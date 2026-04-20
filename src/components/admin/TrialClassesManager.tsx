@@ -10,7 +10,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { CheckCircle, RefreshCw, Users, XCircle } from "lucide-react";
+import { CheckCircle, Mail, RefreshCw, Users, XCircle } from "lucide-react";
 import { formatTime } from "@/lib/admin-utils";
 import { getLevelShortLabel } from "@/constants/levels";
 
@@ -39,6 +39,7 @@ interface TrialBooking {
   confirmed_at: string | null;
   created_at: string;
   user_id?: string | null;
+  rebook_email_sent_at?: string | null;
 }
 
 interface TrialSlot {
@@ -115,6 +116,65 @@ const TrialClassesManager = () => {
     } finally {
       setActioningId(null);
     }
+  };
+
+  const sendRebookEmail = async (booking: TrialBooking) => {
+    setActioningId(booking.id);
+    try {
+      const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
+        body: {
+          template: "trial_rebook_request",
+          email: booking.email,
+          name: booking.name || booking.email,
+          language: "ar",
+          rebook_url: `${window.location.origin}/free-trial`,
+        },
+      });
+      if (emailErr) throw emailErr;
+      const { error: updErr } = await supabase
+        .from("trial_bookings")
+        .update({ rebook_email_sent_at: new Date().toISOString() } as any)
+        .eq("id", booking.id);
+      if (updErr) throw updErr;
+      toast({ title: "Rebook email sent", description: booking.email });
+      fetchData();
+    } catch (err: any) {
+      toast({ title: "Email failed", description: err.message, variant: "destructive" });
+    } finally {
+      setActioningId(null);
+    }
+  };
+
+  const handleSendRebookToAllTBA = async () => {
+    const tba = bookings.filter((b) => b.start_time === "TBA" && !b.rebook_email_sent_at);
+    if (tba.length === 0) {
+      toast({ title: "Nothing to send", description: "Every TBA booking already has a rebook email logged." });
+      return;
+    }
+    if (!confirm(`Send rebook email to ${tba.length} unscheduled student${tba.length === 1 ? "" : "s"}?`)) return;
+    setBulkBusy(true);
+    let ok = 0, fail = 0;
+    for (const b of tba) {
+      try {
+        const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
+          body: {
+            template: "trial_rebook_request",
+            email: b.email,
+            name: b.name || b.email,
+            language: "ar",
+            rebook_url: `${window.location.origin}/free-trial`,
+          },
+        });
+        if (emailErr) throw emailErr;
+        await supabase.from("trial_bookings").update({ rebook_email_sent_at: new Date().toISOString() } as any).eq("id", b.id);
+        ok++;
+      } catch {
+        fail++;
+      }
+    }
+    toast({ title: "Rebook emails", description: `${ok} sent${fail ? `, ${fail} failed` : ""}.` });
+    fetchData();
+    setBulkBusy(false);
   };
 
   const handleAcceptAllPending = async () => {
@@ -258,6 +318,8 @@ const TrialClassesManager = () => {
           const active = session.items.filter((i) => i.status !== "cancelled" && i.status !== "no_show").length;
           const confirmed = session.items.filter((i) => i.status === "confirmed").length;
           const past = isPastSession(session.date);
+          const isTbaSession = session.time === "TBA";
+          const tbaUnsentCount = isTbaSession ? session.items.filter((i) => !i.rebook_email_sent_at).length : 0;
           return (
             <Card key={session.key}>
               <CardHeader className="py-3">
@@ -267,7 +329,7 @@ const TrialClassesManager = () => {
                       {formatSessionLabel(session.date, session.time, session.dow)}
                     </CardTitle>
                     {past && <Badge variant="outline" className="text-[10px]">past</Badge>}
-                    {isLegacySlot(session.time) && (
+                    {!isTbaSession && isLegacySlot(session.time) && (
                       <Badge variant="outline" className="text-[10px]">legacy slot</Badge>
                     )}
                   </div>
@@ -277,6 +339,19 @@ const TrialClassesManager = () => {
                       {session.items.length} booked
                     </span>
                     <span>{confirmed} confirmed · {active} active</span>
+                    {isTbaSession && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="h-7"
+                        disabled={bulkBusy || tbaUnsentCount === 0}
+                        onClick={handleSendRebookToAllTBA}
+                        title={tbaUnsentCount === 0 ? "All students already emailed" : `Email ${tbaUnsentCount} unscheduled student${tbaUnsentCount === 1 ? "" : "s"}`}
+                      >
+                        <Mail className="h-3.5 w-3.5 mr-1" />
+                        Send rebook email ({tbaUnsentCount})
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -323,18 +398,29 @@ const TrialClassesManager = () => {
                             {b.goal || "—"}
                           </TableCell>
                           <TableCell className="text-right">
-                            {b.status === "pending" ? (
-                              <div className="flex gap-1 justify-end">
-                                <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleConfirm(b)}>
-                                  <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
-                                </Button>
-                                <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleReject(b)}>
-                                  <XCircle className="h-3.5 w-3.5 mr-1 text-red-600" /> Reject
-                                </Button>
-                              </div>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">—</span>
-                            )}
+                            <div className="flex gap-1 justify-end items-center flex-wrap">
+                              {isTbaSession && (
+                                b.rebook_email_sent_at ? (
+                                  <Badge variant="secondary" className="text-[10px]" title={`Sent ${new Date(b.rebook_email_sent_at).toLocaleString()}`}>
+                                    email sent {Math.max(0, Math.floor((Date.now() - new Date(b.rebook_email_sent_at).getTime()) / 86400000))}d ago
+                                  </Badge>
+                                ) : (
+                                  <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => sendRebookEmail(b)} title="Email student to pick a slot">
+                                    <Mail className="h-3.5 w-3.5 mr-1" /> Email
+                                  </Button>
+                                )
+                              )}
+                              {b.status === "pending" ? (
+                                <>
+                                  <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleConfirm(b)}>
+                                    <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
+                                  </Button>
+                                  <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleReject(b)}>
+                                    <XCircle className="h-3.5 w-3.5 mr-1 text-red-600" /> Reject
+                                  </Button>
+                                </>
+                              ) : (!isTbaSession && <span className="text-xs text-muted-foreground">—</span>)}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}

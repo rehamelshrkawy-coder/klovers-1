@@ -14,7 +14,8 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_method_reminder" | "rejection" | "trial_confirmed";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request";
+  rebook_url?: string;
   enrollment_id?: string;
   rejection_reason?: "payment_not_received" | "time_slots_unavailable" | "other";
   rejection_note?: string;
@@ -564,6 +565,39 @@ function buildTrialConfirmedEmail(p: EmailPayload) {
   };
 }
 
+function buildTrialRebookEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const url = p.rebook_url || `${SITE_URL}/free-trial`;
+  const btn = `<div style="margin: 24px 0; text-align: center;">
+    <a href="${url}" style="display: inline-block; background: ${BRAND_BLACK}; color: ${BRAND_YELLOW}; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">
+      ${isAr ? "اختر موعدك الآن" : "Pick your trial time"}
+    </a>
+  </div>`;
+
+  if (isAr) {
+    return {
+      subject: "KLovers — من فضلك اختر موعد حصتك التجريبية 🕒",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! 👋</h1>
+        <p>شكراً لاهتمامك بحصة الكورية التجريبية المجانية في Klovers.</p>
+        <p>لاحظنا أن موعدك السابق لم يعد متاحاً أو أنك لم تختر موعداً بعد. من فضلك اختر موعداً جديداً من الأيام المتاحة حتى نؤكد حصتك.</p>
+        ${btn}
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">إذا واجهت أي مشكلة، راسلنا على واتساب ورد ّاً على هذا الإيميل.</p>
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — Please pick a time for your free trial 🕒",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 👋</h1>
+      <p>Thanks for your interest in a free Korean trial class at Klovers.</p>
+      <p>We noticed your previous time slot is no longer available, or you haven't picked one yet. Please choose a new time from the days we currently run so we can confirm your class.</p>
+      ${btn}
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Any trouble? Just reply to this email or message us on WhatsApp.</p>
+    `, false),
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -611,6 +645,9 @@ serve(async (req) => {
         break;
       case "trial_confirmed":
         ({ subject, html } = buildTrialConfirmedEmail(payload));
+        break;
+      case "trial_rebook_request":
+        ({ subject, html } = buildTrialRebookEmail(payload));
         break;
       case "enrollment":
       default:
