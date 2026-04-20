@@ -77,6 +77,7 @@ interface TrialBooking {
   status: string;
   confirmed_at: string | null;
   created_at: string;
+  user_id?: string | null;
 }
 
 // ─── Packages Manager ────────────────────────────────────────────────────────
@@ -1728,25 +1729,166 @@ const TrialBookingsManager = () => {
     }
   };
 
-  // Group active (non-cancelled) bookings per slot for next 7 days
+  const [viewTab, setViewTab] = useState<"upcoming" | "history">("upcoming");
+  const [historyWindow, setHistoryWindow] = useState<"7" | "14" | "30" | "all">("all");
+
+  // ── Partition all bookings into upcoming vs past by trial_date (not created_at)
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const trialDateObj = (b: TrialBooking) => new Date(`${b.trial_date}T00:00:00`);
+
+  // Repeat-booking detection: any email appearing more than once anywhere in the table
+  const emailCounts: Record<string, number> = {};
+  bookings.forEach((b) => {
+    const k = (b.email || "").toLowerCase();
+    if (!k) return;
+    emailCounts[k] = (emailCounts[k] || 0) + 1;
+  });
+  const isRepeat = (b: TrialBooking) =>
+    (emailCounts[(b.email || "").toLowerCase()] || 0) > 1;
+
+  const upcomingBookings = bookings
+    .filter((b) => trialDateObj(b) >= startOfToday)
+    .sort((a, b) => a.trial_date.localeCompare(b.trial_date) || a.start_time.localeCompare(b.start_time));
+
+  const windowDays = historyWindow === "all" ? null : parseInt(historyWindow, 10);
+  const cutoff = windowDays
+    ? new Date(startOfToday.getTime() - windowDays * 24 * 60 * 60 * 1000)
+    : null;
+
+  const pastBookings = bookings
+    .filter((b) => {
+      const d = trialDateObj(b);
+      if (d >= startOfToday) return false;
+      if (cutoff && d < cutoff) return false;
+      return true;
+    })
+    // most recent first
+    .sort((a, b) => b.trial_date.localeCompare(a.trial_date) || b.start_time.localeCompare(a.start_time));
+
+  // Group by exact session (trial_date + start_time). Source of truth = trial_bookings,
+  // so legacy/removed slots still surface here.
+  const groupBySession = (list: TrialBooking[]) => {
+    const groups: Record<string, TrialBooking[]> = {};
+    list.forEach((b) => {
+      const key = `${b.trial_date}__${b.start_time}`;
+      (groups[key] ||= []).push(b);
+    });
+    return Object.entries(groups).map(([key, items]) => {
+      const [date, time] = key.split("__");
+      return { key, date, time, items };
+    });
+  };
+  const upcomingSessions = groupBySession(upcomingBookings);
+  const pastSessions = groupBySession(pastBookings);
+
+  // Next-7-days slot availability card (kept from prior view)
   const now = new Date();
   const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const slotStudents: Record<string, TrialBooking[]> = {};
   bookings.forEach((b) => {
     if (b.status === "cancelled") return;
-    const d = new Date(b.trial_date);
+    const d = trialDateObj(b);
     if (d >= now && d <= nextWeek) {
       const key = `${b.day_of_week}-${b.start_time}`;
-      if (!slotStudents[key]) slotStudents[key] = [];
-      slotStudents[key].push(b);
+      (slotStudents[key] ||= []).push(b);
     }
   });
 
   if (loading) return <p className="text-muted-foreground text-center py-8">Loading trial bookings...</p>;
 
+  const formatSessionLabel = (date: string, time: string) => {
+    const d = new Date(`${date}T00:00:00`);
+    const weekday = d.toLocaleDateString("en-US", { weekday: "long" });
+    const dateLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return `${weekday}, ${dateLabel} — ${formatTime(time)}`;
+  };
+
+  const renderSessionCard = (session: { key: string; date: string; time: string; items: TrialBooking[] }) => {
+    const activeCount = session.items.filter((i) => i.status !== "cancelled" && i.status !== "no_show").length;
+    const matchedSlot = slots.find((s) => s.start_time === session.time);
+    const legacy = !slots.some((s) => s.start_time === session.time);
+    return (
+      <Card key={session.key} className="mb-3">
+        <CardHeader className="py-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-sm">{formatSessionLabel(session.date, session.time)}</CardTitle>
+              {legacy && <Badge variant="outline" className="text-[10px]">legacy slot</Badge>}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {session.items.length} booking{session.items.length === 1 ? "" : "s"} · {activeCount} active
+              {matchedSlot ? ` · capacity ${matchedSlot.capacity}` : ""}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0 pb-3">
+          <div className="rounded-md border overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Level</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Booked</TableHead>
+                  <TableHead>Notes</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {session.items.map((b) => (
+                  <TableRow key={b.id}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-1">
+                        <span>{b.name || "—"}</span>
+                        {isRepeat(b) && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">repeat</Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs">{b.email || "—"}</TableCell>
+                    <TableCell className="text-xs">{b.phone || "—"}</TableCell>
+                    <TableCell className="text-xs">{b.level ? getLevelShortLabel(mapLegacyLevel(b.level)) : "—"}</TableCell>
+                    <TableCell>
+                      <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${TRIAL_STATUS_COLORS[b.status] || "bg-gray-100 text-gray-600"}`}>
+                        {(b.status || "unknown").replace("_", " ")}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                      {new Date(b.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate" title={b.goal || ""}>
+                      {b.goal || "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {b.status === "pending" ? (
+                        <div className="flex gap-1 justify-end">
+                          <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleConfirm(b)}>
+                            <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleReject(b)}>
+                            <XCircle className="h-3.5 w-3.5 mr-1 text-red-600" /> Reject
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="space-y-6">
-      {/* Slot availability */}
+      {/* Slot availability (next 7 days) — quick glance */}
       <div>
         <h3 className="text-sm font-semibold mb-3">Trial Slot Availability (next 7 days)</h3>
         <div className="flex flex-wrap gap-3">
@@ -1772,30 +1914,6 @@ const TrialBookingsManager = () => {
                           <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${TRIAL_STATUS_COLORS[st.status] || "bg-gray-100 text-gray-600"}`}>
                             {st.status.replace("_", " ")}
                           </span>
-                          {st.status === "pending" && (
-                            <div className="flex gap-1">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-6 w-6 p-0"
-                                title="Confirm"
-                                disabled={actioningId === st.id}
-                                onClick={() => handleConfirm(st)}
-                              >
-                                <CheckCircle className="h-3.5 w-3.5 text-green-600" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-6 w-6 p-0"
-                                title="Reject"
-                                disabled={actioningId === st.id}
-                                onClick={() => handleReject(st)}
-                              >
-                                <XCircle className="h-3.5 w-3.5 text-red-600" />
-                              </Button>
-                            </div>
-                          )}
                         </li>
                       ))}
                     </ul>
@@ -1810,77 +1928,47 @@ const TrialBookingsManager = () => {
         </div>
       </div>
 
-      {/* Bookings list */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold">{bookings.length} Trial Request(s)</h3>
-          <Button variant="outline" size="sm" onClick={fetchData}>
-            <RefreshCw className="h-4 w-4 mr-1" /> Refresh
-          </Button>
+      {/* Upcoming / History tabs */}
+      <Tabs value={viewTab} onValueChange={(v) => setViewTab(v as "upcoming" | "history")}>
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <TabsList>
+            <TabsTrigger value="upcoming">Upcoming Trials ({upcomingBookings.length})</TabsTrigger>
+            <TabsTrigger value="history">Trial History ({pastBookings.length})</TabsTrigger>
+          </TabsList>
+          <div className="flex items-center gap-2">
+            {viewTab === "history" && (
+              <Select value={historyWindow} onValueChange={(v) => setHistoryWindow(v as any)}>
+                <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">Last 7 days</SelectItem>
+                  <SelectItem value="14">Last 14 days</SelectItem>
+                  <SelectItem value="30">Last 30 days</SelectItem>
+                  <SelectItem value="all">All time</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+            <Button variant="outline" size="sm" onClick={fetchData}>
+              <RefreshCw className="h-4 w-4 mr-1" /> Refresh
+            </Button>
+          </div>
         </div>
 
-        {bookings.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">No trial bookings yet.</p>
-        ) : (
-          <div className="rounded-md border overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bookings.map((b) => (
-                  <TableRow key={b.id}>
-                    <TableCell className="font-medium">{b.name || "—"}</TableCell>
-                    <TableCell className="text-xs">{b.email || "—"}</TableCell>
-                    <TableCell className="text-xs">{b.phone || "—"}</TableCell>
-                    <TableCell>
-                      <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${TRIAL_STATUS_COLORS[b.status] || "bg-gray-100 text-gray-600"}`}>
-                        {(b.status || "unknown").replace("_", " ")}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {new Date(b.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {b.status === "pending" ? (
-                        <div className="flex gap-1 justify-end">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7"
-                            disabled={actioningId === b.id}
-                            onClick={() => handleConfirm(b)}
-                          >
-                            <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7"
-                            disabled={actioningId === b.id}
-                            onClick={() => handleReject(b)}
-                          >
-                            <XCircle className="h-3.5 w-3.5 mr-1 text-red-600" /> Reject
-                          </Button>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </div>
+        <TabsContent value="upcoming">
+          {upcomingSessions.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">No upcoming trial bookings.</p>
+          ) : (
+            upcomingSessions.map(renderSessionCard)
+          )}
+        </TabsContent>
+
+        <TabsContent value="history">
+          {pastSessions.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">No past trial bookings in this window.</p>
+          ) : (
+            pastSessions.map(renderSessionCard)
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
