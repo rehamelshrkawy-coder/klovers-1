@@ -6,6 +6,7 @@
 
 /** Convert "HH:MM" (24h) to "H:MM AM/PM". Replaces 6+ identical formatTime copies. */
 export function formatTime(t: string): string {
+  if (!t || !/^\d{1,2}:\d{2}$/.test(t)) return t || "";
   const [h, m] = t.split(":").map(Number);
   const ampm = h >= 12 ? "PM" : "AM";
   const hour12 = h % 12 || 12;
