@@ -26,6 +26,7 @@ import { useAuth } from "@/hooks/useAuth";
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 import { LEVEL_KEYS, mapLegacyLevel, getLevelShortLabel, LEVEL_SELECT_OPTIONS } from "@/constants/levels";
 import { formatTime } from "@/lib/admin-utils";
+import { TRIAL_CONFIRMATION_EMAIL_ENABLED } from "@/lib/siteConfig";
 import type { PkgGroup } from "@/types/admin";
 const LEVELS = LEVEL_KEYS;
 
@@ -1651,8 +1652,8 @@ const TrialBookingsManager = () => {
         });
       }
 
-      // 3. Send confirmation email (best effort)
-      try {
+      // 3. Send confirmation email (best effort) — gated by feature flag
+      if (TRIAL_CONFIRMATION_EMAIL_ENABLED) try {
         const [h, m] = (booking.start_time || "18:00").split(":").map(Number);
         const ampm = h >= 12 ? "PM" : "AM";
         const h12 = h % 12 || 12;
@@ -1691,7 +1692,7 @@ const TrialBookingsManager = () => {
         console.error("send-confirmation-email failed:", emailErr);
       }
 
-      toast({ title: "Trial confirmed", description: `${booking.name} has been notified.` });
+      toast({ title: "Trial confirmed", description: TRIAL_CONFIRMATION_EMAIL_ENABLED ? `${booking.name} has been notified.` : `${booking.name} marked confirmed (email disabled).` });
       fetchData();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });

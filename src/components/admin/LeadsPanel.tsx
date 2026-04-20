@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { getLeadStatusBadgeClass } from "@/lib/badge-styles";
 import { exportCSV as exportCSVUtil } from "@/lib/admin-utils";
+import { TRIAL_CONFIRMATION_EMAIL_ENABLED } from "@/lib/siteConfig";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -245,24 +246,26 @@ const LeadsPanel: React.FC = () => {
 
         const trialDateFormatted = new Date(booking.trial_date + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
-        // 4. Send confirmation email
-        await supabase.functions.invoke("send-confirmation-email", {
-          body: {
-            template: "trial_confirmed",
-            email: lead.email,
-            name: lead.name || lead.email,
-            level: lead.level,
-            trial_date: trialDateFormatted,
-            trial_time: time12,
-            trial_timezone: tz,
-            calendar_url: calendarUrl,
-            language: "ar",
-          },
-        });
+        // 4. Send confirmation email — gated by feature flag
+        if (TRIAL_CONFIRMATION_EMAIL_ENABLED) {
+          await supabase.functions.invoke("send-confirmation-email", {
+            body: {
+              template: "trial_confirmed",
+              email: lead.email,
+              name: lead.name || lead.email,
+              level: lead.level,
+              trial_date: trialDateFormatted,
+              trial_time: time12,
+              trial_timezone: tz,
+              calendar_url: calendarUrl,
+              language: "ar",
+            },
+          });
+        }
       }
 
       queryClient.invalidateQueries({ queryKey: ["admin", "leads"] });
-      toast({ title: "Trial approved", description: `${lead.name} has been notified via email.` });
+      toast({ title: "Trial approved", description: TRIAL_CONFIRMATION_EMAIL_ENABLED ? `${lead.name} has been notified via email.` : `${lead.name} approved (email disabled).` });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {

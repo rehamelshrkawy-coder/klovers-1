@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import { Check, X, RefreshCw, CalendarPlus, Loader2 } from "lucide-react";
+import { TRIAL_CONFIRMATION_EMAIL_ENABLED } from "@/lib/siteConfig";
 
 interface TrialBooking {
   id: string;
@@ -107,20 +108,22 @@ const TrialRequestsPanel = () => {
         ? new Date(booking.trial_date + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
         : "";
 
-      await supabase.functions.invoke("send-confirmation-email", {
-        body: {
-          template: "trial_confirmed",
-          email: booking.email,
-          name: booking.name,
-          trial_date: trialDateFormatted,
-          trial_time: booking.start_time ? formatTime12h(booking.start_time) : "",
-          trial_timezone: booking.timezone || "Africa/Cairo",
-          level: booking.level || "Beginner",
-          calendar_url: calendarUrl,
-        },
-      });
+      if (TRIAL_CONFIRMATION_EMAIL_ENABLED) {
+        await supabase.functions.invoke("send-confirmation-email", {
+          body: {
+            template: "trial_confirmed",
+            email: booking.email,
+            name: booking.name,
+            trial_date: trialDateFormatted,
+            trial_time: booking.start_time ? formatTime12h(booking.start_time) : "",
+            trial_timezone: booking.timezone || "Africa/Cairo",
+            level: booking.level || "Beginner",
+            calendar_url: calendarUrl,
+          },
+        });
+      }
 
-      toast({ title: "Approved", description: `Trial confirmed for ${booking.name}. Confirmation email sent.` });
+      toast({ title: "Approved", description: TRIAL_CONFIRMATION_EMAIL_ENABLED ? `Trial confirmed for ${booking.name}. Confirmation email sent.` : `Trial confirmed for ${booking.name} (email disabled).` });
       fetchBookings();
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to approve", variant: "destructive" });

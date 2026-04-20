@@ -9,3 +9,8 @@ export const SITE_URL = "https://kloversegy.com";
 export const ENROLL_URL = `${SITE_URL}/enroll-now`;
 
 export const RETURNING_STUDENT_CODE = "KLOVERSOLDSTUDENT1";
+
+// Temporarily disable trial-confirmation emails while admin reorganizes
+// existing trial leads. Flip back to `true` when ready to resume notifying
+// students on confirm.
+export const TRIAL_CONFIRMATION_EMAIL_ENABLED = false;
