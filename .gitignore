@@ -34,3 +34,5 @@ dist-ssr
 
 # Claude local settings (may contain credentials)
 .claude/settings.local.json
+.claude/worktrees/
+/klovers/
