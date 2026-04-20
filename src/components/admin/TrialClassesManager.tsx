@@ -131,11 +131,15 @@ const TrialClassesManager = () => {
         },
       });
       if (emailErr) throw emailErr;
+      // Best-effort timestamp write — column is added by a pending migration
+      // and may not exist on this env yet. Silently skip on missing-column.
       const { error: updErr } = await supabase
         .from("trial_bookings")
         .update({ rebook_email_sent_at: new Date().toISOString() } as any)
         .eq("id", booking.id);
-      if (updErr) throw updErr;
+      if (updErr && updErr.code !== "42703" && !/rebook_email_sent_at/i.test(updErr.message || "")) {
+        console.warn("rebook timestamp update failed:", updErr);
+      }
       toast({ title: "Rebook email sent", description: booking.email });
       fetchData();
     } catch (err: any) {
@@ -166,7 +170,10 @@ const TrialClassesManager = () => {
           },
         });
         if (emailErr) throw emailErr;
-        await supabase.from("trial_bookings").update({ rebook_email_sent_at: new Date().toISOString() } as any).eq("id", b.id);
+        const { error: updErr } = await supabase.from("trial_bookings").update({ rebook_email_sent_at: new Date().toISOString() } as any).eq("id", b.id);
+        if (updErr && updErr.code !== "42703" && !/rebook_email_sent_at/i.test(updErr.message || "")) {
+          console.warn("rebook timestamp update failed:", updErr);
+        }
         ok++;
       } catch {
         fail++;
