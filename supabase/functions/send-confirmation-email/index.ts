@@ -16,6 +16,7 @@ interface EmailPayload {
   language?: string;
   template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request";
   rebook_url?: string;
+  available_slots?: Array<{ day_of_week: number; start_time: string; timezone?: string }>;
   enrollment_id?: string;
   rejection_reason?: "payment_not_received" | "time_slots_unavailable" | "other";
   rejection_note?: string;
@@ -568,6 +569,32 @@ function buildTrialConfirmedEmail(p: EmailPayload) {
 function buildTrialRebookEmail(p: EmailPayload) {
   const isAr = p.language === "ar";
   const url = p.rebook_url || `${SITE_URL}/free-trial`;
+
+  const dayNamesEn = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const dayNamesAr = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+
+  const formatTime12 = (t: string, ar: boolean) => {
+    if (!t || !/^\d{1,2}:\d{2}$/.test(t)) return t || "";
+    const [h, m] = t.split(":").map(Number);
+    const ampm = h >= 12 ? (ar ? "م" : "PM") : (ar ? "ص" : "AM");
+    const h12 = h % 12 || 12;
+    return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+  };
+
+  const slots = (p.available_slots || []).slice().sort((a, b) =>
+    a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time)
+  );
+
+  const slotsList = slots.length
+    ? `<ul style="color: ${BRAND_TEXT}; ${isAr ? "padding-right: 20px;" : "padding-left: 20px;"} margin: 16px 0;">
+        ${slots.map((s) => {
+          const day = isAr ? dayNamesAr[s.day_of_week] : dayNamesEn[s.day_of_week];
+          const tz = (s.timezone || "Africa/Cairo").replace(/_/g, " ");
+          return `<li style="margin-bottom: 6px;"><strong>${day}</strong> — ${formatTime12(s.start_time, isAr)} <span style="color:${BRAND_MUTED}; font-size: 12px;">(${tz})</span></li>`;
+        }).join("")}
+      </ul>`
+    : "";
+
   const btn = `<div style="margin: 24px 0; text-align: center;">
     <a href="${url}" style="display: inline-block; background: ${BRAND_BLACK}; color: ${BRAND_YELLOW}; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">
       ${isAr ? "اختر موعدك الآن" : "Pick your trial time"}
@@ -580,9 +607,11 @@ function buildTrialRebookEmail(p: EmailPayload) {
       html: brandWrapper(`
         <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! 👋</h1>
         <p>شكراً لاهتمامك بحصة الكورية التجريبية المجانية في Klovers.</p>
-        <p>لاحظنا أن موعدك السابق لم يعد متاحاً أو أنك لم تختر موعداً بعد. من فضلك اختر موعداً جديداً من الأيام المتاحة حتى نؤكد حصتك.</p>
+        <p>موعد الحصة الذي اخترته سابقاً لم يعد متاحاً، أو لم تختر موعداً بعد. هذه هي المواعيد المتاحة حالياً:</p>
+        ${slotsList}
+        <p>اختر الموعد المناسب لك من الرابط التالي حتى نؤكد حجز حصتك:</p>
         ${btn}
-        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">إذا واجهت أي مشكلة، راسلنا على واتساب ورد ّاً على هذا الإيميل.</p>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">إذا واجهت أي مشكلة، راسلنا على واتساب أو رد على هذا الإيميل.</p>
       `, true),
     };
   }
@@ -591,7 +620,9 @@ function buildTrialRebookEmail(p: EmailPayload) {
     html: brandWrapper(`
       <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 👋</h1>
       <p>Thanks for your interest in a free Korean trial class at Klovers.</p>
-      <p>We noticed your previous time slot is no longer available, or you haven't picked one yet. Please choose a new time from the days we currently run so we can confirm your class.</p>
+      <p>Your previous slot is no longer available, or you haven't picked one yet. Here are the times we currently run:</p>
+      ${slotsList}
+      <p>Please pick the time that works best for you so we can confirm your class:</p>
       ${btn}
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Any trouble? Just reply to this email or message us on WhatsApp.</p>
     `, false),

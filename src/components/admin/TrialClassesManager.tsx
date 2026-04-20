@@ -128,6 +128,11 @@ const TrialClassesManager = () => {
           name: booking.name || booking.email,
           language: "ar",
           rebook_url: `${window.location.origin}/free-trial`,
+          available_slots: activeSlots.map((s) => ({
+            day_of_week: s.day_of_week,
+            start_time: s.start_time,
+            timezone: "Africa/Cairo",
+          })),
         },
       });
       if (emailErr) throw emailErr;
@@ -167,6 +172,11 @@ const TrialClassesManager = () => {
             name: b.name || b.email,
             language: "ar",
             rebook_url: `${window.location.origin}/free-trial`,
+            available_slots: activeSlots.map((s) => ({
+              day_of_week: s.day_of_week,
+              start_time: s.start_time,
+              timezone: "Africa/Cairo",
+            })),
           },
         });
         if (emailErr) throw emailErr;
