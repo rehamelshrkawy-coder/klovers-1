@@ -19,6 +19,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Users, Trash2, Bell, RefreshCw, ArrowRight, AlertTriangle, Check, X, ChevronDown, ChevronRight, UserPlus, Search, Lightbulb, CheckCircle, XCircle } from "lucide-react";
 import AdminNotifications from "./AdminNotifications";
+import TrialClassesTab from "./TrialClassesTab";
 import { getSuggestedPackages, type SuggestedPackage, formatSuggestion } from "@/lib/scheduleAutomation";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -1896,6 +1897,7 @@ const SchedulingManager = () => {
         <TabsTrigger value="waitlist">Waitlist</TabsTrigger>
         <TabsTrigger value="config">Private Config</TabsTrigger>
         <TabsTrigger value="trials">Trial Bookings</TabsTrigger>
+        <TabsTrigger value="trial-classes">Trial Classes</TabsTrigger>
         <TabsTrigger value="notifications"><Bell className="h-4 w-4 mr-1" /> Notifications</TabsTrigger>
       </TabsList>
       <TabsContent value="packages"><PackagesManager onSwitchToGroups={() => setActiveTab("groups")} /></TabsContent>
@@ -1903,6 +1905,7 @@ const SchedulingManager = () => {
       <TabsContent value="waitlist"><WaitlistManager /></TabsContent>
       <TabsContent value="config"><PrivateTimeConfig /></TabsContent>
       <TabsContent value="trials"><TrialBookingsManager /></TabsContent>
+      <TabsContent value="trial-classes"><TrialClassesTab /></TabsContent>
       <TabsContent value="notifications"><AdminNotifications /></TabsContent>
     </Tabs>
   );
