@@ -194,6 +194,8 @@ const TrialClassesManager = () => {
   if (loading) return <p className="text-muted-foreground text-center py-8">Loading trial bookings...</p>;
 
   const formatSessionLabel = (date: string, time: string, dow: number) => {
+    // Sentinel date+time used for rows that need to be rescheduled
+    if (time === "TBA" || date === "2099-12-31") return "TBA — Unscheduled";
     const d = new Date(`${date}T00:00:00`);
     const weekday = DAY_NAMES[dow] || d.toLocaleDateString("en-US", { weekday: "long" });
     const dateLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
