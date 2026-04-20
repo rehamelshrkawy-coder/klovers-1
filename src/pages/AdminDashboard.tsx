@@ -44,6 +44,7 @@ const TeacherAvailabilityManager = lazy(() => import("@/components/admin/Teacher
 const StudentPreferenceDashboard = lazy(() => import("@/components/admin/StudentPreferenceDashboard"));
 const BulkEmailManager = lazy(() => import("@/components/admin/BulkEmailManager"));
 const SchedulingManager = lazy(() => import("@/components/admin/SchedulingManager"));
+const TrialClassesManager = lazy(() => import("@/components/admin/TrialClassesManager"));
 const AdminSettings = lazy(() => import("@/components/admin/AdminSettings"));
 const PlacementTestsManager = lazy(() => import("@/components/admin/PlacementTestsManager"));
 const SalesAnalytics = lazy(() => import("@/components/admin/SalesAnalytics"));
@@ -710,6 +711,9 @@ const AdminDashboard = () => {
                 </TabsTrigger>
                 <TabsTrigger value="leads" className={TAB_CLS}>
                   <Users className="h-3.5 w-3.5" /> CRM Leads
+                </TabsTrigger>
+                <TabsTrigger value="trials" className={TAB_CLS}>
+                  <Users className="h-3.5 w-3.5" /> Trial Classes
                 </TabsTrigger>
                 <TabsTrigger value="lead-funnel" className={TAB_CLS}>
                   <TrendingUp className="h-3.5 w-3.5" /> Lead Funnel
@@ -1507,6 +1511,20 @@ const AdminDashboard = () => {
                   <LeadsPanel />
                 </Suspense>
               </TabErrorBoundary>
+            </TabsContent>
+
+            {/* TRIAL CLASSES TAB */}
+            <TabsContent value="trials">
+              <Card className="rounded-2xl">
+                <CardHeader className="pb-4"><CardTitle className="text-base">Trial Classes</CardTitle></CardHeader>
+                <CardContent className="pt-0">
+                  <TabErrorBoundary name="Trial Classes">
+                    <Suspense fallback={<TabLoader />}>
+                      <TrialClassesManager />
+                    </Suspense>
+                  </TabErrorBoundary>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* LEAD FUNNEL TAB */}
