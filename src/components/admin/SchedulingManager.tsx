@@ -1851,7 +1851,7 @@ const TrialBookingsManager = () => {
                     </TableCell>
                     <TableCell className="text-xs">{b.email || "—"}</TableCell>
                     <TableCell className="text-xs">{b.phone || "—"}</TableCell>
-                    <TableCell className="text-xs">{b.level ? getLevelShortLabel(mapLegacyLevel(b.level)) : "—"}</TableCell>
+                    <TableCell className="text-xs">{b.level ? (getLevelShortLabel(b.level) || b.level) : "—"}</TableCell>
                     <TableCell>
                       <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${TRIAL_STATUS_COLORS[b.status] || "bg-gray-100 text-gray-600"}`}>
                         {(b.status || "unknown").replace("_", " ")}
