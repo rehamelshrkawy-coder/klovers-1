@@ -81,6 +81,25 @@ class TabErrorBoundary extends Component<
   static getDerivedStateFromError(error: Error) { return { error: true, errorMsg: error?.message || "Unknown error" }; }
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error(`[TabErrorBoundary] ${this.props.name} crashed:`, error, errorInfo);
+    // Best-effort remote log. Table is created on demand — if it doesn't
+    // exist in this env, silently skip so the fallback UI still renders.
+    try {
+      void supabase.from("admin_error_log" as never).insert({
+        tab: this.props.name,
+        message: error?.message?.slice(0, 500) ?? "Unknown error",
+        stack: error?.stack?.slice(0, 4000) ?? null,
+        component_stack: errorInfo?.componentStack?.slice(0, 4000) ?? null,
+        user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
+        url: typeof window !== "undefined" ? window.location.href.slice(0, 500) : null,
+      } as never).then(({ error: insertErr }) => {
+        if (insertErr && insertErr.code !== "42P01") {
+          // 42P01 = relation does not exist; expected if table not yet deployed.
+          console.warn("[TabErrorBoundary] remote log failed:", insertErr.message);
+        }
+      });
+    } catch {
+      /* ignore — logging must never throw */
+    }
   }
   render() {
     if (this.state.error) {
@@ -341,6 +360,9 @@ const AdminDashboard = () => {
       setRejecting(false);
     }
   };
+
+  // Stable callbacks so memoized hero children don't re-render on every tick.
+  const goToEnrollmentsTab = useCallback(() => setAdminTab("enrollments"), [setAdminTab]);
 
   // View a receipt URL stored on an enrollment — handles stripe: sentinel,
   // plain http(s) URLs, and storage object keys (resolved via signed URL).
@@ -725,7 +747,7 @@ const AdminDashboard = () => {
             activeCount={lifecycleActive}
             completedCount={lifecycleCompleted + lifecycleLocked}
             pendingCount={actionableEnrollments}
-            onPendingClick={() => setAdminTab("enrollments")}
+            onPendingClick={goToEnrollmentsTab}
           />
 
           {/* Collapsible Insights — student health + referral program */}

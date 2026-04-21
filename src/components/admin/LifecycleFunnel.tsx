@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { UserPlus, Users, CreditCard, GraduationCap, Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -73,4 +74,4 @@ const LifecycleFunnel = ({ leadsCount, registeredCount, enrolledCount, activeCou
   );
 };
 
-export default LifecycleFunnel;
+export default memo(LifecycleFunnel);
