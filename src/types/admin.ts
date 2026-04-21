@@ -57,6 +57,7 @@ export interface Enrollment {
   package_id?: string | null;
   enrollment_status?: string;
   sessions_total?: number;
+  negative_since?: string | null;
 }
 
 // ── Student overview ─────────────────────────────────────────────────────────

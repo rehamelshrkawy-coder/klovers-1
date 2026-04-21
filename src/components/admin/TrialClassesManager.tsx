@@ -8,6 +8,11 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
@@ -210,9 +215,6 @@ const TrialClassesManager = () => {
       toast({ title: "Nothing to send", description: "No unscheduled (TBA) bookings right now." });
       return;
     }
-    const resendCount = tba.filter((b) => b.rebook_email_sent_at).length;
-    const note = resendCount > 0 ? ` (${resendCount} will be re-sent)` : "";
-    if (!confirm(`Send rebook email to ${tba.length} unscheduled student${tba.length === 1 ? "" : "s"}${note}?`)) return;
     setBulkBusy(true);
     let ok = 0, fail = 0;
     for (const b of tba) {
@@ -250,9 +252,6 @@ const TrialClassesManager = () => {
     const pending = bookings.filter((b) => b.status === "pending");
     if (pending.length === 0) {
       toast({ title: "Nothing to accept", description: "No pending bookings." });
-      return;
-    }
-    if (!confirm(`Mark ${pending.length} pending booking${pending.length === 1 ? "" : "s"} as confirmed? No emails will be sent.`)) {
       return;
     }
     setBulkBusy(true);
@@ -374,15 +373,30 @@ const TrialClassesManager = () => {
               <SelectItem value="cancelled">Cancelled only</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            size="sm"
-            variant="default"
-            disabled={bulkBusy || pendingCount === 0}
-            onClick={handleAcceptAllPending}
-          >
-            <CheckCircle className="h-4 w-4 mr-1" />
-            Accept all pending ({pendingCount})
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                size="sm"
+                variant="default"
+                disabled={bulkBusy || pendingCount === 0}
+              >
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Accept all pending ({pendingCount})
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Accept all pending bookings?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Mark {pendingCount} pending booking{pendingCount === 1 ? "" : "s"} as confirmed. No emails will be sent.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleAcceptAllPending}>Confirm {pendingCount}</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <Button variant="outline" size="sm" onClick={fetchData}>
             <RefreshCw className="h-4 w-4 mr-1" /> Refresh
           </Button>
@@ -419,17 +433,32 @@ const TrialClassesManager = () => {
                     </span>
                     <span>{confirmed} confirmed · {active} active</span>
                     {isTbaSession && (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        className="h-7"
-                        disabled={bulkBusy || tbaUnsentCount === 0}
-                        onClick={handleSendRebookToAllTBA}
-                        title={tbaUnsentCount === 0 ? "No unscheduled students" : `Email ${tbaUnsentCount} unscheduled student${tbaUnsentCount === 1 ? "" : "s"}`}
-                      >
-                        <Mail className="h-3.5 w-3.5 mr-1" />
-                        Send rebook email ({tbaUnsentCount})
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="h-7"
+                            disabled={bulkBusy || tbaUnsentCount === 0}
+                            title={tbaUnsentCount === 0 ? "No unscheduled students" : `Email ${tbaUnsentCount} unscheduled student${tbaUnsentCount === 1 ? "" : "s"}`}
+                          >
+                            <Mail className="h-3.5 w-3.5 mr-1" />
+                            Send rebook email ({tbaUnsentCount})
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Send rebook email to {tbaUnsentCount} student{tbaUnsentCount === 1 ? "" : "s"}?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              An Arabic rebook email with active slot options will be sent to each unscheduled student in this TBA session.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleSendRebookToAllTBA}>Send {tbaUnsentCount}</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     )}
                   </div>
                 </div>
