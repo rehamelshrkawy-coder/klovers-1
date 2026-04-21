@@ -14,7 +14,7 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3";
   rebook_url?: string;
   available_slots?: Array<{ day_of_week: number; start_time: string; timezone?: string }>;
   enrollment_id?: string;
@@ -629,6 +629,139 @@ function buildTrialRebookEmail(p: EmailPayload) {
   };
 }
 
+// Post-trial nurture sequence. Three stages, shared shell.
+function buildTrialPrepEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const placementUrl = `${SITE_URL}/placement-test`;
+  if (isAr) {
+    return {
+      subject: "KLovers — حصتك التجريبية غداً 🎯",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! 👋</h1>
+        <p>حصتك التجريبية المجانية <strong>غداً</strong>. إليك كيف تستفيد منها للأقصى:</p>
+        <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+          <p style="margin: 0 0 8px; font-weight: bold;">✅ اختبر مستواك قبل الحصة (دقيقتان)</p>
+          <p style="margin: 0; color: ${BRAND_MUTED}; font-size: 13px;">هنطابقك مع المعلم المناسب من أول دقيقة. مجاني وبدون تسجيل.</p>
+        </div>
+        <div style="margin: 20px 0; text-align: center;">
+          ${brandButton("ابدأ اختبار المستوى", placementUrl)}
+        </div>
+        <h3 style="color: ${BRAND_DARK}; font-size: 16px; margin-top: 24px;">نصائح سريعة:</h3>
+        <ul style="color: ${BRAND_TEXT}; padding-right: 20px; line-height: 1.8;">
+          <li>🎧 جهّز سماعات وجرّب الكاميرا قبل الحصة</li>
+          <li>📝 اكتب 2–3 أسباب ليه بتتعلم كوري (هيساعد المعلم)</li>
+          <li>☕ خذ حاجة تشربها — الحصة 45 دقيقة</li>
+        </ul>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">في أي سؤال؟ رد على الإيميل ده أو راسلنا واتساب.</p>
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — Your trial is tomorrow 🎯",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 👋</h1>
+      <p>Your free trial class is <strong>tomorrow</strong>. Here's how to get the most out of it:</p>
+      <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+        <p style="margin: 0 0 8px; font-weight: bold;">✅ Find your level before class (2 min)</p>
+        <p style="margin: 0; color: ${BRAND_MUTED}; font-size: 13px;">So your teacher is ready for you from minute one. Free, no sign-up.</p>
+      </div>
+      <div style="margin: 20px 0; text-align: center;">
+        ${brandButton("Take the placement test", placementUrl)}
+      </div>
+      <h3 style="color: ${BRAND_DARK}; font-size: 16px; margin-top: 24px;">Quick tips:</h3>
+      <ul style="color: ${BRAND_TEXT}; padding-left: 20px; line-height: 1.8;">
+        <li>🎧 Test your headphones + camera beforehand</li>
+        <li>📝 Jot down 2–3 reasons you're learning Korean (helps your teacher)</li>
+        <li>☕ Grab a drink — it's a 45-minute session</li>
+      </ul>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Any questions? Reply to this email or message us on WhatsApp.</p>
+    `, false),
+  };
+}
+
+function buildTrialFollowupDay1Email(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const pricingUrl = `${SITE_URL}/pricing`;
+  if (isAr) {
+    return {
+      subject: "KLovers — ازاي كانت حصتك التجريبية؟ 💭",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! 🌱</h1>
+        <p>ازاي كانت حصتك التجريبية أمس؟ نتمنى تكون حبيتها.</p>
+        <p>لو جاهز تكمل رحلة الكورية، شوف خططنا — فيه <strong>حصص جماعية تبدأ من 25$</strong> وحصص خاصة لو بتفضّل الاهتمام الشخصي.</p>
+        <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+          <p style="margin: 0 0 8px; font-weight: bold;">✨ ليه يسجّل الطلاب معانا:</p>
+          <ul style="margin: 6px 0 0; padding-right: 20px; color: ${BRAND_TEXT}; line-height: 1.7;">
+            <li>مجموعات صغيرة (4–8 طلاب)</li>
+            <li>معلمين أصليين بخبرة TOPIK</li>
+            <li>استرداد كامل بعد أول حصة مدفوعة لو مش حبّيت</li>
+          </ul>
+        </div>
+        <div style="margin: 20px 0; text-align: center;">
+          ${brandButton("شوف الخطط", pricingUrl)}
+        </div>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">عندك أسئلة أو استفسارات عن أنسب خطة؟ رد على الإيميل ده أو راسلنا واتساب وهنساعدك تختار.</p>
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — how was your trial class? 💭",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 🌱</h1>
+      <p>How was your trial class yesterday? We hope you loved it.</p>
+      <p>If you're ready to keep going, here are our plans — <strong>group classes from just $25</strong> and private 1-on-1 if you want dedicated attention.</p>
+      <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+        <p style="margin: 0 0 8px; font-weight: bold;">✨ Why students stay with us:</p>
+        <ul style="margin: 6px 0 0; padding-left: 20px; color: ${BRAND_TEXT}; line-height: 1.7;">
+          <li>Small groups (4–8 students)</li>
+          <li>Native teachers with TOPIK experience</li>
+          <li>Full refund after your first paid class if you don't love it</li>
+        </ul>
+      </div>
+      <div style="margin: 20px 0; text-align: center;">
+        ${brandButton("See the plans", pricingUrl)}
+      </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Questions, or want help picking a plan? Reply to this email or message us on WhatsApp — we'll help you choose.</p>
+    `, false),
+  };
+}
+
+function buildTrialFollowupDay3Email(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const waUrl = "https://wa.me/201010003084?text=" + encodeURIComponent("Hi! I just finished my free trial and I'd like help picking a plan.");
+  const pricingUrl = `${SITE_URL}/pricing`;
+  if (isAr) {
+    return {
+      subject: "KLovers — محتاج مساعدة نختار خطة؟ 🤝",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}!</h1>
+        <p>مرّت كام يوم على حصتك التجريبية — أحياناً اختيار الخطة المناسبة بياخد وقت.</p>
+        <p>لو عندك أي سؤال عن الأسعار أو المجموعات أو الجدول، <strong>كلمنا على واتساب</strong> وهنساعدك في دقايق.</p>
+        <div style="margin: 20px 0; text-align: center;">
+          <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">💬 كلمنا على واتساب</a>
+        </div>
+        <p style="text-align: center; color: ${BRAND_MUTED}; font-size: 13px;">أو <a href="${pricingUrl}" style="color: ${BRAND_DARK};">شوف الخطط بنفسك</a></p>
+        <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
+        <p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">ده آخر تذكير — مش هنبعتلك إيميلات متابعة تانية بعد كده.</p>
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — need help picking a plan? 🤝",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name},</h1>
+      <p>It's been a few days since your trial — picking the right plan can take some thought.</p>
+      <p>If you've got any question on pricing, groups, or schedule, <strong>message us on WhatsApp</strong> and we'll sort it out in minutes.</p>
+      <div style="margin: 20px 0; text-align: center;">
+        <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">💬 Chat on WhatsApp</a>
+      </div>
+      <p style="text-align: center; color: ${BRAND_MUTED}; font-size: 13px;">Or <a href="${pricingUrl}" style="color: ${BRAND_DARK};">browse the plans yourself</a></p>
+      <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
+      <p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">This is our last nudge — we won't keep emailing you after this.</p>
+    `, false),
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -679,6 +812,15 @@ serve(async (req) => {
         break;
       case "trial_rebook_request":
         ({ subject, html } = buildTrialRebookEmail(payload));
+        break;
+      case "trial_prep":
+        ({ subject, html } = buildTrialPrepEmail(payload));
+        break;
+      case "trial_followup_day1":
+        ({ subject, html } = buildTrialFollowupDay1Email(payload));
+        break;
+      case "trial_followup_day3":
+        ({ subject, html } = buildTrialFollowupDay3Email(payload));
         break;
       case "enrollment":
       default:
