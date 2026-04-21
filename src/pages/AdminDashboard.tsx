@@ -29,7 +29,7 @@ import { toast } from "@/hooks/use-toast";
 import { LogOut, Search, Download, Trash2, Check, X, Eye, Undo2, AlertCircle, Bell, ChevronLeft, ChevronRight, Pencil, Mail, Eraser, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Copy, Clock, Tag, UserPlus, Loader2, Image, Trophy, TrendingUp } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Columns3 } from "lucide-react";
+import { ChevronDown, Columns3, Package } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
@@ -639,15 +639,15 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-1.5 md:gap-2">
-              <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2">
+              <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2" aria-label="Refresh dashboard data">
                 <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
                 <span className="hidden sm:inline">{refreshing ? "Refreshing…" : "Refresh"}</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/admin/marketing")} className="gap-2">
-                <Sparkles className="h-4 w-4" /> <span className="hidden md:inline">Marketing</span>
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin/marketing")} className="gap-2" aria-label="Open marketing dashboard">
+                <Sparkles className="h-4 w-4" /> <span className="hidden sm:inline">Marketing</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
-                <LogOut className="h-4 w-4" /> <span className="hidden md:inline">Logout</span>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2" aria-label="Log out">
+                <LogOut className="h-4 w-4" /> <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
@@ -923,7 +923,9 @@ const AdminDashboard = () => {
                   </TabsTrigger>
                 )}
                 {inActiveGroup("manage") && (
-                  <TabsTrigger value="manage" className={TAB_CLS}>Manage</TabsTrigger>
+                  <TabsTrigger value="manage" className={TAB_CLS}>
+                    <Package className="h-3.5 w-3.5" /> Student Admin
+                  </TabsTrigger>
                 )}
                 {inActiveGroup("sales") && (
                   <TabsTrigger value="sales" className={TAB_CLS}>

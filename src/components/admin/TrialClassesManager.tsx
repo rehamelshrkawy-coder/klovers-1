@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,37 +53,51 @@ type TimeFilter = "all" | "upcoming" | "past";
 type StatusFilter = "all" | "pending" | "confirmed" | "no_show" | "cancelled";
 
 const TrialClassesManager = () => {
-  const [bookings, setBookings] = useState<TrialBooking[]>([]);
-  const [activeSlots, setActiveSlots] = useState<TrialSlot[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [actioningId, setActioningId] = useState<string | null>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
-  const fetchData = async () => {
-    setLoading(true);
-    // Source of truth: trial_bookings. No date or status filter — show everything.
-    const [bookingsRes, slotsRes] = await Promise.all([
-      supabase
+  const { data: bookings = [], isLoading: loadingBookings } = useQuery<TrialBooking[]>({
+    queryKey: ["admin", "trial-bookings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from("trial_bookings")
         .select("*")
         .order("trial_date", { ascending: false })
-        .order("start_time", { ascending: true }),
-      supabase
+        .order("start_time", { ascending: true });
+      if (error) {
+        toast({ title: "Error loading bookings", description: error.message, variant: "destructive" });
+        throw error;
+      }
+      return (data as TrialBooking[] | null) ?? [];
+    },
+    staleTime: 60 * 1000,
+  });
+
+  const { data: activeSlots = [], isLoading: loadingSlots } = useQuery<TrialSlot[]>({
+    queryKey: ["admin", "trial-slots"],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from("trial_slots")
         .select("day_of_week, start_time, is_active")
-        .eq("is_active", true),
-    ]);
-    if (bookingsRes.error) {
-      toast({ title: "Error loading bookings", description: bookingsRes.error.message, variant: "destructive" });
-    }
-    setBookings((bookingsRes.data as TrialBooking[] | null) || []);
-    setActiveSlots((slotsRes.data as TrialSlot[] | null) || []);
-    setLoading(false);
-  };
+        .eq("is_active", true);
+      if (error) throw error;
+      return (data as TrialSlot[] | null) ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => { fetchData(); }, []);
+  const loading = loadingBookings || loadingSlots;
+
+  const fetchData = () => {
+    // Invalidate trials-related caches so both the local table and the
+    // dashboard's pending-count badge refresh from the same source.
+    queryClient.invalidateQueries({ queryKey: ["admin", "trial-bookings"] });
+    queryClient.invalidateQueries({ queryKey: ["admin", "trial-slots"] });
+    queryClient.invalidateQueries({ queryKey: ["admin", "trial-stats"] });
+  };
 
   const handleConfirm = async (booking: TrialBooking) => {
     setActioningId(booking.id);
