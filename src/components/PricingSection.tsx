@@ -10,10 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, MapPin, Star, Crown, Globe, Sparkles, Users } from "lucide-react";
+import { Check, MapPin, Star, Crown, Globe, Sparkles, Users, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "@/hooks/use-toast";
-import { logLeadEvent } from "@/lib/leadTracking";
+import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
+import { WHATSAPP_BASE } from "@/lib/siteConfig";
 
 type TierKey = "local" | "regional" | "global";
 
@@ -102,6 +103,23 @@ const PricingSection = () => {
     setSelectedCountry(country);
     const match = allCountries.find((c) => c.country === country);
     setActiveTier(match?.tier ?? null);
+  };
+
+  // Anchors cost per month. Reframes "$70 for 3 months" as "$23/mo" which
+  // reads closer to a streaming sub than an upfront fee.
+  const derivePerMonth = (price: { duration: string; usd?: number; egp?: number }): string => {
+    const months = /^(\d+)/.exec(price.duration)?.[1];
+    const n = months ? parseInt(months, 10) : 1;
+    if (n <= 1) return "";
+    if (price.egp) return `${Math.round(price.egp / n).toLocaleString()} EGP/mo`;
+    if (price.usd) return `$${Math.round(price.usd / n)}/mo`;
+    return "";
+  };
+
+  const openFlexPaymentChat = (tierKey: TierKey, ct: ClassType) => {
+    const msg = `Hi! I'm interested in the ${ct === "group" ? "Group" : "Private"} plan (${tierKey} tier). Can we arrange flexible/installment payment?`;
+    logLeadEvent({ source_type: "pricing", cta_label: "flex_payment_whatsapp", metadata: { tier: tierKey, classType: ct } });
+    trackAndOpenWhatsApp(`${WHATSAPP_BASE}?text=${encodeURIComponent(msg)}`, { cta_label: "pricing_flex_payment" });
   };
 
   return (
@@ -251,6 +269,11 @@ const PricingSection = () => {
                             <p className="font-bold text-lg text-foreground">
                               {price.egp ? `${price.egp.toLocaleString()} EGP` : `$${price.usd}`}
                             </p>
+                            {derivePerMonth(price) && (
+                              <p className="text-[11px] text-primary font-semibold">
+                                {derivePerMonth(price)}
+                              </p>
+                            )}
                             {price.local && isActive && !price.egp && (
                               <p className="text-xs text-muted-foreground">
                                 {price.local}
@@ -279,6 +302,11 @@ const PricingSection = () => {
                             <p className="font-bold text-lg text-foreground">
                               {price.egp ? `${price.egp.toLocaleString()} EGP` : `$${price.usd}`}
                             </p>
+                            {derivePerMonth(price) && (
+                              <p className="text-[11px] text-primary font-semibold">
+                                {derivePerMonth(price)}
+                              </p>
+                            )}
                           </div>
                         </div>
                       ))
@@ -366,6 +394,14 @@ const PricingSection = () => {
                     >
                       {isActive ? t("pricing", "getStartedNow") : t("pricing", "getStarted")}
                     </Button>
+                    <button
+                      type="button"
+                      onClick={() => openFlexPaymentChat(tierKey, classType)}
+                      className="w-full flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground py-1 transition-colors"
+                    >
+                      <MessageCircle className="h-3 w-3" />
+                      Flexible / installment payment? Chat with us
+                    </button>
                   </div>
                 </CardContent>
               </Card>
