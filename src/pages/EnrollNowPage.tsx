@@ -863,6 +863,16 @@ const EnrollNowPage = () => {
                         </button>
                       ))}
                     </div>
+                    <a
+                      href={`${WHATSAPP_BASE}?text=${encodeURIComponent(
+                        `Hi Klovers — I'd like to request a ${selectedLevel || "Korean"} class${preferredDays.length ? ` on ${preferredDays.join(", ")}` : ""}. The current schedule doesn't have this yet.`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-md bg-[#25D366] hover:bg-[#1fb855] text-white px-4 py-2 text-sm font-semibold transition-colors"
+                    >
+                      Or contact us on WhatsApp to find a suitable time
+                    </a>
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-2">

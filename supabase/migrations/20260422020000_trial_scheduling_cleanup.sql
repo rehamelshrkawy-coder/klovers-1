@@ -290,8 +290,12 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.get_trial_availability() TO anon, authenticated;
 
--- Admin views — is_tba-aware, NULL-safe.
-CREATE OR REPLACE VIEW public.v_trial_bookings_admin AS
+-- Admin views — is_tba-aware, NULL-safe. Drop first: CREATE OR REPLACE
+-- cannot reorder or insert columns, and we're adding is_tba at the end.
+DROP VIEW IF EXISTS public.v_trial_slots_admin;
+DROP VIEW IF EXISTS public.v_trial_bookings_admin;
+
+CREATE VIEW public.v_trial_bookings_admin AS
 WITH cfg AS (
   SELECT program_start_date FROM public.trial_settings WHERE id = 1
 )
@@ -310,7 +314,6 @@ SELECT
   END AS day_name,
   tb.trial_date,
   tb.start_time,
-  tb.is_tba,
   tb.status,
   tb.confirmed_at,
   tb.created_at,
@@ -332,13 +335,14 @@ SELECT
     WHEN tb.trial_date IS NULL THEN 'pre_launch'
     WHEN tb.trial_date < (SELECT program_start_date FROM cfg) THEN 'pre_launch'
     ELSE 'active_program'
-  END AS program_phase
+  END AS program_phase,
+  tb.is_tba
 FROM public.trial_bookings tb
 LEFT JOIN public.trial_slots ts
   ON ts.day_of_week = tb.day_of_week
  AND ts.start_time  = tb.start_time;
 
-CREATE OR REPLACE VIEW public.v_trial_slots_admin AS
+CREATE VIEW public.v_trial_slots_admin AS
 WITH cfg AS (
   SELECT suggestion_weeks FROM public.trial_settings WHERE id = 1
 ),
