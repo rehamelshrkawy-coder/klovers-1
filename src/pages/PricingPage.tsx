@@ -8,8 +8,10 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import ScrollToTop from "@/components/ScrollToTop";
 import StickyEnrollBar from "@/components/StickyEnrollBar";
 import { ChevronDown, X } from "lucide-react";
+import { Link } from "react-router-dom";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { trackAndOpenWhatsApp, logLeadEvent } from "@/lib/leadTracking";
+import { track } from "@/lib/tracking";
 
 const faqs = [
   {
@@ -79,44 +81,91 @@ const FAQ = () => {
 const ExitNudge = () => {
   const [visible, setVisible] = useState(false);
   const dismissed = useRef(false);
+  const shownLogged = useRef(false);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!dismissed.current && e.clientY < 60) {
-        setVisible(true);
-        dismissed.current = true; // show only once
+    const trigger = () => {
+      if (dismissed.current) return;
+      dismissed.current = true;
+      setVisible(true);
+      if (!shownLogged.current) {
+        shownLogged.current = true;
+        track.custom("exit_intent_shown", { page: "pricing" });
+        logLeadEvent({ source_type: "pricing", cta_label: "exit_intent_shown" });
       }
     };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (e.clientY < 60) trigger();
+    };
+
+    let scrolledUp = 0;
+    let lastY = window.scrollY;
+    const handleScroll = () => {
+      if (dismissed.current) return;
+      const y = window.scrollY;
+      if (y < lastY) scrolledUp += lastY - y;
+      else scrolledUp = 0;
+      lastY = y;
+      if (scrolledUp > 250) trigger();
+    };
+
     document.addEventListener("mousemove", handleMouseMove);
-    return () => document.removeEventListener("mousemove", handleMouseMove);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
+
+  const handleTrialClick = () => {
+    track.custom("exit_intent_clicked", { page: "pricing", cta: "free_trial" });
+    logLeadEvent({ source_type: "pricing", cta_label: "exit_intent_trial" });
+  };
+
+  const handleWaClick = () => {
+    track.custom("exit_intent_clicked", { page: "pricing", cta: "whatsapp" });
+    const url = `${WHATSAPP_BASE}?text=${encodeURIComponent("Hi! I saw the pricing page and I'd like help choosing a plan.")}`;
+    trackAndOpenWhatsApp(url, { cta_label: "pricing_exit_intent" });
+  };
 
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom-4 duration-300">
-      <div className="bg-primary text-black px-4 py-3 flex items-center justify-between gap-3 max-w-2xl mx-auto mb-4 rounded-xl shadow-2xl border border-black/25">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">💬</span>
-          <div>
-            <p className="font-semibold text-sm">Not sure which plan to pick?</p>
-            <p className="text-xs text-black/70">Chat with us — we'll find the best fit for you.</p>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-3">
+      <div className="bg-card text-card-foreground rounded-2xl shadow-2xl border border-border w-full max-w-md p-6 relative animate-in slide-in-from-bottom-4 duration-300">
+        <button
+          onClick={() => setVisible(false)}
+          aria-label="Dismiss"
+          className="absolute top-3 right-3 text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition-colors"
+        >
+          <X className="h-4 w-4" />
+        </button>
+        <div className="text-center space-y-1 mb-4">
+          <div className="text-4xl mb-2">🎁</div>
+          <h3 className="text-lg font-bold text-foreground">Not ready to pick a plan?</h3>
+          <p className="text-sm text-muted-foreground leading-snug">
+            Try a <strong className="text-foreground">free 20-min trial class</strong> first — no payment, no commitment. Meet a teacher and see if we're the right fit.
+          </p>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <a
-            href={`${WHATSAPP_BASE}?text=${encodeURIComponent("Hi! I need help choosing a Klovers plan.")}`}
-            onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(`${WHATSAPP_BASE}?text=${encodeURIComponent("Hi! I need help choosing a Klovers plan.")}`, { cta_label: "pricing_help" }); }}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-black text-primary text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-black/80 transition-colors"
+        <div className="space-y-2">
+          <Link
+            to="/free-trial"
+            onClick={handleTrialClick}
+            className="block w-full bg-primary text-primary-foreground text-center font-semibold py-3 rounded-xl hover:bg-primary/90 transition-colors"
           >
-            WhatsApp
-          </a>
-          <button onClick={() => setVisible(false)} aria-label="Dismiss" className="text-black/60 hover:text-black">
-            <X className="h-4 w-4" />
+            Book My Free Trial →
+          </Link>
+          <button
+            onClick={handleWaClick}
+            className="w-full text-xs text-muted-foreground hover:text-foreground py-1"
+          >
+            Or chat with us on WhatsApp
           </button>
         </div>
+        <p className="text-[10px] text-muted-foreground text-center mt-3">
+          ⭐️ 1,000+ Egyptian students · full refund after first paid class if you don't love it
+        </p>
       </div>
     </div>
   );
