@@ -29,7 +29,10 @@ import { toast } from "@/hooks/use-toast";
 import { LogOut, Search, Download, Trash2, Check, X, Eye, Undo2, AlertCircle, Bell, ChevronLeft, ChevronRight, Pencil, Mail, Eraser, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Copy, Clock, Tag, UserPlus, Loader2, Image, Trophy, TrendingUp } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Columns3 } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -129,6 +132,30 @@ const AdminDashboard = () => {
 
   // Lead count: "new" status = hasn't been contacted yet
   const newLeadsCount = useMemo(() => leads.filter(l => (l.status ?? "new") === "new").length, [leads]);
+
+  // Students table column visibility — persisted
+  type StudentCol = "country" | "level" | "attendance" | "source" | "joined";
+  const ALL_STUDENT_COLS: StudentCol[] = ["country", "level", "attendance", "source", "joined"];
+  const STUDENT_COL_LABELS: Record<StudentCol, string> = {
+    country: "Country", level: "Level", attendance: "Attendance %", source: "Source", joined: "Joined",
+  };
+  const [visibleStudentCols, setVisibleStudentCols] = useState<Set<StudentCol>>(() => {
+    try {
+      const raw = localStorage.getItem("admin:studentCols");
+      if (raw) return new Set(JSON.parse(raw) as StudentCol[]);
+    } catch { /* ignore */ }
+    return new Set(isMobile ? ["attendance"] : ALL_STUDENT_COLS);
+  });
+  useEffect(() => {
+    try { localStorage.setItem("admin:studentCols", JSON.stringify(Array.from(visibleStudentCols))); } catch { /* ignore */ }
+  }, [visibleStudentCols]);
+  const toggleStudentCol = useCallback((c: StudentCol) => {
+    setVisibleStudentCols(prev => {
+      const next = new Set(prev);
+      if (next.has(c)) next.delete(c); else next.add(c);
+      return next;
+    });
+  }, []);
 
   // Hero "Insights" collapsed by default — restore last choice from localStorage
   const [insightsOpen, setInsightsOpen] = useState<boolean>(() => {
@@ -614,7 +641,7 @@ const AdminDashboard = () => {
             <div className="flex items-center gap-1.5 md:gap-2">
               <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2">
                 <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-                <span className="hidden md:inline">{refreshing ? "Refreshing…" : "Refresh"}</span>
+                <span className="hidden sm:inline">{refreshing ? "Refreshing…" : "Refresh"}</span>
               </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/admin/marketing")} className="gap-2">
                 <Sparkles className="h-4 w-4" /> <span className="hidden md:inline">Marketing</span>
@@ -808,6 +835,7 @@ const AdminDashboard = () => {
                           onClick={() => setTabGroup(g.id)}
                           className={cn(
                             "relative shrink-0 inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
                             isActive
                               ? "bg-background text-foreground shadow-sm ring-1 ring-border"
                               : "text-muted-foreground hover:text-foreground hover:bg-background/60"
@@ -869,7 +897,7 @@ const AdminDashboard = () => {
                 )}
                 {inActiveGroup("leads") && (
                   <TabsTrigger value="leads" className={TAB_CLS}>
-                    <Users className="h-3.5 w-3.5" /> CRM Leads
+                    <Users className="h-3.5 w-3.5" /> New Leads
                     {newLeadsCount > 0 && (
                       <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[9px] rounded-full">{newLeadsCount}</Badge>
                     )}
@@ -891,7 +919,7 @@ const AdminDashboard = () => {
                 )}
                 {inActiveGroup("lead-funnel") && (
                   <TabsTrigger value="lead-funnel" className={TAB_CLS}>
-                    <TrendingUp className="h-3.5 w-3.5" /> Lead Funnel
+                    <TrendingUp className="h-3.5 w-3.5" /> Funnel Analytics
                   </TabsTrigger>
                 )}
                 {inActiveGroup("manage") && (
@@ -1028,6 +1056,28 @@ const AdminDashboard = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size={isMobile ? "icon" : "sm"} aria-label="Toggle table columns">
+                            <Columns3 className="h-4 w-4" />
+                            {!isMobile && <span className="ml-1">Columns</span>}
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuLabel className="text-xs">Visible columns</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {ALL_STUDENT_COLS.map(col => (
+                            <DropdownMenuCheckboxItem
+                              key={col}
+                              checked={visibleStudentCols.has(col)}
+                              onCheckedChange={() => toggleStudentCol(col)}
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              {STUDENT_COL_LABELS[col]}
+                            </DropdownMenuCheckboxItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       <Button variant="outline" size={isMobile ? "icon" : "sm"} onClick={() => {
                         const headers = ["Name", "Email", "Country", "Level", "Remaining Sessions", "Status", "Source", "Joined"];
                         const rows = filteredUsers.map(u => [u.name, u.email, u.country, u.level, u.sessions_remaining, u.derived_status, u.source_label, new Date(u.joined_at).toLocaleDateString()]);
@@ -1089,20 +1139,26 @@ const AdminDashboard = () => {
                         <TableRow className="sticky top-0 bg-background/95 backdrop-blur z-10 border-b">
                           <TableHead className="py-3 px-3 font-semibold">Name</TableHead>
                           <TableHead className="py-3 px-3 font-semibold">Email</TableHead>
-                          <TableHead className="py-3 px-3 hidden md:table-cell font-semibold">Country</TableHead>
-                          <TableHead className="py-3 px-3 hidden md:table-cell font-semibold">Level</TableHead>
+                          {visibleStudentCols.has("country") && (
+                            <TableHead className="py-3 px-3 font-semibold">Country</TableHead>
+                          )}
+                          {visibleStudentCols.has("level") && (
+                            <TableHead className="py-3 px-3 font-semibold">Level</TableHead>
+                          )}
                           <TableHead
                             className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary"
                             onClick={() => setStudentSort(s => ({ col: "sessions_remaining", dir: s.col === "sessions_remaining" && s.dir === "asc" ? "desc" : "asc" }))}
                           >
                             Remaining {studentSort.col === "sessions_remaining" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
                           </TableHead>
-                          <TableHead
-                            className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary hidden sm:table-cell"
-                            onClick={() => setStudentSort(s => ({ col: "attendance_pct", dir: s.col === "attendance_pct" && s.dir === "asc" ? "desc" : "asc" }))}
-                          >
-                            Attend% {studentSort.col === "attendance_pct" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
-                          </TableHead>
+                          {visibleStudentCols.has("attendance") && (
+                            <TableHead
+                              className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary"
+                              onClick={() => setStudentSort(s => ({ col: "attendance_pct", dir: s.col === "attendance_pct" && s.dir === "asc" ? "desc" : "asc" }))}
+                            >
+                              Attend% {studentSort.col === "attendance_pct" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
+                            </TableHead>
+                          )}
                           <TableHead className="py-3 px-3 font-semibold text-center">Negative</TableHead>
                           <TableHead
                             className="py-3 px-3 font-semibold text-right cursor-pointer select-none hover:text-primary"
@@ -1117,13 +1173,17 @@ const AdminDashboard = () => {
                             Balance {studentSort.col === "remaining_balance" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
                           </TableHead>
                           <TableHead className="py-3 px-3 font-semibold">Status</TableHead>
-                          <TableHead className="py-3 px-3 hidden md:table-cell font-semibold">Source</TableHead>
-                          <TableHead
-                            className="py-3 px-3 hidden sm:table-cell font-semibold cursor-pointer select-none hover:text-primary"
-                            onClick={() => setStudentSort(s => ({ col: "joined_at", dir: s.col === "joined_at" && s.dir === "asc" ? "desc" : "asc" }))}
-                          >
-                            Joined {studentSort.col === "joined_at" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
-                          </TableHead>
+                          {visibleStudentCols.has("source") && (
+                            <TableHead className="py-3 px-3 font-semibold">Source</TableHead>
+                          )}
+                          {visibleStudentCols.has("joined") && (
+                            <TableHead
+                              className="py-3 px-3 font-semibold cursor-pointer select-none hover:text-primary"
+                              onClick={() => setStudentSort(s => ({ col: "joined_at", dir: s.col === "joined_at" && s.dir === "asc" ? "desc" : "asc" }))}
+                            >
+                              Joined {studentSort.col === "joined_at" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
+                            </TableHead>
+                          )}
                           <TableHead className="py-3 px-3 w-10" />
                         </TableRow>
                       </TableHeader>
@@ -1138,6 +1198,7 @@ const AdminDashboard = () => {
                                   variant="ghost"
                                   className="h-6 w-6 shrink-0 text-muted-foreground hover:text-primary"
                                   title="Manually enroll"
+                                  aria-label={`Manually enroll ${u.name || u.email}`}
                                   onClick={e => { e.stopPropagation(); openManualEnroll(u); }}
                                 >
                                   <UserPlus className="h-3.5 w-3.5" />
@@ -1148,17 +1209,23 @@ const AdminDashboard = () => {
                               <div className="flex items-center gap-1 max-w-[240px]">
                                 <span className="truncate flex-1 text-sm">{u.email}</span>
                                 <button
-                                  className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-muted"
+                                  className="shrink-0 p-0.5 rounded text-muted-foreground/60 hover:text-foreground hover:bg-muted focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary/50 transition-colors"
                                   onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(u.email); toast({ title: "Copied" }); }}
+                                  aria-label={`Copy email ${u.email}`}
                                 >
-                                  <Copy className="h-3 w-3 text-muted-foreground" />
+                                  <Copy className="h-3 w-3" />
                                 </button>
                               </div>
                             </TableCell>
-                            <TableCell className="py-3 px-3 hidden md:table-cell text-muted-foreground">{u.country || "—"}</TableCell>
-                            <TableCell className="py-3 px-3 hidden md:table-cell text-muted-foreground">{u.level || "—"}</TableCell>
+                            {visibleStudentCols.has("country") && (
+                              <TableCell className="py-3 px-3 text-muted-foreground">{u.country || "—"}</TableCell>
+                            )}
+                            {visibleStudentCols.has("level") && (
+                              <TableCell className="py-3 px-3 text-muted-foreground">{u.level || "—"}</TableCell>
+                            )}
                             <TableCell className="py-3 px-3 text-center font-mono">{u.sessions_remaining}</TableCell>
-                            <TableCell className="py-3 px-3 text-center hidden sm:table-cell">
+                            {visibleStudentCols.has("attendance") && (
+                            <TableCell className="py-3 px-3 text-center">
                               {u.sessions_total > 0 ? (() => {
                                 const pct = Math.round(((u.sessions_total - u.sessions_remaining) / u.sessions_total) * 100);
                                 return (
@@ -1168,7 +1235,14 @@ const AdminDashboard = () => {
                                 );
                               })() : <span className="text-muted-foreground">—</span>}
                             </TableCell>
-                            <TableCell className="py-3 px-3 text-center font-mono">{u.negative_sessions > 0 ? <span className="text-destructive">{u.negative_sessions}</span> : "—"}</TableCell>
+                            )}
+                            <TableCell className="py-3 px-3 text-center font-mono">
+                              {u.negative_sessions > 0 ? (
+                                <span className="inline-flex items-center gap-1 text-destructive font-semibold" aria-label={`${u.negative_sessions} negative sessions`}>
+                                  <AlertCircle className="h-3 w-3" aria-hidden="true" /> {u.negative_sessions}
+                                </span>
+                              ) : "—"}
+                            </TableCell>
                             <TableCell className="py-3 px-3 text-right font-mono" onClick={(e) => e.stopPropagation()}>
                               {u.amount_due > 0 ? (
                                 <TooltipProvider>
@@ -1198,27 +1272,34 @@ const AdminDashboard = () => {
                             <TableCell className="py-3 px-3">
                               <Badge variant={getDerivedStatusBadgeVariant(u.derived_status)} className="text-xs">{u.derived_status}</Badge>
                             </TableCell>
-                            <TableCell className="py-3 px-3 hidden md:table-cell" onClick={(e) => e.stopPropagation()}>
-                              <Badge
-                                variant="outline"
-                                className="text-xs cursor-pointer hover:bg-accent transition-colors"
-                                onClick={() => {
-                                  const f = u.source_label === "Stripe" ? "stripe" : u.source_label === "Egypt" ? "egypt" : null;
-                                  if (f) { setStudentFilter(f); setStudentPage(0); }
-                                }}
-                                title={`Filter by ${u.source_label}`}
-                                role="button"
-                                aria-label={`Filter students by source: ${u.source_label}`}
-                              >
-                                {u.source_label}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="py-3 px-3 hidden sm:table-cell text-muted-foreground text-xs">{new Date(u.joined_at).toLocaleDateString()}</TableCell>
+                            {visibleStudentCols.has("source") && (
+                              <TableCell className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs cursor-pointer hover:bg-accent transition-colors"
+                                  onClick={() => {
+                                    const f = u.source_label === "Stripe" ? "stripe" : u.source_label === "Egypt" ? "egypt" : null;
+                                    if (f) { setStudentFilter(f); setStudentPage(0); }
+                                  }}
+                                  title={`Filter by ${u.source_label}`}
+                                  role="button"
+                                  aria-label={`Filter students by source: ${u.source_label}`}
+                                >
+                                  {u.source_label}
+                                </Badge>
+                              </TableCell>
+                            )}
+                            {visibleStudentCols.has("joined") && (
+                              <TableCell className="py-3 px-3 text-muted-foreground text-xs">{new Date(u.joined_at).toLocaleDateString()}</TableCell>
+                            )}
                             <TableCell className="py-3 px-3 w-10" onClick={(e) => e.stopPropagation()}>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-destructive/10">
-                                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                  <button
+                                    className="p-1 rounded text-destructive/60 hover:text-destructive hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-destructive/40 transition-colors"
+                                    aria-label="Delete student"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
                                   </button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
