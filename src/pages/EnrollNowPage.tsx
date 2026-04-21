@@ -432,7 +432,7 @@ const EnrollNowPage = () => {
       if (!session) {
         saveDraft();
         const returnUrl = buildReturnUrl(4);
-        toast({ title: "Please log in", description: "You need to be logged in to place an order.", variant: "destructive" });
+        toast({ title: t("enrollToasts.pleaseLogIn"), description: t("enrollToasts.pleaseLogInDesc"), variant: "destructive" });
         nav(`/login?redirect=${encodeURIComponent(returnUrl)}`);
         return;
       }
@@ -473,7 +473,7 @@ const EnrollNowPage = () => {
       logLeadEvent({ source_type: "enroll", cta_label: "checkout", metadata: { value: finalPrice ?? 0, country: selectedCountry } });
       nav(`/pay/${enrollmentId}`);
     } catch (err: any) {
-      toast({ title: "Order error", description: err.message, variant: "destructive" });
+      toast({ title: t("enrollToasts.orderError"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -500,11 +500,11 @@ const EnrollNowPage = () => {
       });
       if (error) {
         console.error("Lead submit failed:", error);
-        toast({ title: "Lead capture failed", description: error.message, variant: "destructive" });
+        toast({ title: t("enrollToasts.leadCaptureFailed"), description: error.message, variant: "destructive" });
       }
     } catch (err) {
       console.error("Lead submit error:", err);
-      toast({ title: "Couldn't save your info", description: "Please message us on WhatsApp to complete your enrollment.", variant: "destructive" });
+      toast({ title: t("enrollToasts.couldNotSave"), description: t("enrollToasts.couldNotSaveDesc"), variant: "destructive" });
     }
   };
 
@@ -549,7 +549,7 @@ const EnrollNowPage = () => {
   const handlePay = async () => {
     // Block payment if core schedule fields are missing (package is optional — may be preference-only)
     if (!selectedLevel || preferredDays.length === 0) {
-      toast({ title: "Missing schedule", description: "Please select your level and preferred day before continuing.", variant: "destructive" });
+      toast({ title: t("enrollToasts.missingSchedule"), description: t("enrollToasts.missingScheduleDesc"), variant: "destructive" });
       setStep(2);
       return;
     }
@@ -569,7 +569,7 @@ const EnrollNowPage = () => {
     if (!session) {
       saveDraft();
       const returnUrl = buildReturnUrl(4);
-      toast({ title: "Account required", description: "Please create an account or log in to continue.", variant: "destructive" });
+      toast({ title: t("enrollToasts.accountRequired"), description: t("enrollToasts.accountRequiredDesc"), variant: "destructive" });
       nav(`/signup?redirect=${encodeURIComponent(returnUrl)}`);
       return;
     }
@@ -659,7 +659,7 @@ const EnrollNowPage = () => {
         window.location.href = data.url;
       }
     } catch (err: any) {
-      toast({ title: "Checkout error", description: err.message, variant: "destructive" });
+      toast({ title: t("enrollToasts.checkoutError"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }

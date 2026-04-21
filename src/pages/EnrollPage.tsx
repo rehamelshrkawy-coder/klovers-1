@@ -13,8 +13,10 @@ import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { type TierKey, type ClassType, type Duration, tierPrices, getTierForCountry, DURATION_CLASSES } from "@/lib/stripePrices";
 import { track } from "@/lib/tracking";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const EnrollPage = () => {
+  const { t } = useLanguage();
   useSEO({ title: "Enroll Now", description: "Start learning Korean today. Enroll in a Klovers course — choose your level, schedule, and teacher.", canonical: "https://kloversegy.com/enroll" });
   const [planType, setPlanType] = useState<ClassType | "">("");
   const [duration, setDuration] = useState<string>("");
@@ -62,12 +64,12 @@ const EnrollPage = () => {
 
     // Client-side file validation
     if (receiptFile.size > 5 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Receipt must be under 5MB.", variant: "destructive" });
+      toast({ title: t("enrollForm.fileTooLarge"), description: t("enrollForm.fileTooLargeDesc"), variant: "destructive" });
       return;
     }
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
     if (!allowedTypes.includes(receiptFile.type)) {
-      toast({ title: "Invalid file type", description: "Only JPG, PNG, or PDF files are accepted.", variant: "destructive" });
+      toast({ title: t("enrollForm.invalidType"), description: t("enrollForm.invalidTypeDesc"), variant: "destructive" });
       return;
     }
 
@@ -86,7 +88,7 @@ const EnrollPage = () => {
       } as any);
 
       if (insertError || !enrollmentId) {
-        throw new Error(insertError?.message || "Failed to submit enrollment.");
+        throw new Error(insertError?.message || t("enrollForm.submitFailed"));
       }
 
       // 2. Upload receipt using enrollment ID in path
@@ -97,16 +99,16 @@ const EnrollPage = () => {
         .upload(filePath, receiptFile);
 
       if (uploadError) {
-        throw new Error("Could not upload receipt. Your enrollment was created — please contact support.");
+        throw new Error(t("enrollForm.uploadFailed"));
       }
 
       // 3. Update enrollment with receipt path
       await supabase.from("enrollments").update({ receipt_url: filePath } as any).eq("id", enrollmentId);
 
-      toast({ title: "Enrollment submitted!", description: "We'll review your payment shortly." });
+      toast({ title: t("enrollForm.submitted"), description: t("enrollForm.submittedDesc") });
       navigate("/dashboard");
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("enrollForm.error"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -120,14 +122,14 @@ const EnrollPage = () => {
 
           {/* Header */}
           <div className="text-center space-y-1">
-            <h1 className="text-2xl font-bold text-foreground">Complete Your Enrollment</h1>
-            <p className="text-muted-foreground text-sm">Choose your plan and submit your payment to get started</p>
+            <h1 className="text-2xl font-bold text-foreground">{t("enrollForm.completeEnrollment")}</h1>
+            <p className="text-muted-foreground text-sm">{t("enrollForm.chooseSubmit")}</p>
             <div className="flex items-center justify-center gap-3 flex-wrap pt-1 text-xs text-muted-foreground">
-              <span>⭐ 4.9 rated</span>
+              <span>{t("enrollForm.rated")}</span>
               <span className="text-border">·</span>
-              <span>👥 1,000+ students</span>
+              <span>{t("enrollForm.studentsCount")}</span>
               <span className="text-border">·</span>
-              <span>🇰🇷 A1–C2 levels</span>
+              <span>{t("enrollForm.levels")}</span>
             </div>
           </div>
 
@@ -142,93 +144,93 @@ const EnrollPage = () => {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-bold text-foreground">Reham — 선생님</p>
-                <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">Certified Teacher</span>
+                <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">{t("enrollForm.certifiedTeacher")}</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">5+ years · 300+ students · A1–C2 all levels</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("enrollForm.teacherExp")}</p>
               <p className="text-xs text-muted-foreground/80 italic mt-1 leading-relaxed">
-                "She simplifies everything — you'll notice the difference from day one."
+                {t("enrollForm.teacherQuote")}
               </p>
             </div>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Order Details</CardTitle>
+              <CardTitle className="text-lg">{t("enrollForm.orderDetails")}</CardTitle>
             </CardHeader>
             <CardContent>
               {!tier && userCountry && (
                 <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 mb-4 text-sm text-destructive">
-                  ⚠️ Your country "{userCountry}" is not recognized. Please <a href="/profile" className="underline font-medium">update your profile</a>.
+                  {t("enrollForm.countryUnknown").replace("{country}", userCountry)} <a href="/profile" className="underline font-medium">{t("enrollForm.updateProfile")}</a>.
                 </div>
               )}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <Select value={planType} onValueChange={(v) => setPlanType(v as ClassType)} required>
-                  <SelectTrigger aria-label="Plan type"><SelectValue placeholder="Plan type" /></SelectTrigger>
+                  <SelectTrigger aria-label={t("enrollForm.planType")}><SelectValue placeholder={t("enrollForm.planType")} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="group">👥 Group Classes</SelectItem>
-                    <SelectItem value="private">👤 Private Classes</SelectItem>
+                    <SelectItem value="group">{t("enrollForm.groupClasses")}</SelectItem>
+                    <SelectItem value="private">{t("enrollForm.privateClasses")}</SelectItem>
                   </SelectContent>
                 </Select>
 
                 <Select value={duration} onValueChange={setDuration} required>
-                  <SelectTrigger aria-label="Duration"><SelectValue placeholder="Duration" /></SelectTrigger>
+                  <SelectTrigger aria-label={t("enrollForm.duration")}><SelectValue placeholder={t("enrollForm.duration")} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">1 Month — 4 classes</SelectItem>
-                    <SelectItem value="3">3 Months — 12 classes</SelectItem>
-                    <SelectItem value="6">6 Months — 24 classes 🔥 Best Value</SelectItem>
+                    <SelectItem value="1">{t("enrollForm.month1")}</SelectItem>
+                    <SelectItem value="3">{t("enrollForm.months3")}</SelectItem>
+                    <SelectItem value="6">{t("enrollForm.months6")}</SelectItem>
                   </SelectContent>
                 </Select>
 
                 {price !== null && (
                   <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{classesIncluded} classes included</span>
-                      <span className="text-xs text-muted-foreground">${unitPrice}/class</span>
+                      <span className="text-muted-foreground">{t("enrollForm.classesIncluded").replace("{count}", String(classesIncluded))}</span>
+                      <span className="text-xs text-muted-foreground">{t("enrollForm.perClass").replace("{price}", unitPrice)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="font-semibold text-foreground">Total</span>
+                      <span className="font-semibold text-foreground">{t("enrollForm.total")}</span>
                       <span className="font-bold text-2xl text-foreground">${price}</span>
                     </div>
                   </div>
                 )}
 
                 <Select value={paymentMethod} onValueChange={setPaymentMethod} required>
-                  <SelectTrigger aria-label="Payment method"><SelectValue placeholder="Payment method" /></SelectTrigger>
+                  <SelectTrigger aria-label={t("enrollForm.paymentMethod")}><SelectValue placeholder={t("enrollForm.paymentMethod")} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="vodafone_cash">📱 Vodafone Cash</SelectItem>
-                    <SelectItem value="instapay">💳 InstaPay</SelectItem>
-                    <SelectItem value="bank_transfer">🏦 Bank Transfer</SelectItem>
+                    <SelectItem value="vodafone_cash">{t("enrollForm.vodafoneCash")}</SelectItem>
+                    <SelectItem value="instapay">{t("enrollForm.instapay")}</SelectItem>
+                    <SelectItem value="bank_transfer">{t("enrollForm.bankTransfer")}</SelectItem>
                   </SelectContent>
                 </Select>
 
                 <Input
-                  placeholder="Transaction reference (from your payment)"
+                  placeholder={t("enrollForm.txRefPlaceholder")}
                   value={txRef}
                   onChange={(e) => setTxRef(e.target.value)}
                   required
                 />
 
                 <div>
-                  <label className="text-sm font-medium text-foreground block mb-1">Payment receipt *</label>
+                  <label className="text-sm font-medium text-foreground block mb-1">{t("enrollForm.paymentReceipt")}</label>
                   <Input
                     type="file"
                     accept="image/*,.pdf"
                     onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
                     required
                   />
-                  <p className="text-xs text-muted-foreground mt-1">JPG, PNG, or PDF · max 5MB</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("enrollForm.receiptHint")}</p>
                 </div>
 
                 <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading || !planType || !duration || !paymentMethod || price === null}>
-                  {loading ? "Submitting..." : "🔒 Submit Enrollment"}
+                  {loading ? t("enrollForm.submitting") : t("enrollForm.submitEnrollment")}
                 </Button>
 
                 {/* Trust badges */}
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { icon: "🔒", label: "Secure" },
-                    { icon: "⚡", label: "24h Review" },
-                    { icon: "✅", label: "Verified" },
+                    { icon: "🔒", label: t("enrollForm.secure") },
+                    { icon: "⚡", label: t("enrollForm.review24h") },
+                    { icon: "✅", label: t("enrollForm.verified") },
                   ].map(({ icon, label }) => (
                     <div key={label} className="flex flex-col items-center gap-1 bg-muted/50 rounded-lg p-2">
                       <span className="text-base">{icon}</span>
@@ -238,7 +240,7 @@ const EnrollPage = () => {
                 </div>
 
                 <p className="text-xs text-center text-muted-foreground">
-                  Need help?{" "}
+                  {t("enrollForm.needHelp")}{" "}
                   <a
                     href={WHATSAPP_BASE}
                     onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(WHATSAPP_BASE, { cta_label: "enroll_form_help" }); }}
@@ -246,7 +248,7 @@ const EnrollPage = () => {
                     rel="noopener noreferrer"
                     className="text-green-600 font-semibold hover:underline"
                   >
-                    💬 WhatsApp us
+                    {t("enrollForm.whatsappUs")}
                   </a>
                 </p>
               </form>

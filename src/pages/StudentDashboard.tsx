@@ -20,6 +20,7 @@ import RegistrationChecklist from "@/components/RegistrationChecklist";
 import { LeagueProgressBar, BadgeGrid } from "@/components/GamificationUI";
 import { LeaguePromotionModal, BadgeUnlockToast, StreakCelebration } from "@/components/XpAnimation";
 import { useGamification } from "@/hooks/useGamification";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { BADGES } from "@/constants/gamification";
 // Korean scene photos for immersive gallery
 import imgJeju from "@/assets/blog/jeju-island.jpg";
@@ -134,6 +135,7 @@ const ProfileCard = ({
   userId: string; avatarUrl: string; displayName: string; enrollmentCount: number;
   journeyStage: number; onAvatarUploaded: (url: string) => void; onNameUpdated: (name: string) => void;
 }) => {
+  const { t } = useLanguage();
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState(displayName);
   const [saving, setSaving] = useState(false);
@@ -151,10 +153,10 @@ const ProfileCard = ({
     const { error } = await supabase.from("profiles").update({ name: nameValue.trim() }).eq("user_id", userId);
     setSaving(false);
     if (error) {
-      toast({ title: "Error", description: "Could not update name.", variant: "destructive" });
+      toast({ title: t("dashboardPage.errorTitle"), description: t("dashboardPage.couldNotUpdateName"), variant: "destructive" });
       return;
     }
-    toast({ title: "Name updated!" });
+    toast({ title: t("dashboardPage.nameUpdated") });
     onNameUpdated(nameValue.trim());
     setEditingName(false);
   };
@@ -200,6 +202,7 @@ const ProfileCard = ({
 
 const StudentDashboard = () => {
   useSEO({ title: "My Dashboard", description: "Track your Korean learning progress, schedule, and achievements on Klovers.", canonical: "https://kloversegy.com/dashboard" });
+  const { t } = useLanguage();
   const { loading: gateLoading, resetBlocked } = useResetGate();
   const { progress: gamification, league, loading: gamLoading, awardGameXp, leaguePromotion, newBadges, streakCelebration, clearLeaguePromotion, clearNewBadges, clearStreakCelebration } = useGamification();
   const [enrollments, setEnrollments] = useState<EnrollmentRecord[]>([]);
@@ -404,7 +407,7 @@ const StudentDashboard = () => {
       setLoading(false);
       if (!isOnboardingDone()) setShowWelcome(true);
       } catch (err) {
-        setFetchError(err instanceof Error ? err.message : "Failed to load your dashboard. Please refresh.");
+        setFetchError(err instanceof Error ? err.message : t("dashboardPage.loadFailed"));
         setLoading(false);
       }
     };
@@ -718,7 +721,7 @@ const StudentDashboard = () => {
                 await awardGameXp("vocab_daily", 5, 1);
                 localStorage.setItem(vocabStorageKey, "1");
                 setVocabClaimed(true);
-                toast({ title: "+5 XP", description: "Vocabulary bonus earned!" });
+                toast({ title: t("dashboardPage.xpBonus"), description: t("dashboardPage.vocabBonus") });
               };
               return (
                 <div className="relative overflow-hidden rounded-xl h-28">
