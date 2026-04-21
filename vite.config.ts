@@ -47,6 +47,10 @@ export default defineConfig(() => ({
           "vendor-supabase": ["@supabase/supabase-js"],
           // Markdown rendering (only used on blog post pages)
           "vendor-markdown": ["react-markdown", "remark-gfm"],
+          // Charting — heavy (~400 kB) and only needed inside admin
+          // Sales/Analytics surfaces. Named so the chunk hash stays
+          // stable across deploys when unrelated admin code changes.
+          "vendor-charts": ["recharts"],
         },
       },
     },
