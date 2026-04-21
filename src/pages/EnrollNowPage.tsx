@@ -27,7 +27,6 @@ import { toast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
-import StudentPreferenceStep from "@/components/StudentPreferenceStep";
 import { track } from "@/lib/tracking";
 
 type Step = 1 | 2 | 3 | 4;
@@ -89,7 +88,13 @@ const EnrollNowPage = () => {
     : DAY_NAMES;
 
   const initialStep = Number(searchParams.get("step")) as Step;
-  const [step, setStep] = useState<Step>(initialStep === 2 || initialStep === 3 ? initialStep : 1);
+  // Step 3 was removed (redundant with Step 2) — legacy URLs that point to 3
+  // bump to 4 so returning users land on Pay & Enroll.
+  const [step, setStep] = useState<Step>(
+    initialStep === 2 ? 2 :
+    initialStep === 3 ? 4 :
+    initialStep === 4 ? 4 : 1
+  );
   const [classType, setClassType] = useState<ClassType>(
     (searchParams.get("classType") as ClassType) || "group"
   );
@@ -379,7 +384,7 @@ const EnrollNowPage = () => {
     if (selectedGroupName) draftData.groupName = selectedGroupName;
     if (selectedLevel) draftData.level = selectedLevel;
     if (selectedPackageId) draftData.packageId = selectedPackageId;
-    draftData.step = "3";
+    draftData.step = "4";
     localStorage.setItem("enroll_draft", JSON.stringify(draftData));
   };
 
@@ -387,12 +392,34 @@ const EnrollNowPage = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       saveDraft(); // backup to localStorage in case social login loses URL
-      const returnUrl = buildReturnUrl(3);
+      const returnUrl = buildReturnUrl(4);
       toast({ title: t("auth.accountRequired"), description: t("auth.accountRequiredDesc"), variant: "destructive" });
       nav(`/signup?redirect=${encodeURIComponent(returnUrl)}`);
       return;
     }
-    setStep(3);
+    // The old Step 3 (preferred day/time re-ask) was redundant with Step 2 and
+    // has been removed. Derive the day-of-week/start-time from the Step 2
+    // selections so the enrollment row still carries them into the DB.
+    const primaryDay = preferredDays[0];
+    if (primaryDay) {
+      const dayIdx = DAY_NAMES.indexOf(primaryDay);
+      if (dayIdx >= 0) setPreferredDayOfWeek(dayIdx);
+      const slot = levelSlots.find((s) => s.day === primaryDay);
+      if (slot) {
+        // slot.time is a display label like "6:00 PM" — convert to "HH:MM".
+        const match = slot.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+        if (match) {
+          let h = parseInt(match[1], 10);
+          const m = match[2];
+          const ampm = match[3].toUpperCase();
+          if (ampm === "PM" && h < 12) h += 12;
+          if (ampm === "AM" && h === 12) h = 0;
+          setPreferredStartTime(`${String(h).padStart(2, "0")}:${m}`);
+        }
+      }
+    }
+    submitLead(); // lead capture on checkout entry (moved from removed Step 3)
+    setStep(4);
   };
 
   const canProceedStep2 = !!selectedLevel && preferredDays.length > 0;
@@ -404,7 +431,7 @@ const EnrollNowPage = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         saveDraft();
-        const returnUrl = buildReturnUrl(3);
+        const returnUrl = buildReturnUrl(4);
         toast({ title: "Please log in", description: "You need to be logged in to place an order.", variant: "destructive" });
         nav(`/login?redirect=${encodeURIComponent(returnUrl)}`);
         return;
@@ -481,15 +508,6 @@ const EnrollNowPage = () => {
     }
   };
 
-  // Handle preference step submission
-  const handlePreferenceSubmit = (day: number, time: string) => {
-    setPreferredDayOfWeek(day);
-    setPreferredStartTime(time);
-    setStep(4); // Move to payment step
-    // Capture lead on checkout entry — tracks abandonment if user doesn't pay
-    submitLead();
-  };
-
   // Apply promo code
   const applyPromo = async () => {
     const code = promoInput.trim().toUpperCase();
@@ -550,7 +568,7 @@ const EnrollNowPage = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       saveDraft();
-      const returnUrl = buildReturnUrl(3);
+      const returnUrl = buildReturnUrl(4);
       toast({ title: "Account required", description: "Please create an account or log in to continue.", variant: "destructive" });
       nav(`/signup?redirect=${encodeURIComponent(returnUrl)}`);
       return;
@@ -925,22 +943,12 @@ const EnrollNowPage = () => {
           </Card>
         )}
 
-        {/* STEP 3: Preferred Day & Time */}
-        {step === 3 && (
-          <StudentPreferenceStep
-            onBack={() => setStep(2)}
-            onNext={handlePreferenceSubmit}
-            loading={loading}
-            userLevel={selectedLevel}
-          />
-        )}
-
-        {/* STEP 4: Pay & Enroll */}
+        {/* STEP 4: Pay & Enroll (Step 3 removed — redundant with Step 2) */}
         {step === 4 && (
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Button type="button" variant="ghost" size="sm" onClick={() => setStep(3)}>
+                <Button type="button" variant="ghost" size="sm" onClick={() => setStep(2)}>
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
@@ -968,7 +976,7 @@ const EnrollNowPage = () => {
                     className="w-full"
                     onClick={() => {
                       saveDraft();
-                      const returnUrl = buildReturnUrl(3);
+                      const returnUrl = buildReturnUrl(4);
                       nav(`/signup?redirect=${encodeURIComponent(returnUrl)}`);
                     }}
                   >
