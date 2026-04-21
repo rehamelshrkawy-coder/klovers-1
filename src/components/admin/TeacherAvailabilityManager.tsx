@@ -7,11 +7,22 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { convertSlotToTimezone } from "@/lib/admin-utils";
+import { ADMIN_TIMEZONE, TIMEZONE as SOURCE_TZ } from "@/constants/scheduling";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const DAY_LABELS: { [key: number]: string } = {
   0: "Sun", 1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat"
 };
+
+/** Convert a (day, HH:MM) tuple from Malaysia (admin input) to Cairo (stored). */
+function adminToSource(dayIdx: number, timeHHMM: string): { day_of_week: number; start_time: string } {
+  const c = convertSlotToTimezone(dayIdx, timeHHMM, ADMIN_TIMEZONE, SOURCE_TZ);
+  const [hStr, period] = c.timeFormatted.split(" ");
+  const [hh, mm] = hStr.split(":").map(Number);
+  const h24 = (period === "PM" ? (hh % 12) + 12 : hh % 12);
+  return { day_of_week: c.dayIndex, start_time: `${String(h24).padStart(2, "0")}:${String(mm).padStart(2, "0")}` };
+}
 
 interface TimeSlot {
   id: string;
@@ -81,12 +92,14 @@ const TeacherAvailabilityManager = () => {
     }
 
     try {
+      // Admin enters time in Malaysia tz; convert to Cairo (source) before storing.
+      const stored = adminToSource(parseInt(newDay), newTime);
       const { error } = await supabase
         .from("teacher_availability")
         .insert({
           teacher_id: user.id,
-          day_of_week: parseInt(newDay),
-          start_time: newTime,
+          day_of_week: stored.day_of_week,
+          start_time: stored.start_time,
           is_available: true,
         });
 
@@ -94,7 +107,7 @@ const TeacherAvailabilityManager = () => {
 
       toast({
         title: "Success",
-        description: `Added ${DAYS[parseInt(newDay)]} at ${newTime}`,
+        description: `Added ${DAYS[parseInt(newDay)]} at ${newTime} (${ADMIN_TIMEZONE.replace(/_/g, " ")})`,
       });
 
       setNewTime("");
@@ -166,19 +179,24 @@ const TeacherAvailabilityManager = () => {
     }
   };
 
-  // Group slots by day
-  const slotsByDay: { [key: number]: TimeSlot[] } = {};
-  timeSlots.forEach((slot) => {
-    if (!slotsByDay[slot.day_of_week]) {
-      slotsByDay[slot.day_of_week] = [];
-    }
-    slotsByDay[slot.day_of_week].push(slot);
+  // Compute Malaysia-local weekday/time for each slot (stored as Cairo).
+  type LocalizedSlot = TimeSlot & { localDay: number; localWeekday: string; localTime: string };
+  const localized: LocalizedSlot[] = timeSlots.map((s) => {
+    const l = convertSlotToTimezone(s.day_of_week, s.start_time, SOURCE_TZ, ADMIN_TIMEZONE);
+    return { ...s, localDay: l.dayIndex, localWeekday: l.weekday, localTime: l.timeFormatted };
   });
 
-  // Get available summary
-  const availableSummary = timeSlots
+  // Group by admin-local day
+  const slotsByDay: { [key: number]: LocalizedSlot[] } = {};
+  localized.forEach((slot) => {
+    if (!slotsByDay[slot.localDay]) slotsByDay[slot.localDay] = [];
+    slotsByDay[slot.localDay].push(slot);
+  });
+  Object.values(slotsByDay).forEach(arr => arr.sort((a, b) => a.localTime.localeCompare(b.localTime)));
+
+  const availableSummary = localized
     .filter((s) => s.is_available)
-    .map((s) => `${DAY_LABELS[s.day_of_week]} ${s.start_time}`)
+    .map((s) => `${DAY_LABELS[s.localDay]} ${s.localTime}`)
     .join(", ");
 
   return (
@@ -195,25 +213,25 @@ const TeacherAvailabilityManager = () => {
           {/* Summary */}
           {availableSummary && (
             <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-              <p className="text-sm font-semibold text-foreground mb-2">Available times:</p>
+              <p className="text-sm font-semibold text-foreground mb-1">Available times <span className="text-xs text-muted-foreground">({ADMIN_TIMEZONE.replace(/_/g, " ")})</span>:</p>
               <div className="flex flex-wrap gap-2">
-                {timeSlots
+                {localized
                   .filter((s) => s.is_available)
                   .map((slot) => (
-                    <Badge key={slot.id} variant="secondary">
-                      {DAYS[slot.day_of_week]} {slot.start_time}
+                    <Badge key={slot.id} variant="secondary" title={`Source: ${DAYS[slot.day_of_week]} ${slot.start_time} ${SOURCE_TZ}`}>
+                      {slot.localWeekday} {slot.localTime}
                     </Badge>
                   ))}
               </div>
-              {timeSlots.filter((s) => !s.is_available).length > 0 && (
+              {localized.filter((s) => !s.is_available).length > 0 && (
                 <div className="mt-4 pt-4 border-t border-primary/20">
                   <p className="text-sm font-semibold text-muted-foreground mb-2">Unavailable:</p>
                   <div className="flex flex-wrap gap-2">
-                    {timeSlots
+                    {localized
                       .filter((s) => !s.is_available)
                       .map((slot) => (
-                        <Badge key={slot.id} variant="outline">
-                          {DAYS[slot.day_of_week]} {slot.start_time}
+                        <Badge key={slot.id} variant="outline" title={`Source: ${DAYS[slot.day_of_week]} ${slot.start_time} ${SOURCE_TZ}`}>
+                          {slot.localWeekday} {slot.localTime}
                         </Badge>
                       ))}
                   </div>
@@ -244,7 +262,7 @@ const TeacherAvailabilityManager = () => {
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground block mb-2">
-                  Time (HH:MM)
+                  Time (HH:MM) <span className="text-xs">— {ADMIN_TIMEZONE.replace(/_/g, " ")}</span>
                 </label>
                 <Input
                   type="text"
@@ -290,8 +308,9 @@ const TeacherAvailabilityManager = () => {
                               <Badge
                                 variant={slot.is_available ? "default" : "outline"}
                                 className="font-mono"
+                                title={`Source: ${DAYS[slot.day_of_week]} ${slot.start_time} ${SOURCE_TZ}`}
                               >
-                                {slot.start_time}
+                                {slot.localTime}
                               </Badge>
                               <span className="text-sm text-muted-foreground">
                                 {slot.is_available ? "Available" : "Unavailable"}
