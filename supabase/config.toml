@@ -104,3 +104,6 @@ verify_jwt = false
 
 [functions.checkout-recovery-unsubscribe]
 verify_jwt = false
+
+[functions.resend-recovery-webhook]
+verify_jwt = false
