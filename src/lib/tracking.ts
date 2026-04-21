@@ -47,4 +47,10 @@ export const track = {
       value: data?.value ?? 0,
     });
   },
+
+  /** Custom funnel events (Meta: trackCustom, GA4: event) */
+  custom(eventName: string, params?: Record<string, unknown>) {
+    window.fbq?.("trackCustom", eventName, params);
+    window.gtag?.("event", eventName, params);
+  },
 };

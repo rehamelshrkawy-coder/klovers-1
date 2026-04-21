@@ -18,6 +18,7 @@ import { useSpeech } from "@/hooks/useSpeech";
 import { drawPlacementCard, drawPlacementCertificate } from "@/lib/canvasRenderer";
 import { SITE_URL, WHATSAPP_NUMBER } from "@/lib/siteConfig";
 import { trackAndOpenWhatsApp, logLeadEvent } from "@/lib/leadTracking";
+import { track } from "@/lib/tracking";
 import { CheckCircle, ArrowRight, ArrowLeft, BookOpen, Gamepad2, Users, SkipForward, Undo2, ClipboardList, ChevronDown, ChevronUp, TrendingUp, Share2, RefreshCw, Timer, Download, MapPin, Volume2, Square, Mic } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -47,6 +48,60 @@ const LEVEL_META_AR: Record<string, { emoji: string; tagline: string; descriptio
   l2:    { emoji: "📚", tagline: "ابتدائي (A2)", description: "تستطيع التعامل مع المحادثات البسيطة. صفنا مستوى 2 يغطي أنماط القواعد والحوارات الواقعية.", nextLabel: "مستوى 3–4", prevLabel: "مستوى 1" },
   l3:    { emoji: "🎯", tagline: "متوسط (B1–B2)", description: "أنت مرتاح مع الكورية. صفنا مستوى 3–4 يتعمق في القواعد المتقدمة والكلام الطبيعي.", nextLabel: "مستوى 5–6", prevLabel: "مستوى 2" },
   l5:    { emoji: "🏆", tagline: "متقدم (C1–C2)", description: "تتحدث الكورية بطلاقة. صفنا مستوى 5–6 يصقل الكورية الأكاديمية والمهنية لـ TOPIK II.", prevLabel: "مستوى 3–4" },
+};
+
+// Plan recommendation — group classes for low/mid levels (peer practice + affordability),
+// private 1-on-1 for advanced learners where personalised attention pays off.
+type RecommendedPlan = {
+  name: string;
+  nameAr: string;
+  format: string;
+  formatAr: string;
+  bullets: string[];
+  bulletsAr: string[];
+};
+
+const RECOMMENDED_PLANS: Record<string, RecommendedPlan> = {
+  hangul: {
+    name: "Foundation Group Class",
+    nameAr: "صف التأسيس الجماعي",
+    format: "Small group · 4–8 students · Twice a week",
+    formatAr: "مجموعة صغيرة · ٤–٨ طلاب · مرتين أسبوعياً",
+    bullets: ["Master Hangul in 2 weeks", "Build everyday phrases with peers", "Most affordable plan"],
+    bulletsAr: ["أتقن الهانغول في أسبوعين", "ابنِ الجمل اليومية مع زملائك", "الخطة الأكثر اقتصاداً"],
+  },
+  l1: {
+    name: "Level 1 Group Class",
+    nameAr: "صف المستوى الأول الجماعي",
+    format: "Small group · 4–8 students · Twice a week",
+    formatAr: "مجموعة صغيرة · ٤–٨ طلاب · مرتين أسبوعياً",
+    bullets: ["Daily conversations & numbers", "Practice speaking with peers", "Great value for beginners"],
+    bulletsAr: ["محادثات يومية وأرقام", "تدرّب على المحادثة مع الزملاء", "قيمة ممتازة للمبتدئين"],
+  },
+  l2: {
+    name: "Level 2 Group Class",
+    nameAr: "صف المستوى الثاني الجماعي",
+    format: "Small group · 4–8 students · Twice a week",
+    formatAr: "مجموعة صغيرة · ٤–٨ طلاب · مرتين أسبوعياً",
+    bullets: ["Grammar patterns for real conversations", "K-drama listening practice", "Prep for TOPIK I"],
+    bulletsAr: ["أنماط القواعد للمحادثات الحقيقية", "تمارين استماع من الدراما", "التحضير لـ TOPIK I"],
+  },
+  l3: {
+    name: "Level 3–4 Group Class",
+    nameAr: "صف المستوى ٣–٤ الجماعي",
+    format: "Small group · 4–6 students · Twice a week",
+    formatAr: "مجموعة صغيرة · ٤–٦ طلاب · مرتين أسبوعياً",
+    bullets: ["Nuanced grammar & natural speech", "Discuss K-dramas in Korean", "TOPIK II prep track"],
+    bulletsAr: ["قواعد متقدمة وكلام طبيعي", "ناقش الدراما بالكورية", "مسار التحضير لـ TOPIK II"],
+  },
+  l5: {
+    name: "Private 1-on-1 Class",
+    nameAr: "صف خاص فردي",
+    format: "Private · Flexible schedule · Personalised",
+    formatAr: "خاص · جدول مرن · مخصص لك",
+    bullets: ["Tailored to your goals (TOPIK / business / academic)", "Native teacher, all feedback on you", "Fastest progress at this level"],
+    bulletsAr: ["مخصص لأهدافك (TOPIK / أعمال / أكاديمي)", "معلم أصلي، كل التركيز عليك", "أسرع تقدم في هذا المستوى"],
+  },
 };
 
 const SECTION_BANNERS: Record<number, { label: string; hint: string }> = {
@@ -311,6 +366,8 @@ const PlacementTestPage = () => {
     // Always show result immediately — save to Supabase in background if logged in
     setResult(res);
     setPhase("result");
+    track.custom("placement_recommendation_shown", { level: res.levelKey, score: res.score });
+    logLeadEvent({ source_type: "placement", cta_label: "recommendation_shown", metadata: { level: res.levelKey, score: res.score } });
     if (userId) {
       setSubmitting(true);
       const { error } = await supabase.from("placement_tests").insert({
@@ -906,6 +963,62 @@ const PlacementTestPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Recommended plan — top-of-result conversion card */}
+          {(() => {
+            const plan = RECOMMENDED_PLANS[result.levelKey];
+            if (!plan) return null;
+            const planName = isAr ? plan.nameAr : plan.name;
+            const planFormat = isAr ? plan.formatAr : plan.format;
+            const bullets = isAr ? plan.bulletsAr : plan.bullets;
+            return (
+              <Card className="border-primary/30 bg-gradient-to-b from-primary/5 to-transparent">
+                <CardContent className="pt-5 pb-5 space-y-4">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-wider">
+                    <span>✨</span>
+                    {isAr ? "موصى به لك" : "Recommended for you"}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-foreground leading-tight">{planName}</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">{planFormat}</p>
+                  </div>
+                  <ul className="space-y-1.5">
+                    {bullets.map((b, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-foreground/90">
+                        <CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="pt-1 space-y-2">
+                    <Button
+                      size="lg"
+                      className="w-full font-semibold"
+                      onClick={() => {
+                        track.custom("placement_recommendation_clicked", { level: result.levelKey, cta: "free_trial", plan: plan.name });
+                        logLeadEvent({ source_type: "placement", cta_label: "recommendation_trial", metadata: { level: result.levelKey, plan: plan.name } });
+                        navigate("/free-trial");
+                      }}
+                    >
+                      {isAr ? "احجز تجربتي المجانية" : "Book My Free Trial"} <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                    <button
+                      onClick={() => {
+                        track.custom("placement_recommendation_clicked", { level: result.levelKey, cta: "see_pricing", plan: plan.name });
+                        navigate("/pricing");
+                      }}
+                      className="w-full text-xs text-muted-foreground hover:text-foreground hover:underline"
+                    >
+                      {isAr ? "أو شاهد خطط الأسعار" : "Or see full pricing"}
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground text-center">
+                    {isAr ? "⭐️ +١٠٠٠ طالب مصري · استرداد كامل بعد أول حصة مدفوعة" : "⭐️ 1,000+ Egyptian students · full refund after first paid class"}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })()}
 
           {/* Performance breakdown */}
           <Card>
