@@ -137,6 +137,7 @@ const TrialBookingPage = () => {
 
       if (error) throw error;
       if (data?.error) {
+        logLeadEvent({ source_type: "free_trial", cta_label: "booking_failed", metadata: { reason: data.error } });
         toast({ title: "Booking failed", description: data.error, variant: "destructive" });
         setLoading(false);
         return;
@@ -144,6 +145,7 @@ const TrialBookingPage = () => {
 
       setBookingResult(data.booking);
     } catch (err: any) {
+      logLeadEvent({ source_type: "free_trial", cta_label: "booking_failed", metadata: { reason: err?.message || "unknown" } });
       toast({
         title: "Something went wrong",
         description: err.message || "Please try again.",
@@ -160,6 +162,13 @@ const TrialBookingPage = () => {
       track.custom("post_trial_screen_shown", { trial_date: bookingResult.trial_date });
     }
   }, [bookingResult]);
+
+  // Funnel step: slot picker page viewed. With landing_viewed +
+  // trial_booking_confirm already in place, this closes the funnel:
+  // landing → cta → slot_page → confirm.
+  useEffect(() => {
+    logLeadEvent({ source_type: "free_trial", cta_label: "slot_page_viewed" });
+  }, []);
 
   // ── Success state ──────────────────────────────────────────────────────────
   if (bookingResult) {
