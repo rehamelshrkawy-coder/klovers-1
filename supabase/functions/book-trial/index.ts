@@ -215,7 +215,7 @@ Deno.serve(async (req) => {
     // alone — the INSERT will hit 23505 and we return a friendly message.
     const { data: existingBooking, error: lookupError } = await supabase
       .from("trial_bookings")
-      .select("id, start_time, trial_date")
+      .select("id, start_time, trial_date, is_tba")
       .ilike("email", normalizedEmail)
       .limit(1)
       .maybeSingle();
@@ -223,9 +223,13 @@ Deno.serve(async (req) => {
       console.error("book-trial lookup error:", JSON.stringify(lookupError));
     }
 
+    // `is_tba` is the source of truth; fall back to sentinels for pre-migration
+    // rows where the column hasn't been populated yet.
     const isTbaPlaceholder =
       !!existingBooking &&
-      (existingBooking.start_time === "TBA" || existingBooking.trial_date === "2099-12-31");
+      (existingBooking.is_tba === true ||
+        existingBooking.start_time === "TBA" ||
+        existingBooking.trial_date === "2099-12-31");
 
     if (isTbaPlaceholder && existingBooking) {
       const { error: deleteError } = await supabase

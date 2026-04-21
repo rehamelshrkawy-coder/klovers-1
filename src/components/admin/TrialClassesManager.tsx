@@ -40,7 +40,13 @@ interface TrialBooking {
   created_at: string;
   user_id?: string | null;
   rebook_email_sent_at?: string | null;
+  is_tba?: boolean;
 }
+
+// Source of truth for unscheduled placeholders. Falls back to legacy sentinel
+// values for pre-migration rows (start_time='TBA' or trial_date='2099-12-31').
+const isTbaBooking = (b: Pick<TrialBooking, "is_tba" | "start_time" | "trial_date">) =>
+  b.is_tba === true || b.start_time === "TBA" || b.trial_date === "2099-12-31";
 
 interface TrialSlot {
   day_of_week: number;
@@ -155,7 +161,7 @@ const TrialClassesManager = () => {
   };
 
   const handleSendRebookToAllTBA = async () => {
-    const tba = bookings.filter((b) => b.start_time === "TBA");
+    const tba = bookings.filter(isTbaBooking);
     if (tba.length === 0) {
       toast({ title: "Nothing to send", description: "No unscheduled (TBA) bookings right now." });
       return;
@@ -273,7 +279,7 @@ const TrialClassesManager = () => {
   if (loading) return <p className="text-muted-foreground text-center py-8">Loading trial bookings...</p>;
 
   const formatSessionLabel = (date: string, time: string, dow: number) => {
-    // Sentinel date+time used for rows that need to be rescheduled
+    // Sentinel date+time used for rows that need to be rescheduled (is_tba=true)
     if (time === "TBA" || date === "2099-12-31") return "TBA — Unscheduled";
     const d = new Date(`${date}T00:00:00`);
     const weekday = DAY_NAMES[dow] || d.toLocaleDateString("en-US", { weekday: "long" });
