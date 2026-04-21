@@ -104,6 +104,11 @@ const Index = () => {
         <Suspense fallback={<SectionFallback />}>
           <HowItWorks />
         </Suspense>
+        {/* Action — low-friction free CTA (no payment). Placed high because
+            placement-test takers convert 5x more than bounced visitors. */}
+        <Suspense fallback={<SectionFallback />}>
+          <PlacementTestCTA />
+        </Suspense>
         {/* Desire — social proof builds trust early */}
         <Suspense fallback={<SectionFallback />}>
           <TestimonialsSection />
@@ -113,10 +118,6 @@ const Index = () => {
         {/* Desire — humanize the brand, build connection */}
         <Suspense fallback={<SectionFallback />}>
           <MeetTeacher />
-        </Suspense>
-        {/* Action — low-friction free CTA (no payment) */}
-        <Suspense fallback={<SectionFallback />}>
-          <PlacementTestCTA />
         </Suspense>
         {/* Desire — show the clear path forward */}
         <Suspense fallback={<SectionFallback />}>
