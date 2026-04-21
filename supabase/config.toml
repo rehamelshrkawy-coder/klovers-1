@@ -98,3 +98,9 @@ verify_jwt = false
 
 [functions.translate-lessons]
 verify_jwt = false
+
+[functions.abandoned-checkout-recovery]
+verify_jwt = false
+
+[functions.checkout-recovery-unsubscribe]
+verify_jwt = false
