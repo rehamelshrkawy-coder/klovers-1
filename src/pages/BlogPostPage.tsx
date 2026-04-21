@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import OptimizedImage from "@/components/OptimizedImage";
+import BlogComments from "@/components/BlogComments";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -524,6 +525,9 @@ const BlogPostPage = () => {
               ))}
             </div>
           )}
+
+          {/* Comments */}
+          <BlogComments postId={post.id} isAr={isAr} />
 
           {/* Related posts */}
           {relatedPosts.length > 0 && (
