@@ -32,6 +32,7 @@ const T = {
     errorMsg: "Could not post comment. Please try again.",
     required: "Please enter your name and a comment.",
     tooShort: "Comment must be at least 2 characters.",
+    signedInAs: "Posting as",
   },
   ar: {
     heading: "التعليقات",
@@ -45,6 +46,7 @@ const T = {
     errorMsg: "تعذّر نشر التعليق. حاول مجددًا.",
     required: "يرجى إدخال الاسم والتعليق.",
     tooShort: "يجب ألا يقل التعليق عن حرفين.",
+    signedInAs: "تعليق باسم",
   },
 };
 
@@ -55,6 +57,7 @@ const BlogComments = ({ postId, isAr }: BlogCommentsProps) => {
   const [body, setBody] = useState("");
   const [website, setWebsite] = useState(""); // honeypot, must stay empty
   const [submitting, setSubmitting] = useState(false);
+  const [accountName, setAccountName] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,7 +68,7 @@ const BlogComments = ({ postId, isAr }: BlogCommentsProps) => {
       .eq("approved", true)
       .order("created_at", { ascending: false })
       .limit(200)
-      .then(({ data }) => {
+      .then(({ data }: { data: Comment[] | null }) => {
         if (cancelled) return;
         setComments((data as Comment[]) ?? []);
       });
@@ -73,6 +76,35 @@ const BlogComments = ({ postId, isAr }: BlogCommentsProps) => {
       cancelled = true;
     };
   }, [postId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadAccount = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("name")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      const resolved =
+        (profile?.name && profile.name.trim()) ||
+        (user.user_metadata?.full_name as string | undefined) ||
+        (user.user_metadata?.name as string | undefined) ||
+        (user.email ? user.email.split("@")[0] : null);
+      if (resolved) {
+        setAccountName(resolved);
+        setName(resolved);
+      }
+    };
+    loadAccount();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => loadAccount());
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -121,15 +153,23 @@ const BlogComments = ({ postId, isAr }: BlogCommentsProps) => {
       </h2>
 
       <form onSubmit={onSubmit} className="space-y-3 mb-8">
-        <Input
-          type="text"
-          placeholder={t.name}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          maxLength={80}
-          required
-          dir={isAr ? "rtl" : "ltr"}
-        />
+        {accountName ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <User className="h-4 w-4" />
+            <span>{t.signedInAs}</span>
+            <span className="font-semibold text-foreground">{accountName}</span>
+          </div>
+        ) : (
+          <Input
+            type="text"
+            placeholder={t.name}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={80}
+            required
+            dir={isAr ? "rtl" : "ltr"}
+          />
+        )}
         <Textarea
           placeholder={t.message}
           value={body}
