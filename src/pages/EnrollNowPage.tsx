@@ -859,7 +859,21 @@ const EnrollNowPage = () => {
                 {!selectedLevel ? (
                   <p className="text-sm text-muted-foreground italic">{t("enrollNow.selectLevelFirst")}</p>
                 ) : levelSlots.length === 0 && classType === "private" ? (
-                  <p className="text-sm text-muted-foreground italic">{t("enrollNow.noPrivateDays")}</p>
+                  <div className="space-y-3">
+                    <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-sm text-amber-800 dark:text-amber-200">
+                      {t("enrollNow.noPrivateDays")}
+                    </div>
+                    <a
+                      href={`${WHATSAPP_BASE}?text=${encodeURIComponent(
+                        `Hi Klovers — I'd like a private ${selectedLevel || "Korean"} class. The current schedule has no private days available yet — can we arrange a time?`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-md bg-[#25D366] hover:bg-[#1fb855] text-white px-4 py-2 text-sm font-semibold transition-colors"
+                    >
+                      Contact us on WhatsApp to arrange a private time
+                    </a>
+                  </div>
                 ) : levelSlots.length === 0 ? (
                   <div className="space-y-3">
                     <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-sm text-amber-800 dark:text-amber-200">
