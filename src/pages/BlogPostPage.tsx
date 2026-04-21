@@ -474,7 +474,7 @@ const BlogPostPage = () => {
 
           {/* CTA block — custom if set, default otherwise */}
           <div className="mt-12 p-8 bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl text-center space-y-4">
-            <p className="text-xs font-semibold text-primary text-outlined uppercase tracking-widest">
+            <p className="text-xs font-semibold text-foreground/70 uppercase tracking-widest">
               {post.cta_text ? (isAr ? "مستعد للبدء؟" : "Ready to start?") : (isAr ? "ابدأ تعلّم الكورية اليوم" : "Start learning Korean today")}
             </p>
             <h3 className="text-xl font-bold text-foreground">
