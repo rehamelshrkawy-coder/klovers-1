@@ -209,31 +209,72 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 2. Insert trial booking (will fail on unique constraint if already booked)
-    const { data: booking, error: bookingError } = await supabase
+    // 2. Insert trial booking — or, if the user already has a TBA
+    // (unscheduled) placeholder booking, update that row with the picked slot.
+    // This is the rebook-email flow: admin sent them a "please pick a time"
+    // email and we need to let them convert the TBA row into a real slot
+    // without tripping the per-email unique index.
+    const { data: existingBooking } = await supabase
       .from("trial_bookings")
-      .insert({
-        name: finalName,
-        email: normalizedEmail,
-        phone: phone?.trim() || null,
-        level: level?.trim() || null,
-        goal: goal?.trim() || null,
-        day_of_week,
-        start_time,
-        trial_date: trialDate,
-        timezone,
-        status: "pending",
-        ...(resolvedUserId ? { user_id: resolvedUserId } : {}),
-      })
-      .select("id")
-      .single();
+      .select("id, status, start_time, trial_date")
+      .ilike("email", normalizedEmail)
+      .limit(1)
+      .maybeSingle();
 
-    if (bookingError) {
-      // Unique constraint: user already has an active booking for this slot
-      // Return HTTP 200 with ok:false so supabase.functions.invoke() delivers
-      // the friendly message to the frontend's `if (data?.error)` handler
+    const isTbaPlaceholder =
+      existingBooking &&
+      (existingBooking.start_time === "TBA" || existingBooking.trial_date === "2099-12-31");
+
+    let booking: { id: string } | null = null;
+    let bookingError: { code?: string } | null = null;
+
+    if (isTbaPlaceholder) {
+      const { data: updated, error: updateError } = await supabase
+        .from("trial_bookings")
+        .update({
+          name: finalName,
+          phone: phone?.trim() || null,
+          level: level?.trim() || null,
+          goal: goal?.trim() || null,
+          day_of_week,
+          start_time,
+          trial_date: trialDate,
+          timezone,
+          status: "pending",
+          ...(resolvedUserId ? { user_id: resolvedUserId } : {}),
+        })
+        .eq("id", existingBooking.id)
+        .select("id")
+        .single();
+      booking = updated;
+      bookingError = updateError;
+    } else {
+      const { data: inserted, error: insertError } = await supabase
+        .from("trial_bookings")
+        .insert({
+          name: finalName,
+          email: normalizedEmail,
+          phone: phone?.trim() || null,
+          level: level?.trim() || null,
+          goal: goal?.trim() || null,
+          day_of_week,
+          start_time,
+          trial_date: trialDate,
+          timezone,
+          status: "pending",
+          ...(resolvedUserId ? { user_id: resolvedUserId } : {}),
+        })
+        .select("id")
+        .single();
+      booking = inserted;
+      bookingError = insertError;
+    }
+
+    if (bookingError || !booking) {
+      // Unique constraint: user already has a real booking — return a friendly
+      // 200 with ok:false so the frontend's `if (data?.error)` handler runs
       // instead of throwing a FunctionsHttpError on non-2xx.
-      if (bookingError.code === "23505") {
+      if (bookingError?.code === "23505") {
         return new Response(
           JSON.stringify({
             ok: false,
@@ -243,7 +284,7 @@ Deno.serve(async (req) => {
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      throw bookingError;
+      throw bookingError ?? new Error("Failed to create or update trial booking");
     }
 
     // 3. Notify admin
