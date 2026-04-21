@@ -30,7 +30,7 @@ interface SchedulePickerProps {
   selectedLevel?: string;
 }
 
-import { formatTime } from "@/lib/admin-utils";
+import { formatTime, convertSlotToTimezone } from "@/lib/admin-utils";
 
 function timeDiffMinutes(timeStr: string, targetHour: number): number {
   const [h, m] = timeStr.split(":").map(Number);
@@ -169,7 +169,8 @@ const SchedulePicker = ({
   const selectPackage = async (pkg: SchedulePackage, isAlternative: boolean) => {
     setConfirmed(pkg);
     setShowAlternatives(false);
-    const label = `${DAY_NAMES[pkg.day_of_week]} · ${formatTime(pkg.start_time)} · ${pkg.duration_min}min · ${pkg.timezone}`;
+    const local = convertSlotToTimezone(pkg.day_of_week, pkg.start_time, pkg.timezone, userTimezone);
+    const label = `${local.weekday} · ${local.timeFormatted} · ${pkg.duration_min}min · ${userTimezone}`;
     onSelect(pkg.id, label);
 
     const scheduleFields = {
@@ -262,15 +263,16 @@ const SchedulePicker = ({
   }
 
   if (confirmed) {
+    const localConfirmed = convertSlotToTimezone(confirmed.day_of_week, confirmed.start_time, confirmed.timezone, userTimezone);
     return (
       <div className="bg-accent rounded-lg p-4 flex items-start gap-3">
         <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
         <div className="space-y-1">
           <p className="font-semibold text-foreground">
-            {DAY_NAMES[confirmed.day_of_week]} · {formatTime(confirmed.start_time)}
+            {localConfirmed.weekday} · {localConfirmed.timeFormatted}
           </p>
           <p className="text-sm text-muted-foreground">
-            {confirmed.duration_min} min · {confirmed.timezone.replace(/_/g, " ")}
+            {confirmed.duration_min} min · {userTimezone.replace(/_/g, " ")} <span className="opacity-70">({formatTime(confirmed.start_time)} {confirmed.timezone.replace(/_/g, " ")})</span>
           </p>
           <p className="text-xs text-muted-foreground">Pending payment approval</p>
           <Button
@@ -298,15 +300,16 @@ const SchedulePicker = ({
     }
 
     if (selectedPrivateOption) {
+      const pLocal = convertSlotToTimezone(selectedPrivateOption.dayIndex, selectedPrivateOption.time, selectedPrivateOption.timezone, userTimezone);
       return (
         <div className="bg-accent rounded-lg p-4 flex items-start gap-3">
           <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
           <div className="space-y-1">
             <p className="font-semibold text-foreground">
-              {selectedPrivateOption.weekday} · {selectedPrivateOption.timeFormatted}
+              {pLocal.weekday} · {pLocal.timeFormatted}
             </p>
             <p className="text-sm text-muted-foreground">
-              {selectedPrivateOption.timezone.replace(/_/g, " ")}
+              {userTimezone.replace(/_/g, " ")} <span className="opacity-70">({selectedPrivateOption.weekday} {selectedPrivateOption.timeFormatted} {selectedPrivateOption.timezone.replace(/_/g, " ")})</span>
             </p>
             <p className="text-xs text-muted-foreground">Private class — pending confirmation</p>
             <Button
@@ -334,32 +337,38 @@ const SchedulePicker = ({
         <p className="text-sm text-muted-foreground">Pick your preferred private class slot:</p>
 
         <div className="grid gap-3">
-          {privateOptions.map((opt) => (
+          {privateOptions.map((opt) => {
+            const oLocal = convertSlotToTimezone(opt.dayIndex, opt.time, opt.timezone, userTimezone);
+            return (
             <button
               key={`${opt.dayIndex}-${opt.time}`}
               type="button"
               onClick={() => {
                 setSelectedPrivateOption(opt);
-                const label = `${opt.weekday} · ${opt.timeFormatted} · ${opt.timezone}`;
+                const label = `${oLocal.weekday} · ${oLocal.timeFormatted} · ${userTimezone}`;
                 onSelect(`private-${opt.dayIndex}-${opt.time}`, label);
               }}
               className="w-full text-left p-4 rounded-lg border-2 border-border hover:border-primary hover:bg-accent transition-all"
             >
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="font-semibold text-foreground">{opt.weekday}</p>
+                  <p className="font-semibold text-foreground">{oLocal.weekday}</p>
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Clock className="h-3.5 w-3.5" />
-                      {opt.timeFormatted}
+                      {oLocal.timeFormatted}
                     </span>
-                    <span className="text-xs">{opt.timezone.replace(/_/g, " ")}</span>
+                    <span className="text-xs">{userTimezone.replace(/_/g, " ")}</span>
                   </div>
+                  <p className="text-[11px] text-muted-foreground/70">
+                    ({opt.weekday} {opt.timeFormatted} {opt.timezone.replace(/_/g, " ")})
+                  </p>
                 </div>
                 <Badge variant="secondary">Private</Badge>
               </div>
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
@@ -367,10 +376,12 @@ const SchedulePicker = ({
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">Pick your preferred class slot (1 day · 90 min · 18:00 Cairo default):</p>
+      <p className="text-sm text-muted-foreground">Pick your preferred class slot — times shown in your timezone ({userTimezone.replace(/_/g, " ")}):</p>
 
       <div className="grid gap-3">
-        {packages.map((pkg) => (
+        {packages.map((pkg) => {
+          const local = convertSlotToTimezone(pkg.day_of_week, pkg.start_time, pkg.timezone, userTimezone);
+          return (
           <button
             key={pkg.id}
             type="button"
@@ -384,15 +395,18 @@ const SchedulePicker = ({
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="font-semibold text-foreground">
-                  {DAY_NAMES[pkg.day_of_week]}
+                  {local.weekday}
                 </p>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" />
-                    {formatTime(pkg.start_time)} · {pkg.duration_min}min
+                    {local.timeFormatted} · {pkg.duration_min}min
                   </span>
-                  <span className="text-xs">{pkg.timezone.replace(/_/g, " ")}</span>
+                  <span className="text-xs">{userTimezone.replace(/_/g, " ")}</span>
                 </div>
+                <p className="text-[11px] text-muted-foreground/70">
+                  ({DAY_NAMES[pkg.day_of_week]} {formatTime(pkg.start_time)} {pkg.timezone.replace(/_/g, " ")})
+                </p>
                 {pkg.level && (
                   <Badge variant="outline" className="text-xs">{pkg.level}</Badge>
                 )}
@@ -409,7 +423,8 @@ const SchedulePicker = ({
               </Badge>
             </div>
           </button>
-        ))}
+          );
+        })}
       </div>
 
       {/* Alternatives Dialog */}
@@ -421,9 +436,10 @@ const SchedulePicker = ({
               Slot Full
             </DialogTitle>
             <DialogDescription>
-              {clickedFull && (
-                <>"{DAY_NAMES[clickedFull.day_of_week]} {formatTime(clickedFull.start_time)}" is full. Choose an alternative:</>
-              )}
+              {clickedFull && (() => {
+                const l = convertSlotToTimezone(clickedFull.day_of_week, clickedFull.start_time, clickedFull.timezone, userTimezone);
+                return <>"{l.weekday} {l.timeFormatted}" is full. Choose an alternative:</>;
+              })()}
             </DialogDescription>
           </DialogHeader>
 
@@ -433,7 +449,9 @@ const SchedulePicker = ({
             </p>
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto">
-              {alternatives.map((alt) => (
+              {alternatives.map((alt) => {
+                const altLocal = convertSlotToTimezone(alt.day_of_week, alt.start_time, alt.timezone, userTimezone);
+                return (
                 <button
                   key={alt.id}
                   type="button"
@@ -443,10 +461,10 @@ const SchedulePicker = ({
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-foreground text-sm">
-                        {DAY_NAMES[alt.day_of_week]} · {formatTime(alt.start_time)}
+                        {altLocal.weekday} · {altLocal.timeFormatted}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {alt.duration_min}min · {alt.timezone.replace(/_/g, " ")}
+                        {alt.duration_min}min · {userTimezone.replace(/_/g, " ")}
                       </p>
                     </div>
                     <Badge variant="secondary" className="text-xs">
@@ -454,7 +472,8 @@ const SchedulePicker = ({
                     </Badge>
                   </div>
                 </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </DialogContent>
