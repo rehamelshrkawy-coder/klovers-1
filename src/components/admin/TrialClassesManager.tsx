@@ -32,8 +32,8 @@ interface TrialBooking {
   level: string | null;
   goal: string | null;
   day_of_week: number;
-  start_time: string;
-  trial_date: string;
+  start_time: string | null;
+  trial_date: string | null;
   timezone: string;
   status: string;
   confirmed_at: string | null;
@@ -43,10 +43,13 @@ interface TrialBooking {
   is_tba?: boolean;
 }
 
-// Source of truth for unscheduled placeholders. Falls back to legacy sentinel
-// values for pre-migration rows (start_time='TBA' or trial_date='2099-12-31').
+// Source of truth for unscheduled placeholders. Post-migration, TBA rows
+// have start_time/trial_date=NULL; the DB trigger keeps is_tba in sync.
+// Legacy sentinel checks remain defensive.
 const isTbaBooking = (b: Pick<TrialBooking, "is_tba" | "start_time" | "trial_date">) =>
-  b.is_tba === true || b.start_time === "TBA" || b.trial_date === "2099-12-31";
+  b.is_tba === true ||
+  !b.start_time || !b.trial_date ||
+  b.start_time === "TBA" || b.trial_date === "2099-12-31";
 
 interface TrialSlot {
   day_of_week: number;
@@ -249,6 +252,8 @@ const TrialClassesManager = () => {
     return bookings.filter((b) => {
       if (statusFilter !== "all" && b.status !== statusFilter) return false;
       if (timeFilter !== "all") {
+        // TBA rows have no date; exclude from upcoming/past filters.
+        if (!b.trial_date || isTbaBooking(b)) return false;
         const d = new Date(`${b.trial_date}T00:00:00`);
         if (timeFilter === "upcoming" && d < startOfToday) return false;
         if (timeFilter === "past" && d >= startOfToday) return false;
@@ -257,39 +262,47 @@ const TrialClassesManager = () => {
     });
   }, [bookings, statusFilter, timeFilter, startOfToday]);
 
-  // ── Group by exact session (trial_date + start_time). Capacity is NOT enforced
-  // in display — all bookings for a session are shown.
+  // ── Group by exact session (trial_date + start_time). TBA rows fold into a
+  // single synthetic session so admins see one "Unscheduled" card.
+  const TBA_KEY = "__tba__";
   const sessions = useMemo(() => {
     const groups: Record<string, TrialBooking[]> = {};
     filtered.forEach((b) => {
-      const key = `${b.trial_date}__${b.start_time}`;
+      const key = isTbaBooking(b) ? TBA_KEY : `${b.trial_date}__${b.start_time}`;
       (groups[key] ||= []).push(b);
     });
     return Object.entries(groups)
       .map(([key, items]) => {
+        if (key === TBA_KEY) {
+          return { key, date: null, time: null, items, dow: items[0]?.day_of_week ?? 0, isTba: true };
+        }
         const [date, time] = key.split("__");
-        return { key, date, time, items, dow: items[0]?.day_of_week ?? 0 };
+        return { key, date, time, items, dow: items[0]?.day_of_week ?? 0, isTba: false };
       })
-      // Most recent first (future dates before past dates; within same date, later times first)
-      .sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time));
+      // TBA pinned on top; real sessions sorted most-recent first.
+      .sort((a, b) => {
+        if (a.isTba) return -1;
+        if (b.isTba) return 1;
+        return (b.date || "").localeCompare(a.date || "") || (b.time || "").localeCompare(a.time || "");
+      });
   }, [filtered]);
 
   const pendingCount = bookings.filter((b) => b.status === "pending").length;
 
   if (loading) return <p className="text-muted-foreground text-center py-8">Loading trial bookings...</p>;
 
-  const formatSessionLabel = (date: string, time: string, dow: number) => {
-    // Sentinel date+time used for rows that need to be rescheduled (is_tba=true)
-    if (time === "TBA" || date === "2099-12-31") return "TBA — Unscheduled";
+  const formatSessionLabel = (date: string | null, time: string | null, dow: number) => {
+    // NULL (or legacy sentinel) → unscheduled placeholder.
+    if (!date || !time || time === "TBA" || date === "2099-12-31") return "TBA — Unscheduled";
     const d = new Date(`${date}T00:00:00`);
     const weekday = DAY_NAMES[dow] || d.toLocaleDateString("en-US", { weekday: "long" });
     const dateLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
     return `${weekday}, ${dateLabel} — ${formatTime(time)}`;
   };
 
-  const isLegacySlot = (time: string) => !activeSlots.some((s) => s.start_time === time);
+  const isLegacySlot = (time: string | null) => !!time && !activeSlots.some((s) => s.start_time === time);
 
-  const isPastSession = (date: string) => new Date(`${date}T00:00:00`) < startOfToday;
+  const isPastSession = (date: string | null) => !!date && new Date(`${date}T00:00:00`) < startOfToday;
 
   return (
     <div className="space-y-4">
@@ -343,7 +356,7 @@ const TrialClassesManager = () => {
           const active = session.items.filter((i) => i.status !== "cancelled" && i.status !== "no_show").length;
           const confirmed = session.items.filter((i) => i.status === "confirmed").length;
           const past = isPastSession(session.date);
-          const isTbaSession = session.time === "TBA";
+          const isTbaSession = session.isTba;
           const tbaUnsentCount = isTbaSession ? session.items.length : 0;
           return (
             <Card key={session.key}>

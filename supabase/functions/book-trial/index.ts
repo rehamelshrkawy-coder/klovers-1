@@ -223,11 +223,12 @@ Deno.serve(async (req) => {
       console.error("book-trial lookup error:", JSON.stringify(lookupError));
     }
 
-    // `is_tba` is the source of truth; fall back to sentinels for pre-migration
-    // rows where the column hasn't been populated yet.
+    // `is_tba` is the source of truth; NULL date/time and legacy sentinels
+    // are defensive fallbacks for any row that predates the sync trigger.
     const isTbaPlaceholder =
       !!existingBooking &&
       (existingBooking.is_tba === true ||
+        !existingBooking.start_time || !existingBooking.trial_date ||
         existingBooking.start_time === "TBA" ||
         existingBooking.trial_date === "2099-12-31");
 
