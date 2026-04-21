@@ -229,6 +229,22 @@ const BlogPostPage = () => {
     }
     canonical.href = `https://kloversegy.com/blog/${post.slug}`;
 
+    // hreflang alternates — EN ↔ AR. Slug pattern: `{base}` (en) ↔ `{base}-ar` or legacy `ar-{base}`.
+    document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
+    const addAlt = (hreflang: string, href: string) => {
+      const el = document.createElement("link");
+      el.setAttribute("rel", "alternate");
+      el.setAttribute("hreflang", hreflang);
+      el.setAttribute("href", href);
+      document.head.appendChild(el);
+    };
+    const base = post.slug.startsWith("ar-") ? post.slug.slice(3) : post.slug.replace(/-ar$/, "");
+    const enUrl = `https://kloversegy.com/blog/${base}`;
+    const arUrl = `https://kloversegy.com/blog/${base}-ar`;
+    addAlt("en", enUrl);
+    addAlt("ar", arUrl);
+    addAlt("x-default", enUrl);
+
     // JSON-LD: BlogPosting with enhanced metadata
     let jsonLd = document.getElementById("blog-jsonld");
     if (!jsonLd) {
@@ -270,6 +286,34 @@ const BlogPostPage = () => {
       }
     });
 
+    // JSON-LD: FAQPage — built from `### question?` / A pairs under FAQ heading
+    document.getElementById("faq-jsonld")?.remove();
+    const faqHeadingRe = /##\s+(Frequently Asked Questions|الأسئلة الشائعة)[\s\S]*?(?=\n##\s|$)/i;
+    const faqMatch = post.content.match(faqHeadingRe);
+    if (faqMatch) {
+      const qaRe = /###\s+(.+?)\n+([\s\S]*?)(?=\n###\s|\n##\s|$)/g;
+      const qa: { q: string; a: string }[] = [];
+      let m: RegExpExecArray | null;
+      while ((m = qaRe.exec(faqMatch[0])) !== null) {
+        qa.push({ q: m[1].trim(), a: m[2].trim().replace(/\n+/g, " ").slice(0, 800) });
+      }
+      if (qa.length > 0) {
+        const faqLd = document.createElement("script");
+        faqLd.id = "faq-jsonld";
+        faqLd.setAttribute("type", "application/ld+json");
+        faqLd.textContent = JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: qa.map(x => ({
+            "@type": "Question",
+            name: x.q,
+            acceptedAnswer: { "@type": "Answer", text: x.a },
+          })),
+        });
+        document.head.appendChild(faqLd);
+      }
+    }
+
     // JSON-LD: BreadcrumbList
     let breadcrumbLd = document.getElementById("breadcrumb-jsonld");
     if (!breadcrumbLd) {
@@ -292,8 +336,10 @@ const BlogPostPage = () => {
       document.title = "Klovers";
       jsonLd?.remove();
       breadcrumbLd?.remove();
+      document.getElementById("faq-jsonld")?.remove();
       canonical?.remove();
       document.querySelectorAll('meta[property="article:tag"]').forEach((el) => el.remove());
+      document.querySelectorAll('link[rel="alternate"][hreflang]').forEach((el) => el.remove());
     };
   }, [post]);
 
