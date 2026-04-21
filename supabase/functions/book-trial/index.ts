@@ -250,7 +250,8 @@ Deno.serve(async (req) => {
         start_time,
         trial_date: trialDate,
         timezone,
-        status: "pending",
+        status: "confirmed",
+        confirmed_at: new Date().toISOString(),
         ...(resolvedUserId ? { user_id: resolvedUserId } : {}),
       })
       .select("id")
@@ -289,6 +290,21 @@ Deno.serve(async (req) => {
       description: `Your free trial Korean class with Klovers Academy.\nLevel: ${level || "Beginner"}\n\nhttps://kloversegy.com`,
       timezone,
     });
+
+    // 5. Send trial confirmation email (auto-confirmed — no admin step)
+    supabase.functions.invoke("send-confirmation-email", {
+      body: {
+        template: "trial_confirmed",
+        email: normalizedEmail,
+        name: finalName,
+        language: "ar",
+        trial_date: trialDate,
+        trial_time: start_time,
+        trial_timezone: timezone,
+        level: level?.trim() || "",
+        calendar_url: calendarUrl,
+      },
+    }).catch((e) => console.warn("trial_confirmed email failed:", e));
 
     return new Response(
       JSON.stringify({
