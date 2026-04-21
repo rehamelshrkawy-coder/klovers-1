@@ -59,16 +59,34 @@ const LeadsPanel: React.FC = () => {
   const [contactedLeadIds, setContactedLeadIds] = useState<Set<string>>(new Set());
   const [leadsSourceFilter, setLeadsSourceFilter] = useState("");
   const [sendingNameEmails, setSendingNameEmails] = useState(false);
-  const [recoveryKpi, setRecoveryKpi] = useState<{ total_sent: number; leads_emailed: number; leads_converted: number; recovery_rate_pct: number } | null>(null);
+  const [recoveryKpi, setRecoveryKpi] = useState<{
+    total_sent: number; leads_emailed: number; leads_opened: number; leads_clicked: number;
+    leads_converted: number; open_rate_pct: number; click_rate_pct: number; recovery_rate_pct: number;
+  } | null>(null);
+  const [recoveryTracker, setRecoveryTracker] = useState<Array<{
+    lead_id: string; name: string | null; email: string; plan_type: string | null;
+    emails_sent: number; last_stage_sent: number | null;
+    last_sent_at: string | null; last_opened_at: string | null;
+    last_clicked_at: string | null; converted_at: string | null; unsubscribed: boolean;
+  }>>([]);
+  const [showRecoveryTracker, setShowRecoveryTracker] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await (supabase as any)
-        .from("checkout_recovery_kpi")
-        .select("total_sent, leads_emailed, leads_converted, recovery_rate_pct")
-        .maybeSingle();
-      if (!cancelled && !error && data) setRecoveryKpi(data);
+      const [kpiRes, trackerRes] = await Promise.all([
+        (supabase as any)
+          .from("checkout_recovery_kpi")
+          .select("total_sent, leads_emailed, leads_opened, leads_clicked, leads_converted, open_rate_pct, click_rate_pct, recovery_rate_pct")
+          .maybeSingle(),
+        (supabase as any)
+          .from("checkout_recovery_tracker")
+          .select("lead_id, name, email, plan_type, emails_sent, last_stage_sent, last_sent_at, last_opened_at, last_clicked_at, converted_at, unsubscribed")
+          .order("last_sent_at", { ascending: false })
+          .limit(100),
+      ]);
+      if (!cancelled && !kpiRes.error && kpiRes.data) setRecoveryKpi(kpiRes.data);
+      if (!cancelled && !trackerRes.error && trackerRes.data) setRecoveryTracker(trackerRes.data);
     })();
     return () => { cancelled = true; };
   }, []);
@@ -418,28 +436,95 @@ const LeadsPanel: React.FC = () => {
       </CardHeader>
       <CardContent className="pt-0 space-y-4">
 
-        {/* Abandoned Checkout Recovery — KPI */}
+        {/* Abandoned Checkout Recovery — KPI + tracker */}
         {recoveryKpi && recoveryKpi.total_sent > 0 && (
-          <div className="rounded-xl border border-border bg-muted/30 p-4">
-            <div className="flex items-center gap-2 mb-3">
+          <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-3">
+            <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-semibold">Abandoned Checkout Recovery</span>
               <span className="text-xs text-muted-foreground ml-1">— automated email sequence</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="ml-auto h-7 px-2 text-xs"
+                onClick={() => setShowRecoveryTracker(v => !v)}
+              >
+                {showRecoveryTracker ? "Hide details" : "View details"}
+              </Button>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
               <div className="bg-background border border-border rounded-lg px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Emails Sent</p>
-                <p className="text-xl font-bold">{recoveryKpi.total_sent}</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Sent</p>
+                <p className="text-lg font-bold">{recoveryKpi.total_sent}</p>
               </div>
               <div className="bg-background border border-border rounded-lg px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Converted</p>
-                <p className="text-xl font-bold text-green-600 dark:text-green-400">{recoveryKpi.leads_converted}</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Opened</p>
+                <p className="text-lg font-bold">{recoveryKpi.leads_opened}</p>
+                <p className="text-[10px] text-muted-foreground">{recoveryKpi.open_rate_pct}%</p>
               </div>
               <div className="bg-background border border-border rounded-lg px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Recovery Rate</p>
-                <p className="text-xl font-bold">{recoveryKpi.recovery_rate_pct}%</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Clicked</p>
+                <p className="text-lg font-bold">{recoveryKpi.leads_clicked}</p>
+                <p className="text-[10px] text-muted-foreground">{recoveryKpi.click_rate_pct}%</p>
+              </div>
+              <div className="bg-background border border-border rounded-lg px-3 py-2">
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Booked</p>
+                <p className="text-lg font-bold text-green-600 dark:text-green-400">{recoveryKpi.leads_converted}</p>
+              </div>
+              <div className="bg-background border border-border rounded-lg px-3 py-2">
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Recovery</p>
+                <p className="text-lg font-bold">{recoveryKpi.recovery_rate_pct}%</p>
               </div>
             </div>
+
+            {showRecoveryTracker && recoveryTracker.length > 0 && (
+              <div className="border border-border rounded-lg overflow-hidden bg-background">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-muted/50">
+                      <tr className="text-left text-muted-foreground">
+                        <th className="px-3 py-2 font-medium">Lead</th>
+                        <th className="px-3 py-2 font-medium">Plan</th>
+                        <th className="px-3 py-2 font-medium text-center">Stage</th>
+                        <th className="px-3 py-2 font-medium text-center">Sent</th>
+                        <th className="px-3 py-2 font-medium text-center">Opened</th>
+                        <th className="px-3 py-2 font-medium text-center">Clicked</th>
+                        <th className="px-3 py-2 font-medium text-center">Booked</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recoveryTracker.map(row => {
+                        const fmt = (d: string | null) => d ? new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "—";
+                        const Dot = ({ on, colorClass }: { on: boolean; colorClass: string }) =>
+                          on ? <span className={`inline-block w-2 h-2 rounded-full ${colorClass}`} /> : <span className="text-muted-foreground">—</span>;
+                        return (
+                          <tr key={row.lead_id} className="border-t border-border">
+                            <td className="px-3 py-2">
+                              <div className="font-medium truncate max-w-[160px]">{row.name || "—"}</div>
+                              <div className="text-muted-foreground truncate max-w-[160px]">{row.email}</div>
+                            </td>
+                            <td className="px-3 py-2 capitalize text-muted-foreground">{row.plan_type || "—"}</td>
+                            <td className="px-3 py-2 text-center">{row.last_stage_sent ?? "—"}</td>
+                            <td className="px-3 py-2 text-center" title={row.last_sent_at || ""}>{fmt(row.last_sent_at)}</td>
+                            <td className="px-3 py-2 text-center" title={row.last_opened_at || ""}>
+                              {row.last_opened_at ? <span className="text-blue-600 dark:text-blue-400">{fmt(row.last_opened_at)}</span> : <Dot on={false} colorClass="" />}
+                            </td>
+                            <td className="px-3 py-2 text-center" title={row.last_clicked_at || ""}>
+                              {row.last_clicked_at ? <span className="text-purple-600 dark:text-purple-400">{fmt(row.last_clicked_at)}</span> : <Dot on={false} colorClass="" />}
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                              {row.converted_at
+                                ? <span className="text-green-600 dark:text-green-400 font-semibold">✓ {fmt(row.converted_at)}</span>
+                                : <Dot on={false} colorClass="" />}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
