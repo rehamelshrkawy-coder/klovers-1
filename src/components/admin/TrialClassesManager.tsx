@@ -419,15 +419,24 @@ const TrialClassesManager = () => {
                           <TableCell className="text-right">
                             <div className="flex gap-1 justify-end items-center flex-wrap">
                               {isTbaSession && (
-                                b.rebook_email_sent_at ? (
-                                  <Badge variant="secondary" className="text-[10px]" title={`Sent ${new Date(b.rebook_email_sent_at).toLocaleString()}`}>
-                                    email sent {Math.max(0, Math.floor((Date.now() - new Date(b.rebook_email_sent_at).getTime()) / 86400000))}d ago
-                                  </Badge>
-                                ) : (
-                                  <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => sendRebookEmail(b)} title="Email student to pick a slot">
-                                    <Mail className="h-3.5 w-3.5 mr-1" /> Email
+                                <>
+                                  {b.rebook_email_sent_at && (
+                                    <Badge variant="secondary" className="text-[10px]" title={`Sent ${new Date(b.rebook_email_sent_at).toLocaleString()}`}>
+                                      email sent {Math.max(0, Math.floor((Date.now() - new Date(b.rebook_email_sent_at).getTime()) / 86400000))}d ago
+                                    </Badge>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-7"
+                                    disabled={actioningId === b.id}
+                                    onClick={() => sendRebookEmail(b)}
+                                    title={b.rebook_email_sent_at ? "Resend rebook email" : "Email student to pick a slot"}
+                                  >
+                                    <Mail className="h-3.5 w-3.5 mr-1" />
+                                    {b.rebook_email_sent_at ? "Resend" : "Email"}
                                   </Button>
-                                )
+                                </>
                               )}
                               {b.status === "pending" ? (
                                 <>
