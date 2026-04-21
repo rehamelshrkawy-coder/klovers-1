@@ -110,6 +110,7 @@ import { useLeads } from "@/hooks/admin/useLeads";
 import { useEnrollments } from "@/hooks/admin/useEnrollments";
 import { useAttendanceRequests } from "@/hooks/admin/useAttendanceRequests";
 import { useReferralStats } from "@/hooks/admin/useReferralStats";
+import { useTrialStats } from "@/hooks/admin/useTrialStats";
 
 const AdminDashboard = () => {
   const queryClient = useQueryClient();
@@ -122,6 +123,10 @@ const AdminDashboard = () => {
   const { data: enrollments = [], isLoading: enrollmentsLoading } = useEnrollments({ profileMap });
   const { data: attendanceReqs = [], isLoading: attendanceLoading } = useAttendanceRequests({ profileMap, overviewRows });
   const { data: referralStats = { total: 0, thisMonth: 0, totalClicks: 0, clicksThisMonth: 0, perUser: [] } } = useReferralStats();
+  const { data: trialStats = { pending: 0, upcoming: 0, thisWeek: 0, total: 0 } } = useTrialStats();
+
+  // Lead count: "new" status = hasn't been contacted yet
+  const newLeadsCount = useMemo(() => leads.filter(l => (l.status ?? "new") === "new").length, [leads]);
 
 
   const loading = leadsLoading || enrollmentsLoading || overviewLoading || attendanceLoading;
@@ -547,26 +552,46 @@ const AdminDashboard = () => {
     setRefreshing(false);
   };
 
-  const TAB_CLS = "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium border border-border data-[state=active]:bg-primary data-[state=active]:text-black data-[state=active]:border-primary bg-background gap-1.5 h-auto";
-  const TAB_GROUP_LABEL = "text-[10px] font-bold text-muted-foreground uppercase tracking-widest self-center shrink-0 pr-1";
+  const TAB_CLS = "shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium border border-border/60 data-[state=active]:bg-primary data-[state=active]:text-black data-[state=active]:border-primary data-[state=active]:shadow-sm bg-background hover:bg-muted transition-colors gap-1.5 h-auto";
+
+  const TAB_GROUPS: { id: string; label: string; icon: typeof Users; tabs: string[] }[] = [
+    { id: "ops",     label: "Operations", icon: BarChart3, tabs: ["students", "enrollments", "leads", "trials", "lead-funnel", "manage", "sales", "promos"] },
+    { id: "learn",   label: "Learning",   icon: Users,     tabs: ["group-attendance", "group-matcher", "placement-tests", "session-attendance", "preferences", "league-users"] },
+    { id: "content", label: "Content",    icon: Sparkles,  tabs: ["blog", "seo-orchestration", "image-audit", "campaigns"] },
+    { id: "config",  label: "Config",     icon: Settings,  tabs: ["notifications", "scheduling", "availability", "settings"] },
+  ];
+  const activeGroup = TAB_GROUPS.find(g => g.tabs.includes(adminTab))?.id ?? "ops";
+  const [tabGroup, setTabGroup] = useState<string>(activeGroup);
+  useEffect(() => { setTabGroup(activeGroup); }, [activeGroup]);
+  const inActiveGroup = (tab: string) => TAB_GROUPS.find(g => g.id === tabGroup)?.tabs.includes(tab);
 
   return (
     <TooltipProvider>
       <div id="main-content" className="min-h-screen bg-muted/30">
         {/* Header */}
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b">
-          <div className="max-w-7xl mx-auto flex items-center justify-between py-3 px-4 md:px-6">
-            <div>
-              <h1 className="text-lg font-bold text-foreground">Admin Dashboard</h1>
-              <p className="text-xs text-muted-foreground">Manage students, enrollments & content</p>
+        <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border/60 shadow-sm">
+          <div className="h-0.5 w-full bg-gradient-to-r from-primary/80 via-primary to-primary/40" />
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 py-3 px-4 md:px-6">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground flex items-center justify-center shadow-sm shrink-0">
+                <Sparkles className="h-4.5 w-4.5" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-base md:text-lg font-bold text-foreground leading-tight truncate">Admin Dashboard</h1>
+                <p className="text-[11px] text-muted-foreground hidden sm:block">Manage students, enrollments & content</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing}>
-                <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-                {refreshing ? "Refreshing…" : "Refresh"}
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2">
+                <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+                <span className="hidden md:inline">{refreshing ? "Refreshing…" : "Refresh"}</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/admin/marketing")}><Sparkles className="h-4 w-4 mr-2" /> Marketing</Button>
-              <Button variant="outline" size="sm" onClick={handleLogout}><LogOut className="h-4 w-4 mr-2" /> Logout</Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin/marketing")} className="gap-2">
+                <Sparkles className="h-4 w-4" /> <span className="hidden md:inline">Marketing</span>
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
+                <LogOut className="h-4 w-4" /> <span className="hidden md:inline">Logout</span>
+              </Button>
             </div>
           </div>
         </div>
@@ -676,7 +701,10 @@ const AdminDashboard = () => {
           {/* Pending enrollments alert */}
           {actionableEnrollments > 0 && (
             <div
-              className="flex items-center gap-3 rounded-xl border border-amber-400/60 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setAdminTab("enrollments"); } }}
+              className="flex items-center gap-3 rounded-xl border border-amber-400/60 bg-gradient-to-r from-amber-50 to-amber-100/60 dark:from-amber-950/30 dark:to-amber-900/20 px-4 py-3 cursor-pointer hover:shadow-sm hover:border-amber-500/70 transition-all"
               onClick={() => { setAdminTab("enrollments"); setTimeout(() => document.getElementById("admin-tabs-root")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80); }}
             >
               <Bell className="h-5 w-5 text-amber-600 shrink-0 animate-pulse" />
@@ -690,96 +718,188 @@ const AdminDashboard = () => {
             </div>
           )}
 
+          {/* Pending trials alert */}
+          {trialStats.pending > 0 && (
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setAdminTab("trials")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setAdminTab("trials"); } }}
+              className="flex items-center gap-3 rounded-xl border border-blue-400/60 bg-gradient-to-r from-blue-50 to-blue-100/60 dark:from-blue-950/30 dark:to-blue-900/20 px-4 py-3 cursor-pointer hover:shadow-sm hover:border-blue-500/70 transition-all"
+            >
+              <Users className="h-5 w-5 text-blue-600 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-blue-800 dark:text-blue-300 text-sm">
+                  {trialStats.pending} trial booking{trialStats.pending > 1 ? "s" : ""} awaiting confirmation
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">
+                  {trialStats.thisWeek > 0 && `${trialStats.thisWeek} scheduled this week · `}
+                  {trialStats.upcoming} upcoming total — click to review
+                </p>
+              </div>
+              <span className="text-xs font-medium text-blue-700 dark:text-blue-400 shrink-0">View →</span>
+            </div>
+          )}
+
           <Suspense fallback={<TabLoader />}>
           <Tabs id="admin-tabs-root" value={adminTab} onValueChange={setAdminTab}>
-            <TabsList className="w-full h-auto bg-card border border-border rounded-2xl p-3 flex flex-col gap-2">
-              {/* Operations row */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className={TAB_GROUP_LABEL}>Ops</span>
-                <TabsTrigger value="students" className={TAB_CLS}>
-                  <Users className="h-3.5 w-3.5" /> Users
-                  <span className="opacity-60">({overviewRows.length})</span>
-                </TabsTrigger>
-                <TabsTrigger value="enrollments" className={TAB_CLS}>
-                  <FileCheck className="h-3.5 w-3.5" /> Enrollments
-                  {actionableEnrollments > 0 && (
-                    <span className="relative inline-flex">
-                      <Badge variant="destructive" className="h-4 min-w-4 px-1 text-[9px] rounded-full">{actionableEnrollments}</Badge>
-                      <span className="absolute inset-0 rounded-full bg-destructive/60 animate-ping" />
-                    </span>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="leads" className={TAB_CLS}>
-                  <Users className="h-3.5 w-3.5" /> CRM Leads
-                </TabsTrigger>
-                <TabsTrigger value="trials" className={TAB_CLS}>
-                  <Users className="h-3.5 w-3.5" /> Trial Classes
-                </TabsTrigger>
-                <TabsTrigger value="lead-funnel" className={TAB_CLS}>
-                  <TrendingUp className="h-3.5 w-3.5" /> Lead Funnel
-                </TabsTrigger>
-                <TabsTrigger value="manage" className={TAB_CLS}>Manage</TabsTrigger>
-                <TabsTrigger value="sales" className={TAB_CLS}>
-                  <BarChart3 className="h-3.5 w-3.5" /> Sales
-                </TabsTrigger>
-                <TabsTrigger value="promos" className={TAB_CLS}>
-                  <Tag className="h-3.5 w-3.5" /> Promos
-                </TabsTrigger>
+            {/* Two-level navigation: group selector + contextual tabs */}
+            <div className="w-full bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+              {/* Group selector */}
+              <div className="flex items-center gap-1 p-2 bg-muted/40 border-b border-border/60 overflow-x-auto">
+                {TAB_GROUPS.map(g => {
+                  const GroupIcon = g.icon;
+                  const isActive = tabGroup === g.id;
+                  const hasAlert =
+                    (g.id === "ops" && (actionableEnrollments > 0 || trialStats.pending > 0)) ||
+                    (g.id === "learn" && pendingAttendance > 0);
+                  return (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => setTabGroup(g.id)}
+                      className={cn(
+                        "relative shrink-0 inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all",
+                        isActive
+                          ? "bg-background text-foreground shadow-sm ring-1 ring-border"
+                          : "text-muted-foreground hover:text-foreground hover:bg-background/60"
+                      )}
+                    >
+                      <GroupIcon className="h-3.5 w-3.5" />
+                      {g.label}
+                      {hasAlert && (
+                        <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
-              <div className="w-full h-px bg-border" />
-
-              {/* Learning row */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className={TAB_GROUP_LABEL}>Learn</span>
-                <TabsTrigger value="group-attendance" className={TAB_CLS}>
-                  Groups
-                  {pendingAttendance > 0 && (
-                    <Badge variant="destructive" className="h-4 min-w-4 px-1 text-[9px] rounded-full">{pendingAttendance}</Badge>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="group-matcher" className={TAB_CLS}>Matcher</TabsTrigger>
-                <TabsTrigger value="placement-tests" className={TAB_CLS}>Placement Tests</TabsTrigger>
-                <TabsTrigger value="session-attendance" className={TAB_CLS}>
-                  <FileCheck className="h-3.5 w-3.5" /> Attendance
-                </TabsTrigger>
-                <TabsTrigger value="preferences" className={TAB_CLS}>
-                  <BarChart3 className="h-3.5 w-3.5" /> Preferences
-                </TabsTrigger>
-                <TabsTrigger value="league-users" className={TAB_CLS}>
-                  <Trophy className="h-3.5 w-3.5" /> Leagues
-                </TabsTrigger>
-              </div>
-
-              <div className="w-full h-px bg-border" />
-
-              {/* Content & Config row */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className={TAB_GROUP_LABEL}>Content</span>
-                <TabsTrigger value="blog" className={TAB_CLS}>Blog</TabsTrigger>
-                <TabsTrigger value="seo-orchestration" className={TAB_CLS}>
-                  <Sparkles className="h-3.5 w-3.5" /> SEO AI
-                </TabsTrigger>
-                <TabsTrigger value="image-audit" className={TAB_CLS}>
-                  <Image className="h-3.5 w-3.5" /> Images
-                </TabsTrigger>
-                <TabsTrigger value="campaigns" className={TAB_CLS}>
-                  <Mail className="h-3.5 w-3.5" /> Campaigns
-                </TabsTrigger>
-                <div className="w-px h-4 bg-border mx-1 self-center" />
-                <span className={TAB_GROUP_LABEL}>Config</span>
-                <TabsTrigger value="notifications" className={TAB_CLS}>
-                  <Bell className="h-3.5 w-3.5" /> Alerts
-                </TabsTrigger>
-                <TabsTrigger value="scheduling" className={TAB_CLS}>Scheduling</TabsTrigger>
-                <TabsTrigger value="availability" className={TAB_CLS}>
-                  <Clock className="h-3.5 w-3.5" /> Availability
-                </TabsTrigger>
-                <TabsTrigger value="settings" className={TAB_CLS}>
-                  <Settings className="h-3.5 w-3.5" /> Settings
-                </TabsTrigger>
-              </div>
-            </TabsList>
+              <TabsList className="w-full h-auto bg-transparent border-0 rounded-none p-3 flex flex-wrap items-center gap-1.5 justify-start">
+                {inActiveGroup("students") && (
+                  <TabsTrigger value="students" className={TAB_CLS}>
+                    <Users className="h-3.5 w-3.5" /> Users
+                    <span className="opacity-60">({overviewRows.length})</span>
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("enrollments") && (
+                  <TabsTrigger value="enrollments" className={TAB_CLS}>
+                    <FileCheck className="h-3.5 w-3.5" /> Enrollments
+                    {actionableEnrollments > 0 && (
+                      <span className="relative inline-flex">
+                        <Badge variant="destructive" className="h-4 min-w-4 px-1 text-[9px] rounded-full">{actionableEnrollments}</Badge>
+                        <span className="absolute inset-0 rounded-full bg-destructive/60 animate-ping" />
+                      </span>
+                    )}
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("leads") && (
+                  <TabsTrigger value="leads" className={TAB_CLS}>
+                    <Users className="h-3.5 w-3.5" /> CRM Leads
+                    {newLeadsCount > 0 && (
+                      <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[9px] rounded-full">{newLeadsCount}</Badge>
+                    )}
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("trials") && (
+                  <TabsTrigger value="trials" className={TAB_CLS}>
+                    <Users className="h-3.5 w-3.5" /> Trial Classes
+                    {trialStats.pending > 0 && (
+                      <span className="relative inline-flex">
+                        <Badge variant="destructive" className="h-4 min-w-4 px-1 text-[9px] rounded-full">{trialStats.pending}</Badge>
+                        <span className="absolute inset-0 rounded-full bg-destructive/60 animate-ping" />
+                      </span>
+                    )}
+                    {trialStats.pending === 0 && trialStats.upcoming > 0 && (
+                      <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[9px] rounded-full">{trialStats.upcoming}</Badge>
+                    )}
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("lead-funnel") && (
+                  <TabsTrigger value="lead-funnel" className={TAB_CLS}>
+                    <TrendingUp className="h-3.5 w-3.5" /> Lead Funnel
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("manage") && (
+                  <TabsTrigger value="manage" className={TAB_CLS}>Manage</TabsTrigger>
+                )}
+                {inActiveGroup("sales") && (
+                  <TabsTrigger value="sales" className={TAB_CLS}>
+                    <BarChart3 className="h-3.5 w-3.5" /> Sales
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("promos") && (
+                  <TabsTrigger value="promos" className={TAB_CLS}>
+                    <Tag className="h-3.5 w-3.5" /> Promos
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("group-attendance") && (
+                  <TabsTrigger value="group-attendance" className={TAB_CLS}>
+                    <Users className="h-3.5 w-3.5" /> Groups
+                    {pendingAttendance > 0 && (
+                      <Badge variant="destructive" className="h-4 min-w-4 px-1 text-[9px] rounded-full">{pendingAttendance}</Badge>
+                    )}
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("group-matcher") && (
+                  <TabsTrigger value="group-matcher" className={TAB_CLS}>Matcher</TabsTrigger>
+                )}
+                {inActiveGroup("placement-tests") && (
+                  <TabsTrigger value="placement-tests" className={TAB_CLS}>Placement Tests</TabsTrigger>
+                )}
+                {inActiveGroup("session-attendance") && (
+                  <TabsTrigger value="session-attendance" className={TAB_CLS}>
+                    <FileCheck className="h-3.5 w-3.5" /> Attendance
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("preferences") && (
+                  <TabsTrigger value="preferences" className={TAB_CLS}>
+                    <BarChart3 className="h-3.5 w-3.5" /> Preferences
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("league-users") && (
+                  <TabsTrigger value="league-users" className={TAB_CLS}>
+                    <Trophy className="h-3.5 w-3.5" /> Leagues
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("blog") && (
+                  <TabsTrigger value="blog" className={TAB_CLS}>Blog</TabsTrigger>
+                )}
+                {inActiveGroup("seo-orchestration") && (
+                  <TabsTrigger value="seo-orchestration" className={TAB_CLS}>
+                    <Sparkles className="h-3.5 w-3.5" /> SEO AI
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("image-audit") && (
+                  <TabsTrigger value="image-audit" className={TAB_CLS}>
+                    <Image className="h-3.5 w-3.5" /> Images
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("campaigns") && (
+                  <TabsTrigger value="campaigns" className={TAB_CLS}>
+                    <Mail className="h-3.5 w-3.5" /> Campaigns
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("notifications") && (
+                  <TabsTrigger value="notifications" className={TAB_CLS}>
+                    <Bell className="h-3.5 w-3.5" /> Alerts
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("scheduling") && (
+                  <TabsTrigger value="scheduling" className={TAB_CLS}>Scheduling</TabsTrigger>
+                )}
+                {inActiveGroup("availability") && (
+                  <TabsTrigger value="availability" className={TAB_CLS}>
+                    <Clock className="h-3.5 w-3.5" /> Availability
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("settings") && (
+                  <TabsTrigger value="settings" className={TAB_CLS}>
+                    <Settings className="h-3.5 w-3.5" /> Settings
+                  </TabsTrigger>
+                )}
+              </TabsList>
+            </div>
 
             {/* STUDENTS TAB */}
             <TabsContent value="students">
