@@ -155,12 +155,14 @@ const TrialClassesManager = () => {
   };
 
   const handleSendRebookToAllTBA = async () => {
-    const tba = bookings.filter((b) => b.start_time === "TBA" && !b.rebook_email_sent_at);
+    const tba = bookings.filter((b) => b.start_time === "TBA");
     if (tba.length === 0) {
-      toast({ title: "Nothing to send", description: "Every TBA booking already has a rebook email logged." });
+      toast({ title: "Nothing to send", description: "No unscheduled (TBA) bookings right now." });
       return;
     }
-    if (!confirm(`Send rebook email to ${tba.length} unscheduled student${tba.length === 1 ? "" : "s"}?`)) return;
+    const resendCount = tba.filter((b) => b.rebook_email_sent_at).length;
+    const note = resendCount > 0 ? ` (${resendCount} will be re-sent)` : "";
+    if (!confirm(`Send rebook email to ${tba.length} unscheduled student${tba.length === 1 ? "" : "s"}${note}?`)) return;
     setBulkBusy(true);
     let ok = 0, fail = 0;
     for (const b of tba) {
@@ -336,7 +338,7 @@ const TrialClassesManager = () => {
           const confirmed = session.items.filter((i) => i.status === "confirmed").length;
           const past = isPastSession(session.date);
           const isTbaSession = session.time === "TBA";
-          const tbaUnsentCount = isTbaSession ? session.items.filter((i) => !i.rebook_email_sent_at).length : 0;
+          const tbaUnsentCount = isTbaSession ? session.items.length : 0;
           return (
             <Card key={session.key}>
               <CardHeader className="py-3">
@@ -363,7 +365,7 @@ const TrialClassesManager = () => {
                         className="h-7"
                         disabled={bulkBusy || tbaUnsentCount === 0}
                         onClick={handleSendRebookToAllTBA}
-                        title={tbaUnsentCount === 0 ? "All students already emailed" : `Email ${tbaUnsentCount} unscheduled student${tbaUnsentCount === 1 ? "" : "s"}`}
+                        title={tbaUnsentCount === 0 ? "No unscheduled students" : `Email ${tbaUnsentCount} unscheduled student${tbaUnsentCount === 1 ? "" : "s"}`}
                       >
                         <Mail className="h-3.5 w-3.5 mr-1" />
                         Send rebook email ({tbaUnsentCount})
