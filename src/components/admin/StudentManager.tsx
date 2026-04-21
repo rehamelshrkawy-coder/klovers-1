@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo, memo } from "react";
+import { useState, useMemo, memo, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { LEVEL_SELECT_OPTIONS_WITH_SPECIAL, LEVEL_SELECT_OPTIONS } from "@/constants/levels";
 import { Button } from "@/components/ui/button";
@@ -81,18 +82,16 @@ const EMPTY_PACKAGE_FORM = {
 };
 
 const StudentManager = () => {
+  const queryClient = useQueryClient();
+
   // Overview
-  const [overviewRows, setOverviewRows] = useState<StatusOverviewRow[]>([]);
   const [overviewSearch, setOverviewSearch] = useState("");
   const [overviewFilter, setOverviewFilter] = useState("all");
-  const [overviewLoading, setOverviewLoading] = useState(true);
 
   // Legacy students CRUD
-  const [legacyStudents, setLegacyStudents] = useState<LegacyStudent[]>([]);
   const [legacySearch, setLegacySearch] = useState("");
   const [legacyStatusFilter, setLegacyStatusFilter] = useState("all");
   const [legacyGroupFilter, setLegacyGroupFilter] = useState("all");
-  const [legacyLoading, setLegacyLoading] = useState(true);
 
   // Student dialog (add/edit student info)
   const [studentDialogOpen, setStudentDialogOpen] = useState(false);
@@ -128,33 +127,62 @@ const StudentManager = () => {
   const [enrollSaving, setEnrollSaving] = useState(false);
 
   // Groups
-  const [groups, setGroups] = useState<StudentGroup[]>([]);
   const [manageGroupsOpen, setManageGroupsOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
 
-  const fetchGroups = async () => {
-    // Fetch from pkg_groups (active groups from Teacher Available Slots)
-    const { data } = await supabase.from("pkg_groups").select("id, name, created_at").eq("is_active", true).order("name");
-    setGroups(data || []);
-  };
+  // ── Data layer: React Query (shared cache with AdminDashboard) ──
+  const { data: overviewRows = [], isLoading: overviewLoading } = useQuery<StatusOverviewRow[]>({
+    queryKey: ["admin", "student-status-overview"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("admin_student_status_overview").select("*");
+      if (error) {
+        toast({ title: "Error loading overview", description: error.message, variant: "destructive" });
+        throw error;
+      }
+      return (data as StatusOverviewRow[]) ?? [];
+    },
+    staleTime: 60 * 1000,
+  });
 
-  const fetchOverview = async () => {
-    setOverviewLoading(true);
-    const { data, error } = await supabase.from("admin_student_status_overview").select("*");
-    if (error) toast({ title: "Error loading overview", description: error.message, variant: "destructive" });
-    setOverviewRows((data as StatusOverviewRow[]) || []);
-    setOverviewLoading(false);
-  };
+  const { data: legacyStudents = [], isLoading: legacyLoading } = useQuery<LegacyStudent[]>({
+    queryKey: ["admin", "legacy-students"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("students")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (error) {
+        toast({ title: "Error loading students", description: error.message, variant: "destructive" });
+        throw error;
+      }
+      return ((data ?? []) as LegacyStudent[]).map(s => ({ ...s, group_name: s.group_name || "" }));
+    },
+    staleTime: 60 * 1000,
+  });
 
-  const fetchLegacyStudents = async () => {
-    setLegacyLoading(true);
-    const { data, error } = await supabase.from("students").select("*").order("created_at", { ascending: false }).limit(200);
-    if (error) toast({ title: "Error loading students", description: error.message, variant: "destructive" });
-    setLegacyStudents(((data ?? []) as LegacyStudent[]).map(s => ({ ...s, group_name: s.group_name || "" })));
-    setLegacyLoading(false);
-  };
+  const { data: groups = [] } = useQuery<StudentGroup[]>({
+    queryKey: ["admin", "pkg-groups"],
+    queryFn: async () => {
+      const { data } = await supabase.from("pkg_groups").select("id, name, created_at").eq("is_active", true).order("name");
+      return (data as StudentGroup[]) ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => { fetchOverview(); fetchLegacyStudents(); fetchGroups(); }, []);
+  // Legacy handlers — kept as callable functions to preserve call sites below.
+  // Each now invalidates the matching query instead of setting local state.
+  const fetchOverview = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["admin", "student-status-overview"] });
+  }, [queryClient]);
+
+  const fetchLegacyStudents = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["admin", "legacy-students"] });
+  }, [queryClient]);
+
+  const fetchGroups = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["admin", "pkg-groups"] });
+  }, [queryClient]);
 
   // === OVERVIEW TAB ===
   const filteredOverview = useMemo(() => {

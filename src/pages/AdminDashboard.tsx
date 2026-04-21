@@ -118,6 +118,7 @@ import { useReferralStats } from "@/hooks/admin/useReferralStats";
 import { useTrialStats } from "@/hooks/admin/useTrialStats";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { formatMoney, formatDate } from "@/lib/format";
+import { EnrollmentCard } from "@/components/admin/EnrollmentCard";
 
 const AdminDashboard = () => {
   const queryClient = useQueryClient();
@@ -341,6 +342,48 @@ const AdminDashboard = () => {
       setRejecting(false);
     }
   };
+
+  // View a receipt URL stored on an enrollment — handles stripe: sentinel,
+  // plain http(s) URLs, and storage object keys (resolved via signed URL).
+  const handleViewReceipt = useCallback(async (e: Enrollment) => {
+    if (!e.receipt_url || e.receipt_url.length === 0) return;
+    if (e.receipt_url.startsWith("stripe:")) {
+      toast({ title: "Stripe payment", description: "This enrollment was paid via Stripe — no manual receipt." });
+      return;
+    }
+    if (e.receipt_url.startsWith("http")) {
+      window.open(e.receipt_url, "_blank");
+      return;
+    }
+    const { data, error } = await supabase.storage
+      .from("receipts")
+      .createSignedUrl(e.receipt_url, 300);
+    if (error || !data?.signedUrl) {
+      toast({ title: "Error", description: "Could not load receipt.", variant: "destructive" });
+      return;
+    }
+    window.open(data.signedUrl, "_blank");
+  }, []);
+
+  // Request schedule resubmission — inserts a token row and copies link.
+  const handleRequestResubmission = useCallback(async (e: Enrollment) => {
+    const token = crypto.randomUUID().replace(/-/g, "");
+    const { error: insertErr } = await supabase
+      .from("schedule_resubmission_requests")
+      .insert({
+        enrollment_id: e.id,
+        user_id: e.user_id,
+        email: e.profiles?.email || "",
+        token,
+      });
+    if (insertErr) {
+      toast({ title: "Error", description: insertErr.message, variant: "destructive" });
+      return;
+    }
+    const link = `${window.location.origin}/resubmit-schedule?token=${token}`;
+    await navigator.clipboard.writeText(link);
+    toast({ title: "Link copied!", description: "Send this link to the student to update their schedule." });
+  }, []);
 
   const handleSendPaymentMethodReminder = async (e: Enrollment) => {
     setSendingReminder(prev => new Set(prev).add(e.id));
@@ -1537,264 +1580,41 @@ const AdminDashboard = () => {
                         )}
                         {filtered.length === 0 ? (
                           <p className="text-muted-foreground text-center py-8">No {tab.replace(/_/g, " ")} enrollments.</p>
-                        ) : pagedEnrollments.map((e) => (
-                          <Card key={e.id} className={selectedEnrollmentIds.has(e.id) ? "ring-2 ring-primary/50 animate-flash-bg" : ""}>
-                            <CardContent className="pt-6">
-                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div className="flex items-start gap-3">
-                                  {isActionableTab && (
-                                    <Checkbox
-                                      checked={selectedEnrollmentIds.has(e.id)}
-                                      onCheckedChange={(checked) => {
-                                        setSelectedEnrollmentIds(prev => {
-                                          const next = new Set(prev);
-                                          checked ? next.add(e.id) : next.delete(e.id);
-                                          return next;
-                                        });
-                                      }}
-                                      className="mt-1 shrink-0"
-                                      aria-label={`Select enrollment for ${e.profiles?.name || e.profiles?.email}`}
-                                    />
-                                  )}
-                                <div className="space-y-1 flex-1">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <p className="font-semibold text-foreground">{e.profiles?.name || "Unknown"} — {e.profiles?.email}</p>
-                                    {e.negative_since && (() => {
-                                      const days = Math.max(0, Math.floor((Date.now() - new Date(e.negative_since).getTime()) / 86400000));
-                                      return (
-                                        <Badge variant="destructive" className="text-[10px] h-5 px-1.5 shrink-0">
-                                          Overdue {days}d
-                                        </Badge>
-                                      );
-                                    })()}
-                                  </div>
-                                  <p className="text-sm text-muted-foreground">
-                                    {e.plan_type} · {e.duration}mo · {e.classes_included} classes · {formatMoney(e.amount, e.currency)} · Ref: {e.tx_ref || '—'}
-                                    {e.payment_method && <> · <span className="font-medium">{e.payment_method === 'vodafone_cash' ? 'Vodafone Cash' : e.payment_method === 'instapay' ? 'InstaPay' : e.payment_method === 'bank_transfer' ? 'Bank Transfer' : e.payment_method}</span></>}
-                                    {e.currency === 'EGP' && !e.payment_method && (e.approval_status === 'PENDING_PAYMENT' || e.approval_status === 'UNDER_REVIEW') && (
-                                      <span className="inline-flex items-center gap-1.5 ml-2">
-                                        <Badge variant="outline" className="text-xs border-amber-400 text-amber-700 bg-amber-50">
-                                          ⚠ Missing payment method
-                                        </Badge>
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          className="h-6 text-xs border-amber-400 text-amber-700 hover:bg-amber-50"
-                                          disabled={sendingReminder.has(e.id)}
-                                          onClick={() => handleSendPaymentMethodReminder(e)}
-                                        >
-                                          {sendingReminder.has(e.id) ? "Sending…" : "Send Reminder"}
-                                        </Button>
-                                      </span>
-                                    )}
-                                    {e.payment_date && <> · Paid: {e.payment_date}</>}
-                                    {e.due_at && e.approval_status === 'PENDING_PAYMENT' && <> · Due: {new Date(e.due_at).toLocaleString()}</>}
-                                  </p>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground">Unit price:</span>
-                                    {editingUnitPrice[e.id] !== undefined ? (
-                                      <Input
-                                        type="number"
-                                        className="h-7 w-24"
-                                        min="0.01"
-                                        max="10000"
-                                        step="0.01"
-                                        value={editingUnitPrice[e.id]}
-                                        onChange={(ev) => setEditingUnitPrice((prev) => ({ ...prev, [e.id]: ev.target.value }))}
-                                      />
-                                    ) : (
-                                      <span className="text-sm font-medium text-foreground">${Math.round(e.unit_price)}</span>
-                                    )}
-                                  </div>
-                                  {/* Editable Level & Preferred Days for pending enrollments */}
-                                  {e.plan_type === "group" && (
-                                    <div className="space-y-2 pt-2 border-t border-border">
-                                      {/* Read-only Level badge */}
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-sm text-muted-foreground shrink-0">Level:</span>
-                                        {(() => {
-                                          const profileEmail = e.profiles?.email?.toLowerCase() ?? "";
-                                          const leadLvl = profileEmail && leadsByEmail[profileEmail]?.level?.trim()
-                                            ? normalizeLevel(leadsByEmail[profileEmail].level)
-                                            : "";
-                                          const resolvedLevel = (e.level?.trim() ? normalizeLevel(e.level) : null)
-                                            ?? leadLvl
-                                            ?? "";
-                                          return resolvedLevel ? (
-                                            <Badge variant="outline">{resolvedLevel.replace(/_/g, " ")}</Badge>
-                                          ) : (
-                                            <Badge variant="destructive" className="text-xs">Missing level</Badge>
-                                          );
-                                        })()}
-                                      </div>
-                                      {/* Read-only Preferred day (single) with legacy fallback */}
-                                      <div className="flex items-center gap-2 flex-wrap">
-                                        <span className="text-sm text-muted-foreground shrink-0">Day:</span>
-                                        {(() => {
-                                          const day = e.preferred_day || (e.preferred_days && e.preferred_days.length > 0 ? e.preferred_days[0] : null);
-                                          return day ? (
-                                            <Badge variant="secondary" className="text-xs">{day}</Badge>
-                                          ) : (
-                                            <span className="text-xs text-muted-foreground italic">Not set</span>
-                                          );
-                                        })()}
-                                        {e.preferred_time && (
-                                          <span className="text-xs text-muted-foreground">· {e.preferred_time}</span>
-                                        )}
-                                        {e.timezone && (
-                                          <span className="text-xs text-muted-foreground">· {e.timezone.replace(/_/g, " ")}</span>
-                                        )}
-                                      </div>
-                                      {/* Missing schedule warning + resubmission button */}
-                                      {(!e.level || (!e.preferred_day && (!e.preferred_days || e.preferred_days.length === 0))) && (
-                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                          <Badge variant="destructive" className="text-xs flex items-center gap-1">
-                                            <AlertCircle className="h-3 w-3" /> Legacy / Missing registration schedule
-                                          </Badge>
-                                          <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="h-6 text-xs"
-                                            onClick={async () => {
-                                              const token = crypto.randomUUID().replace(/-/g, "");
-                                              const { error: insertErr } = await supabase
-                                                .from("schedule_resubmission_requests")
-                                                .insert({
-                                                  enrollment_id: e.id,
-                                                  user_id: e.user_id,
-                                                  email: e.profiles?.email || "",
-                                                  token,
-                                                });
-                                              if (insertErr) {
-                                                toast({ title: "Error", description: insertErr.message, variant: "destructive" });
-                                                return;
-                                              }
-                                              const link = `${window.location.origin}/resubmit-schedule?token=${token}`;
-                                              await navigator.clipboard.writeText(link);
-                                              toast({ title: "Link copied!", description: "Send this link to the student to update their schedule." });
-                                            }}
-                                          >
-                                            Request Resubmission
-                                          </Button>
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                                  {/* Show existing preferences for approved enrollments */}
-                                  {e.approval_status === "APPROVED" && (e.preferred_day || (e.preferred_days && e.preferred_days.length > 0)) && (
-                                    <p className="text-xs text-muted-foreground">
-                                      📅 {e.preferred_day || e.preferred_days?.join(", ")} {e.preferred_time ? `· ${e.preferred_time}` : ""}
-                                    </p>
-                                  )}
-                                  <p className="text-xs text-muted-foreground">{new Date(e.created_at).toLocaleString()}</p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant={e.payment_provider === "stripe" ? "default" : "secondary"}>
-                                    {e.payment_provider === "stripe" ? "Stripe" : "Manual"}
-                                  </Badge>
-                                  <Badge variant={e.approval_status === "APPROVED" ? "default" : e.approval_status === "REJECTED" ? "destructive" : "secondary"}>
-                                    {e.approval_status}
-                                  </Badge>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={!e.receipt_url || e.receipt_url.length === 0}
-                                    className={e.receipt_url && e.receipt_url.length > 0
-                                      ? "border-green-400 text-green-700 hover:bg-green-50 dark:text-green-400 dark:border-green-600 dark:hover:bg-green-950/30"
-                                      : "opacity-50 cursor-not-allowed"
-                                    }
-                                    title={e.receipt_url && e.receipt_url.length > 0 ? "View payment receipt" : "No receipt uploaded yet"}
-                                    onClick={async () => {
-                                      if (!e.receipt_url || e.receipt_url.length === 0) return;
-                                      if (e.receipt_url.startsWith("stripe:")) {
-                                        toast({ title: "Stripe payment", description: "This enrollment was paid via Stripe — no manual receipt." });
-                                        return;
-                                      }
-                                      if (e.receipt_url.startsWith("http")) {
-                                        window.open(e.receipt_url, "_blank");
-                                        return;
-                                      }
-                                      const { data, error } = await supabase.storage
-                                        .from("receipts")
-                                        .createSignedUrl(e.receipt_url, 600);
-                                      if (error || !data?.signedUrl) {
-                                        toast({ title: "Error", description: "Could not load receipt.", variant: "destructive" });
-                                        return;
-                                      }
-                                      window.open(data.signedUrl, "_blank");
-                                    }}
-                                  >
-                                    <Eye className="h-4 w-4 mr-1" />
-                                    {e.receipt_url && e.receipt_url.length > 0 ? "Receipt ✓" : "No Receipt"}
-                                  </Button>
-                                   {(e.approval_status === "PENDING" || e.approval_status === "UNDER_REVIEW" || e.approval_status === "PENDING_PAYMENT") && (
-                                    <>
-                                      <Button size="sm" variant="outline" onClick={() => setEditingUnitPrice((prev) => ({ ...prev, [e.id]: String(e.unit_price) }))}>
-                                        <Pencil className="h-4 w-4 mr-1" /> Edit
-                                      </Button>
-                                      {e.plan_type === "group" ? (
-                                        <Button size="sm" onClick={async () => {
-                                          await handleEnrollmentAction(e, "APPROVED");
-                                          setAdminTab("group-matcher");
-                                        }}>
-                                          <Check className="h-4 w-4 mr-1" /> Approve & Match
-                                        </Button>
-                                      ) : (
-                                        <Button size="sm" onClick={() => handleEnrollmentAction(e, "APPROVED")}>
-                                          <Check className="h-4 w-4 mr-1" /> Approve
-                                        </Button>
-                                      )}
-                                      <Button size="sm" variant="destructive" onClick={() => { setRejectTarget(e); setRejectReason("payment_not_received"); setRejectNote(""); }}>
-                                        <X className="h-4 w-4 mr-1" /> Reject
-                                      </Button>
-                                    </>
-                                   )}
-                                  {e.approval_status === "APPROVED" && (
-                                    <AlertDialog>
-                                      <AlertDialogTrigger asChild>
-                                        <Button size="sm" variant="outline">
-                                          <Undo2 className="h-4 w-4 mr-1" /> Revert
-                                        </Button>
-                                      </AlertDialogTrigger>
-                                      <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                          <AlertDialogTitle>Revert approval?</AlertDialogTitle>
-                                          <AlertDialogDescription>
-                                            This will move the enrollment back to Pending and deduct {e.classes_included} credits from the student.
-                                          </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                          <AlertDialogAction onClick={() => handleRevertEnrollment(e)}>Revert</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                      </AlertDialogContent>
-                                    </AlertDialog>
-                                  )}
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button size="sm" variant="ghost">
-                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Delete enrollment?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          This will permanently delete this enrollment record for {e.profiles?.name || "this student"}.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleDeleteEnrollment(e.id)}>Delete</AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </div>
-                                </div>{/* close flex items-start gap-3 */}
-                              </div>{/* close flex flex-col md:flex-row */}
-                            </CardContent>
-                          </Card>
-                        ))}
+                        ) : pagedEnrollments.map((e) => {
+                          const profileEmail = e.profiles?.email?.toLowerCase() ?? "";
+                          const leadLvl = profileEmail && leadsByEmail[profileEmail]?.level?.trim()
+                            ? normalizeLevel(leadsByEmail[profileEmail].level)
+                            : "";
+                          const resolvedLevelFallback = (e.level?.trim() ? normalizeLevel(e.level) : null) ?? leadLvl ?? "";
+                          return (
+                            <EnrollmentCard
+                              key={e.id}
+                              enrollment={e}
+                              isActionableTab={isActionableTab}
+                              isSelected={selectedEnrollmentIds.has(e.id)}
+                              onToggleSelect={(id, checked) => {
+                                setSelectedEnrollmentIds(prev => {
+                                  const next = new Set(prev);
+                                  if (checked) next.add(id); else next.delete(id);
+                                  return next;
+                                });
+                              }}
+                              editingPrice={editingUnitPrice[e.id]}
+                              onStartEditPrice={(en) => setEditingUnitPrice(prev => ({ ...prev, [en.id]: String(en.unit_price) }))}
+                              onChangeEditPrice={(id, val) => setEditingUnitPrice(prev => ({ ...prev, [id]: val }))}
+                              isSendingReminder={sendingReminder.has(e.id)}
+                              onSendPaymentMethodReminder={handleSendPaymentMethodReminder}
+                              resolvedLevelFallback={resolvedLevelFallback}
+                              onApprove={(en) => handleEnrollmentAction(en, "APPROVED")}
+                              onApproveAndMatch={async (en) => { await handleEnrollmentAction(en, "APPROVED"); setAdminTab("group-matcher"); }}
+                              onReject={(en) => { setRejectTarget(en); setRejectReason("payment_not_received"); setRejectNote(""); }}
+                              onRevert={handleRevertEnrollment}
+                              onDelete={handleDeleteEnrollment}
+                              onViewReceipt={handleViewReceipt}
+                              onRequestResubmission={handleRequestResubmission}
+                            />
+                          );
+                        })}
                         {enrollPageCount > 1 && (
                           <div className="flex items-center justify-between pt-2">
                             <p className="text-xs text-muted-foreground">
