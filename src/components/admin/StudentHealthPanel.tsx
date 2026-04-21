@@ -74,7 +74,7 @@ const StudentHealthPanel = ({ overviewRows }: Props) => {
         {cards.map(({ key, icon: Icon, iconColor, bgColor, borderColor, badgeClass, count, label, sublabel, rows }) => (
           <Card
             key={key}
-            className={`rounded-xl border ${borderColor} ${bgColor} cursor-pointer hover:shadow-md transition-shadow`}
+            className={`rounded-2xl border ${borderColor} ${bgColor} cursor-pointer hover:shadow-md transition-shadow`}
             onClick={() => setOpenCard(openCard === key ? null : key)}
           >
             <CardContent className="p-4">
@@ -126,7 +126,7 @@ const StudentHealthPanel = ({ overviewRows }: Props) => {
         ))}
 
         {/* Renewal Pipeline Value */}
-        <Card className="rounded-xl border border-green-200 dark:border-green-800/40 bg-green-50 dark:bg-green-950/20">
+        <Card className="rounded-2xl border border-green-200 dark:border-green-800/40 bg-green-50 dark:bg-green-950/20">
           <CardContent className="p-4">
             <div className="flex items-start gap-2">
               <DollarSign className="h-5 w-5 shrink-0 text-green-600 mt-0.5" />
