@@ -14,8 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const PAGE_SIZE = 25;
+import { ADMIN_PAGE_SIZE as PAGE_SIZE } from "@/lib/admin-utils";
 
 type SortKey = "xp_desc" | "xp_asc" | "streak_desc" | "badges_desc" | "activity_desc";
 
