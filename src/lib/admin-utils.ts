@@ -2,6 +2,11 @@
  * Shared admin utilities — replaces duplicated helpers across admin components.
  */
 
+// ── Pagination ───────────────────────────────────────────────────────────────
+
+/** Default page size for admin tables. Keeps row height × count ≈ one screen. */
+export const ADMIN_PAGE_SIZE = 25;
+
 // ── Time formatting ──────────────────────────────────────────────────────────
 
 /** Convert "HH:MM" (24h) to "H:MM AM/PM". Replaces 6+ identical formatTime copies. */

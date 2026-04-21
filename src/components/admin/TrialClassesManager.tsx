@@ -148,7 +148,6 @@ const TrialClassesManager = () => {
   };
 
   const handleUnschedule = async (booking: TrialBooking) => {
-    if (!confirm(`Move ${booking.name || booking.email} back to the TBA (unscheduled) list?`)) return;
     setActioningId(booking.id);
     try {
       const { error } = await supabase
@@ -538,16 +537,31 @@ const TrialClassesManager = () => {
                                 </>
                               )}
                               {!isTbaSession && b.status !== "cancelled" && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-7"
-                                  disabled={actioningId === b.id}
-                                  onClick={() => handleUnschedule(b)}
-                                  title="Move student back to the TBA (unscheduled) list"
-                                >
-                                  <RefreshCw className="h-3.5 w-3.5 mr-1" /> Unschedule
-                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7"
+                                      disabled={actioningId === b.id}
+                                      title="Move student back to the TBA (unscheduled) list"
+                                    >
+                                      <RefreshCw className="h-3.5 w-3.5 mr-1" /> Unschedule
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Move {b.name || b.email} back to TBA?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        The booking returns to the unscheduled list and its confirmation is cleared. The student can rebook via the link in their rebook email.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleUnschedule(b)}>Unschedule</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                               )}
                               {!isTbaSession && b.status === "cancelled" && (
                                 <span className="text-xs text-muted-foreground">—</span>

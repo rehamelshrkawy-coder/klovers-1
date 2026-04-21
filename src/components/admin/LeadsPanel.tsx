@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { getLeadStatusBadgeClass } from "@/lib/badge-styles";
-import { exportCSV as exportCSVUtil } from "@/lib/admin-utils";
+import { exportCSV as exportCSVUtil, ADMIN_PAGE_SIZE as PAGE_SIZE } from "@/lib/admin-utils";
 import { TRIAL_CONFIRMATION_EMAIL_ENABLED } from "@/lib/siteConfig";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,6 @@ import { useScheduleWeekdays } from "@/hooks/admin/useScheduleWeekdays";
 import type { Lead } from "@/types/admin";
 
 const STATUS_OPTIONS = ["new", "trial_booked", "contacted", "enrolled", "rejected", "lost"];
-const PAGE_SIZE = 25;
 
 const LeadsPanel: React.FC = () => {
   const queryClient = useQueryClient();

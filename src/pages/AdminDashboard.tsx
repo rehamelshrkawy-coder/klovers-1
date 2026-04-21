@@ -71,7 +71,6 @@ const TabLoader = () => (
 // Lead, Enrollment, AttendanceReq, OverviewRow — imported from @/types/admin
 
 const STATUS_OPTIONS = ["new", "trial_booked", "contacted", "enrolled", "rejected", "lost"];
-const PAGE_SIZE = 25;
 
 // Error boundary for lazy-loaded tab components
 class TabErrorBoundary extends Component<
@@ -108,7 +107,7 @@ class TabErrorBoundary extends Component<
 
 import { normalizeLevel, LEVEL_SELECT_OPTIONS } from "@/constants/levels";
 import type { Lead, Enrollment, AttendanceReq, OverviewRow } from "@/types/admin";
-import { formatTime } from "@/lib/admin-utils";
+import { formatTime, ADMIN_PAGE_SIZE as PAGE_SIZE } from "@/lib/admin-utils";
 import { useProfiles } from "@/hooks/admin/useProfiles";
 import { useStudentOverview, buildOverviewByEmail } from "@/hooks/admin/useStudentOverview";
 import { useLeads } from "@/hooks/admin/useLeads";
@@ -1060,9 +1059,21 @@ const AdminDashboard = () => {
               <Card className="rounded-2xl">
                 <CardHeader className="pb-4">
                   <div className="flex flex-col gap-4">
-                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">Users</CardTitle>
-                      <p className="text-xs text-muted-foreground">{filteredUsers.length} of {overviewRows.length}</p>
+                     <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <CardTitle className="text-base">Users</CardTitle>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          Read-only overview of every student. For manual enrollment, packages, or legacy records use
+                          <button
+                            type="button"
+                            onClick={() => setAdminTab("manage")}
+                            className="underline underline-offset-2 hover:text-foreground ml-1"
+                          >
+                            Student Admin →
+                          </button>
+                        </p>
+                      </div>
+                      <p className="text-xs text-muted-foreground shrink-0">{filteredUsers.length} of {overviewRows.length}</p>
                     </div>
                     {/* Responsive student filters */}
                     {isMobile ? (
@@ -1689,7 +1700,19 @@ const AdminDashboard = () => {
             {/* MANAGE STUDENTS TAB */}
             <TabsContent value="manage">
               <Card className="rounded-2xl">
-                <CardHeader className="pb-4"><CardTitle className="text-base">Manage Students</CardTitle></CardHeader>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-base">Student Admin</CardTitle>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Create / edit student records, assign packages, and manage legacy attendance. For the high-level overview use
+                    <button
+                      type="button"
+                      onClick={() => setAdminTab("students")}
+                      className="underline underline-offset-2 hover:text-foreground ml-1"
+                    >
+                      Users →
+                    </button>
+                  </p>
+                </CardHeader>
                 <CardContent className="pt-0">
                   <TabErrorBoundary name="Student Manager">
                     <StudentManager />
