@@ -453,7 +453,7 @@ const BlogPostPage = () => {
             prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
             prose-h4:text-lg prose-h4:mt-6 prose-h4:mb-2
             prose-p:text-foreground/90 prose-p:leading-[1.85] prose-p:my-5 prose-p:text-[1.05rem]
-            prose-a:text-primary prose-a:font-medium prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-primary/80
+            prose-a:text-blue-700 dark:prose-a:text-blue-400 prose-a:font-medium prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-blue-900 dark:hover:prose-a:text-blue-300
             prose-strong:text-foreground prose-strong:font-bold
             prose-em:text-foreground/80
             prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:px-5 prose-blockquote:py-3 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-foreground/80
