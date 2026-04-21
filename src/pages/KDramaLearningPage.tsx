@@ -6,8 +6,10 @@ import OptimizedImage from "@/components/OptimizedImage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Zap, Tv, Brain, BarChart3, Play, ArrowRight, Sparkles } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const KDramaLearningPage = () => {
+  const { t } = useLanguage();
   useSEO({
     title: "Learn Korean Through K-Dramas | Beginner to Advanced Method",
     description: "Master Korean by watching K-dramas. Learn the best dramas for your level, proven learning methods, and how to progress from A1 to B2 through drama immersion.",
@@ -81,22 +83,22 @@ const KDramaLearningPage = () => {
         {/* Hero */}
         <section className="pt-24 pb-16 bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-950/20 dark:to-purple-950/20">
           <div className="container mx-auto px-4 max-w-4xl">
-            <Badge className="mb-4" variant="outline">K-Drama Learning Method</Badge>
+            <Badge className="mb-4" variant="outline">{t("kdrama.badge")}</Badge>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
-              Learn Korean Through K-Dramas
+              {t("kdrama.heroTitle")}
             </h1>
             <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
-              The secret method used by 500K+ K-drama fans. Go from A1 beginner to B2 fluency by watching the shows you love, not grinding textbooks.
+              {t("kdrama.heroSubtitle")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild>
-                <a href="/enroll-now">Start Learning</a>
+                <a href="/enroll-now">{t("kdrama.ctaStart")}</a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="/placement-test">Find Your Level</a>
+                <a href="/placement-test">{t("kdrama.ctaFindLevel")}</a>
               </Button>
             </div>
-            <p className="text-sm text-foreground/70 mt-6">40% faster learning than textbooks alone</p>
+            <p className="text-sm text-foreground/70 mt-6">{t("kdrama.ctaFooter")}</p>
           </div>
         </section>
 

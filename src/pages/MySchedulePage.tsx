@@ -12,8 +12,10 @@ import { ArrowLeft, CalendarDays, Clock, Users, AlertTriangle, CheckCircle2, Loa
 import { toast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/useSEO";
 import { getLevelShortLabel } from "@/constants/levels";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAY_NAMES_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAY_NAMES_AR = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
 import { formatTime } from "@/lib/admin-utils";
 
@@ -45,6 +47,8 @@ interface AlternativePkg {
 }
 
 const MySchedulePage = () => {
+  const { t, language } = useLanguage();
+  const DAY_NAMES = language === "ar" ? DAY_NAMES_AR : DAY_NAMES_EN;
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -166,7 +170,7 @@ const MySchedulePage = () => {
         window.history.replaceState({}, "", url.pathname);
       }
       } catch (err) {
-        setFetchError(err instanceof Error ? err.message : "Failed to load your schedule.");
+        setFetchError(err instanceof Error ? err.message : t("mySchedule.loadFailedFallback"));
         setLoading(false);
       }
     };
@@ -213,14 +217,14 @@ const MySchedulePage = () => {
 
     // 4. Insert admin notification
     const { data: { session } } = await supabase.auth.getSession();
-    const userName = session?.user?.user_metadata?.name || session?.user?.email || "A student";
+    const userName = session?.user?.user_metadata?.name || session?.user?.email || t("mySchedule.aStudent");
     await (supabase as any).from("admin_notifications").insert({
-      message: `${userName} changed their schedule (new package: ${selectedPackageLabel})`,
+      message: t("mySchedule.changedScheduleAdminMsg").replace("{name}", userName).replace("{label}", selectedPackageLabel),
       type: "STUDENT_CHANGED_SLOT",
       related_user_id: userId,
     });
 
-    toast({ title: "Schedule updated", description: "Your new schedule preference has been saved." });
+    toast({ title: t("mySchedule.scheduleUpdated"), description: t("mySchedule.scheduleUpdatedDesc") });
     setShowPicker(false);
     setAssigning(false);
     window.location.reload();
@@ -237,12 +241,13 @@ const MySchedulePage = () => {
     if (enr) {
       await (supabase as any).rpc("assign_student_to_pkg_group", { _user_id: userId, _enrollment_id: (enr as any).id });
     }
+    const altInfo = `${getLevelShortLabel(pkg.level)} ${DAY_NAMES[pkg.day_of_week]} ${formatTime(pkg.start_time)}`;
     await (supabase as any).from("admin_notifications").insert({
-      message: `Waitlisted student moved to alternative: ${getLevelShortLabel(pkg.level)} ${DAY_NAMES[pkg.day_of_week]} ${formatTime(pkg.start_time)}`,
+      message: t("mySchedule.waitlistMovedAdminMsg").replace("{info}", altInfo),
       type: "STUDENT_CHANGED_SLOT",
       related_user_id: userId,
     });
-    toast({ title: "Moved to alternative slot" });
+    toast({ title: t("mySchedule.movedToAlternative") });
     setAssigning(false);
     window.location.reload();
   };
@@ -254,9 +259,9 @@ const MySchedulePage = () => {
         <main id="main-content" className="pt-24 flex items-center justify-center px-4">
           <div className="text-center space-y-3 max-w-sm">
             <AlertTriangle className="h-10 w-10 mx-auto text-destructive" />
-            <h2 className="font-semibold text-foreground">Couldn't load your schedule</h2>
+            <h2 className="font-semibold text-foreground">{t("mySchedule.couldNotLoadTitle")}</h2>
             <p className="text-sm text-muted-foreground">{fetchError}</p>
-            <Button onClick={() => window.location.reload()}>Refresh</Button>
+            <Button onClick={() => window.location.reload()}>{t("mySchedule.refresh")}</Button>
           </div>
         </main>
       </div>
@@ -281,9 +286,9 @@ const MySchedulePage = () => {
         <div className="max-w-2xl mx-auto space-y-6">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> Dashboard
+              <ArrowLeft className="h-4 w-4 mr-1" /> {t("mySchedule.dashboardLink")}
             </Button>
-            <h1 className="text-2xl font-bold text-foreground">My Schedule</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t("mySchedule.title")}</h1>
           </div>
 
           {/* Package Details */}
@@ -291,7 +296,7 @@ const MySchedulePage = () => {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4" /> Selected Package
+                  <CalendarDays className="h-4 w-4" /> {t("mySchedule.selectedPackage")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -309,12 +314,12 @@ const MySchedulePage = () => {
             <Card className="border-amber-300 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-700">
               <CardContent className="pt-6 text-center space-y-4">
                 <AlertTriangle className="h-10 w-10 mx-auto text-amber-500" />
-                <h2 className="text-lg font-semibold text-foreground">Choose Your Class Schedule</h2>
+                <h2 className="text-lg font-semibold text-foreground">{t("mySchedule.chooseScheduleTitle")}</h2>
                 <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                  You need to pick a preferred day and time to complete your registration. This helps us assign you to the right group.
+                  {t("mySchedule.chooseScheduleDesc")}
                 </p>
                 <Button size="lg" onClick={() => setShowPicker(true)}>
-                  <CalendarDays className="h-4 w-4 mr-2" /> Pick a Day & Time
+                  <CalendarDays className="h-4 w-4 mr-2" /> {t("mySchedule.pickDayTime")}
                 </Button>
               </CardContent>
             </Card>
@@ -324,7 +329,7 @@ const MySchedulePage = () => {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Users className="h-4 w-4" /> Assignment Status
+                <Users className="h-4 w-4" /> {t("mySchedule.assignmentStatus")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -332,11 +337,11 @@ const MySchedulePage = () => {
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
                   <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-medium text-foreground">Assigned to <span className="text-primary">{groupInfo.name}</span></p>
+                    <p className="font-medium text-foreground">{t("mySchedule.assignedTo")} <span className="text-primary">{groupInfo.name}</span></p>
                     {groupInfo.next_session ? (
-                      <p className="text-sm text-muted-foreground mt-1">Next session: <strong>{groupInfo.next_session}</strong></p>
+                      <p className="text-sm text-muted-foreground mt-1">{t("mySchedule.nextSession")} <strong>{groupInfo.next_session}</strong></p>
                     ) : (
-                      <p className="text-sm text-muted-foreground mt-1">No upcoming sessions scheduled yet.</p>
+                      <p className="text-sm text-muted-foreground mt-1">{t("mySchedule.noUpcomingSessions")}</p>
                     )}
                   </div>
                 </div>
@@ -346,8 +351,8 @@ const MySchedulePage = () => {
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
                   <Loader2 className="h-5 w-5 text-primary shrink-0 mt-0.5 animate-spin" />
                   <div>
-                    <p className="font-medium text-foreground">Awaiting Group Assignment</p>
-                    <p className="text-sm text-muted-foreground mt-1">Your payment is confirmed! We're assigning you to a class group — this usually takes 24–48 hours.</p>
+                    <p className="font-medium text-foreground">{t("mySchedule.awaitingAssignment")}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{t("mySchedule.awaitingDesc")}</p>
                   </div>
                 </div>
               )}
@@ -357,36 +362,36 @@ const MySchedulePage = () => {
                   <div className="flex items-start gap-3 p-3 rounded-lg bg-destructive/5 border border-destructive/20">
                     <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-medium text-foreground">Waitlisted</p>
-                      <p className="text-sm text-muted-foreground mt-1">All groups for your selected slot are full. Please choose an alternative.</p>
+                      <p className="font-medium text-foreground">{t("mySchedule.waitlisted")}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{t("mySchedule.waitlistDesc")}</p>
                     </div>
                   </div>
                   {alternatives.length > 0 && (
                     <div className="space-y-2">
-                      <p className="text-sm font-medium text-foreground">Available alternatives:</p>
+                      <p className="text-sm font-medium text-foreground">{t("mySchedule.availableAlternatives")}</p>
                       {alternatives.map((alt) => (
                         <div key={alt.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
                           <div>
                             <p className="text-sm font-medium text-foreground">
                               {DAY_NAMES[alt.day_of_week]} · {formatTime(alt.start_time)}
                             </p>
-                            <p className="text-xs text-muted-foreground">{alt.duration_min}min · {alt.timezone.replace(/_/g, " ")} · {alt.seats_left} seats left</p>
+                            <p className="text-xs text-muted-foreground">{alt.duration_min}{t("mySchedule.minutes")} · {alt.timezone.replace(/_/g, " ")} · {alt.seats_left} {t("mySchedule.seatsLeft")}</p>
                           </div>
                           <Button size="sm" disabled={assigning} onClick={() => handleAssignToAlternative(alt)}>
-                            {assigning ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ArrowRight className="h-4 w-4 mr-1" /> Choose</>}
+                            {assigning ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ArrowRight className="h-4 w-4 mr-1" /> {t("mySchedule.choose")}</>}
                           </Button>
                         </div>
                       ))}
                     </div>
                   )}
                   {alternatives.length === 0 && (
-                    <p className="text-sm text-muted-foreground">No alternatives available. Please contact support.</p>
+                    <p className="text-sm text-muted-foreground">{t("mySchedule.noAlternatives")}</p>
                   )}
                 </div>
               )}
 
               {assignmentStatus === "none" && (
-                <p className="text-sm text-muted-foreground">You haven't selected a schedule yet.</p>
+                <p className="text-sm text-muted-foreground">{t("mySchedule.notSelectedYet")}</p>
               )}
             </CardContent>
           </Card>
@@ -394,7 +399,7 @@ const MySchedulePage = () => {
           {/* Change Schedule Button */}
           {packageDetails && (
             <Button variant="outline" onClick={() => setShowPicker(true)} className="w-full">
-              <RefreshCw className="h-4 w-4 mr-2" /> Change Schedule
+              <RefreshCw className="h-4 w-4 mr-2" /> {t("mySchedule.changeSchedule")}
             </Button>
           )}
         </div>
@@ -405,11 +410,11 @@ const MySchedulePage = () => {
       <Dialog open={showPicker} onOpenChange={(open) => { setShowPicker(open); if (!open) { setSelectedCourseType(null); setSelectedPackageId(null); } }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{packageDetails ? "Change Schedule" : "Choose Your Schedule"}</DialogTitle>
+            <DialogTitle>{packageDetails ? t("mySchedule.changeSchedule") : t("mySchedule.modalChooseSchedule")}</DialogTitle>
             <DialogDescription>
               {!selectedCourseType
-                ? "First, choose your class type."
-                : "Select a class slot. Your preference will be saved and admin notified."}
+                ? t("mySchedule.modalChooseType")
+                : t("mySchedule.modalSelectSlot")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -421,8 +426,8 @@ const MySchedulePage = () => {
                   className="p-6 rounded-lg border-2 border-border hover:border-primary hover:bg-accent transition-all text-center space-y-2"
                 >
                   <Users className="h-8 w-8 mx-auto text-primary" />
-                  <p className="font-semibold text-foreground">Group Class</p>
-                  <p className="text-xs text-muted-foreground">Learn with other students</p>
+                  <p className="font-semibold text-foreground">{t("mySchedule.groupClass")}</p>
+                  <p className="text-xs text-muted-foreground">{t("mySchedule.groupClassDesc")}</p>
                 </button>
                 <button
                   type="button"
@@ -430,17 +435,17 @@ const MySchedulePage = () => {
                   className="p-6 rounded-lg border-2 border-border hover:border-primary hover:bg-accent transition-all text-center space-y-2"
                 >
                   <Clock className="h-8 w-8 mx-auto text-primary" />
-                  <p className="font-semibold text-foreground">Private Class</p>
-                  <p className="text-xs text-muted-foreground">One-on-one sessions</p>
+                  <p className="font-semibold text-foreground">{t("mySchedule.privateClass")}</p>
+                  <p className="text-xs text-muted-foreground">{t("mySchedule.privateClassDesc")}</p>
                 </button>
               </div>
             ) : (
               <>
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="sm" onClick={() => { setSelectedCourseType(null); setSelectedPackageId(null); }}>
-                    <ArrowLeft className="h-4 w-4 mr-1" /> Back
+                    <ArrowLeft className="h-4 w-4 mr-1" /> {t("mySchedule.backBtn")}
                   </Button>
-                  <Badge variant="outline">{selectedCourseType === "group" ? "Group" : "Private"}</Badge>
+                  <Badge variant="outline">{selectedCourseType === "group" ? t("mySchedule.group") : t("mySchedule.private")}</Badge>
                 </div>
                 <SchedulePicker
                   courseType={selectedCourseType}
@@ -451,7 +456,7 @@ const MySchedulePage = () => {
                 {selectedPackageId && (
                   <Button className="w-full" disabled={assigning} onClick={handleConfirmChange}>
                     {assigning ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                    Confirm New Schedule
+                    {t("mySchedule.confirmNewSchedule")}
                   </Button>
                 )}
               </>

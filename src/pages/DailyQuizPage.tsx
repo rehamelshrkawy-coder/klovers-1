@@ -19,6 +19,7 @@ import { CheckCircle, ArrowRight, ArrowLeft, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { NextStepCard } from "@/components/NextStepCard";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ExerciseItem {
   id: string;
@@ -38,6 +39,7 @@ interface QuizResult {
 }
 
 const DailyQuizPage = () => {
+  const { t } = useLanguage();
   useSEO({
     title: "Daily Quiz - K-Lovers",
     description: "Test your vocabulary knowledge with our daily quiz.",
@@ -155,7 +157,7 @@ const DailyQuizPage = () => {
     setExercises(shuffled as ExerciseItem[]);
     setLoading(false);
     } catch (err) {
-      setFetchError(err instanceof Error ? err.message : "Failed to load quiz.");
+      setFetchError(err instanceof Error ? err.message : t("dailyQuiz.loadFailed"));
       setLoading(false);
     }
   };
@@ -189,8 +191,8 @@ const DailyQuizPage = () => {
   const handleSubmit = async () => {
     if (totalAnswered < exercises.length) {
       toast({
-        title: "Please answer all questions",
-        description: `${exercises.length - totalAnswered} questions remaining.`,
+        title: t("dailyQuiz.answerAll"),
+        description: t("dailyQuiz.remainingCount").replace("{count}", String(exercises.length - totalAnswered)),
         variant: "destructive",
       });
       return;
@@ -224,7 +226,7 @@ const DailyQuizPage = () => {
         <main id="main-content" className="flex-1 flex items-center justify-center px-4">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading your daily quiz...</p>
+            <p className="text-muted-foreground">{t("dailyQuiz.loading")}</p>
           </div>
         </main>
         <Footer />
@@ -241,9 +243,9 @@ const DailyQuizPage = () => {
         <main id="main-content" className="flex-1 flex items-center justify-center px-4 py-16">
           <div className="text-center space-y-3 max-w-sm">
             <p className="text-4xl">😕</p>
-            <h2 className="font-semibold text-foreground">Couldn't load today's quiz</h2>
+            <h2 className="font-semibold text-foreground">{t("dailyQuiz.loadErrorTitle")}</h2>
             <p className="text-sm text-muted-foreground">{fetchError}</p>
-            <button onClick={() => fetchDailyQuiz()} className="px-4 py-2 text-sm bg-foreground text-background rounded-md hover:opacity-80">Try again</button>
+            <button onClick={() => fetchDailyQuiz()} className="px-4 py-2 text-sm bg-foreground text-background rounded-md hover:opacity-80">{t("dailyQuiz.tryAgainBtn")}</button>
           </div>
         </main>
       </div>
@@ -260,11 +262,11 @@ const DailyQuizPage = () => {
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
                 <CheckCircle className="h-8 w-8 text-blue-600" />
               </div>
-              <CardTitle className="text-2xl">Quiz Already Done Today!</CardTitle>
+              <CardTitle className="text-2xl">{t("dailyQuiz.alreadyDoneTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <p className="text-muted-foreground">
-                You've already completed your daily quiz. Come back tomorrow for a fresh challenge!
+                {t("dailyQuiz.alreadyDoneDesc")}
               </p>
               {/* Countdown to next quiz */}
               {(() => {
@@ -275,16 +277,16 @@ const DailyQuizPage = () => {
                 const minutesLeft = Math.floor(((midnight.getTime() - now.getTime()) % 3600000) / 60000);
                 return (
                   <p className="text-xs text-muted-foreground text-center">
-                    ⏰ Next quiz available in {hoursLeft}h {minutesLeft}m
+                    {t("dailyQuiz.nextQuizIn").replace("{hours}", String(hoursLeft)).replace("{mins}", String(minutesLeft))}
                   </p>
                 );
               })()}
               <div className="pt-4 border-t">
                 <p className="text-sm text-muted-foreground mb-4">
-                  💪 Keep up your learning streak by reviewing vocabulary instead!
+                  {t("dailyQuiz.streakHint")}
                 </p>
                 <Button asChild className="w-full">
-                  <a href="/review">Start Review Session</a>
+                  <a href="/review">{t("dailyQuiz.startReview")}</a>
                 </Button>
               </div>
             </CardContent>
@@ -306,14 +308,14 @@ const DailyQuizPage = () => {
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 border border-black/10">
                 <Zap className="h-8 w-8 text-yellow-600" />
               </div>
-              <CardTitle className="text-2xl">Start Learning First!</CardTitle>
+              <CardTitle className="text-2xl">{t("dailyQuiz.startLearningTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                The Daily Quiz unlocks once your lessons have exercises. Complete your first lesson to get started!
+                {t("dailyQuiz.startLearningDesc")}
               </p>
               <Button asChild className="w-full">
-                <a href="/dashboard">Go to Dashboard</a>
+                <a href="/dashboard">{t("dailyQuiz.goDashboard")}</a>
               </Button>
             </CardContent>
           </Card>
@@ -333,24 +335,24 @@ const DailyQuizPage = () => {
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 border border-black/10">
                 <Zap className="h-8 w-8 text-yellow-600" />
               </div>
-              <CardTitle className="text-2xl">Daily Quiz Challenge</CardTitle>
+              <CardTitle className="text-2xl">{t("dailyQuiz.dailyChallengeTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
                 <p className="text-4xl font-bold text-amber-700">{exercises.length}</p>
-                <p className="text-muted-foreground mt-1">Questions from your completed lessons</p>
+                <p className="text-muted-foreground mt-1">{t("dailyQuiz.fromCompletedLessons")}</p>
               </div>
               <div className="pt-4 border-t">
-                <p className="text-sm text-muted-foreground mb-2">Earn</p>
+                <p className="text-sm text-muted-foreground mb-2">{t("dailyQuiz.earn")}</p>
                 <Badge variant="outline" className="text-lg px-4 py-2">
                   +30 XP
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Score 70%+ to pass and earn your bonus points!
+                {t("dailyQuiz.passNote")}
               </p>
               <Button onClick={() => setQuizStarted(true)} size="lg" className="w-full">
-                Start Quiz <ArrowRight className="ml-2 h-4 w-4" />
+                {t("dailyQuiz.startQuizBtn")} <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
           </Card>
@@ -380,7 +382,7 @@ const DailyQuizPage = () => {
                   )}
                 />
               </div>
-              <CardTitle className="text-2xl">Quiz Complete!</CardTitle>
+              <CardTitle className="text-2xl">{t("dailyQuiz.quizComplete")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
@@ -388,21 +390,19 @@ const DailyQuizPage = () => {
                   {result.score}/{result.total}
                 </p>
                 <p className="text-muted-foreground mt-1">
-                  {result.percentage}% - {result.passed ? "PASSED ✅" : "REVIEW MORE 📚"}
+                  {result.percentage}% - {result.passed ? t("dailyQuiz.passed") : t("dailyQuiz.reviewMore")}
                 </p>
               </div>
 
               <div className="pt-4 border-t space-y-3">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">XP Earned</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t("dailyQuiz.xpEarnedLabel")}</p>
                   <p className="text-2xl font-bold text-yellow-600">+{result.xpEarned} XP</p>
                 </div>
               </div>
 
               <p className="text-sm text-muted-foreground">
-                {result.passed
-                  ? "Great job! You've mastered these vocabulary items. Keep it up!"
-                  : "Review the lessons and come back for more. Every attempt makes you stronger!"}
+                {result.passed ? t("dailyQuiz.passedMsg") : t("dailyQuiz.failedMsg")}
               </p>
 
               <div className="pt-4 border-t">
@@ -440,7 +440,7 @@ const DailyQuizPage = () => {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">
-                Question {currentIndex + 1} of {exercises.length}
+                {t("dailyQuiz.questionOf").replace("{current}", String(currentIndex + 1)).replace("{total}", String(exercises.length))}
               </span>
               <span className="text-sm text-muted-foreground">
                 {Math.round(progressPercent)}%
@@ -505,7 +505,7 @@ const DailyQuizPage = () => {
               {/* Explanation shown immediately after a wrong answer */}
               {showResults[currentExercise.id] && answers[currentExercise.id] !== currentExercise.correct_index && currentExercise.explanation && (
                 <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 ring-1 ring-black/10">
-                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1">💡 Explanation</p>
+                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1">{t("dailyQuiz.explanation")}</p>
                   <p className="text-sm text-amber-800 dark:text-amber-300">{currentExercise.explanation}</p>
                 </div>
               )}
@@ -520,19 +520,19 @@ const DailyQuizPage = () => {
               disabled={currentIndex === 0}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Previous
+              {t("dailyQuiz.previous")}
             </Button>
 
             {currentIndex === exercises.length - 1 ? (
               <Button onClick={handleSubmit} disabled={submitting}>
-                {submitting ? "Submitting..." : "Submit Quiz"}
+                {submitting ? t("dailyQuiz.submitting") : t("dailyQuiz.submitQuiz")}
               </Button>
             ) : (
               <Button
                 onClick={handleNext}
                 disabled={!showResults[currentExercise.id]}
               >
-                Next <ArrowRight className="h-4 w-4 ml-2" />
+                {t("dailyQuiz.nextBtn")} <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             )}
           </div>

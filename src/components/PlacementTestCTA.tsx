@@ -2,28 +2,30 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ClipboardCheck, Brain, Target, Sparkles, Clock, CheckCircle2, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-
-const LEVELS = [
-  { label: "A1 Beginner",     color: "bg-blue-500",   width: "w-[15%]" },
-  { label: "A2 Elementary",   color: "bg-cyan-500",    width: "w-[30%]" },
-  { label: "B1 Intermediate", color: "bg-green-500",   width: "w-[50%]" },
-  { label: "B2 Upper-Int.",   color: "bg-amber-500",   width: "w-[65%]" },
-  { label: "C1 Advanced",     color: "bg-orange-500",  width: "w-[80%]" },
-  { label: "C2 Mastery",      color: "bg-rose-500",    width: "w-[100%]" },
-];
-
-const FEATURES = [
-  { icon: ClipboardCheck, label: "20 Questions" },
-  { icon: Clock,          label: "~5 Minutes" },
-  { icon: Target,         label: "TOPIK-Based" },
-  { icon: Brain,          label: "Instant Results" },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const PlacementTestCTA = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
   const [activeLevel, setActiveLevel] = useState(0);
+
+  const LEVELS = [
+    { label: t("placementCta.levelA1"),  color: "bg-blue-500",   width: "w-[15%]" },
+    { label: t("placementCta.levelA2"),  color: "bg-cyan-500",    width: "w-[30%]" },
+    { label: t("placementCta.levelB1"),  color: "bg-green-500",   width: "w-[50%]" },
+    { label: t("placementCta.levelB2"),  color: "bg-amber-500",   width: "w-[65%]" },
+    { label: t("placementCta.levelC1"),  color: "bg-orange-500",  width: "w-[80%]" },
+    { label: t("placementCta.levelC2"),  color: "bg-rose-500",    width: "w-[100%]" },
+  ];
+
+  const FEATURES = [
+    { icon: ClipboardCheck, label: t("placementCta.feature20Q") },
+    { icon: Clock,          label: t("placementCta.feature5Min") },
+    { icon: Target,         label: t("placementCta.featureTopik") },
+    { icon: Brain,          label: t("placementCta.featureInstant") },
+  ];
 
   // Scroll-triggered entrance
   useEffect(() => {
@@ -45,7 +47,7 @@ const PlacementTestCTA = () => {
       setActiveLevel(i);
     }, 400);
     return () => clearInterval(id);
-  }, [visible]);
+  }, [visible, LEVELS.length]);
 
   return (
     <section
@@ -80,20 +82,20 @@ const PlacementTestCTA = () => {
           >
             <div className="inline-flex items-center gap-2 bg-amber-100 border border-black/10 px-4 py-2 rounded-full text-sm font-semibold text-amber-700">
               <Sparkles className="h-4 w-4" />
-              Free Assessment · No Sign-up Needed
+              {t("placementCta.badge")}
             </div>
 
             <h2 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">
-              Where does your<br />
+              {t("placementCta.titleLine1")}<br />
               <span className="relative inline-block">
-                <span className="relative z-10">Korean level</span>
+                <span className="relative z-10">{t("placementCta.titleMiddle")}</span>
                 <span className="absolute bottom-1 left-0 w-full h-3 bg-amber-200/40 rounded-full -z-0" />
               </span>{" "}
-              stand?
+              {t("placementCta.titleEnd")}
             </h2>
 
             <p className="text-muted-foreground text-lg leading-relaxed">
-              Our free TOPIK-aligned test pinpoints your exact level — A1 to C2 — in just 20 questions and gives you a personalised study roadmap in under 5 minutes.
+              {t("placementCta.subtitle")}
             </p>
 
             {/* Feature pills */}
@@ -111,12 +113,12 @@ const PlacementTestCTA = () => {
               onClick={() => navigate("/placement-test")}
               className="text-base px-8 gap-2 h-12 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow"
             >
-              Take the Free Test
+              {t("placementCta.cta")}
               <ChevronRight className="h-4 w-4" />
             </Button>
 
             <p className="text-xs text-muted-foreground">
-              ✓ No account needed &nbsp;·&nbsp; ✓ Instant results &nbsp;·&nbsp; ✓ 100% free
+              {t("placementCta.note")}
             </p>
           </div>
 
@@ -135,8 +137,8 @@ const PlacementTestCTA = () => {
                     <ClipboardCheck className="h-5 w-5 text-primary-foreground" />
                   </div>
                   <div>
-                    <p className="text-primary-foreground font-bold text-sm">TOPIK Placement Test</p>
-                    <p className="text-primary-foreground/70 text-xs">Klovers Korean Academy</p>
+                    <p className="text-primary-foreground font-bold text-sm">{t("placementCta.cardTitle")}</p>
+                    <p className="text-primary-foreground/70 text-xs">{t("placementCta.cardSubtitle")}</p>
                   </div>
                 </div>
 
@@ -150,7 +152,7 @@ const PlacementTestCTA = () => {
                         </span>
                         {idx === activeLevel && (
                           <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium animate-pulse border border-black/10">
-                            Detecting…
+                            {t("placementCta.detecting")}
                           </span>
                         )}
                         {idx < activeLevel && (
@@ -170,14 +172,14 @@ const PlacementTestCTA = () => {
 
                 {/* Card footer */}
                 <div className="px-5 py-3 bg-muted/50 border-t border-border flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">20 questions · TOPIK-aligned</span>
-                  <span className="text-xs font-bold text-amber-700">FREE</span>
+                  <span className="text-xs text-muted-foreground">{t("placementCta.cardFooter")}</span>
+                  <span className="text-xs font-bold text-amber-700">{t("placementCta.free")}</span>
                 </div>
               </div>
 
               {/* Floating badge */}
               <div className="absolute -top-3 -right-3 bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                ✓ Instant
+                {t("placementCta.instant")}
               </div>
             </div>
           </div>

@@ -12,10 +12,12 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 import { LEVEL_SELECT_OPTIONS, normalizeLevel, getLevelShortLabel } from "@/constants/levels";
+import { useLanguage } from "@/contexts/LanguageContext";
 // Keep the canonical short keys (hangul, l1 … l6) as values so the RPC
 // receives exactly what schedule_packages.level contains. Labels stay friendly.
 const LEVELS = LEVEL_SELECT_OPTIONS;
-const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAY_NAMES_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAY_NAMES_AR = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
 import { formatTime } from "@/lib/admin-utils";
 
@@ -39,6 +41,8 @@ interface SchedulePackage {
 }
 
 const ResubmitSchedulePage = () => {
+  const { t, language } = useLanguage();
+  const DAY_NAMES = language === "ar" ? DAY_NAMES_AR : DAY_NAMES_EN;
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "";
 
@@ -57,7 +61,7 @@ const ResubmitSchedulePage = () => {
   // Validate token via secure RPC
   useEffect(() => {
     if (!token) {
-      setError("No token provided. Please use the link sent to your email.");
+      setError(t("resubmitSchedule.errorNoToken"));
       setLoading(false);
       return;
     }
@@ -67,18 +71,18 @@ const ResubmitSchedulePage = () => {
         { _token: token }
       );
       if (err || !data || (data as any[]).length === 0) {
-        setError("Invalid or expired link. Please contact support.");
+        setError(t("resubmitSchedule.errorInvalid"));
         setLoading(false);
         return;
       }
       const req = (data as any[])[0] as ResubRequest;
       if (req.status !== "pending") {
-        setError("This schedule submission has already been completed.");
+        setError(t("resubmitSchedule.errorAlreadyDone"));
         setLoading(false);
         return;
       }
       if (new Date(req.expires_at) < new Date()) {
-        setError("This link has expired. Please contact your teacher for a new link.");
+        setError(t("resubmitSchedule.errorExpired"));
         setLoading(false);
         return;
       }
@@ -110,7 +114,7 @@ const ResubmitSchedulePage = () => {
     setSubmitting(true);
     try {
       const pkg = packages.find(p => p.id === selectedPackageId);
-      if (!pkg) throw new Error("Package not found");
+      if (!pkg) throw new Error(t("resubmitSchedule.errorPackageNotFound"));
 
       const normalizedLvl = normalizeLevel(selectedLevel);
       const dayName = DAY_NAMES[pkg.day_of_week];
@@ -131,9 +135,9 @@ const ResubmitSchedulePage = () => {
       if (rpcErr) throw new Error(rpcErr.message);
 
       setSubmitted(true);
-      toast({ title: "Schedule submitted!", description: "Your schedule preferences have been saved." });
+      toast({ title: t("resubmitSchedule.savedTitle"), description: t("resubmitSchedule.savedDesc") });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: err.message, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -178,8 +182,8 @@ const ResubmitSchedulePage = () => {
           <Card>
             <CardContent className="pt-6 text-center space-y-4">
               <CheckCircle2 className="h-12 w-12 text-primary mx-auto" />
-              <h2 className="text-xl font-bold text-foreground">Schedule Submitted!</h2>
-              <p className="text-muted-foreground">Your schedule preferences have been saved. Your teacher will confirm your class schedule soon.</p>
+              <h2 className="text-xl font-bold text-foreground">{t("resubmitSchedule.successTitle")}</h2>
+              <p className="text-muted-foreground">{t("resubmitSchedule.successDesc")}</p>
             </CardContent>
           </Card>
         </main>
@@ -195,18 +199,18 @@ const ResubmitSchedulePage = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">
-              <CalendarDays className="h-6 w-6" /> Update Your Schedule
+              <CalendarDays className="h-6 w-6" /> {t("resubmitSchedule.pageTitle")}
             </CardTitle>
             <p className="text-muted-foreground text-sm">
-              Hi {request?.email}! Please select your Korean level and preferred class schedule.
+              {t("resubmitSchedule.greeting").replace("{email}", request?.email || "")}
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Level */}
             <div className="space-y-2">
-              <Label>Korean Level</Label>
+              <Label>{t("resubmitSchedule.koreanLevel")}</Label>
               <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                <SelectTrigger><SelectValue placeholder="Select your level" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("resubmitSchedule.selectLevelPlaceholder")} /></SelectTrigger>
                 <SelectContent>
                   {LEVELS.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
                 </SelectContent>
@@ -215,7 +219,7 @@ const ResubmitSchedulePage = () => {
 
             {/* Timezone */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2"><Clock className="h-4 w-4" /> Timezone</Label>
+              <Label className="flex items-center gap-2"><Clock className="h-4 w-4" /> {t("resubmitSchedule.timezone")}</Label>
               <Select value={timezone} onValueChange={setTimezone}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -229,9 +233,9 @@ const ResubmitSchedulePage = () => {
             {/* Package selection */}
             {selectedLevel && (
               <div className="space-y-2">
-                <Label>Preferred Class Slot</Label>
+                <Label>{t("resubmitSchedule.preferredSlot")}</Label>
                 {packages.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic">No slots available for this level. Please contact support.</p>
+                  <p className="text-sm text-muted-foreground italic">{t("resubmitSchedule.noSlots")}</p>
                 ) : (
                   <div className="grid gap-2">
                     {packages.map(pkg => (
@@ -251,7 +255,7 @@ const ResubmitSchedulePage = () => {
                             <div className="flex items-center gap-3 text-sm text-muted-foreground">
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3.5 w-3.5" />
-                                {formatTime(pkg.start_time)} · {pkg.duration_min}min
+                                {formatTime(pkg.start_time)} · {pkg.duration_min}{t("mySchedule.minutes")}
                               </span>
                               <span className="text-xs">{pkg.timezone.replace(/_/g, " ")}</span>
                             </div>
@@ -272,9 +276,9 @@ const ResubmitSchedulePage = () => {
               onClick={handleSubmit}
             >
               {submitting ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...</>
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("resubmitSchedule.saving")}</>
               ) : (
-                "Submit Schedule"
+                t("resubmitSchedule.submitScheduleBtn")
               )}
             </Button>
           </CardContent>

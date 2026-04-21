@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -16,6 +16,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { LEVEL_SELECT_OPTIONS } from "@/constants/levels";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const COUNTRIES = [
   "Egypt", "Saudi Arabia", "UAE", "Kuwait", "Qatar", "Bahrain", "Oman",
@@ -24,28 +25,26 @@ const COUNTRIES = [
   "Canada", "Australia", "Other",
 ];
 
-// Level options — uses the canonical short keys (hangul, l1…l6) from the
-// single source of truth in @/constants/levels. Two extra "starting point"
-// options are kept for users who can't self-assess to a TOPIK band yet.
-const LEVELS = [
-  { value: "absolute_beginner", label: "Absolute Beginner (never studied Korean)" },
-  { value: "beginner", label: "Beginner (knows Hangul)" },
-  ...LEVEL_SELECT_OPTIONS,
-];
-
-const GOALS = [
-  "Travel to Korea",
-  "Watch K-dramas / K-pop without subtitles",
-  "Study or work in Korea",
-  "Make Korean friends",
-  "Pass TOPIK exam",
-  "General interest",
-  "Other",
-];
-
 const CompleteProfilePage = () => {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const emailFromUrl = searchParams.get("email") || "";
+
+  const LEVELS = [
+    { value: "absolute_beginner", label: t("completeProfile.levelAbsoluteBeginner") },
+    { value: "beginner", label: t("completeProfile.levelKnowsHangul") },
+    ...LEVEL_SELECT_OPTIONS,
+  ];
+
+  const GOALS = [
+    { value: "Travel to Korea", label: t("completeProfile.goal1") },
+    { value: "Watch K-dramas / K-pop without subtitles", label: t("completeProfile.goal2") },
+    { value: "Study or work in Korea", label: t("completeProfile.goal3") },
+    { value: "Make Korean friends", label: t("completeProfile.goal4") },
+    { value: "Pass TOPIK exam", label: t("completeProfile.goal5") },
+    { value: "General interest", label: t("completeProfile.goal6") },
+    { value: "Other", label: t("completeProfile.goal7") },
+  ];
 
   const [form, setForm] = useState({
     name: "",
@@ -63,7 +62,7 @@ const CompleteProfilePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.email || !form.name.trim()) {
-      toast({ title: "Please fill in your name and email.", variant: "destructive" });
+      toast({ title: t("completeProfile.fillNameEmail"), variant: "destructive" });
       return;
     }
 
@@ -83,11 +82,11 @@ const CompleteProfilePage = () => {
         },
       });
 
-      if (error) throw new Error(error.message || "Failed to save. Please try again.");
+      if (error) throw new Error(error.message || t("completeProfile.saveFailedGeneric"));
 
       setDone(true);
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: err.message, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -102,19 +101,18 @@ const CompleteProfilePage = () => {
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Profile Updated!</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t("completeProfile.doneTitle")}</h1>
             <p className="text-muted-foreground leading-relaxed">
-              Thank you! Your information has been saved. Our team will be in touch
-              soon to match you with the right Korean class.
+              {t("completeProfile.doneDesc")}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
               <Button asChild>
                 <Link to="/enroll">
-                  Browse Courses <ArrowRight className="h-4 w-4 ml-2" />
+                  {t("completeProfile.browseCourses")} <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
               </Button>
               <Button asChild variant="outline">
-                <Link to="/">Go to Home</Link>
+                <Link to="/">{t("completeProfile.goHome")}</Link>
               </Button>
             </div>
           </div>
@@ -132,11 +130,11 @@ const CompleteProfilePage = () => {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-1.5 mb-4">
-              <span className="text-primary text-outlined text-sm font-semibold">🇰🇷 Complete Your Profile</span>
+              <span className="text-primary text-outlined text-sm font-semibold">{t("completeProfile.badge")}</span>
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">One step closer to Korean!</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{t("completeProfile.pageTitle")}</h1>
             <p className="text-muted-foreground">
-              Fill in a few details so we can match you with the perfect class.
+              {t("completeProfile.pageSubtitle")}
             </p>
           </div>
 
@@ -145,10 +143,10 @@ const CompleteProfilePage = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Name */}
               <div className="space-y-1.5">
-                <Label htmlFor="name">Your Name *</Label>
+                <Label htmlFor="name">{t("completeProfile.nameLabel")}</Label>
                 <Input
                   id="name"
-                  placeholder="e.g. Sara Ali"
+                  placeholder={t("completeProfile.namePlaceholder")}
                   value={form.name}
                   onChange={(e) => set("name")(e.target.value)}
                   required
@@ -157,11 +155,11 @@ const CompleteProfilePage = () => {
 
               {/* Email */}
               <div className="space-y-1.5">
-                <Label htmlFor="email">Email Address *</Label>
+                <Label htmlFor="email">{t("completeProfile.emailLabel")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t("completeProfile.emailPlaceholder")}
                   value={form.email}
                   onChange={(e) => set("email")(e.target.value)}
                   readOnly={!!emailFromUrl}
@@ -172,10 +170,10 @@ const CompleteProfilePage = () => {
 
               {/* Country */}
               <div className="space-y-1.5">
-                <Label>Country</Label>
+                <Label>{t("completeProfile.countryLabel")}</Label>
                 <Select value={form.country} onValueChange={set("country")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select your country" />
+                    <SelectValue placeholder={t("completeProfile.countryPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {COUNTRIES.map((c) => (
@@ -187,10 +185,10 @@ const CompleteProfilePage = () => {
 
               {/* Level */}
               <div className="space-y-1.5">
-                <Label>Korean Level</Label>
+                <Label>{t("completeProfile.levelLabel")}</Label>
                 <Select value={form.level} onValueChange={set("level")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="What's your current level?" />
+                    <SelectValue placeholder={t("completeProfile.levelPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {LEVELS.map((l) => (
@@ -202,27 +200,27 @@ const CompleteProfilePage = () => {
 
               {/* Goal */}
               <div className="space-y-1.5">
-                <Label>Learning Goal</Label>
+                <Label>{t("completeProfile.goalLabel")}</Label>
                 <Select value={form.goal} onValueChange={set("goal")}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Why are you learning Korean?" />
+                    <SelectValue placeholder={t("completeProfile.goalPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {GOALS.map((g) => (
-                      <SelectItem key={g} value={g}>{g}</SelectItem>
+                      <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={submitting}>
-                {submitting ? "Saving…" : "Save My Profile"}
+                {submitting ? t("completeProfile.savingButton") : t("completeProfile.saveButton")}
                 {!submitting && <ArrowRight className="h-4 w-4 ml-2" />}
               </Button>
             </form>
 
             <p className="text-center text-xs text-muted-foreground">
-              Takes 1 minute · We never share your information
+              {t("completeProfile.privacyNote")}
             </p>
           </div>
         </div>

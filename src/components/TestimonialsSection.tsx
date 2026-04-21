@@ -1,4 +1,5 @@
 import { Star, Facebook } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const reviews = [
   {
@@ -164,6 +165,7 @@ const ScrollRow = ({
 };
 
 const TestimonialsSection = () => {
+  const { t } = useLanguage();
   return (
     <section className="py-20 md:py-28 bg-background overflow-hidden">
       <div className="container mx-auto px-4 mb-10 text-center">
@@ -176,15 +178,15 @@ const TestimonialsSection = () => {
         >
           <Facebook className="h-4 w-4 text-blue-600" />
           <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
-            100% Recommend · 16 Facebook Reviews
+            {t("testimonialsSection.badge")}
           </span>
         </a>
 
         <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground mb-3">
-          What Our Students Say
+          {t("testimonialsSection.title")}
         </h2>
         <p className="text-muted-foreground max-w-xl mx-auto text-base">
-          Real reviews from real students — in their own words 🇰🇷
+          {t("testimonialsSection.subtitle")}
         </p>
 
         {/* Star summary */}
@@ -195,7 +197,7 @@ const TestimonialsSection = () => {
             ))}
           </div>
           <span className="text-lg font-bold text-foreground">4.9</span>
-          <span className="text-muted-foreground text-sm">/ 5.0 · 1,000+ students</span>
+          <span className="text-muted-foreground text-sm">{t("testimonialsSection.ratingSuffix")}</span>
         </div>
       </div>
 

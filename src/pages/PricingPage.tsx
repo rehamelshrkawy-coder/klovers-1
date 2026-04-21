@@ -12,8 +12,9 @@ import { Link } from "react-router-dom";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { trackAndOpenWhatsApp, logLeadEvent } from "@/lib/leadTracking";
 import { track } from "@/lib/tracking";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const faqs = [
+const englishFaqs = [
   {
     q: "Do I need any experience to start?",
     a: "Absolutely not. We start from the very basics — Hangul letters, pronunciation, and everyday phrases. If you're a total beginner you'll be in the right place.",
@@ -41,15 +42,24 @@ const faqs = [
 ];
 
 const FAQ = () => {
+  const { t } = useLanguage();
   const [open, setOpen] = useState<number | null>(null);
+  const faqs = [
+    { q: t("pricingPage.faq1Q"), a: t("pricingPage.faq1A") },
+    { q: t("pricingPage.faq2Q"), a: t("pricingPage.faq2A") },
+    { q: t("pricingPage.faq3Q"), a: t("pricingPage.faq3A") },
+    { q: t("pricingPage.faq4Q"), a: t("pricingPage.faq4A") },
+    { q: t("pricingPage.faq5Q"), a: t("pricingPage.faq5A") },
+    { q: t("pricingPage.faq6Q"), a: t("pricingPage.faq6A") },
+  ];
   return (
     <section className="py-20 md:py-28 bg-muted/40">
       <div className="container mx-auto px-4 max-w-2xl">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-2">
-          Common Questions
+          {t("pricingPage.faqTitle")}
         </h2>
         <p className="text-center text-muted-foreground text-sm mb-10">
-          Everything you need to know before enrolling
+          {t("pricingPage.faqSubtitle")}
         </p>
         <div className="space-y-3">
           {faqs.map((faq, i) => (
@@ -79,6 +89,7 @@ const FAQ = () => {
 };
 
 const ExitNudge = () => {
+  const { t } = useLanguage();
   const [visible, setVisible] = useState(false);
   const dismissed = useRef(false);
   const shownLogged = useRef(false);
@@ -125,7 +136,7 @@ const ExitNudge = () => {
 
   const handleWaClick = () => {
     track.custom("exit_intent_clicked", { page: "pricing", cta: "whatsapp" });
-    const url = `${WHATSAPP_BASE}?text=${encodeURIComponent("Hi! I saw the pricing page and I'd like help choosing a plan.")}`;
+    const url = `${WHATSAPP_BASE}?text=${encodeURIComponent(t("pricingPage.exitWaMessage"))}`;
     trackAndOpenWhatsApp(url, { cta_label: "pricing_exit_intent" });
   };
 
@@ -136,16 +147,16 @@ const ExitNudge = () => {
       <div className="bg-card text-card-foreground rounded-2xl shadow-2xl border border-border w-full max-w-md p-6 relative animate-in slide-in-from-bottom-4 duration-300">
         <button
           onClick={() => setVisible(false)}
-          aria-label="Dismiss"
+          aria-label={t("pricingPage.exitDismiss")}
           className="absolute top-3 right-3 text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
         <div className="text-center space-y-1 mb-4">
           <div className="text-4xl mb-2">🎁</div>
-          <h3 className="text-lg font-bold text-foreground">Not ready to pick a plan?</h3>
+          <h3 className="text-lg font-bold text-foreground">{t("pricingPage.exitTitle")}</h3>
           <p className="text-sm text-muted-foreground leading-snug">
-            Try a <strong className="text-foreground">free 20-min trial class</strong> first — no payment, no commitment. Meet a teacher and see if we're the right fit.
+            {t("pricingPage.exitBodyPre")} <strong className="text-foreground">{t("pricingPage.exitBodyHighlight")}</strong> {t("pricingPage.exitBodyPost")}
           </p>
         </div>
         <div className="space-y-2">
@@ -154,17 +165,17 @@ const ExitNudge = () => {
             onClick={handleTrialClick}
             className="block w-full bg-primary text-primary-foreground text-center font-semibold py-3 rounded-xl hover:bg-primary/90 transition-colors"
           >
-            Book My Free Trial →
+            {t("pricingPage.exitCta")}
           </Link>
           <button
             onClick={handleWaClick}
             className="w-full text-xs text-muted-foreground hover:text-foreground py-1"
           >
-            Or chat with us on WhatsApp
+            {t("pricingPage.exitChat")}
           </button>
         </div>
         <p className="text-[10px] text-muted-foreground text-center mt-3">
-          ⭐️ 1,000+ Egyptian students · full refund after first paid class if you don't love it
+          {t("pricingPage.exitFooter")}
         </p>
       </div>
     </div>
@@ -220,7 +231,7 @@ const PricingPage = () => {
     faqEl.textContent = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "FAQPage",
-      "mainEntity": faqs.map((f) => ({
+      "mainEntity": englishFaqs.map((f) => ({
         "@type": "Question",
         "name": f.q,
         "acceptedAnswer": { "@type": "Answer", "text": f.a }

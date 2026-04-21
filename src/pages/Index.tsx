@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import WhyLearnKorean from "@/components/WhyLearnKorean";
@@ -26,6 +27,7 @@ const SectionFallback = () => (
 );
 
 const Index = () => {
+  const { t } = useLanguage();
   useSEO({ title: "Learn Korean Online", description: "Join Klovers Korean Lovers Academy. Interactive online Korean lessons, placement tests, and gamified learning for all levels.", canonical: "https://kloversegy.com/" });
 
   useEffect(() => {
@@ -85,14 +87,14 @@ const Index = () => {
         <div className="bg-secondary text-secondary-foreground">
           <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center">
             <div className="flex items-center gap-2">
-              <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">AI-Powered</span>
-              <span className="text-sm font-medium">Korean Interview Training — Personalized Q&A</span>
+              <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">{t("homeBanner.badge")}</span>
+              <span className="text-sm font-medium">{t("homeBanner.text")}</span>
             </div>
             <Link
               to="/interview-training"
               className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-[#E6E600] transition-colors"
             >
-              Start Free Interview Prep
+              {t("homeBanner.cta")}
             </Link>
           </div>
         </div>

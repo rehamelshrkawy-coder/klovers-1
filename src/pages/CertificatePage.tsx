@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const LEVEL_LABELS: Record<string, string> = {
   "A0": "Complete Beginner",
@@ -21,6 +22,7 @@ const LEVEL_LABELS: Record<string, string> = {
 };
 
 const CertificatePage = () => {
+  const { t } = useLanguage();
   const [params] = useSearchParams();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [name, setName] = useState("Student");
@@ -212,11 +214,11 @@ const CertificatePage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center py-10 px-4">
-      <h1 className="text-foreground text-2xl font-bold mb-2">Your KLovers Certificate</h1>
-      <p className="text-muted-foreground text-sm mb-6">Download and share on Instagram, Facebook, or LinkedIn!</p>
+      <h1 className="text-foreground text-2xl font-bold mb-2">{t("certificatePage.pageTitle")}</h1>
+      <p className="text-muted-foreground text-sm mb-6">{t("certificatePage.pageSubtitle")}</p>
 
       {loading ? (
-        <div className="text-muted-foreground">Generating certificate…</div>
+        <div className="text-muted-foreground">{t("certificatePage.generating")}</div>
       ) : (
         <>
           <canvas
@@ -225,9 +227,9 @@ const CertificatePage = () => {
             style={{ border: "2px solid rgba(255,255,0,0.3)" }}
           />
           <Button onClick={download} className="mt-6 gap-2 text-base font-bold px-8" size="lg">
-            <Download className="h-5 w-5" /> Download Certificate (PNG)
+            <Download className="h-5 w-5" /> {t("certificatePage.downloadPng")}
           </Button>
-          <p className="text-muted-foreground text-xs mt-3">Right-click → Save image, or use the button above</p>
+          <p className="text-muted-foreground text-xs mt-3">{t("certificatePage.rightClickHint")}</p>
         </>
       )}
     </div>

@@ -5,8 +5,10 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, BookOpen, Zap, Users, Target, TrendingUp, ArrowRight, Clock, Award } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const TopikExamPage = () => {
+  const { t } = useLanguage();
   useSEO({
     title: "TOPIK Exam Preparation 2026 | Complete Study Guide & Practice Tests",
     description: "Master the TOPIK Korean proficiency exam with our complete 2026 guide. Learn test format, scoring, registration deadlines, and proven strategies to reach your target TOPIK level (1-6).",
@@ -103,19 +105,19 @@ const TopikExamPage = () => {
         {/* Hero */}
         <section className="pt-24 pb-16 bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-950/20 dark:to-teal-950/20">
           <div className="container mx-auto px-4 max-w-4xl">
-            <Badge className="mb-4" variant="outline">TOPIK Preparation</Badge>
+            <Badge className="mb-4" variant="outline">{t("topikExam.badge")}</Badge>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
-              Master the TOPIK Exam in 2026
+              {t("topikExam.heroTitle")}
             </h1>
             <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
-              Complete 2026 guide to TOPIK preparation. Learn exam format, scoring, strategies, and proven study methods to reach your target level (1-6).
+              {t("topikExam.heroSubtitle")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild>
-                <a href="/placement-test">Take Free Assessment</a>
+                <a href="/placement-test">{t("topikExam.ctaTest")}</a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="/enroll-now">Start TOPIK Prep Course</a>
+                <a href="/enroll-now">{t("topikExam.ctaCourse")}</a>
               </Button>
             </div>
           </div>
