@@ -154,6 +154,10 @@ const AdminDashboard = () => {
   // Lead count: "new" status = hasn't been contacted yet
   const newLeadsCount = useMemo(() => leads.filter(l => (l.status ?? "new") === "new").length, [leads]);
 
+  // Needed by the visibleStudentCols useState initializer below — must be declared first
+  // to avoid a temporal-dead-zone ReferenceError on the very first render.
+  const isMobile = useIsMobile();
+
   // Students table column visibility — persisted
   type StudentCol = "country" | "level" | "attendance" | "source" | "joined";
   const ALL_STUDENT_COLS: StudentCol[] = ["country", "level", "attendance", "source", "joined"];
@@ -221,7 +225,6 @@ const AdminDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showOverdueOnly, setShowOverdueOnly] = useState(false);
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
 
   // Derived leadsByEmail map for level fallback
   const leadsByEmail = useMemo(() => {
