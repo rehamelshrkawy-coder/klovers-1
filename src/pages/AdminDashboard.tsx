@@ -116,6 +116,8 @@ import { useEnrollments } from "@/hooks/admin/useEnrollments";
 import { useAttendanceRequests } from "@/hooks/admin/useAttendanceRequests";
 import { useReferralStats } from "@/hooks/admin/useReferralStats";
 import { useTrialStats } from "@/hooks/admin/useTrialStats";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { formatMoney, formatDate } from "@/lib/format";
 
 const AdminDashboard = () => {
   const queryClient = useQueryClient();
@@ -530,10 +532,15 @@ const AdminDashboard = () => {
   const stripeCount = overviewRows.filter(u => u.source_label === "Stripe").length;
   const egyptCount = overviewRows.filter(u => u.source_label === "Egypt").length;
 
+  // Debounced search values so typing doesn't lag the filter
+  const debouncedStudentSearch = useDebouncedValue(studentSearch, 200);
+  const debouncedEnrollmentSearch = useDebouncedValue(enrollmentSearch, 200);
+
   // Filtered + searched users from view
   const filteredUsers = useMemo(() => {
+    const q = debouncedStudentSearch.toLowerCase();
     return overviewRows.filter(u => {
-      const matchesSearch = !studentSearch || u.name?.toLowerCase().includes(studentSearch.toLowerCase()) || u.email?.toLowerCase().includes(studentSearch.toLowerCase());
+      const matchesSearch = !q || u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q);
       const matchesFilter = studentFilter === "confirmed" ? ["ACTIVE", "COMPLETED", "LOCKED"].includes(u.derived_status)
         : studentFilter === "leads" ? u.derived_status === "LEAD"
         : studentFilter === "stripe" ? u.source_label === "Stripe"
@@ -543,7 +550,7 @@ const AdminDashboard = () => {
       const matchesLevel = levelFilter === "all" || normalizeLevel(u.level || "") === levelFilter;
       return matchesSearch && matchesFilter && matchesLevel;
     });
-  }, [overviewRows, studentSearch, studentFilter, levelFilter]);
+  }, [overviewRows, debouncedStudentSearch, studentFilter, levelFilter]);
 
   // Sorted users (after filter, before pagination)
   const sortedUsers = useMemo(() => {
@@ -564,9 +571,9 @@ const AdminDashboard = () => {
   const totalPages = Math.max(1, Math.ceil(sortedUsers.length / PAGE_SIZE));
   const pagedUsers = sortedUsers.slice(studentPage * PAGE_SIZE, (studentPage + 1) * PAGE_SIZE);
 
-  // Reset pages when filters change
-  useEffect(() => { setStudentPage(0); }, [studentSearch, studentFilter, levelFilter]);
-  useEffect(() => { setEnrollmentPage(0); }, [enrollmentSearch]);
+  // Reset pages when filters change (debounced so fast typing doesn't thrash)
+  useEffect(() => { setStudentPage(0); }, [debouncedStudentSearch, studentFilter, levelFilter]);
+  useEffect(() => { setEnrollmentPage(0); }, [debouncedEnrollmentSearch]);
 
   const overdueCount = overviewRows.filter(u => u.amount_due > 0).length;
   const studentFilterOptions = [
@@ -1045,7 +1052,14 @@ const AdminDashboard = () => {
                     <div className={`flex gap-2 ${isMobile ? "flex-col" : "flex-row"}`}>
                       <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="Search by name or email..." value={studentSearch} onChange={(e) => setStudentSearch(e.target.value)} className="pl-9" />
+                        <Input
+                          placeholder="Search by name or email..."
+                          value={studentSearch}
+                          onChange={(e) => setStudentSearch(e.target.value)}
+                          className="pl-9"
+                          aria-label="Search students by name or email"
+                          type="search"
+                        />
                       </div>
                       <Select value={levelFilter} onValueChange={setLevelFilter}>
                         <SelectTrigger className="w-full sm:w-40">
@@ -1251,11 +1265,11 @@ const AdminDashboard = () => {
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <a
-                                        href={`mailto:${u.email}?subject=Outstanding Balance - Klovers&body=Hi ${(u.name || "").split(" ")[0]},%0A%0AYou have an outstanding balance of ${u.currency === "EGP" ? "LE" : "$"}${Math.round(u.amount_due).toLocaleString()}. Please arrange payment at your earliest convenience.%0A%0ABest,%0AKlovers Team`}
+                                        href={`mailto:${u.email}?subject=Outstanding Balance - Klovers&body=Hi ${(u.name || "").split(" ")[0]},%0A%0AYou have an outstanding balance of ${formatMoney(u.amount_due, u.currency)}. Please arrange payment at your earliest convenience.%0A%0ABest,%0AKlovers Team`}
                                         className="inline-flex items-center gap-1 text-destructive hover:text-destructive/80 transition-colors text-xs font-semibold"
                                         aria-label={`Send payment request to ${u.name}`}
                                       >
-                                        {u.currency === "EGP" ? "LE" : "$"}{Math.round(u.amount_due).toLocaleString()}
+                                        {formatMoney(u.amount_due, u.currency)}
                                         <Mail className="h-3 w-3 flex-shrink-0" />
                                       </a>
                                     </TooltipTrigger>
@@ -1267,7 +1281,7 @@ const AdminDashboard = () => {
                             <TableCell className="py-3 px-3 text-right font-mono">
                               {u.remaining_balance > 0 ? (
                                 <span className="text-xs font-medium text-green-700 dark:text-green-400">
-                                  {u.currency === "EGP" ? "LE" : "$"}{u.remaining_balance.toFixed(2)}
+                                  {formatMoney(u.remaining_balance, u.currency)}
                                 </span>
                               ) : "—"}
                             </TableCell>
@@ -1292,7 +1306,7 @@ const AdminDashboard = () => {
                               </TableCell>
                             )}
                             {visibleStudentCols.has("joined") && (
-                              <TableCell className="py-3 px-3 text-muted-foreground text-xs">{new Date(u.joined_at).toLocaleDateString()}</TableCell>
+                              <TableCell className="py-3 px-3 text-muted-foreground text-xs">{formatDate(u.joined_at)}</TableCell>
                             )}
                             <TableCell className="py-3 px-3 w-10" onClick={(e) => e.stopPropagation()}>
                               <AlertDialog>
@@ -1422,7 +1436,14 @@ const AdminDashboard = () => {
                   <div className="flex gap-2 mb-3">
                     <div className="relative flex-1">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input placeholder="Search by name, email or plan…" value={enrollmentSearch} onChange={(e) => setEnrollmentSearch(e.target.value)} className="pl-9" />
+                      <Input
+                        placeholder="Search by name, email or plan…"
+                        value={enrollmentSearch}
+                        onChange={(e) => setEnrollmentSearch(e.target.value)}
+                        className="pl-9"
+                        aria-label="Search enrollments by name, email or plan"
+                        type="search"
+                      />
                     </div>
                     <Button
                       size="sm"
@@ -1481,8 +1502,8 @@ const AdminDashboard = () => {
                       const isActionable = e.approval_status === "PENDING_PAYMENT" || e.approval_status === "UNDER_REVIEW";
                       if (!showLegacyEnrollments && isLegacy(e) && !isActionable) return false;
                       if (showOverdueOnly && !e.negative_since) return false;
-                      if (enrollmentSearch) {
-                        const q = enrollmentSearch.toLowerCase();
+                      if (debouncedEnrollmentSearch) {
+                        const q = debouncedEnrollmentSearch.toLowerCase();
                         const name = e.profiles?.name?.toLowerCase() ?? "";
                         const email = e.profiles?.email?.toLowerCase() ?? "";
                         const plan = e.plan_type?.toLowerCase() ?? "";
@@ -1548,7 +1569,7 @@ const AdminDashboard = () => {
                                     })()}
                                   </div>
                                   <p className="text-sm text-muted-foreground">
-                                    {e.plan_type} · {e.duration}mo · {e.classes_included} classes · {e.currency === 'EGP' ? `${Math.round(e.amount).toLocaleString()} EGP` : `$${Math.round(e.amount)}`} · Ref: {e.tx_ref || '—'}
+                                    {e.plan_type} · {e.duration}mo · {e.classes_included} classes · {formatMoney(e.amount, e.currency)} · Ref: {e.tx_ref || '—'}
                                     {e.payment_method && <> · <span className="font-medium">{e.payment_method === 'vodafone_cash' ? 'Vodafone Cash' : e.payment_method === 'instapay' ? 'InstaPay' : e.payment_method === 'bank_transfer' ? 'Bank Transfer' : e.payment_method}</span></>}
                                     {e.currency === 'EGP' && !e.payment_method && (e.approval_status === 'PENDING_PAYMENT' || e.approval_status === 'UNDER_REVIEW') && (
                                       <span className="inline-flex items-center gap-1.5 ml-2">
