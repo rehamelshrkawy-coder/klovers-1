@@ -28,6 +28,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { LogOut, Search, Download, Trash2, Check, X, Eye, Undo2, AlertCircle, Bell, ChevronLeft, ChevronRight, Pencil, Mail, Eraser, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Copy, Clock, Tag, UserPlus, Loader2, Image, Trophy, TrendingUp } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -127,6 +129,14 @@ const AdminDashboard = () => {
 
   // Lead count: "new" status = hasn't been contacted yet
   const newLeadsCount = useMemo(() => leads.filter(l => (l.status ?? "new") === "new").length, [leads]);
+
+  // Hero "Insights" collapsed by default — restore last choice from localStorage
+  const [insightsOpen, setInsightsOpen] = useState<boolean>(() => {
+    try { return localStorage.getItem("admin:insightsOpen") === "1"; } catch { return false; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem("admin:insightsOpen", insightsOpen ? "1" : "0"); } catch { /* ignore */ }
+  }, [insightsOpen]);
 
 
   const loading = leadsLoading || enrollmentsLoading || overviewLoading || attendanceLoading;
@@ -563,7 +573,27 @@ const AdminDashboard = () => {
   const activeGroup = TAB_GROUPS.find(g => g.tabs.includes(adminTab))?.id ?? "ops";
   const [tabGroup, setTabGroup] = useState<string>(activeGroup);
   useEffect(() => { setTabGroup(activeGroup); }, [activeGroup]);
-  const inActiveGroup = (tab: string) => TAB_GROUPS.find(g => g.id === tabGroup)?.tabs.includes(tab);
+  const currentGroup = useMemo(() => TAB_GROUPS.find(g => g.id === tabGroup), [tabGroup]);
+  const inActiveGroup = useCallback((tab: string) => !!currentGroup?.tabs.includes(tab), [currentGroup]);
+
+  // Alt+1..4 jump between groups; ignore if user is typing in an input.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const target = e.target as HTMLElement | null;
+      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+      if (target?.isContentEditable) return;
+      const idx = ["1", "2", "3", "4"].indexOf(e.key);
+      if (idx < 0) return;
+      const group = TAB_GROUPS[idx];
+      if (!group) return;
+      e.preventDefault();
+      setTabGroup(group.id);
+      setAdminTab(group.tabs[0]);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [setAdminTab]);
 
   return (
     <TooltipProvider>
@@ -622,10 +652,22 @@ const AdminDashboard = () => {
             onPendingClick={() => setAdminTab("enrollments")}
           />
 
-          <StudentHealthPanel overviewRows={overviewRows} />
-
-          {/* Referral program stats */}
-          {(referralStats.total > 0 || referralStats.totalClicks > 0) && (
+          {/* Collapsible Insights — student health + referral program */}
+          {(overviewRows.length > 0 || referralStats.total > 0 || referralStats.totalClicks > 0) && (
+            <Collapsible open={insightsOpen} onOpenChange={setInsightsOpen}>
+              <CollapsibleTrigger className="w-full flex items-center justify-between gap-3 rounded-xl border border-border bg-card hover:bg-muted/50 px-4 py-2.5 text-sm transition-colors">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium text-foreground">Insights</span>
+                  <span className="text-xs text-muted-foreground">
+                    Student health · Referrals ({referralStats.total})
+                  </span>
+                </div>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", insightsOpen && "rotate-180")} />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-6 pt-4 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
+                <StudentHealthPanel overviewRows={overviewRows} />
+                {(referralStats.total > 0 || referralStats.totalClicks > 0) && (
             <div className="rounded-2xl border border-border bg-card px-4 py-4 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-xl flex items-center justify-center bg-pink-100 dark:bg-pink-900/30 shrink-0">
@@ -696,48 +738,53 @@ const AdminDashboard = () => {
                 </div>
               )}
             </div>
+                )}
+              </CollapsibleContent>
+            </Collapsible>
           )}
 
-          {/* Pending enrollments alert */}
-          {actionableEnrollments > 0 && (
-            <div
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setAdminTab("enrollments"); } }}
-              className="flex items-center gap-3 rounded-xl border border-amber-400/60 bg-gradient-to-r from-amber-50 to-amber-100/60 dark:from-amber-950/30 dark:to-amber-900/20 px-4 py-3 cursor-pointer hover:shadow-sm hover:border-amber-500/70 transition-all"
-              onClick={() => { setAdminTab("enrollments"); setTimeout(() => document.getElementById("admin-tabs-root")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80); }}
-            >
-              <Bell className="h-5 w-5 text-amber-600 shrink-0 animate-pulse" />
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-amber-800 dark:text-amber-300 text-sm">
-                  {actionableEnrollments} enrollment{actionableEnrollments > 1 ? "s" : ""} need{actionableEnrollments === 1 ? "s" : ""} your attention
-                </p>
-                <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">Pending payment or under review — click to open Enrollments tab</p>
+          {/* Unified "Action needed" bar — stacks quick-actions into one row */}
+          {(actionableEnrollments > 0 || trialStats.pending > 0) && (
+            <div className="rounded-xl border border-amber-400/60 bg-gradient-to-r from-amber-50 to-amber-100/30 dark:from-amber-950/25 dark:to-amber-900/10 overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-2 border-b border-amber-400/30">
+                <Bell className="h-4 w-4 text-amber-600 animate-pulse" />
+                <span className="text-xs font-semibold text-amber-800 dark:text-amber-300 uppercase tracking-wide">
+                  Action needed ({(actionableEnrollments > 0 ? 1 : 0) + (trialStats.pending > 0 ? 1 : 0)})
+                </span>
               </div>
-              <span className="text-xs font-medium text-amber-700 dark:text-amber-400 shrink-0">View →</span>
-            </div>
-          )}
-
-          {/* Pending trials alert */}
-          {trialStats.pending > 0 && (
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => setAdminTab("trials")}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setAdminTab("trials"); } }}
-              className="flex items-center gap-3 rounded-xl border border-blue-400/60 bg-gradient-to-r from-blue-50 to-blue-100/60 dark:from-blue-950/30 dark:to-blue-900/20 px-4 py-3 cursor-pointer hover:shadow-sm hover:border-blue-500/70 transition-all"
-            >
-              <Users className="h-5 w-5 text-blue-600 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-blue-800 dark:text-blue-300 text-sm">
-                  {trialStats.pending} trial booking{trialStats.pending > 1 ? "s" : ""} awaiting confirmation
-                </p>
-                <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">
-                  {trialStats.thisWeek > 0 && `${trialStats.thisWeek} scheduled this week · `}
-                  {trialStats.upcoming} upcoming total — click to review
-                </p>
+              <div className="divide-y divide-amber-400/20">
+                {actionableEnrollments > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => { setAdminTab("enrollments"); setTabGroup("ops"); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-start hover:bg-amber-100/60 dark:hover:bg-amber-900/20 transition-colors"
+                  >
+                    <FileCheck className="h-4 w-4 text-amber-600 shrink-0" />
+                    <div className="flex-1 min-w-0 text-sm">
+                      <span className="font-semibold text-amber-900 dark:text-amber-200">{actionableEnrollments}</span>
+                      <span className="text-amber-800 dark:text-amber-300"> enrollment{actionableEnrollments > 1 ? "s" : ""} pending review or payment</span>
+                    </div>
+                    <span className="text-xs font-medium text-amber-700 dark:text-amber-400 shrink-0">Review →</span>
+                  </button>
+                )}
+                {trialStats.pending > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => { setAdminTab("trials"); setTabGroup("ops"); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-start hover:bg-amber-100/60 dark:hover:bg-amber-900/20 transition-colors"
+                  >
+                    <Users className="h-4 w-4 text-amber-600 shrink-0" />
+                    <div className="flex-1 min-w-0 text-sm">
+                      <span className="font-semibold text-amber-900 dark:text-amber-200">{trialStats.pending}</span>
+                      <span className="text-amber-800 dark:text-amber-300"> trial booking{trialStats.pending > 1 ? "s" : ""} awaiting confirmation</span>
+                      {trialStats.thisWeek > 0 && (
+                        <span className="text-xs text-amber-700/80 dark:text-amber-400/80 ml-2">· {trialStats.thisWeek} this week</span>
+                      )}
+                    </div>
+                    <span className="text-xs font-medium text-amber-700 dark:text-amber-400 shrink-0">Confirm →</span>
+                  </button>
+                )}
               </div>
-              <span className="text-xs font-medium text-blue-700 dark:text-blue-400 shrink-0">View →</span>
             </div>
           )}
 
@@ -747,35 +794,62 @@ const AdminDashboard = () => {
             <div className="w-full bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
               {/* Group selector */}
               <div className="flex items-center gap-1 p-2 bg-muted/40 border-b border-border/60 overflow-x-auto">
-                {TAB_GROUPS.map(g => {
+                {TAB_GROUPS.map((g, idx) => {
                   const GroupIcon = g.icon;
                   const isActive = tabGroup === g.id;
                   const hasAlert =
                     (g.id === "ops" && (actionableEnrollments > 0 || trialStats.pending > 0)) ||
                     (g.id === "learn" && pendingAttendance > 0);
                   return (
-                    <button
-                      key={g.id}
-                      type="button"
-                      onClick={() => setTabGroup(g.id)}
-                      className={cn(
-                        "relative shrink-0 inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all",
-                        isActive
-                          ? "bg-background text-foreground shadow-sm ring-1 ring-border"
-                          : "text-muted-foreground hover:text-foreground hover:bg-background/60"
-                      )}
-                    >
-                      <GroupIcon className="h-3.5 w-3.5" />
-                      {g.label}
-                      {hasAlert && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
-                      )}
-                    </button>
+                    <Tooltip key={g.id}>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={() => setTabGroup(g.id)}
+                          className={cn(
+                            "relative shrink-0 inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all",
+                            isActive
+                              ? "bg-background text-foreground shadow-sm ring-1 ring-border"
+                              : "text-muted-foreground hover:text-foreground hover:bg-background/60"
+                          )}
+                        >
+                          <GroupIcon className="h-3.5 w-3.5" />
+                          {g.label}
+                          {hasAlert && (
+                            <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+                          )}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-[10px]">
+                        Alt+{idx + 1}
+                      </TooltipContent>
+                    </Tooltip>
                   );
                 })}
               </div>
 
-              <TabsList className="w-full h-auto bg-transparent border-0 rounded-none p-3 flex flex-wrap items-center gap-1.5 justify-start">
+              {/* Mobile tab selector (< sm) */}
+              {isMobile && currentGroup && (
+                <div className="p-3 border-b border-border/60 bg-background">
+                  <Select value={adminTab} onValueChange={setAdminTab}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currentGroup.tabs.map(t => (
+                        <SelectItem key={t} value={t}>
+                          {t.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <TabsList className={cn(
+                "w-full h-auto bg-transparent border-0 rounded-none p-3 flex-wrap items-center gap-1.5 justify-start",
+                isMobile ? "hidden" : "flex"
+              )}>
                 {inActiveGroup("students") && (
                   <TabsTrigger value="students" className={TAB_CLS}>
                     <Users className="h-3.5 w-3.5" /> Users
@@ -971,14 +1045,34 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent className="pt-0">
               {loading ? (
-                <div className="space-y-2 py-4">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <Skeleton key={i} className="h-10 w-full rounded-lg" />
+                <div className="py-2">
+                  <div className="flex items-center gap-3 py-3 border-b border-border/50">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-40 flex-1" />
+                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 py-3 border-b border-border/30 last:border-0">
+                      <Skeleton className="h-9 w-9 rounded-full shrink-0" />
+                      <div className="flex-1 space-y-1.5">
+                        <Skeleton className="h-3.5 w-1/3" />
+                        <Skeleton className="h-3 w-1/2 opacity-70" />
+                      </div>
+                      <Skeleton className="h-5 w-16 rounded-full" />
+                      <Skeleton className="h-7 w-20 rounded-md" />
+                    </div>
                   ))}
                 </div>
               ) : sortedUsers.length === 0 ? (
-                <div className="text-center py-8 space-y-3">
-                  <p className="text-muted-foreground">No students match your filters.</p>
+                <div className="text-center py-12 space-y-3">
+                  <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                    <Search className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-medium text-sm text-foreground">No students match your filters</p>
+                    <p className="text-xs text-muted-foreground">Try clearing filters or adjusting your search term</p>
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"
@@ -1223,9 +1317,21 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent className="pt-0">
               {loading ? (
-                <div className="space-y-2 py-4">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} className="h-10 w-full rounded-lg" />
+                <div className="py-2 space-y-2">
+                  <div className="flex gap-2 mb-3">
+                    <Skeleton className="h-10 flex-1 rounded-md" />
+                    <Skeleton className="h-10 w-28 rounded-md" />
+                  </div>
+                  {Array.from({ length: 7 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 px-3 py-3 rounded-lg border border-border/40">
+                      <Skeleton className="h-4 w-4 rounded" />
+                      <div className="flex-1 space-y-1.5">
+                        <Skeleton className="h-3.5 w-2/5" />
+                        <Skeleton className="h-3 w-1/3 opacity-70" />
+                      </div>
+                      <Skeleton className="h-5 w-20 rounded-full" />
+                      <Skeleton className="h-7 w-24 rounded-md" />
+                    </div>
                   ))}
                 </div>
               ) : (
