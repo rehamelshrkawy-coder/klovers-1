@@ -105,38 +105,38 @@ const KDramaLearningPage = () => {
         {/* Why K-Dramas Work */}
         <section className="py-16 border-b">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-3xl font-bold mb-12 text-center">Why K-Dramas Are the Best Learning Tool</h2>
+            <h2 className="text-3xl font-bold mb-12 text-center">{t("kdrama.whyTitle")}</h2>
             <div className="grid md:grid-cols-2 gap-8">
               {[
                 {
                   icon: <Tv className="h-8 w-8 text-pink-500" />,
-                  title: "Natural Spoken Korean",
-                  desc: "Real conversations, not textbook sentences. You learn how Koreans actually talk — slang, casual forms, emotional expressions."
+                  title: t("kdrama.whyCard1Title"),
+                  desc: t("kdrama.whyCard1Desc")
                 },
                 {
                   icon: <Brain className="h-8 w-8 text-purple-500" />,
-                  title: "Emotional Memory Encoding",
-                  desc: "When you're emotionally invested in a scene, your brain tags the words as 'important' and stores them longer."
+                  title: t("kdrama.whyCard2Title"),
+                  desc: t("kdrama.whyCard2Desc")
                 },
                 {
                   icon: <BarChart3 className="h-8 w-8 text-blue-500" />,
-                  title: "Repetition Without Boredom",
-                  desc: "Dramas repeat phrases naturally. You hear 'I love you' 50 times across episodes without feeling like you're studying."
+                  title: t("kdrama.whyCard3Title"),
+                  desc: t("kdrama.whyCard3Desc")
                 },
                 {
                   icon: <Sparkles className="h-8 w-8 text-amber-500" />,
-                  title: "Cultural Context",
-                  desc: "Learn more than words — understand Korean culture, manners, social hierarchies, and why Koreans communicate the way they do."
+                  title: t("kdrama.whyCard4Title"),
+                  desc: t("kdrama.whyCard4Desc")
                 },
                 {
                   icon: <Play className="h-8 w-8 text-red-500" />,
-                  title: "Motivation Stays High",
-                  desc: "You WANT to understand because you're invested in the story. No cramming, no forcing yourself — you want more."
+                  title: t("kdrama.whyCard5Title"),
+                  desc: t("kdrama.whyCard5Desc")
                 },
                 {
                   icon: <CheckCircle2 className="h-8 w-8 text-green-500" />,
-                  title: "Passively Builds Skills",
-                  desc: "You improve listening, pronunciation patterns, rhythm, and intonation just by watching. Your ear trains automatically."
+                  title: t("kdrama.whyCard6Title"),
+                  desc: t("kdrama.whyCard6Desc")
                 }
               ].map((item, i) => (
                 <div key={i} className="p-6 rounded-lg border bg-slate-50/50 dark:bg-slate-900/50 hover:shadow-lg transition-shadow">
@@ -152,34 +152,34 @@ const KDramaLearningPage = () => {
         {/* The Framework */}
         <section className="py-16 border-b bg-slate-50/50 dark:bg-slate-950/20">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-3xl font-bold mb-4">The 4-Watch Method (Most Effective)</h2>
-            <p className="text-foreground/70 mb-12">This proven method accelerates learning dramatically. Follow it for any K-drama.</p>
+            <h2 className="text-3xl font-bold mb-4">{t("kdrama.frameworkTitle")}</h2>
+            <p className="text-foreground/70 mb-12">{t("kdrama.frameworkSubtitle")}</p>
 
             <div className="space-y-6">
               {[
                 {
                   num: "1",
-                  title: "Watch 1: English Subtitles — Enjoy the Story",
-                  time: "1 hour per episode",
-                  desc: "Just relax and watch. Your job is to enjoy the plot, not study. Get invested in the characters and story. This builds motivation for later watches."
+                  title: t("kdrama.watch1Title"),
+                  time: t("kdrama.watch1Time"),
+                  desc: t("kdrama.watch1Desc")
                 },
                 {
                   num: "2",
-                  title: "Watch 2: Korean Subtitles — Notice the Words",
-                  time: "1.5 hours per episode",
-                  desc: "Slower pace. Notice words you recognize. When you see a word in Korean text that matches the audio, your brain notes the connection. Don't pause — let it flow."
+                  title: t("kdrama.watch2Title"),
+                  time: t("kdrama.watch2Time"),
+                  desc: t("kdrama.watch2Desc")
                 },
                 {
                   num: "3",
-                  title: "Watch 3: No Subtitles — Test Your Listening",
-                  time: "1 hour per episode",
-                  desc: "Now your listening is tested. You'll catch maybe 30-50% at A1, 60-70% at B1. This struggle is good — it's the brain working hard to process."
+                  title: t("kdrama.watch3Title"),
+                  time: t("kdrama.watch3Time"),
+                  desc: t("kdrama.watch3Desc")
                 },
                 {
                   num: "4",
-                  title: "Scene-Based Deep Dive — Master 1 Scene",
-                  time: "30 minutes",
-                  desc: "Pick ONE emotional 3-minute scene. Pause, repeat, write what you heard, repeat, listen again. By day 3, you'll have memorized the scene."
+                  title: t("kdrama.watch4Title"),
+                  time: t("kdrama.watch4Time"),
+                  desc: t("kdrama.watch4Desc")
                 }
               ].map((item, i) => (
                 <div key={i} className="p-6 rounded-lg border bg-white dark:bg-slate-900">
@@ -198,8 +198,8 @@ const KDramaLearningPage = () => {
             </div>
 
             <div className="mt-8 p-6 rounded-lg bg-green-50 dark:bg-green-950/10 border border-green-200 dark:border-green-800">
-              <p className="font-bold mb-2">✓ Expected Results:</p>
-              <p className="text-foreground/70">After 1 full drama (12 episodes × 4 watches): 300+ vocabulary, 40+ phrases memorized, 1-2 TOPIK level improvement if combined with active study.</p>
+              <p className="font-bold mb-2">{t("kdrama.expectedResults")}</p>
+              <p className="text-foreground/70">{t("kdrama.expectedResultsDesc")}</p>
             </div>
           </div>
         </section>
@@ -207,36 +207,36 @@ const KDramaLearningPage = () => {
         {/* Dramas by Level */}
         <section className="py-16 border-b">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-3xl font-bold mb-4">Recommended Dramas by Korean Level</h2>
-            <p className="text-foreground/70 mb-12">Start with your level, don't jump ahead. The difficulty progression matters.</p>
+            <h2 className="text-3xl font-bold mb-4">{t("kdrama.levelsTitle")}</h2>
+            <p className="text-foreground/70 mb-12">{t("kdrama.levelsSubtitle")}</p>
 
             {[
               {
-                level: "A1 — BEGINNER (0-3 months)",
+                level: t("kdrama.levelA1"),
                 dramas: [
-                  { name: "Squid Game", why: "Clear pronunciation, repetitive vocab (game/rules/numbers), high engagement" },
-                  { name: "My School President", why: "Teenagers (slower speech), school vocabulary, uplifting tone" }
+                  { name: t("kdrama.levelA1Drama1Name"), why: t("kdrama.levelA1Drama1Why") },
+                  { name: t("kdrama.levelA1Drama2Name"), why: t("kdrama.levelA1Drama2Why") }
                 ]
               },
               {
-                level: "A2 — ELEMENTARY (3-6 months)",
+                level: t("kdrama.levelA2"),
                 dramas: [
-                  { name: "Descendants of the Sun", why: "Medical/military vocab, clear dialogue, multiple angles teach words" },
-                  { name: "Crash Landing on You", why: "Everyday Korean mixed with quirky plot, good balance" }
+                  { name: t("kdrama.levelA2Drama1Name"), why: t("kdrama.levelA2Drama1Why") },
+                  { name: t("kdrama.levelA2Drama2Name"), why: t("kdrama.levelA2Drama2Why") }
                 ]
               },
               {
-                level: "B1 — INTERMEDIATE (6-9 months)",
+                level: t("kdrama.levelB1"),
                 dramas: [
-                  { name: "Itaewon Class", why: "Restaurant/business Korean, mature dialogue, realistic situations" },
-                  { name: "Reply 1988", why: "Family dynamics, nostalgic (slower), conversational patterns" }
+                  { name: t("kdrama.levelB1Drama1Name"), why: t("kdrama.levelB1Drama1Why") },
+                  { name: t("kdrama.levelB1Drama2Name"), why: t("kdrama.levelB1Drama2Why") }
                 ]
               },
               {
-                level: "B2+ — ADVANCED (9-12 months)",
+                level: t("kdrama.levelB2"),
                 dramas: [
-                  { name: "Hospital Playlist", why: "Medical terminology, complex emotions, multiple characters" },
-                  { name: "Mr. Sunshine", why: "Historical (formal language), mature themes, dense dialogue" }
+                  { name: t("kdrama.levelB2Drama1Name"), why: t("kdrama.levelB2Drama1Why") },
+                  { name: t("kdrama.levelB2Drama2Name"), why: t("kdrama.levelB2Drama2Why") }
                 ]
               }
             ].map((section, i) => (
@@ -258,15 +258,15 @@ const KDramaLearningPage = () => {
         {/* Study Habits */}
         <section className="py-16 border-b bg-blue-50/50 dark:bg-blue-950/10">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-3xl font-bold mb-12 text-center">Build the Drama Habit (30 Days to Results)</h2>
+            <h2 className="text-3xl font-bold mb-12 text-center">{t("kdrama.habitTitle")}</h2>
 
             <div className="space-y-4">
               {[
-                { day: "Days 1-5", goal: "Pick your drama & watch episode 1 (English subtitles)", habit: "30 min daily" },
-                { day: "Days 6-10", goal: "Watch episodes 1-2 again (Korean subtitles)", habit: "45 min daily" },
-                { day: "Days 11-15", goal: "Rewatch no subtitles + pick 1 scene to master", habit: "1 hour daily" },
-                { day: "Days 16-20", goal: "Finish episode 2-3 fully, keep 1 phrase journal", habit: "1 hour daily" },
-                { day: "Days 21-30", goal: "Build momentum: 1-2 episodes per week with journal", habit: "1-2 hours daily" }
+                { day: t("kdrama.habitDay1"), goal: t("kdrama.habitGoal1"), habit: t("kdrama.habitTime1") },
+                { day: t("kdrama.habitDay2"), goal: t("kdrama.habitGoal2"), habit: t("kdrama.habitTime2") },
+                { day: t("kdrama.habitDay3"), goal: t("kdrama.habitGoal3"), habit: t("kdrama.habitTime3") },
+                { day: t("kdrama.habitDay4"), goal: t("kdrama.habitGoal4"), habit: t("kdrama.habitTime4") },
+                { day: t("kdrama.habitDay5"), goal: t("kdrama.habitGoal5"), habit: t("kdrama.habitTime5") }
               ].map((item, i) => (
                 <div key={i} className="p-4 rounded-lg border bg-white dark:bg-slate-900 flex items-start gap-4">
                   <div className="flex-shrink-0 font-bold text-blue-600 min-w-fit">{item.day}</div>
@@ -279,12 +279,12 @@ const KDramaLearningPage = () => {
             </div>
 
             <div className="mt-8 p-6 rounded-lg bg-amber-50 dark:bg-amber-950/10 border border-amber-200 dark:border-amber-800">
-              <p className="font-bold mb-2">📝 Keep a Drama Journal:</p>
-              <p className="text-sm text-foreground/70 mb-4">When you hear a phrase you like, write it:</p>
+              <p className="font-bold mb-2">{t("kdrama.journalTitle")}</p>
+              <p className="text-sm text-foreground/70 mb-4">{t("kdrama.journalIntro")}</p>
               <div className="bg-white dark:bg-slate-900 p-4 rounded text-sm font-mono text-foreground/70">
-                <p>Phrase: "정말이야?" (Really?)</p>
-                <p>Context: Character's shocked reaction</p>
-                <p>My sentence: "정말이야? 한국어를 배웠어?" (Really? You learned Korean?)</p>
+                <p>{t("kdrama.journalPhrase")}</p>
+                <p>{t("kdrama.journalContext")}</p>
+                <p>{t("kdrama.journalMySentence")}</p>
               </div>
             </div>
           </div>
@@ -293,23 +293,23 @@ const KDramaLearningPage = () => {
         {/* Why Klovers + Dramas */}
         <section className="py-16 border-b">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-3xl font-bold mb-4">Combine Dramas + Klovers for 3x Faster Results</h2>
-            <p className="text-foreground/70 mb-12">Drama watching is powerful passive learning. Add structured lessons for active learning — together they're unstoppable.</p>
+            <h2 className="text-3xl font-bold mb-4">{t("kdrama.combineTitle")}</h2>
+            <p className="text-foreground/70 mb-12">{t("kdrama.combineSubtitle")}</p>
 
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 {
-                  col: "Dramas Alone",
-                  items: ["Learn listening", "Learn vocabulary", "Learn culture", "❌ Don't learn grammar", "❌ Can't ask questions"]
+                  col: t("kdrama.combineCol1Title"),
+                  items: [t("kdrama.combineCol1Item1"), t("kdrama.combineCol1Item2"), t("kdrama.combineCol1Item3"), t("kdrama.combineCol1Item4"), t("kdrama.combineCol1Item5")]
                 },
                 {
-                  col: "Klovers + Dramas",
-                  items: ["Learn listening ✓", "Learn vocabulary ✓", "Learn culture ✓", "Learn grammar ✓", "Ask questions ✓"],
+                  col: t("kdrama.combineCol2Title"),
+                  items: [t("kdrama.combineCol2Item1"), t("kdrama.combineCol2Item2"), t("kdrama.combineCol2Item3"), t("kdrama.combineCol2Item4"), t("kdrama.combineCol2Item5")],
                   highlight: true
                 },
                 {
-                  col: "Textbooks Alone",
-                  items: ["Learn grammar", "Learn vocabulary", "❌ Boring", "❌ Not realistic Korean", "❌ No cultural context"]
+                  col: t("kdrama.combineCol3Title"),
+                  items: [t("kdrama.combineCol3Item1"), t("kdrama.combineCol3Item2"), t("kdrama.combineCol3Item3"), t("kdrama.combineCol3Item4"), t("kdrama.combineCol3Item5")]
                 }
               ].map((col, i) => (
                 <div key={i} className={`p-6 rounded-lg border ${
@@ -331,8 +331,8 @@ const KDramaLearningPage = () => {
             </div>
 
             <div className="mt-8 p-6 rounded-lg bg-purple-50 dark:bg-purple-950/10 border border-purple-200 dark:border-purple-800">
-              <p className="font-bold mb-2">🎯 Best Strategy:</p>
-              <p className="text-foreground/70">Take Klovers lessons 3x per week (1 hour), watch K-dramas 3-4x per week (1-2 hours). Let lessons explain the grammar you hear in dramas, and let dramas reinforce what you learned in lessons.</p>
+              <p className="font-bold mb-2">{t("kdrama.strategyTitle")}</p>
+              <p className="text-foreground/70">{t("kdrama.strategyDesc")}</p>
             </div>
           </div>
         </section>
@@ -340,29 +340,14 @@ const KDramaLearningPage = () => {
         {/* FAQ */}
         <section className="py-16 border-b">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-3xl font-bold mb-12 text-center">K-Drama Learning FAQs</h2>
+            <h2 className="text-3xl font-bold mb-12 text-center">{t("kdrama.faqTitle")}</h2>
             <div className="space-y-6">
               {[
-                {
-                  q: "How many episodes should I watch per week?",
-                  a: "Start with 1 episode per week (4 watches = 4 hours). Once you get the habit, move to 2-3 episodes per week. Quality beats quantity — one fully analyzed episode beats 5 passive episodes."
-                },
-                {
-                  q: "What if the K-drama doesn't have Korean subtitles available?",
-                  a: "Netflix has Korean subtitles for most dramas. If not, use YouTube with auto-generated Korean subtitles (not perfect but helpful). Try: Viki, iQiyi, or WeTV apps which support Korean subtitles."
-                },
-                {
-                  q: "Should I watch the full series or just clip scenes?",
-                  a: "Full series. Watching the full arc keeps you motivated (cliffhangers!), reinforces vocab across more situations, and the story engagement helps retention. Clips are too short to build the habit."
-                },
-                {
-                  q: "How much new vocabulary do you realistically learn?",
-                  a: "Per drama series: 200-400 words if A1, 300-500 words if B1. Not all new words — many repeats. But key phrases and high-frequency words will stick."
-                },
-                {
-                  q: "Is drama learning enough, or do I need formal lessons?",
-                  a: "Dramas teach listening and vocabulary brilliantly, but grammar and writing need structure. Combine dramas with 1-2 lessons per week from Klovers for fastest progress."
-                }
+                { q: t("kdrama.faq1Q"), a: t("kdrama.faq1A") },
+                { q: t("kdrama.faq2Q"), a: t("kdrama.faq2A") },
+                { q: t("kdrama.faq3Q"), a: t("kdrama.faq3A") },
+                { q: t("kdrama.faq4Q"), a: t("kdrama.faq4A") },
+                { q: t("kdrama.faq5Q"), a: t("kdrama.faq5A") }
               ].map((item, i) => (
                 <details key={i} className="group p-6 rounded-lg border bg-slate-50/50 dark:bg-slate-900/50 cursor-pointer">
                   <summary className="font-bold text-lg flex items-center justify-between">
@@ -381,23 +366,23 @@ const KDramaLearningPage = () => {
         {/* CTA */}
         <section className="py-20 bg-gradient-to-r from-pink-600 to-purple-600 text-white">
           <div className="container mx-auto px-4 max-w-4xl text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Start Learning Through K-Dramas Today</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">{t("kdrama.finalCtaTitle")}</h2>
             <p className="text-lg mb-8 text-pink-100 max-w-2xl mx-auto">
-              Watch the shows you love while your brain learns Korean automatically. Klovers lessons structure your learning so every drama watch accelerates your progress.
+              {t("kdrama.finalCtaDesc")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" asChild>
                 <a href="/enroll-now" className="flex items-center gap-2">
-                  Join Klovers <ArrowRight className="h-4 w-4" />
+                  {t("kdrama.finalCtaJoin")} <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>
               <Button size="lg" variant="outline" className="text-foreground border-white hover:bg-white/10" asChild>
-                <a href="/placement-test">Find Your Drama Level</a>
+                <a href="/placement-test">{t("kdrama.finalCtaLevel")}</a>
               </Button>
             </div>
             <p className="text-sm text-pink-100 mt-6">
               <Tv className="h-4 w-4 inline mr-2" />
-              Recommended dramas for all levels • Drama journal template included • Expert tutor guidance
+              {t("kdrama.finalCtaFooter")}
             </p>
           </div>
         </section>
