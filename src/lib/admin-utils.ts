@@ -18,6 +18,66 @@ export function formatTime(t: string): string {
   return `${hour12}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
+const WEEKDAY_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+function tzOffsetMs(date: Date, tz: string): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, hour12: false,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).formatToParts(date).reduce((a, p) => { a[p.type] = p.value; return a; }, {} as Record<string, string>);
+  const hour = parts.hour === "24" ? 0 : +parts.hour;
+  const asUTC = Date.UTC(+parts.year, +parts.month - 1, +parts.day, hour, +parts.minute, +parts.second);
+  return asUTC - date.getTime();
+}
+
+/**
+ * Convert a recurring weekly slot from source timezone to target timezone.
+ * Returns the localized weekday + 12h time string. Handles DST correctly
+ * by resolving against the next upcoming occurrence.
+ */
+export function convertSlotToTimezone(
+  dayOfWeek: number,
+  timeHHMM: string,
+  sourceTz: string,
+  targetTz: string,
+): { weekday: string; dayIndex: number; timeFormatted: string } {
+  if (!timeHHMM || !/^\d{1,2}:\d{2}$/.test(timeHHMM) || !sourceTz || !targetTz) {
+    return {
+      weekday: WEEKDAY_LONG[dayOfWeek] || "",
+      dayIndex: dayOfWeek,
+      timeFormatted: formatTime(timeHHMM),
+    };
+  }
+  const [h, m] = timeHHMM.split(":").map(Number);
+
+  // Find next date (in source tz) matching dayOfWeek
+  const now = new Date();
+  const srcParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: sourceTz, weekday: "short",
+    year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(now).reduce((a, p) => { a[p.type] = p.value; return a; }, {} as Record<string, string>);
+  const dowMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const currentDow = dowMap[srcParts.weekday] ?? 0;
+  const delta = ((dayOfWeek - currentDow) + 7) % 7 || 7;
+  const base = new Date(Date.UTC(+srcParts.year, +srcParts.month - 1, +srcParts.day));
+  base.setUTCDate(base.getUTCDate() + delta);
+
+  // Interpret (year,month,day,h,m) as wall-time in source tz → UTC instant
+  const guess = Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), base.getUTCDate(), h, m);
+  const offset = tzOffsetMs(new Date(guess), sourceTz);
+  const instant = new Date(guess - offset);
+
+  const tgtParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: targetTz, weekday: "long",
+    hour: "numeric", minute: "2-digit", hour12: true,
+  }).formatToParts(instant).reduce((a, p) => { a[p.type] = p.value; return a; }, {} as Record<string, string>);
+
+  const dayIndex = WEEKDAY_LONG.indexOf(tgtParts.weekday);
+  const timeFormatted = `${tgtParts.hour}:${tgtParts.minute} ${tgtParts.dayPeriod}`;
+  return { weekday: tgtParts.weekday, dayIndex, timeFormatted };
+}
+
 // ── Attendance status colors ─────────────────────────────────────────────────
 
 /** Ring + background classes for attendance status badges. */
