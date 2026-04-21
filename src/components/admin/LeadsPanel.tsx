@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { getLeadStatusBadgeClass } from "@/lib/badge-styles";
@@ -60,6 +60,19 @@ const LeadsPanel: React.FC = () => {
   const [contactedLeadIds, setContactedLeadIds] = useState<Set<string>>(new Set());
   const [leadsSourceFilter, setLeadsSourceFilter] = useState("");
   const [sendingNameEmails, setSendingNameEmails] = useState(false);
+  const [recoveryKpi, setRecoveryKpi] = useState<{ total_sent: number; leads_emailed: number; leads_converted: number; recovery_rate_pct: number } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await (supabase as any)
+        .from("checkout_recovery_kpi")
+        .select("total_sent, leads_emailed, leads_converted, recovery_rate_pct")
+        .maybeSingle();
+      if (!cancelled && !error && data) setRecoveryKpi(data);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -405,6 +418,31 @@ const LeadsPanel: React.FC = () => {
         </div>
       </CardHeader>
       <CardContent className="pt-0 space-y-4">
+
+        {/* Abandoned Checkout Recovery — KPI */}
+        {recoveryKpi && recoveryKpi.total_sent > 0 && (
+          <div className="rounded-xl border border-border bg-muted/30 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-semibold">Abandoned Checkout Recovery</span>
+              <span className="text-xs text-muted-foreground ml-1">— automated email sequence</span>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-background border border-border rounded-lg px-3 py-2">
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Emails Sent</p>
+                <p className="text-xl font-bold">{recoveryKpi.total_sent}</p>
+              </div>
+              <div className="bg-background border border-border rounded-lg px-3 py-2">
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Converted</p>
+                <p className="text-xl font-bold text-green-600 dark:text-green-400">{recoveryKpi.leads_converted}</p>
+              </div>
+              <div className="bg-background border border-border rounded-lg px-3 py-2">
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Recovery Rate</p>
+                <p className="text-xl font-bold">{recoveryKpi.recovery_rate_pct}%</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Abandoned Checkouts — reached step 4 but didn't pay */}
         {(() => {
