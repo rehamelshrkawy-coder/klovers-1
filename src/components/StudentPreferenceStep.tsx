@@ -11,9 +11,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { AlertCircle, Calendar } from "lucide-react";
+import { AlertCircle, Calendar, MessageCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { WHATSAPP_NUMBER } from "@/lib/siteConfig";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -172,14 +173,32 @@ const StudentPreferenceStep = ({
                     {t("enrollNow.prefStepSuggestTime")}
                   </p>
                 )}
-                {timeOptions.length === 0 ? (
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2">
-                    <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-amber-800">
-                      {t("enrollNow.prefStepNoTimes").replace("{day}", localDayNames[parseInt(preferredDay)] ?? DAYS[parseInt(preferredDay)])}
-                    </p>
-                  </div>
-                ) : (
+                {timeOptions.length === 0 ? (() => {
+                  const dayLabel = localDayNames[parseInt(preferredDay)] ?? DAYS[parseInt(preferredDay)];
+                  const waMsg = encodeURIComponent(
+                    `Hi Klovers — I'd like to request a Korean class on ${dayLabel}${userLevel ? ` for ${userLevel}` : ""}. The current schedule doesn't have a matching time.`
+                  );
+                  const waHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
+                  return (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-3">
+                      <div className="flex gap-2">
+                        <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-amber-800">
+                          {t("enrollNow.prefStepNoTimes").replace("{day}", dayLabel)}
+                        </p>
+                      </div>
+                      <a
+                        href={waHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-md bg-[#25D366] hover:bg-[#1fb855] text-white px-4 py-2 text-sm font-semibold transition-colors w-full sm:w-auto justify-center"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        Contact us on WhatsApp to arrange this time
+                      </a>
+                    </div>
+                  );
+                })() : (
                   <Select value={preferredTime} onValueChange={setPreferredTime}>
                     <SelectTrigger id="time-select">
                       <SelectValue placeholder={t("enrollNow.prefStepSelectTime")} />
