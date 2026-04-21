@@ -118,10 +118,16 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
     const time = formatTime12h(s.start_time);
     const cap = s.capacity ?? DEFAULT_CAPACITY;
     const spotsLeft = cap - s.booked_count;
-    return `${day} at ${time} — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
+    const tzLabel = s.timezone ? ` (${s.timezone})` : "";
+    return `${day} at ${time}${tzLabel} — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
   };
 
   const keyFor = (s: TrialSlot) => `${s.day_of_week}|${s.start_time}`;
+
+  const selectedSlot = availableSlots.find((s) => keyFor(s) === selectedKey);
+  const footerTimezone = selectedSlot?.timezone
+    ?? availableSlots[0]?.timezone
+    ?? "Africa/Cairo";
 
   const commit = () => {
     if (!selectedKey) return;
@@ -156,7 +162,7 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        All times are in Cairo (Africa/Cairo)
+        All times are in {footerTimezone}
       </p>
 
       <Button
