@@ -16,9 +16,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
 import TrialSlotPicker from "@/components/TrialSlotPicker";
-import { logLeadEvent } from "@/lib/leadTracking";
+import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
+import { track } from "@/lib/tracking";
+import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
-import { CheckCircle2, CalendarPlus, ArrowRight, GraduationCap, LayoutDashboard } from "lucide-react";
+import { CheckCircle2, CalendarPlus, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag } from "lucide-react";
 
 interface BookingResult {
   trial_date: string;
@@ -152,6 +154,13 @@ const TrialBookingPage = () => {
     }
   };
 
+  // Fire once when success state renders, for funnel measurement.
+  useEffect(() => {
+    if (bookingResult) {
+      track.custom("post_trial_screen_shown", { trial_date: bookingResult.trial_date });
+    }
+  }, [bookingResult]);
+
   // ── Success state ──────────────────────────────────────────────────────────
   if (bookingResult) {
     const formattedDate = new Date(bookingResult.trial_date + "T00:00:00").toLocaleDateString("en-US", {
@@ -160,18 +169,21 @@ const TrialBookingPage = () => {
       day: "numeric",
     });
 
+    const trialDateMs = new Date(bookingResult.trial_date + "T00:00:00").getTime();
+    const daysUntil = Math.max(0, Math.round((trialDateMs - Date.now()) / 86400000));
+
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="pt-16 flex items-center justify-center">
-          <div className="max-w-lg mx-auto px-4 py-20 text-center">
-            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="h-10 w-10 text-green-600" />
-            </div>
-            <h1 className="text-3xl font-black text-foreground mb-3">Your trial is booked! 🎉</h1>
-
-            <div className="bg-card border border-border rounded-2xl p-6 text-left mb-6 space-y-2">
-              <div className="flex items-center gap-3">
+        <main className="pt-16">
+          <div className="max-w-2xl mx-auto px-4 py-12">
+            {/* Hero */}
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
+                <CheckCircle2 className="h-10 w-10 text-green-600" />
+              </div>
+              <h1 className="text-3xl font-black text-foreground mb-3">Your trial is booked! 🎉</h1>
+              <div className="inline-flex items-center gap-3 bg-card border border-border rounded-2xl px-5 py-3 text-left">
                 <CalendarPlus className="h-5 w-5 text-primary shrink-0" />
                 <div>
                   <p className="font-bold text-foreground">{formattedDate}</p>
@@ -180,20 +192,82 @@ const TrialBookingPage = () => {
                   </p>
                 </div>
               </div>
+              <p className="text-muted-foreground mt-4 text-sm max-w-md mx-auto">
+                A teacher will confirm your class within a few hours. You'll receive a confirmation email with a calendar link once it's approved.
+              </p>
             </div>
 
-            <p className="text-muted-foreground mb-6">
-              A teacher will confirm your class within a few hours. You'll receive a confirmation email with a calendar link once it's approved.
-            </p>
+            {/* While-you-wait nurture bridge */}
+            <div className="bg-gradient-to-b from-primary/5 to-transparent border border-primary/20 rounded-2xl p-6 mb-6">
+              <div className="flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-wider mb-4">
+                <Sparkles className="h-3.5 w-3.5" />
+                {daysUntil > 0 ? `While you wait — ${daysUntil} day${daysUntil === 1 ? "" : "s"} to go` : "Your trial is today — here's how to prep"}
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
-              <Button variant="outline" onClick={() => navigate("/dashboard")} className="gap-2">
+              <div className="space-y-3">
+                {/* Placement test */}
+                <button
+                  onClick={() => {
+                    track.custom("post_trial_cta_clicked", { cta: "placement_test" });
+                    logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_placement_test" });
+                    navigate("/placement-test");
+                  }}
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-primary/50 hover:shadow-md transition-all group"
+                >
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <GraduationCap className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-foreground">Find your level (2 min)</p>
+                    <p className="text-xs text-muted-foreground">So your teacher is ready for you from minute one.</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                </button>
+
+                {/* Pricing teaser */}
+                <button
+                  onClick={() => {
+                    track.custom("post_trial_cta_clicked", { cta: "pricing" });
+                    logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_pricing" });
+                    navigate("/pricing");
+                  }}
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-primary/50 hover:shadow-md transition-all group"
+                >
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Tag className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-foreground">Peek at our plans</p>
+                    <p className="text-xs text-muted-foreground">Group classes from $25/mo · small groups, live teachers.</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                </button>
+
+                {/* WhatsApp */}
+                <button
+                  onClick={() => {
+                    track.custom("post_trial_cta_clicked", { cta: "whatsapp" });
+                    const url = `${WHATSAPP_BASE}?text=${encodeURIComponent("Hi! I just booked my free trial and have a question.")}`;
+                    trackAndOpenWhatsApp(url, { cta_label: "post_booking_whatsapp" });
+                  }}
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-primary/50 hover:shadow-md transition-all group"
+                >
+                  <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+                    <MessageCircle className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-foreground">Questions? Message us on WhatsApp</p>
+                    <p className="text-xs text-muted-foreground">We reply within an hour during business days.</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                </button>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <Button variant="ghost" onClick={() => navigate("/dashboard")} className="gap-2 text-muted-foreground">
                 <LayoutDashboard className="h-4 w-4" />
-                Go to Dashboard
-              </Button>
-              <Button variant="outline" onClick={() => navigate("/placement-test")} className="gap-2">
-                <GraduationCap className="h-4 w-4" />
-                Take Placement Test
+                Go to my dashboard
               </Button>
             </div>
           </div>
