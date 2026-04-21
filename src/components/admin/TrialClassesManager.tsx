@@ -124,6 +124,32 @@ const TrialClassesManager = () => {
     }
   };
 
+  const handleUnschedule = async (booking: TrialBooking) => {
+    if (!confirm(`Move ${booking.name || booking.email} back to the TBA (unscheduled) list?`)) return;
+    setActioningId(booking.id);
+    try {
+      const { error } = await supabase
+        .from("trial_bookings")
+        .update({
+          start_time: "TBA",
+          trial_date: "2099-12-31",
+          day_of_week: 0,
+          status: "pending",
+          is_tba: true,
+          confirmed_at: null,
+          rebook_email_sent_at: null,
+        } as any)
+        .eq("id", booking.id);
+      if (error) throw error;
+      toast({ title: "Moved to TBA", description: booking.name || booking.email });
+      fetchData();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setActioningId(null);
+    }
+  };
+
   const sendRebookEmail = async (booking: TrialBooking) => {
     setActioningId(booking.id);
     try {
@@ -444,7 +470,7 @@ const TrialClassesManager = () => {
                                   </Button>
                                 </>
                               )}
-                              {b.status === "pending" ? (
+                              {b.status === "pending" && (
                                 <>
                                   <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleConfirm(b)}>
                                     <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
@@ -453,7 +479,22 @@ const TrialClassesManager = () => {
                                     <XCircle className="h-3.5 w-3.5 mr-1 text-red-600" /> Reject
                                   </Button>
                                 </>
-                              ) : (!isTbaSession && <span className="text-xs text-muted-foreground">—</span>)}
+                              )}
+                              {!isTbaSession && b.status !== "cancelled" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7"
+                                  disabled={actioningId === b.id}
+                                  onClick={() => handleUnschedule(b)}
+                                  title="Move student back to the TBA (unscheduled) list"
+                                >
+                                  <RefreshCw className="h-3.5 w-3.5 mr-1" /> Unschedule
+                                </Button>
+                              )}
+                              {!isTbaSession && b.status === "cancelled" && (
+                                <span className="text-xs text-muted-foreground">—</span>
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>
