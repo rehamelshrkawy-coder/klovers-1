@@ -71,6 +71,12 @@ const FreeTrialPage = () => {
     }
   }, [referredBy]);
 
+  // Funnel step: landing page viewed. Lets us compute
+  // "landing_viewed → cta_clicked" abandonment rate.
+  useEffect(() => {
+    logLeadEvent({ source_type: "free_trial", cta_label: "landing_viewed" });
+  }, []);
+
   const handleBookCta = async () => {
     // Fire-and-forget lead event so we know which CTA brought them in.
     logLeadEvent({
