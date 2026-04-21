@@ -14,22 +14,11 @@ import { Progress } from "@/components/ui/progress";
 import { track } from "@/lib/tracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { trackAndOpenWhatsApp } from "@/lib/leadTracking";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const METHOD_DETAILS: Record<string, { label: string; value: string }> = {
-  vodafone_cash: { label: "Send to Vodafone Cash number", value: "+201010003084" },
-  instapay:      { label: "Transfer to bank account",     value: "00601121777560" },
-};
-
-const METHODS = [
-  { value: "vodafone_cash", label: "Vodafone Cash", icon: "📱" },
-  { value: "instapay", label: "InstaPay", icon: "💳" },
-  { value: "bank_transfer", label: "Bank Transfer", icon: "🏦" },
-] as const;
-
-const METHOD_LABELS: Record<string, string> = {
-  vodafone_cash: "Vodafone Cash",
-  instapay: "InstaPay",
-  bank_transfer: "Bank Transfer",
+const METHOD_DETAIL_KEYS: Record<string, { labelKey: string; value: string }> = {
+  vodafone_cash: { labelKey: "payment.sendToVodafone", value: "+201010003084" },
+  instapay:      { labelKey: "payment.transferToBank", value: "00601121777560" },
 };
 
 interface EnrollmentData {
@@ -48,37 +37,42 @@ interface EnrollmentData {
 }
 
 /* ── Order Summary sub-component ── */
-const OrderSummary = ({ enrollment }: { enrollment: EnrollmentData }) => (
-  <Card className="mb-6">
-    <CardHeader>
-      <CardTitle className="text-xl flex items-center gap-2">
-        <Wallet className="h-5 w-5" /> Order Summary
-      </CardTitle>
-    </CardHeader>
-    <CardContent className="space-y-2">
-      <div className="flex justify-between text-sm">
-        <span className="text-muted-foreground">Plan</span>
-        <span className="font-medium text-foreground capitalize">{enrollment.plan_type} Classes</span>
-      </div>
-      <div className="flex justify-between text-sm">
-        <span className="text-muted-foreground">Duration</span>
-        <span className="font-medium text-foreground">
-          {enrollment.duration} {enrollment.duration === 1 ? "Month" : "Months"} ({enrollment.classes_included} classes)
-        </span>
-      </div>
-      <div className="flex justify-between text-sm border-t border-border pt-2">
-        <span className="font-semibold text-foreground">Total</span>
-        <span className="font-bold text-lg text-foreground">{Math.round(enrollment.amount).toLocaleString()} EGP</span>
-      </div>
-      {enrollment.due_at && (
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Clock className="h-3 w-3" />
-          Pay before: {new Date(enrollment.due_at).toLocaleString()}
+const OrderSummary = ({ enrollment }: { enrollment: EnrollmentData }) => {
+  const { t, language } = useLanguage();
+  return (
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle className="text-xl flex items-center gap-2">
+          <Wallet className="h-5 w-5" /> {t("payment.orderSummary")}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">{t("payment.plan")}</span>
+          <span className="font-medium text-foreground capitalize">
+            {t("payment.planClasses").replace("{plan}", enrollment.plan_type)}
+          </span>
         </div>
-      )}
-    </CardContent>
-  </Card>
-);
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">{t("payment.duration")}</span>
+          <span className="font-medium text-foreground">
+            {enrollment.duration} {enrollment.duration === 1 ? t("payment.month") : t("payment.months")} ({t("payment.classesCount").replace("{count}", String(enrollment.classes_included))})
+          </span>
+        </div>
+        <div className="flex justify-between text-sm border-t border-border pt-2">
+          <span className="font-semibold text-foreground">{t("payment.total")}</span>
+          <span className="font-bold text-lg text-foreground">{Math.round(enrollment.amount).toLocaleString()} EGP</span>
+        </div>
+        {enrollment.due_at && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            {t("payment.payBefore")} {new Date(enrollment.due_at).toLocaleString(language === "ar" ? "ar-EG" : "en-US")}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 /* ── Under Review confirmation block ── */
 const UnderReviewBlock = ({
@@ -96,8 +90,15 @@ const UnderReviewBlock = ({
   onReplaceReceipt: (file: File) => void;
   replacing: boolean;
 }) => {
+  const { t, language } = useLanguage();
   const [showReplace, setShowReplace] = useState(false);
   const [newFile, setNewFile] = useState<File | null>(null);
+
+  const METHOD_LABEL_KEYS: Record<string, string> = {
+    vodafone_cash: "payment.vodafoneCash",
+    instapay: "payment.instapay",
+    bank_transfer: "payment.bankTransfer",
+  };
 
   const handleReplace = () => {
     if (newFile) onReplaceReceipt(newFile);
@@ -109,23 +110,27 @@ const UnderReviewBlock = ({
         {/* Status badge */}
         <div className="text-center space-y-2">
           <CheckCircle className="h-12 w-12 mx-auto text-primary" />
-          <h2 className="text-xl font-semibold text-foreground">Payment Under Review</h2>
+          <h2 className="text-xl font-semibold text-foreground">{t("payment.paymentUnderReview")}</h2>
         </div>
 
         {/* Submission details */}
         <div className="bg-muted rounded-lg p-4 space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Payment Method</span>
-            <span className="font-medium text-foreground">{METHOD_LABELS[enrollment.payment_method ?? ""] ?? enrollment.payment_method}</span>
+            <span className="text-muted-foreground">{t("payment.paymentMethod")}</span>
+            <span className="font-medium text-foreground">
+              {enrollment.payment_method && METHOD_LABEL_KEYS[enrollment.payment_method]
+                ? t(METHOD_LABEL_KEYS[enrollment.payment_method])
+                : enrollment.payment_method}
+            </span>
           </div>
           {enrollment.payment_date && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Payment Date</span>
-              <span className="font-medium text-foreground">{new Date(enrollment.payment_date).toLocaleDateString()}</span>
+              <span className="text-muted-foreground">{t("payment.paymentDate")}</span>
+              <span className="font-medium text-foreground">{new Date(enrollment.payment_date).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")}</span>
             </div>
           )}
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Receipt</span>
+            <span className="text-muted-foreground">{t("payment.receipt")}</span>
             <span className="font-medium text-foreground truncate max-w-[180px]">{receiptFileName}</span>
           </div>
         </div>
@@ -133,16 +138,16 @@ const UnderReviewBlock = ({
         {/* View receipt */}
         <Button variant="outline" className="w-full" onClick={onViewReceipt} disabled={viewingReceipt}>
           <Eye className="h-4 w-4 mr-2" />
-          {viewingReceipt ? "Opening…" : "View Uploaded Receipt"}
+          {viewingReceipt ? t("payment.opening") : t("payment.viewReceipt")}
         </Button>
 
         {/* Next-step messaging */}
         <div className="bg-accent/50 border border-border rounded-lg p-4 text-sm space-y-1">
-          <p className="font-semibold text-foreground">What happens next?</p>
+          <p className="font-semibold text-foreground">{t("payment.whatNext")}</p>
           <ul className="list-disc list-inside text-muted-foreground space-y-1">
-            <li>Our team will review your receipt within <strong className="text-foreground">24–48 hours</strong>.</li>
-            <li>You'll receive an <strong className="text-foreground">email notification</strong> once approved.</li>
-            <li>Your classes will be activated automatically after approval.</li>
+            <li>{t("payment.whatNext1")} <strong className="text-foreground">{t("payment.hours")}</strong>.</li>
+            <li>{t("payment.whatNext2Pre")} <strong className="text-foreground">{t("payment.whatNext2Mid")}</strong> {t("payment.whatNext2Post")}</li>
+            <li>{t("payment.whatNext3")}</li>
           </ul>
         </div>
 
@@ -153,14 +158,14 @@ const UnderReviewBlock = ({
             className="text-xs text-muted-foreground underline hover:text-foreground transition-colors w-full text-center"
             onClick={() => setShowReplace(true)}
           >
-            Uploaded the wrong file? Replace receipt
+            {t("payment.wrongFile")}
           </button>
         ) : (
           <div className="border border-destructive/30 bg-destructive/5 rounded-lg p-4 space-y-3">
             <div className="flex items-start gap-2 text-sm">
               <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
               <p className="text-muted-foreground">
-                This will replace your current receipt. The review timer will reset.
+                {t("payment.replaceWarning")}
               </p>
             </div>
             <Input
@@ -178,17 +183,17 @@ const UnderReviewBlock = ({
                 className="flex-1"
               >
                 <RefreshCw className="h-4 w-4 mr-1" />
-                {replacing ? "Replacing…" : "Replace Receipt"}
+                {replacing ? t("payment.replacing") : t("payment.replaceReceipt")}
               </Button>
               <Button type="button" variant="outline" size="sm" onClick={() => { setShowReplace(false); setNewFile(null); }}>
-                Cancel
+                {t("payment.cancel")}
               </Button>
             </div>
           </div>
         )}
 
         <Button className="w-full" onClick={() => window.location.href = "/dashboard"}>
-          Go to Dashboard
+          {t("payment.goToDashboard")}
         </Button>
       </CardContent>
     </Card>
@@ -205,16 +210,23 @@ const PaymentForm = ({
   onSubmit: (method: string, date: string, file: File, txRef: string) => void;
   submitting: boolean;
 }) => {
+  const { t } = useLanguage();
   const [paymentMethod, setPaymentMethod] = useState("");
   const [paymentDate, setPaymentDate] = useState("");
   const [txRef, setTxRef] = useState("");
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
+  const METHODS = [
+    { value: "vodafone_cash", label: t("payment.vodafoneCash"), icon: "📱" },
+    { value: "instapay", label: t("payment.instapay"), icon: "💳" },
+    { value: "bank_transfer", label: t("payment.bankTransfer"), icon: "🏦" },
+  ];
+
   const copyAccount = () => {
-    const detail = METHOD_DETAILS[paymentMethod];
+    const detail = METHOD_DETAIL_KEYS[paymentMethod];
     if (!detail) return;
     navigator.clipboard.writeText(detail.value);
-    toast({ title: "Copied!", description: `${detail.label} copied to clipboard.` });
+    toast({ title: t("payment.copied"), description: t("payment.copiedDesc").replace("{label}", t(detail.labelKey)) });
   };
 
   const handleSubmit = () => {
@@ -225,12 +237,12 @@ const PaymentForm = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Submit Payment</CardTitle>
+        <CardTitle className="text-lg">{t("payment.submitPayment")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
         {/* Payment Method */}
         <div className="space-y-2">
-          <Label id="payment-method-label">Payment Method *</Label>
+          <Label id="payment-method-label">{t("payment.paymentMethodRequired")}</Label>
           <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-labelledby="payment-method-label">
             {METHODS.map((m) => (
               <button
@@ -256,7 +268,7 @@ const PaymentForm = ({
         {/* Transfer details — shown only after method is selected */}
         {paymentMethod === "bank_transfer" && (
           <div className="bg-muted rounded-lg p-4 space-y-2">
-            <p className="text-xs text-muted-foreground">Contact us on WhatsApp to get bank transfer details</p>
+            <p className="text-xs text-muted-foreground">{t("payment.bankTransferHelp")}</p>
             <a
               href={WHATSAPP_BASE}
               onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(WHATSAPP_BASE, { cta_label: "egypt_payment_bank_transfer" }); }}
@@ -264,15 +276,15 @@ const PaymentForm = ({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#25D366] hover:bg-[#1ebe5d] px-4 py-2 rounded-lg transition-colors w-full justify-center"
             >
-              💬 Contact us on WhatsApp
+              {t("payment.contactWhatsApp")}
             </a>
           </div>
         )}
-        {paymentMethod && paymentMethod !== "bank_transfer" && METHOD_DETAILS[paymentMethod] && (
+        {paymentMethod && paymentMethod !== "bank_transfer" && METHOD_DETAIL_KEYS[paymentMethod] && (
           <div className="bg-muted rounded-lg p-4">
-            <p className="text-xs text-muted-foreground mb-1">{METHOD_DETAILS[paymentMethod].label}</p>
+            <p className="text-xs text-muted-foreground mb-1">{t(METHOD_DETAIL_KEYS[paymentMethod].labelKey)}</p>
             <div className="flex items-center gap-2">
-              <code className="text-lg font-mono font-bold text-foreground flex-1">{METHOD_DETAILS[paymentMethod].value}</code>
+              <code className="text-lg font-mono font-bold text-foreground flex-1">{METHOD_DETAIL_KEYS[paymentMethod].value}</code>
               <Button variant="outline" size="sm" type="button" onClick={copyAccount}>
                 <Copy className="h-4 w-4" />
               </Button>
@@ -282,7 +294,7 @@ const PaymentForm = ({
 
         {/* Payment Date */}
         <div className="space-y-2">
-          <Label htmlFor="paymentDate">Payment Date *</Label>
+          <Label htmlFor="paymentDate">{t("payment.paymentDateRequired")}</Label>
           <Input
             id="paymentDate"
             type="date"
@@ -294,7 +306,7 @@ const PaymentForm = ({
 
         {/* Receipt Upload */}
         <div className="space-y-2">
-          <Label htmlFor="receipt">Receipt (JPG/PNG/PDF, max 5MB) *</Label>
+          <Label htmlFor="receipt">{t("payment.receiptLabel")}</Label>
           <Input
             id="receipt"
             type="file"
@@ -310,10 +322,10 @@ const PaymentForm = ({
 
         {/* Transaction Reference */}
         <div className="space-y-2">
-          <Label htmlFor="txRef">Transaction Reference (optional)</Label>
+          <Label htmlFor="txRef">{t("payment.txRef")}</Label>
           <Input
             id="txRef"
-            placeholder="e.g. transfer ID"
+            placeholder={t("payment.txRefPlaceholder")}
             value={txRef}
             onChange={(e) => setTxRef(e.target.value)}
             maxLength={100}
@@ -327,7 +339,7 @@ const PaymentForm = ({
           disabled={!paymentMethod || !paymentDate || !receiptFile || submitting}
           onClick={handleSubmit}
         >
-          {submitting ? "Submitting…" : "Submit Payment"}
+          {submitting ? t("payment.submitting") : t("payment.submitPayment")}
         </Button>
       </CardContent>
     </Card>
@@ -337,6 +349,7 @@ const PaymentForm = ({
 /* ── Main Page ── */
 const EgyptPaymentPage = () => {
   useSEO({ title: "Complete Payment | Klovers Korean Academy", description: "Complete your enrollment payment to activate your Klovers Korean course.", noindex: true });
+  const { t } = useLanguage();
   const { enrollmentId } = useParams<{ enrollmentId: string }>();
   const navigate = useNavigate();
   const [enrollment, setEnrollment] = useState<EnrollmentData | null>(null);
@@ -375,7 +388,7 @@ const EgyptPaymentPage = () => {
       }
 
       if (!data) {
-        toast({ title: "Enrollment not found", description: `ID: ${enrollmentId}`, variant: "destructive" });
+        toast({ title: t("payment.enrollmentNotFound"), description: `ID: ${enrollmentId}`, variant: "destructive" });
         navigate("/dashboard");
         return;
       }
@@ -390,19 +403,19 @@ const EgyptPaymentPage = () => {
   }, [enrollmentId, navigate]);
 
   const uploadReceipt = useCallback(async (file: File, enrollId: string): Promise<string> => {
-    if (file.size > 5 * 1024 * 1024) throw new Error("File too large (max 5 MB)");
+    if (file.size > 5 * 1024 * 1024) throw new Error(t("payment.fileTooLarge"));
     const allowed = ["image/jpeg", "image/png", "application/pdf"];
-    if (!allowed.includes(file.type)) throw new Error("Only JPG, PNG, or PDF allowed");
+    if (!allowed.includes(file.type)) throw new Error(t("payment.onlyAllowed"));
 
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error("Not authenticated");
+    if (!session) throw new Error(t("payment.notAuthenticated"));
 
     const ext = file.name.split(".").pop();
     const path = `${session.user.id}/${enrollId}.${ext}`;
     const { error } = await supabase.storage.from("receipts").upload(path, file, { upsert: true });
     if (error) throw error;
     return path;
-  }, []);
+  }, [t]);
 
   const handleSubmit = async (method: string, date: string, file: File, txRef: string) => {
     if (!enrollment) return;
@@ -429,7 +442,7 @@ const EgyptPaymentPage = () => {
             .single();
           if (refreshed) {
             setEnrollment(refreshed as any);
-            toast({ title: "Status updated", description: refreshed.approval_status === "APPROVED" ? "This enrollment has already been approved!" : "Enrollment status has changed. Please review.", variant: "default" });
+            toast({ title: t("payment.statusUpdated"), description: refreshed.approval_status === "APPROVED" ? t("payment.alreadyApproved") : t("payment.statusChanged"), variant: "default" });
             return;
           }
         }
@@ -442,9 +455,9 @@ const EgyptPaymentPage = () => {
         prev ? { ...prev, approval_status: "UNDER_REVIEW", payment_method: method, payment_date: date, receipt_url: path } : null
       );
       track.purchase({ value: enrollment.amount, currency: enrollment.currency || "EGP" });
-      toast({ title: "Payment submitted!", description: "Your payment is now under review." });
+      toast({ title: t("payment.paymentSubmitted"), description: t("payment.paymentSubmittedDesc") });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("payment.error"), description: err.message, variant: "destructive" });
     } finally {
       setSubmitting(false);
       setUploadProgress(null);
@@ -459,7 +472,7 @@ const EgyptPaymentPage = () => {
       if (error || !data?.signedUrl) throw error ?? new Error("Could not generate link");
       window.open(data.signedUrl, "_blank", "noreferrer");
     } catch {
-      toast({ title: "Error", description: "Could not open receipt. Please try again.", variant: "destructive" });
+      toast({ title: t("payment.error"), description: t("payment.couldNotOpen"), variant: "destructive" });
     } finally {
       setViewingReceipt(false);
     }
@@ -479,9 +492,9 @@ const EgyptPaymentPage = () => {
 
       setLastFileName(file.name);
       setEnrollment((prev) => prev ? { ...prev, receipt_url: path } : null);
-      toast({ title: "Receipt replaced", description: "Your new receipt has been uploaded." });
+      toast({ title: t("payment.receiptReplaced"), description: t("payment.receiptReplacedDesc") });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("payment.error"), description: err.message, variant: "destructive" });
     } finally {
       setReplacing(false);
     }
@@ -492,7 +505,7 @@ const EgyptPaymentPage = () => {
       <div className="min-h-screen">
         <Header />
         <main id="main-content" className="pt-24 flex items-center justify-center">
-          <p className="text-muted-foreground">Loading…</p>
+          <p className="text-muted-foreground">{t("payment.loading")}</p>
         </main>
       </div>
     );
@@ -512,7 +525,7 @@ const EgyptPaymentPage = () => {
               <div className="mb-4 space-y-1">
                 <Progress value={uploadProgress} className="h-2" />
                 <p className="text-xs text-muted-foreground text-center">
-                  {uploadProgress < 70 ? "Uploading receipt..." : uploadProgress < 100 ? "Submitting payment..." : "Done!"}
+                  {uploadProgress < 70 ? t("payment.uploadingReceipt") : uploadProgress < 100 ? t("payment.submittingPayment") : t("payment.done")}
                 </p>
               </div>
             )}
@@ -539,12 +552,12 @@ const EgyptPaymentPage = () => {
                 <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center mx-auto">
                   <CheckCircle className="h-9 w-9 text-green-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground">You're in! 🎉</h2>
+                <h2 className="text-2xl font-bold text-foreground">{t("payment.youAreIn")}</h2>
                 <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-                  Your payment has been approved and your enrollment is now active. Welcome to Klovers!
+                  {t("payment.approvedMsg")}
                 </p>
                 <Button className="w-full sm:w-auto" onClick={() => navigate("/dashboard")}>
-                  Go to Dashboard <ArrowRight className="h-4 w-4 ml-1" />
+                  {t("payment.goToDashboard")} <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               </CardContent>
             </Card>
@@ -558,10 +571,10 @@ const EgyptPaymentPage = () => {
                       <Sparkles className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-1">Upgrade Available</p>
-                      <h3 className="font-bold text-foreground mb-1">Want faster results? Try Private.</h3>
+                      <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-1">{t("payment.upgradeAvailable")}</p>
+                      <h3 className="font-bold text-foreground mb-1">{t("payment.upgradeTitle")}</h3>
                       <p className="text-sm text-muted-foreground mb-3">
-                        1-on-1 sessions move 3× faster — personalized lessons, flexible schedule, instant feedback. Many students switch after their first month.
+                        {t("payment.upgradeDesc")}
                       </p>
                       <div className="flex flex-wrap gap-2">
                         <a
@@ -571,10 +584,10 @@ const EgyptPaymentPage = () => {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 text-sm font-semibold bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
                         >
-                          Ask about Private →
+                          {t("payment.askPrivate")}
                         </a>
                         <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="text-muted-foreground">
-                          No thanks
+                          {t("payment.noThanks")}
                         </Button>
                       </div>
                     </div>
@@ -588,8 +601,8 @@ const EgyptPaymentPage = () => {
         {enrollment.approval_status === "REJECTED" && (
           <Card>
             <CardContent className="pt-6 text-center space-y-3">
-              <h2 className="text-xl font-semibold text-destructive">Payment Rejected</h2>
-              <p className="text-muted-foreground">Please contact support for assistance.</p>
+              <h2 className="text-xl font-semibold text-destructive">{t("payment.paymentRejected")}</h2>
+              <p className="text-muted-foreground">{t("payment.rejectedMsg")}</p>
               <a
                 href={WHATSAPP_BASE}
                 onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(WHATSAPP_BASE, { cta_label: "egypt_payment_rejected" }); }}
@@ -597,7 +610,7 @@ const EgyptPaymentPage = () => {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#25D366] hover:bg-[#1ebe5d] px-4 py-2 rounded-lg transition-colors"
               >
-                💬 Contact us on WhatsApp
+                {t("payment.contactWhatsApp")}
               </a>
             </CardContent>
           </Card>
@@ -606,9 +619,9 @@ const EgyptPaymentPage = () => {
         {/* Trust badges */}
         <div className="mt-6 grid grid-cols-3 gap-3">
           {[
-            { icon: "🔒", title: "Secure Upload", desc: "Encrypted storage" },
-            { icon: "⚡", title: "Fast Review", desc: "Within 24–48h" },
-            { icon: "💬", title: "Need Help?", desc: "WhatsApp us" },
+            { icon: "🔒", title: t("payment.secureUpload"), desc: t("payment.secureUploadDesc") },
+            { icon: "⚡", title: t("payment.fastReview"), desc: t("payment.fastReviewDesc") },
+            { icon: "💬", title: t("payment.needHelp"), desc: t("payment.needHelpDesc") },
           ].map(({ icon, title, desc }) => (
             <div key={title} className="bg-muted/50 border border-border rounded-xl p-3 text-center">
               <span className="text-xl block mb-1">{icon}</span>
@@ -620,7 +633,7 @@ const EgyptPaymentPage = () => {
 
         {/* WhatsApp fallback */}
         <p className="text-center text-xs text-muted-foreground mt-4">
-          Having trouble?{" "}
+          {t("payment.troubleText")}{" "}
           <a
             href={WHATSAPP_BASE}
             onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(WHATSAPP_BASE, { cta_label: "egypt_payment_help" }); }}
@@ -628,9 +641,9 @@ const EgyptPaymentPage = () => {
             rel="noopener noreferrer"
             className="text-green-600 font-semibold hover:underline"
           >
-            WhatsApp us
+            {t("payment.whatsappUs")}
           </a>{" "}
-          and we'll help you complete your enrollment.
+          {t("payment.troubleHelp")}
         </p>
       </main>
       <Footer />
