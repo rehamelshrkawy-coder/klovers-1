@@ -26,29 +26,42 @@ import InterviewQACard, { type InterviewQA } from "@/components/interview/Interv
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/hooks/useSEO";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Briefcase, Brain, Trophy, Sparkles, Lock, GraduationCap,
   Loader2, ChevronRight, Star, Globe, ArrowRight,
 } from "lucide-react";
 
-const INDUSTRIES = [
-  "Technology", "Finance & Banking", "Healthcare", "Education",
-  "Manufacturing", "Hospitality & Tourism", "Logistics & Supply Chain",
-  "Retail & E-commerce", "Marketing & Media", "Consulting",
-  "Government & Public Sector", "Energy & Utilities", "Other",
+const INDUSTRY_KEYS = [
+  "indTechnology", "indFinance", "indHealthcare", "indEducation",
+  "indManufacturing", "indHospitality", "indLogistics",
+  "indRetail", "indMarketing", "indConsulting",
+  "indGovernment", "indEnergy", "indOther",
 ];
 
-const EXPERIENCE_OPTIONS = [
-  { value: "0", label: "0-1 years" },
-  { value: "2", label: "2-3 years" },
-  { value: "4", label: "4-5 years" },
-  { value: "6", label: "6-10 years" },
-  { value: "10", label: "10+ years" },
+const EXPERIENCE_KEYS = [
+  { value: "0", key: "exp01" },
+  { value: "2", key: "exp23" },
+  { value: "4", key: "exp45" },
+  { value: "6", key: "exp610" },
+  { value: "10", key: "exp10plus" },
 ];
 
-const LANGUAGES = ["English", "Arabic", "Korean", "Chinese", "Japanese", "French", "Spanish", "Hindi", "Malay", "Turkish"];
+const LANGUAGE_KEYS = [
+  { id: "English", key: "langEnglish" },
+  { id: "Arabic", key: "langArabic" },
+  { id: "Korean", key: "langKorean" },
+  { id: "Chinese", key: "langChinese" },
+  { id: "Japanese", key: "langJapanese" },
+  { id: "French", key: "langFrench" },
+  { id: "Spanish", key: "langSpanish" },
+  { id: "Hindi", key: "langHindi" },
+  { id: "Malay", key: "langMalay" },
+  { id: "Turkish", key: "langTurkish" },
+];
 
 export default function KoreanInterviewPage() {
+  const { t } = useLanguage();
   useSEO({
     title: "Korean Interview Training — AI-Powered | Klovers",
     description: "Practice Korean job interview questions with AI-generated personalized Q&A. Get 2 free questions, upgrade for more.",
@@ -100,7 +113,7 @@ export default function KoreanInterviewPage() {
 
     if (paymentResult === "success" && returnSessionId) {
       setSessionId(returnSessionId);
-      toast({ title: "Payment successful!", description: "Generating your additional questions..." });
+      toast({ title: t("koreanInterviewPage.toastPayTitle"), description: t("koreanInterviewPage.toastPayDesc") });
       // Poll for payment confirmation then generate
       const pollPayment = async () => {
         for (let i = 0; i < 10; i++) {
@@ -119,11 +132,11 @@ export default function KoreanInterviewPage() {
             return;
           }
         }
-        toast({ title: "Payment processing", description: "Your payment is being confirmed. Please refresh in a moment.", variant: "destructive" });
+        toast({ title: t("koreanInterviewPage.toastPayProcTitle"), description: t("koreanInterviewPage.toastPayProcDesc"), variant: "destructive" });
       };
       pollPayment();
     } else if (paymentResult === "canceled") {
-      toast({ title: "Payment canceled", description: "You can try again anytime." });
+      toast({ title: t("koreanInterviewPage.toastPayCancelTitle"), description: t("koreanInterviewPage.toastPayCancelDesc") });
     }
   }, [searchParams]);
 
@@ -179,10 +192,10 @@ export default function KoreanInterviewPage() {
       setPaidRemaining(data.paid_remaining ?? 0);
 
       if (data.quota_reached && !sid) {
-        toast({ title: "Free questions used", description: "Unlock 5 more questions for just $5!" });
+        toast({ title: t("koreanInterviewPage.toastQuotaTitle"), description: t("koreanInterviewPage.toastQuotaDesc") });
       }
     } catch (e: any) {
-      toast({ title: "Generation failed", description: e.message, variant: "destructive" });
+      toast({ title: t("koreanInterviewPage.toastGenFail"), description: e.message, variant: "destructive" });
     } finally {
       setGenerating(false);
     }
@@ -190,7 +203,7 @@ export default function KoreanInterviewPage() {
 
   const handleGenerate = () => {
     if (!jobTitle.trim()) {
-      toast({ title: "Job title required", description: "Please enter your target job title." });
+      toast({ title: t("koreanInterviewPage.toastJobRequiredTitle"), description: t("koreanInterviewPage.toastJobRequiredDesc") });
       return;
     }
     if (!user) {
@@ -212,7 +225,7 @@ export default function KoreanInterviewPage() {
         window.location.href = res.data.url;
       }
     } catch (e: any) {
-      toast({ title: "Checkout failed", description: e.message, variant: "destructive" });
+      toast({ title: t("koreanInterviewPage.toastCheckoutFail"), description: e.message, variant: "destructive" });
     } finally {
       setPurchasing(false);
     }
@@ -240,25 +253,24 @@ export default function KoreanInterviewPage() {
           </div>
           <div className="relative max-w-5xl mx-auto px-4 py-16 md:py-24 text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <Badge className="bg-white/20 text-white border-white/30 text-sm">AI-Powered</Badge>
-              <Badge className="bg-white/20 text-white border-white/30 text-sm">면접 준비</Badge>
+              <Badge className="bg-white/20 text-white border-white/30 text-sm">{t("koreanInterviewPage.heroBadgeAI")}</Badge>
+              <Badge className="bg-white/20 text-white border-white/30 text-sm">{t("koreanInterviewPage.heroBadgeKo")}</Badge>
             </div>
             <h1 className="text-3xl md:text-5xl font-bold mb-4">
-              Ace Your Korean Job Interview
+              {t("koreanInterviewPage.heroTitle")}
             </h1>
             <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-8">
-              Get personalized Korean interview questions with model answers,
-              pronunciation guides, and text-to-speech — all tailored to your skills.
+              {t("koreanInterviewPage.heroSubtitle")}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a href="#skill-form" className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-6 py-3 rounded-full hover:bg-[#E6E600] transition-colors">
-                <Sparkles className="h-5 w-5" /> Start Free — 2 Questions
+                <Sparkles className="h-5 w-5" /> {t("koreanInterviewPage.heroCtaStart")}
               </a>
               <Link
                 to="/practice-interview"
                 className="inline-flex items-center gap-2 border-2 border-white/40 text-white font-semibold px-6 py-3 rounded-full hover:bg-white/10 transition-colors"
               >
-                <GraduationCap className="h-5 w-5" /> Demo Teacher
+                <GraduationCap className="h-5 w-5" /> {t("koreanInterviewPage.heroCtaDemo")}
               </Link>
             </div>
           </div>
@@ -266,12 +278,12 @@ export default function KoreanInterviewPage() {
 
         {/* ── How It Works ── */}
         <section className="max-w-5xl mx-auto px-4 py-16">
-          <h2 className="text-2xl font-bold text-center mb-10">How It Works</h2>
+          <h2 className="text-2xl font-bold text-center mb-10">{t("koreanInterviewPage.howTitle")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { icon: Briefcase, title: "1. Add Your Skills", desc: "Enter your job title, experience, industry, and languages you speak." },
-              { icon: Brain, title: "2. Get Questions", desc: "AI generates personalized Korean interview Q&A pairs with translations and pronunciation." },
-              { icon: Trophy, title: "3. Practice & Master", desc: "Listen with text-to-speech, practice slowly, and master your Korean answers." },
+              { icon: Briefcase, title: t("koreanInterviewPage.step1Title"), desc: t("koreanInterviewPage.step1Desc") },
+              { icon: Brain, title: t("koreanInterviewPage.step2Title"), desc: t("koreanInterviewPage.step2Desc") },
+              { icon: Trophy, title: t("koreanInterviewPage.step3Title"), desc: t("koreanInterviewPage.step3Desc") },
             ].map((step) => (
               <Card key={step.title} className="rounded-xl text-center">
                 <CardContent className="p-6 space-y-3">
@@ -292,15 +304,15 @@ export default function KoreanInterviewPage() {
             <Card className="rounded-2xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Briefcase className="h-5 w-5" /> Your Skills & Background
+                  <Briefcase className="h-5 w-5" /> {t("koreanInterviewPage.formTitle")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="jobTitle">Target Job Title *</Label>
+                  <Label htmlFor="jobTitle">{t("koreanInterviewPage.jobTitleLabel")}</Label>
                   <Input
                     id="jobTitle"
-                    placeholder="e.g. Software Engineer, Data Analyst, Marketing Manager"
+                    placeholder={t("koreanInterviewPage.jobTitlePlaceholder")}
                     value={jobTitle}
                     onChange={(e) => setJobTitle(e.target.value)}
                   />
@@ -308,27 +320,27 @@ export default function KoreanInterviewPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Years of Experience</Label>
+                    <Label>{t("koreanInterviewPage.experienceLabel")}</Label>
                     <Select value={yearsExperience} onValueChange={setYearsExperience}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {EXPERIENCE_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        {EXPERIENCE_KEYS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>{t(`koreanInterviewPage.${opt.key}`)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Industry</Label>
+                    <Label>{t("koreanInterviewPage.industryLabel")}</Label>
                     <Select value={industry} onValueChange={setIndustry}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select..." />
+                        <SelectValue placeholder={t("koreanInterviewPage.industryPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
-                        {INDUSTRIES.map((ind) => (
-                          <SelectItem key={ind} value={ind}>{ind}</SelectItem>
+                        {INDUSTRY_KEYS.map((ind) => (
+                          <SelectItem key={ind} value={ind}>{t(`koreanInterviewPage.${ind}`)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -336,20 +348,20 @@ export default function KoreanInterviewPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Languages You Speak</Label>
+                  <Label>{t("koreanInterviewPage.languagesLabel")}</Label>
                   <div className="flex flex-wrap gap-2">
-                    {LANGUAGES.map((lang) => (
+                    {LANGUAGE_KEYS.map((lang) => (
                       <button
-                        key={lang}
+                        key={lang.id}
                         type="button"
-                        onClick={() => toggleLang(lang)}
+                        onClick={() => toggleLang(lang.id)}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                          selectedLangs.includes(lang)
+                          selectedLangs.includes(lang.id)
                             ? "bg-muted border-border text-foreground dark:bg-secondary dark:border-border dark:text-secondary-foreground"
                             : "bg-white border-gray-200 text-gray-600 hover:border-border dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300"
                         }`}
                       >
-                        {lang}
+                        {t(`koreanInterviewPage.${lang.key}`)}
                       </button>
                     ))}
                   </div>
@@ -361,16 +373,16 @@ export default function KoreanInterviewPage() {
                   className="w-full gap-2 text-white h-12 text-base"
                 >
                   {generating ? (
-                    <><Loader2 className="h-5 w-5 animate-spin" /> Generating Questions...</>
+                    <><Loader2 className="h-5 w-5 animate-spin" /> {t("koreanInterviewPage.btnGenerating")}</>
                   ) : questions.length > 0 ? (
-                    <><Sparkles className="h-5 w-5" /> Generate More Questions</>
+                    <><Sparkles className="h-5 w-5" /> {t("koreanInterviewPage.btnGenerateMore")}</>
                   ) : (
-                    <><Sparkles className="h-5 w-5" /> Generate My Interview Questions</>
+                    <><Sparkles className="h-5 w-5" /> {t("koreanInterviewPage.btnGenerate")}</>
                   )}
                 </Button>
                 {!user && !authLoading && (
                   <p className="text-xs text-center text-muted-foreground">
-                    Free account required to generate questions. <Link to="/login?redirect=/interview-training" className="text-primary underline">Sign in</Link> or <Link to="/signup?redirect=/interview-training" className="text-primary underline">create one</Link>.
+                    {t("koreanInterviewPage.authNotice")} <Link to="/login?redirect=/interview-training" className="text-primary underline">{t("koreanInterviewPage.authSignIn")}</Link>{t("koreanInterviewPage.authOr")}<Link to="/signup?redirect=/interview-training" className="text-primary underline">{t("koreanInterviewPage.authCreate")}</Link>{t("koreanInterviewPage.authPeriod")}
                   </p>
                 )}
               </CardContent>
@@ -382,11 +394,11 @@ export default function KoreanInterviewPage() {
         {questions.length > 0 && (
           <section className="max-w-3xl mx-auto px-4 py-16">
             <div className="space-y-4 mb-8">
-              <h2 className="text-2xl font-bold">Your Interview Questions</h2>
+              <h2 className="text-2xl font-bold">{t("koreanInterviewPage.resultsTitle")}</h2>
               <div className="flex items-center gap-3">
                 <Progress value={(totalUnlocked / Math.max(totalQuestions, 7)) * 100} className="h-2 flex-1" />
                 <span className="text-sm text-muted-foreground whitespace-nowrap">
-                  {totalUnlocked} / {Math.max(totalQuestions, 7)} unlocked
+                  {totalUnlocked} / {Math.max(totalQuestions, 7)} {t("koreanInterviewPage.resultsUnlocked")}
                 </span>
               </div>
             </div>
@@ -422,7 +434,7 @@ export default function KoreanInterviewPage() {
                       <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-gray-900/60">
                         <div className="flex flex-col items-center gap-2 text-muted-foreground">
                           <Lock className="h-8 w-8" />
-                          <span className="text-sm font-medium">Unlock for $5</span>
+                          <span className="text-sm font-medium">{t("koreanInterviewPage.unlockFor5")}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -437,15 +449,15 @@ export default function KoreanInterviewPage() {
                 <CardContent className="p-6 text-center space-y-4">
                   <div className="flex items-center justify-center gap-2">
                     <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                    <h3 className="text-lg font-bold">Unlock 5 More Questions</h3>
+                    <h3 className="text-lg font-bold">{t("koreanInterviewPage.upgradeTitle")}</h3>
                     <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
                   </div>
                   <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    Get 5 additional AI-generated interview questions personalized to your skills — with Korean translations, romanization, and text-to-speech.
+                    {t("koreanInterviewPage.upgradeDesc")}
                   </p>
                   <div className="flex items-center justify-center gap-2">
-                    <span className="text-3xl font-bold text-foreground">$5</span>
-                    <span className="text-sm text-muted-foreground">one-time</span>
+                    <span className="text-3xl font-bold text-foreground">{t("koreanInterviewPage.upgradePrice")}</span>
+                    <span className="text-sm text-muted-foreground">{t("koreanInterviewPage.upgradeOneTime")}</span>
                   </div>
                   <Button
                     onClick={handlePurchase}
@@ -453,9 +465,9 @@ export default function KoreanInterviewPage() {
                     className="gap-2 text-white px-8 h-12 text-base"
                   >
                     {purchasing ? (
-                      <><Loader2 className="h-5 w-5 animate-spin" /> Processing...</>
+                      <><Loader2 className="h-5 w-5 animate-spin" /> {t("koreanInterviewPage.upgradeProcessing")}</>
                     ) : (
-                      <><Lock className="h-5 w-5" /> Unlock All Questions</>
+                      <><Lock className="h-5 w-5" /> {t("koreanInterviewPage.upgradeBtn")}</>
                     )}
                   </Button>
                 </CardContent>
@@ -468,13 +480,13 @@ export default function KoreanInterviewPage() {
         <section className="bg-gray-50 dark:bg-gray-900 py-16">
           <div className="max-w-3xl mx-auto px-4 text-center space-y-4">
             <GraduationCap className="h-10 w-10 mx-auto text-primary" />
-            <h2 className="text-xl font-bold">See How a Teacher Practices</h2>
+            <h2 className="text-xl font-bold">{t("koreanInterviewPage.demoTitle")}</h2>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              Watch a full demo of 41 real interview questions and answers prepared by a Klovers teacher. Password protected — for preview only.
+              {t("koreanInterviewPage.demoDesc")}
             </p>
             <Link to="/practice-interview">
               <Button variant="outline" className="gap-2">
-                <GraduationCap className="h-4 w-4" /> Demo Teacher <ArrowRight className="h-4 w-4" />
+                <GraduationCap className="h-4 w-4" /> {t("koreanInterviewPage.demoBtn")} <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -484,10 +496,10 @@ export default function KoreanInterviewPage() {
         <section className="max-w-5xl mx-auto px-4 py-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
-              { icon: Brain, label: "AI-Powered", desc: "Gemini generates tailored Q&A" },
-              { icon: Globe, label: "Korean + English", desc: "Bilingual with romanization" },
-              { icon: Trophy, label: "Interview Ready", desc: "Real Korean interview format" },
-              { icon: Star, label: "1,000+ Students", desc: "Trusted by Klovers community" },
+              { icon: Brain, label: t("koreanInterviewPage.trustAI"), desc: t("koreanInterviewPage.trustAIDesc") },
+              { icon: Globe, label: t("koreanInterviewPage.trustBilingual"), desc: t("koreanInterviewPage.trustBilingualDesc") },
+              { icon: Trophy, label: t("koreanInterviewPage.trustReady"), desc: t("koreanInterviewPage.trustReadyDesc") },
+              { icon: Star, label: t("koreanInterviewPage.trustStudents"), desc: t("koreanInterviewPage.trustStudentsDesc") },
             ].map((item) => (
               <div key={item.label} className="space-y-2">
                 <item.icon className="h-8 w-8 mx-auto text-primary" />
@@ -504,20 +516,20 @@ export default function KoreanInterviewPage() {
       <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Sign in to continue</DialogTitle>
+            <DialogTitle>{t("koreanInterviewPage.loginDialogTitle")}</DialogTitle>
             <DialogDescription>
-              Create a free account or sign in to generate your personalized Korean interview questions.
+              {t("koreanInterviewPage.loginDialogDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 mt-2">
             <Link to="/login?redirect=/interview-training">
               <Button className="w-full gap-2">
-                <ChevronRight className="h-4 w-4" /> Sign In
+                <ChevronRight className="h-4 w-4" /> {t("koreanInterviewPage.loginDialogSignIn")}
               </Button>
             </Link>
             <Link to="/signup?redirect=/interview-training">
               <Button variant="outline" className="w-full gap-2">
-                Create Free Account
+                {t("koreanInterviewPage.loginDialogCreate")}
               </Button>
             </Link>
           </div>

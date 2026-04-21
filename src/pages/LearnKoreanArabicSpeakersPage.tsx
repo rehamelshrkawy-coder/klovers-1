@@ -6,8 +6,10 @@ import OptimizedImage from "@/components/OptimizedImage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Zap, Users, Award, ArrowRight, BarChart3, Clock } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const LearnKoreanArabicSpeakersPage = () => {
+  const { t } = useLanguage();
   useSEO({
     title: "Learn Korean as an Arabic Speaker | Difficulty Guide & Study Methods",
     description: "Discover why Korean is easier for Arabic speakers than English speakers. Find grammar similarities, shared sounds, and proven study methods tailored to Arabic learners.",
@@ -98,19 +100,19 @@ const LearnKoreanArabicSpeakersPage = () => {
         {/* Hero Section */}
         <section className="pt-24 pb-16 bg-muted/50">
           <div className="container mx-auto px-4 max-w-4xl">
-            <Badge className="mb-4" variant="outline">For Arabic Learners</Badge>
+            <Badge className="mb-4" variant="outline">{t("learnArabicSpeakers.badge")}</Badge>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
-              Learn Korean as an Arabic Speaker
+              {t("learnArabicSpeakers.heroTitle")}
             </h1>
             <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
-              Korean is actually <span className="font-semibold text-primary">easier for Arabic speakers</span> than English speakers. Discover why, and reach intermediate fluency in 6-8 months instead of 12+.
+              {t("learnArabicSpeakers.heroSubtitlePre")} <span className="font-semibold text-primary">{t("learnArabicSpeakers.heroSubtitleBold")}</span> {t("learnArabicSpeakers.heroSubtitlePost")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild>
-                <a href="/enroll-now">Start Learning Today</a>
+                <a href="/enroll-now">{t("learnArabicSpeakers.heroCtaStart")}</a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="/placement-test">Take Free Assessment</a>
+                <a href="/placement-test">{t("learnArabicSpeakers.heroCtaTest")}</a>
               </Button>
             </div>
           </div>
@@ -119,28 +121,28 @@ const LearnKoreanArabicSpeakersPage = () => {
         {/* Key Advantages Section */}
         <section className="py-16 border-b">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-3xl font-bold mb-12 text-center">Why Korean is Easier for You</h2>
+            <h2 className="text-3xl font-bold mb-12 text-center">{t("learnArabicSpeakers.advantagesTitle")}</h2>
             <div className="grid md:grid-cols-2 gap-8">
               {[
                 {
                   icon: <Zap className="h-8 w-8 text-amber-500" />,
-                  title: "Grammar You Already Understand",
-                  desc: "SOV word order + agglutinative suffixes = Arabic structure. You won't learn grammar, you'll recognize it."
+                  title: t("learnArabicSpeakers.advGrammarTitle"),
+                  desc: t("learnArabicSpeakers.advGrammarDesc")
                 },
                 {
                   icon: <Award className="h-8 w-8 text-primary" />,
-                  title: "Formal/Informal Levels (Like Arabic)",
-                  desc: "Korean has respect words and formal/casual speech just like Arabic. This is intuitive for you."
+                  title: t("learnArabicSpeakers.advFormalTitle"),
+                  desc: t("learnArabicSpeakers.advFormalDesc")
                 },
                 {
                   icon: <BarChart3 className="h-8 w-8 text-green-500" />,
-                  title: "3x Faster Progress",
-                  desc: "Arabic speakers typically progress 3x faster than English speakers. B1 in 6-8 months vs 12+ months."
+                  title: t("learnArabicSpeakers.advFastTitle"),
+                  desc: t("learnArabicSpeakers.advFastDesc")
                 },
                 {
                   icon: <Users className="h-8 w-8 text-purple-500" />,
-                  title: "Hangul is the Easiest Alphabet",
-                  desc: "Created as a phonetic script. Learn it in 2 hours, not years. Designed specifically for ease."
+                  title: t("learnArabicSpeakers.advHangulTitle"),
+                  desc: t("learnArabicSpeakers.advHangulDesc")
                 }
               ].map((item, i) => (
                 <div key={i} className="p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow">
@@ -156,8 +158,8 @@ const LearnKoreanArabicSpeakersPage = () => {
         {/* Grammar Similarities Section */}
         <section className="py-16 border-b bg-slate-50/50 dark:bg-slate-950/20">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-3xl font-bold mb-4">Grammar Similarities: Arabic ↔ Korean</h2>
-            <p className="text-foreground/70 mb-12">These patterns feel natural to you because you already speak Arabic.</p>
+            <h2 className="text-3xl font-bold mb-4">{t("learnArabicSpeakers.grammarTitle")}</h2>
+            <p className="text-foreground/70 mb-12">{t("learnArabicSpeakers.grammarSubtitle")}</p>
 
             <div className="space-y-8">
               {[
@@ -166,33 +168,33 @@ const LearnKoreanArabicSpeakersPage = () => {
                   ar_parse: "[ الكتاب (subject) | أحمر (adjective) ]",
                   ko: "책이 빨강이다",
                   ko_parse: "[ 책 (subject) | 이 (particle) | 빨강 (adjective) | 이다 (copula) ]",
-                  concept: "Subject-Adjective: Adjectives follow nouns in both languages"
+                  concept: t("learnArabicSpeakers.concept1")
                 },
                 {
                   ar: "أنا أحب الكتاب",
                   ar_parse: "[ أنا (I) | أحب (love) | الكتاب (book) ]",
                   ko: "나는 책을 사랑한다",
                   ko_parse: "[ 나 (I) | 는 (particle) | 책 (book) | 을 (particle) | 사랑 (love) | 한다 (verb ending) ]",
-                  concept: "Particles mark case: Like Arabic's tanween/case endings, Korean uses particles (은/는, 을/를, 에게, etc)"
+                  concept: t("learnArabicSpeakers.concept2")
                 },
                 {
                   ar: "يا أحمد، كيف حالك؟ (formal) vs أنت بخير؟ (casual)",
                   ar_parse: "Formal + Informal address",
                   ko: "안녕하세요? (formal) vs 안녕? (casual)",
                   ko_parse: "Formal + Informal speech",
-                  concept: "Speech Levels: Like Arabic, Korean marks social respect through word choice and endings"
+                  concept: t("learnArabicSpeakers.concept3")
                 }
               ].map((ex, i) => (
                 <div key={i} className="p-6 rounded-lg border bg-white dark:bg-slate-900">
                   <p className="font-bold mb-4 text-foreground">{ex.concept}</p>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <p className="text-sm font-semibold text-foreground/60 mb-2">Arabic</p>
+                      <p className="text-sm font-semibold text-foreground/60 mb-2">{t("learnArabicSpeakers.grammarArabicLabel")}</p>
                       <p className="text-lg font-bold mb-1">{ex.ar}</p>
                       <p className="text-sm text-foreground/70">{ex.ar_parse}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-foreground/60 mb-2">Korean</p>
+                      <p className="text-sm font-semibold text-foreground/60 mb-2">{t("learnArabicSpeakers.grammarKoreanLabel")}</p>
                       <p className="text-lg font-bold mb-1">{ex.ko}</p>
                       <p className="text-sm text-foreground/70">{ex.ko_parse}</p>
                     </div>
@@ -206,13 +208,13 @@ const LearnKoreanArabicSpeakersPage = () => {
         {/* Timeline Section */}
         <section className="py-16 border-b">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-3xl font-bold mb-12 text-center">Your Learning Timeline</h2>
+            <h2 className="text-3xl font-bold mb-12 text-center">{t("learnArabicSpeakers.timelineTitle")}</h2>
             <div className="space-y-6">
               {[
-                { month: "Month 1-2", level: "A1 (Beginner)", skills: "Hangul alphabet, basic greetings, survival phrases (ordering food, asking directions)" },
-                { month: "Month 3-4", level: "A2 (Elementary)", skills: "Present tense, daily conversations, 500+ vocabulary, reading simple dialogues" },
-                { month: "Month 5-6", level: "B1 (Intermediate)", skills: "Past/future tenses, explain opinions, watch K-dramas with subtitles, hold 10-minute conversations" },
-                { month: "Month 7-8", level: "B1-B2 (Upper Int.)", skills: "Complex sentences, business Korean basics, prepare for TOPIK Level 3-4" }
+                { month: t("learnArabicSpeakers.timelineMonth12"), level: t("learnArabicSpeakers.timelineLvl1"), skills: t("learnArabicSpeakers.timelineSkills1") },
+                { month: t("learnArabicSpeakers.timelineMonth34"), level: t("learnArabicSpeakers.timelineLvl2"), skills: t("learnArabicSpeakers.timelineSkills2") },
+                { month: t("learnArabicSpeakers.timelineMonth56"), level: t("learnArabicSpeakers.timelineLvl3"), skills: t("learnArabicSpeakers.timelineSkills3") },
+                { month: t("learnArabicSpeakers.timelineMonth78"), level: t("learnArabicSpeakers.timelineLvl4"), skills: t("learnArabicSpeakers.timelineSkills4") }
               ].map((item, i) => (
                 <div key={i} className="flex gap-6 items-start">
                   <div className="flex-shrink-0">
@@ -234,33 +236,15 @@ const LearnKoreanArabicSpeakersPage = () => {
         {/* Why Klovers is Perfect for Arabic Speakers */}
         <section className="py-16 border-b bg-muted/50">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-3xl font-bold mb-12 text-center">Why Klovers for Arabic Speakers</h2>
+            <h2 className="text-3xl font-bold mb-12 text-center">{t("learnArabicSpeakers.whyKloversTitle")}</h2>
             <div className="grid md:grid-cols-2 gap-6">
               {[
-                {
-                  title: "Native Arabic-Speaking Teachers",
-                  desc: "Instructors who understand Arabic grammar and can explain Korean through that lens. They've walked your path."
-                },
-                {
-                  title: "Contrastive Grammar Lessons",
-                  desc: "We explain Korean grammar by comparing it to Arabic — not just comparing to English like other apps."
-                },
-                {
-                  title: "Culturally Relevant Content",
-                  desc: "Content about K-drama, Korean culture, and business Korean. Learn the Korea that interests you."
-                },
-                {
-                  title: "Flexible Payment in EGP",
-                  desc: "Pricing in Egyptian Pound, payment methods suited for Middle Eastern students. No currency headaches."
-                },
-                {
-                  title: "Live Group Classes (Evening)",
-                  desc: "Classes at 8 PM Cairo time, ideal for working professionals. Learn with other Arabic speakers."
-                },
-                {
-                  title: "Personalized 1-on-1 Options",
-                  desc: "One-on-one instruction where teachers focus on your specific Arabic-to-Korean learning path."
-                }
+                { title: t("learnArabicSpeakers.whyCard1Title"), desc: t("learnArabicSpeakers.whyCard1Desc") },
+                { title: t("learnArabicSpeakers.whyCard2Title"), desc: t("learnArabicSpeakers.whyCard2Desc") },
+                { title: t("learnArabicSpeakers.whyCard3Title"), desc: t("learnArabicSpeakers.whyCard3Desc") },
+                { title: t("learnArabicSpeakers.whyCard4Title"), desc: t("learnArabicSpeakers.whyCard4Desc") },
+                { title: t("learnArabicSpeakers.whyCard5Title"), desc: t("learnArabicSpeakers.whyCard5Desc") },
+                { title: t("learnArabicSpeakers.whyCard6Title"), desc: t("learnArabicSpeakers.whyCard6Desc") }
               ].map((item, i) => (
                 <div key={i} className="p-6 rounded-lg border bg-white dark:bg-slate-900">
                   <div className="flex items-start gap-3 mb-4">
@@ -277,25 +261,13 @@ const LearnKoreanArabicSpeakersPage = () => {
         {/* FAQ Section */}
         <section className="py-16 border-b">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="text-3xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
+            <h2 className="text-3xl font-bold mb-12 text-center">{t("learnArabicSpeakers.faqPageTitle")}</h2>
             <div className="space-y-6">
               {[
-                {
-                  q: "Will I need to learn hanja (Korean Chinese characters)?",
-                  a: "Not for conversational fluency. Hanja appears on official documents and some news articles, but modern Korean communication (texting, social media, K-dramas) uses only Hangul. Learn hanja after reaching B1 level if needed."
-                },
-                {
-                  q: "How is Hangul different from Arabic script?",
-                  a: "Hangul is alphabetic (consonants + vowels combine into blocks), while Arabic is abjadic (mostly consonants). Hangul was intentionally designed for ease and logical structure. You'll master it in 2-3 hours, not weeks."
-                },
-                {
-                  q: "Can I use translation apps to learn Korean?",
-                  a: "Not effectively. Apps give you translations, not understanding. Your brain needs to recognize patterns. Use apps only for reference — practice active learning through conversation and writing."
-                },
-                {
-                  q: "What's the best resource for learning Korean as an Arabic speaker?",
-                  a: "Combination of: (1) Structured lessons from a teacher (like Klovers), (2) Immersion via K-dramas, (3) Conversation practice with natives, (4) Daily flashcards for vocabulary. We provide all four."
-                }
+                { q: t("learnArabicSpeakers.faqQ1"), a: t("learnArabicSpeakers.faqA1") },
+                { q: t("learnArabicSpeakers.faqQ2"), a: t("learnArabicSpeakers.faqA2") },
+                { q: t("learnArabicSpeakers.faqQ3"), a: t("learnArabicSpeakers.faqA3") },
+                { q: t("learnArabicSpeakers.faqQ4"), a: t("learnArabicSpeakers.faqA4") }
               ].map((item, i) => (
                 <details key={i} className="group p-6 rounded-lg border bg-slate-50/50 dark:bg-slate-900/50 cursor-pointer">
                   <summary className="font-bold text-lg flex items-center justify-between">
@@ -314,23 +286,23 @@ const LearnKoreanArabicSpeakersPage = () => {
         {/* CTA Section */}
         <section className="py-20 bg-secondary text-white">
           <div className="container mx-auto px-4 max-w-4xl text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Master Korean Faster?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">{t("learnArabicSpeakers.ctaTitle")}</h2>
             <p className="text-lg mb-8 text-white/80 max-w-2xl mx-auto">
-              Join 500+ Arabic speakers learning Korean with Klovers. Get personalized lessons tailored to your Arabic-speaking background.
+              {t("learnArabicSpeakers.ctaSubtitle")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" asChild>
                 <a href="/enroll-now" className="flex items-center gap-2">
-                  Enroll Now <ArrowRight className="h-4 w-4" />
+                  {t("learnArabicSpeakers.ctaEnroll")} <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>
               <Button size="lg" variant="outline" className="text-foreground border-white hover:bg-white/10" asChild>
-                <a href="/contact">Chat with us</a>
+                <a href="/contact">{t("learnArabicSpeakers.ctaChat")}</a>
               </Button>
             </div>
             <p className="text-sm text-white/80 mt-6">
               <Clock className="h-4 w-4 inline mr-2" />
-              Free placement test • No credit card required • Start anytime
+              {t("learnArabicSpeakers.ctaFooter")}
             </p>
           </div>
         </section>

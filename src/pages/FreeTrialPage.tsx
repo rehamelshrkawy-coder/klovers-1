@@ -8,20 +8,22 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { logLeadEvent } from "@/lib/leadTracking";
 import { Star, Users, Clock, ArrowRight, Gift, CalendarDays } from "lucide-react";
-
-const PERKS = [
-  { icon: Gift, text: "100% free — no credit card" },
-  { icon: Users, text: "Live class with real teacher" },
-  { icon: Clock, text: "45-minute session" },
-  { icon: Star, text: "Personalised level assessment" },
-];
-
-const SLOT_HIGHLIGHTS = [
-  { day: "Wednesday", time: "5:30 PM" },
-  { day: "Sunday",    time: "6:30 PM" },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const FreeTrialPage = () => {
+  const { t } = useLanguage();
+  const PERKS = [
+    { icon: Gift, text: t("freeTrial.perkFree") },
+    { icon: Users, text: t("freeTrial.perkLive") },
+    { icon: Clock, text: t("freeTrial.perkDuration") },
+    { icon: Star, text: t("freeTrial.perkAssessment") },
+  ];
+
+  const SLOT_HIGHLIGHTS = [
+    { day: t("freeTrial.dayWednesday"), time: "5:30 PM" },
+    { day: t("freeTrial.daySunday"),    time: "6:30 PM" },
+  ];
+
   useSEO({
     title: "Book Your Free Korean Class | Klovers Academy",
     description: "Try a live Korean class for free. No credit card. Real teacher. 45 minutes. Join 1,000+ students learning Korean the right way.",
@@ -101,13 +103,13 @@ const FreeTrialPage = () => {
         <section className="py-16 md:py-24 bg-gradient-to-b from-primary/10 via-background to-background">
           <div className="container mx-auto px-4 text-center max-w-3xl">
             <span className="inline-block bg-primary text-black text-xs font-black tracking-[0.2em] uppercase px-5 py-2 rounded-full mb-5">
-              Free Trial
+              {t("freeTrial.badge")}
             </span>
             <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tight mb-5 leading-[1.05]">
-              Try Korean for <span className="text-primary text-outlined-lg">Free</span>
+              {t("freeTrial.heroTitle1")} <span className="text-primary text-outlined-lg">{t("freeTrial.heroTitleFree")}</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-8">
-              One live class. Real teacher. No credit card. Pick a time that works for you.
+              {t("freeTrial.heroSubtitle")}
             </p>
 
             <Button
@@ -115,12 +117,12 @@ const FreeTrialPage = () => {
               onClick={handleBookCta}
               className="gap-2 text-base font-bold h-14 px-8 shadow-xl hover:scale-[1.02] transition-transform"
             >
-              Book Your Free Korean Class
+              {t("freeTrial.cta")}
               <ArrowRight className="h-5 w-5" />
             </Button>
 
             <p className="text-xs text-muted-foreground mt-3">
-              {user ? "You're signed in — pick a slot on the next page." : "Takes 30 seconds. We'll create your account so you can manage your bookings."}
+              {user ? t("freeTrial.noteSignedIn") : t("freeTrial.noteSignedOut")}
             </p>
 
             {/* Perks */}
@@ -144,9 +146,9 @@ const FreeTrialPage = () => {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/15 mb-3">
                 <CalendarDays className="h-6 w-6 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">When do trials run?</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2">{t("freeTrial.slotsTitle")}</h2>
               <p className="text-sm text-muted-foreground mb-6">
-                We run two free trial sessions every week. All times are in Cairo (Africa/Cairo).
+                {t("freeTrial.slotsSubtitle")}
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
@@ -163,7 +165,7 @@ const FreeTrialPage = () => {
                 onClick={handleBookCta}
                 className="w-full sm:w-auto gap-2 text-base font-bold h-13 px-8"
               >
-                Book Your Free Korean Class
+                {t("freeTrial.cta")}
                 <ArrowRight className="h-5 w-5" />
               </Button>
 
@@ -175,7 +177,7 @@ const FreeTrialPage = () => {
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  <span className="font-semibold text-foreground">14 students</span> booked this week
+                  <span className="font-semibold text-foreground">{t("freeTrial.bookedSuffixCount")}</span> {t("freeTrial.bookedSuffixText")}
                 </p>
               </div>
             </div>
