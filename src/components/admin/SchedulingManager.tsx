@@ -25,7 +25,8 @@ import { useAuth } from "@/hooks/useAuth";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 import { LEVEL_KEYS, mapLegacyLevel, getLevelShortLabel, LEVEL_SELECT_OPTIONS } from "@/constants/levels";
-import { formatTime } from "@/lib/admin-utils";
+import { formatTime, convertSlotToTimezone } from "@/lib/admin-utils";
+import { ADMIN_TIMEZONE } from "@/constants/scheduling";
 import { TRIAL_CONFIRMATION_EMAIL_ENABLED } from "@/lib/siteConfig";
 import type { PkgGroup } from "@/types/admin";
 const LEVELS = LEVEL_KEYS;
@@ -315,7 +316,8 @@ const PackagesManager = ({ onSwitchToGroups }: { onSwitchToGroups?: () => void }
   };
 
   const handleDeletePackage = async (p: Package) => {
-    if (!confirm(`Delete this slot? (${getLevelShortLabel(p.level)} – ${DAY_NAMES[p.day_of_week]} ${formatTime(p.start_time)})\n\nThis will also deactivate any groups linked to it.`)) return;
+    const lcl = convertSlotToTimezone(p.day_of_week, p.start_time, p.timezone, ADMIN_TIMEZONE);
+    if (!confirm(`Delete this slot? (${getLevelShortLabel(p.level)} – ${lcl.weekday} ${lcl.timeFormatted} ${ADMIN_TIMEZONE})\n\nThis will also deactivate any groups linked to it.`)) return;
     // Deactivate linked groups first
     await supabase.from("pkg_groups").update({ is_active: false }).eq("package_id", p.id);
     const { error } = await supabase.from("schedule_packages").delete().eq("id", p.id);
@@ -471,14 +473,21 @@ const PackagesManager = ({ onSwitchToGroups }: { onSwitchToGroups?: () => void }
               {displayed.map((p) => {
                 const seatsLeft = p.seats_left ?? (p.capacity - (p.member_count ?? 0));
                 const needsGroup = (p.waitlist_count ?? 0) > 0 || seatsLeft <= 0;
+                const local = convertSlotToTimezone(p.day_of_week, p.start_time, p.timezone, ADMIN_TIMEZONE);
                 return (
                 <TableRow key={p.id}>
                   <TableCell><Badge variant="outline">{getLevelShortLabel(p.level)}</Badge></TableCell>
                   <TableCell><Badge variant={p.course_type === "private" ? "destructive" : "secondary"}>{p.course_type || "group"}</Badge></TableCell>
-                  <TableCell>{DAY_NAMES[p.day_of_week]}</TableCell>
-                  <TableCell>{formatTime(p.start_time)}</TableCell>
+                  <TableCell>
+                    <div>{local.weekday}</div>
+                    <div className="text-[10px] text-muted-foreground/70">({DAY_NAMES[p.day_of_week]} Cairo)</div>
+                  </TableCell>
+                  <TableCell>
+                    <div>{local.timeFormatted}</div>
+                    <div className="text-[10px] text-muted-foreground/70">({formatTime(p.start_time)} Cairo)</div>
+                  </TableCell>
                   <TableCell>{p.duration_min}min</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{p.timezone.replace(/_/g, " ")}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{ADMIN_TIMEZONE.replace(/_/g, " ")}<br/><span className="text-[10px] opacity-70">src: {p.timezone.replace(/_/g, " ")}</span></TableCell>
                   <TableCell>
                     <span className="font-mono text-sm">{p.member_count ?? 0}/{p.total_capacity ?? p.capacity}</span>
                   </TableCell>
