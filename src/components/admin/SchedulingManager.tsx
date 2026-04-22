@@ -1619,11 +1619,14 @@ interface TrialSlot {
   is_active: boolean;
 }
 
+const TRIAL_DAY_OPTIONS = [1, 2, 3, 7, 14, 30];
+
 const TrialBookingsManager = () => {
   const [bookings, setBookings] = useState<TrialBooking[]>([]);
   const [slots, setSlots] = useState<TrialSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [actioningId, setActioningId] = useState<string | null>(null);
+  const [trialDaysMap, setTrialDaysMap] = useState<Record<string, number>>({});
 
   const fetchData = async () => {
     setLoading(true);
@@ -1639,13 +1642,13 @@ const TrialBookingsManager = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  const handleConfirm = async (booking: TrialBooking) => {
+  const handleConfirm = async (booking: TrialBooking, trialDays: number) => {
     setActioningId(booking.id);
     try {
       // 1. Update trial booking status
       const { error: tbErr } = await supabase
         .from("trial_bookings")
-        .update({ status: "confirmed", confirmed_at: new Date().toISOString() } as any)
+        .update({ status: "confirmed", confirmed_at: new Date().toISOString(), trial_days: trialDays } as any)
         .eq("id", booking.id);
       if (tbErr) throw tbErr;
 
@@ -1701,7 +1704,7 @@ const TrialBookingsManager = () => {
         console.error("send-confirmation-email failed:", emailErr);
       }
 
-      toast({ title: "Trial confirmed", description: TRIAL_CONFIRMATION_EMAIL_ENABLED ? `${booking.name} has been notified.` : `${booking.name} marked confirmed (email disabled).` });
+      toast({ title: "Trial confirmed", description: TRIAL_CONFIRMATION_EMAIL_ENABLED ? `${booking.name} notified — ${trialDays}d trial.` : `${booking.name} confirmed (email disabled) — ${trialDays}d trial.` });
       fetchData();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -1874,10 +1877,27 @@ const TrialBookingsManager = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       {b.status === "pending" ? (
-                        <div className="flex gap-1 justify-end">
-                          <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleConfirm(b)}>
-                            <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
-                          </Button>
+                        <div className="flex gap-1 justify-end flex-wrap">
+                          <div className="flex items-center gap-1">
+                            <Select
+                              value={String(trialDaysMap[b.id] ?? 1)}
+                              onValueChange={(v) => setTrialDaysMap((prev) => ({ ...prev, [b.id]: Number(v) }))}
+                            >
+                              <SelectTrigger className="h-7 w-[72px] text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {TRIAL_DAY_OPTIONS.map((d) => (
+                                  <SelectItem key={d} value={String(d)} className="text-xs">
+                                    {d}d
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleConfirm(b, trialDaysMap[b.id] ?? 1)}>
+                              <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
+                            </Button>
+                          </div>
                           <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleReject(b)}>
                             <XCircle className="h-3.5 w-3.5 mr-1 text-red-600" /> Reject
                           </Button>
