@@ -270,7 +270,7 @@ const PricingSection = () => {
                               {price.egp ? `${price.egp.toLocaleString()} EGP` : `$${price.usd}`}
                             </p>
                             {derivePerMonth(price) && (
-                              <p className="text-[11px] text-primary font-semibold">
+                              <p className="text-[11px] text-green-600 dark:text-green-400 font-semibold">
                                 {derivePerMonth(price)}
                               </p>
                             )}
@@ -303,7 +303,7 @@ const PricingSection = () => {
                               {price.egp ? `${price.egp.toLocaleString()} EGP` : `$${price.usd}`}
                             </p>
                             {derivePerMonth(price) && (
-                              <p className="text-[11px] text-primary font-semibold">
+                              <p className="text-[11px] text-green-600 dark:text-green-400 font-semibold">
                                 {derivePerMonth(price)}
                               </p>
                             )}
