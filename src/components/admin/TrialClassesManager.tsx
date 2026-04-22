@@ -66,7 +66,34 @@ interface TrialSlot {
 type TimeFilter = "all" | "upcoming" | "past";
 type StatusFilter = "all" | "pending" | "confirmed" | "no_show" | "cancelled";
 
-const TRIAL_DAY_OPTIONS = [1, 2, 3, 7, 14, 30];
+interface UpcomingSlot {
+  value: string; // "YYYY-MM-DD|dow|HH:mm"
+  label: string;
+  date: string;
+  day_of_week: number;
+  start_time: string;
+}
+
+function getUpcomingSlotDates(slots: TrialSlot[], weeksAhead = 8): UpcomingSlot[] {
+  const results: UpcomingSlot[] = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  for (const slot of slots) {
+    for (let w = 0; w < weeksAhead; w++) {
+      const d = new Date(today);
+      const diff = (slot.day_of_week - d.getDay() + 7) % 7 + w * 7;
+      d.setDate(d.getDate() + diff);
+      const dateStr = d.toISOString().slice(0, 10);
+      const [h, m] = slot.start_time.split(":").map(Number);
+      const ampm = h >= 12 ? "PM" : "AM";
+      const h12 = h % 12 || 12;
+      const label = `${DAY_NAMES[slot.day_of_week]} ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+      results.push({ value: `${dateStr}|${slot.day_of_week}|${slot.start_time}`, label, date: dateStr, day_of_week: slot.day_of_week, start_time: slot.start_time });
+    }
+  }
+  results.sort((a, b) => a.date.localeCompare(b.date));
+  return results;
+}
 
 const TrialClassesManager = () => {
   const queryClient = useQueryClient();
@@ -74,7 +101,7 @@ const TrialClassesManager = () => {
   const [bulkBusy, setBulkBusy] = useState(false);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [trialDaysMap, setTrialDaysMap] = useState<Record<string, number>>({});
+  const [trialSlotMap, setTrialSlotMap] = useState<Record<string, string>>({});
 
   const { data: bookings = [], isLoading: loadingBookings } = useQuery<TrialBooking[]>({
     queryKey: ["admin", "trial-bookings"],
@@ -107,6 +134,7 @@ const TrialClassesManager = () => {
   });
 
   const loading = loadingBookings || loadingSlots;
+  const upcomingSlots = useMemo(() => getUpcomingSlotDates(activeSlots), [activeSlots]);
 
   const fetchData = () => {
     // Invalidate trials-related caches so both the local table and the
@@ -116,15 +144,23 @@ const TrialClassesManager = () => {
     queryClient.invalidateQueries({ queryKey: ["admin", "trial-stats"] });
   };
 
-  const handleConfirm = async (booking: TrialBooking, trialDays: number) => {
+  const handleConfirm = async (booking: TrialBooking, slotValue: string) => {
+    const [date, dowStr, time] = slotValue.split("|");
     setActioningId(booking.id);
     try {
       const { error } = await supabase
         .from("trial_bookings")
-        .update({ status: "confirmed", confirmed_at: new Date().toISOString(), trial_days: trialDays } as any)
+        .update({
+          status: "confirmed",
+          confirmed_at: new Date().toISOString(),
+          trial_date: date,
+          day_of_week: Number(dowStr),
+          start_time: time,
+          is_tba: false,
+        } as any)
         .eq("id", booking.id);
       if (error) throw error;
-      toast({ title: "Confirmed", description: `${booking.name || booking.email} — ${trialDays} trial day${trialDays !== 1 ? "s" : ""}` });
+      toast({ title: "Confirmed", description: `${booking.name || booking.email} → ${date} at ${time}` });
       fetchData();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -531,23 +567,29 @@ const TrialClassesManager = () => {
                               )}
                               {b.status === "pending" && (
                                 <>
-                                  <div className="flex items-center gap-1">
+                                  <div className="flex items-center gap-1 flex-wrap">
                                     <Select
-                                      value={String(trialDaysMap[b.id] ?? 1)}
-                                      onValueChange={(v) => setTrialDaysMap((prev) => ({ ...prev, [b.id]: Number(v) }))}
+                                      value={trialSlotMap[b.id] ?? upcomingSlots[0]?.value ?? ""}
+                                      onValueChange={(v) => setTrialSlotMap((prev) => ({ ...prev, [b.id]: v }))}
                                     >
-                                      <SelectTrigger className="h-7 w-[72px] text-xs">
-                                        <SelectValue />
+                                      <SelectTrigger className="h-7 w-[160px] text-xs">
+                                        <SelectValue placeholder="Pick class date" />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        {TRIAL_DAY_OPTIONS.map((d) => (
-                                          <SelectItem key={d} value={String(d)} className="text-xs">
-                                            {d}d
+                                        {upcomingSlots.map((s) => (
+                                          <SelectItem key={s.value} value={s.value} className="text-xs">
+                                            {s.label}
                                           </SelectItem>
                                         ))}
                                       </SelectContent>
                                     </Select>
-                                    <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleConfirm(b, trialDaysMap[b.id] ?? 1)}>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7"
+                                      disabled={actioningId === b.id || !upcomingSlots.length}
+                                      onClick={() => handleConfirm(b, trialSlotMap[b.id] ?? upcomingSlots[0]?.value ?? "")}
+                                    >
                                       <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
                                     </Button>
                                   </div>

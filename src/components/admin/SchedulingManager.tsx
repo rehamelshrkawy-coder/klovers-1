@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, memo } from "react";
+import { useState, useEffect, useCallback, memo, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1619,14 +1619,43 @@ interface TrialSlot {
   is_active: boolean;
 }
 
-const TRIAL_DAY_OPTIONS = [1, 2, 3, 7, 14, 30];
+const DAY_NAMES_SHORT = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+interface UpcomingSlot {
+  value: string;
+  label: string;
+  date: string;
+  day_of_week: number;
+  start_time: string;
+}
+
+function getUpcomingSlotDates(slots: TrialSlot[], weeksAhead = 8): UpcomingSlot[] {
+  const results: UpcomingSlot[] = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  for (const slot of slots) {
+    for (let w = 0; w < weeksAhead; w++) {
+      const d = new Date(today);
+      const diff = (slot.day_of_week - d.getDay() + 7) % 7 + w * 7;
+      d.setDate(d.getDate() + diff);
+      const dateStr = d.toISOString().slice(0, 10);
+      const [h, m] = slot.start_time.split(":").map(Number);
+      const ampm = h >= 12 ? "PM" : "AM";
+      const h12 = h % 12 || 12;
+      const label = `${DAY_NAMES_SHORT[slot.day_of_week]} ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+      results.push({ value: `${dateStr}|${slot.day_of_week}|${slot.start_time}`, label, date: dateStr, day_of_week: slot.day_of_week, start_time: slot.start_time });
+    }
+  }
+  results.sort((a, b) => a.date.localeCompare(b.date));
+  return results;
+}
 
 const TrialBookingsManager = () => {
   const [bookings, setBookings] = useState<TrialBooking[]>([]);
   const [slots, setSlots] = useState<TrialSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [actioningId, setActioningId] = useState<string | null>(null);
-  const [trialDaysMap, setTrialDaysMap] = useState<Record<string, number>>({});
+  const [trialSlotMap, setTrialSlotMap] = useState<Record<string, string>>({});
 
   const fetchData = async () => {
     setLoading(true);
@@ -1642,13 +1671,23 @@ const TrialBookingsManager = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  const handleConfirm = async (booking: TrialBooking, trialDays: number) => {
+  const upcomingSlots = useMemo(() => getUpcomingSlotDates(slots), [slots]);
+
+  const handleConfirm = async (booking: TrialBooking, slotValue: string) => {
+    const [date, dowStr, time] = slotValue.split("|");
     setActioningId(booking.id);
     try {
-      // 1. Update trial booking status
+      // 1. Update trial booking status + assign to selected class date
       const { error: tbErr } = await supabase
         .from("trial_bookings")
-        .update({ status: "confirmed", confirmed_at: new Date().toISOString(), trial_days: trialDays } as any)
+        .update({
+          status: "confirmed",
+          confirmed_at: new Date().toISOString(),
+          trial_date: date,
+          day_of_week: Number(dowStr),
+          start_time: time,
+          is_tba: false,
+        } as any)
         .eq("id", booking.id);
       if (tbErr) throw tbErr;
 
@@ -1704,7 +1743,7 @@ const TrialBookingsManager = () => {
         console.error("send-confirmation-email failed:", emailErr);
       }
 
-      toast({ title: "Trial confirmed", description: TRIAL_CONFIRMATION_EMAIL_ENABLED ? `${booking.name} notified — ${trialDays}d trial.` : `${booking.name} confirmed (email disabled) — ${trialDays}d trial.` });
+      toast({ title: "Trial confirmed", description: TRIAL_CONFIRMATION_EMAIL_ENABLED ? `${booking.name} notified — ${date}.` : `${booking.name} confirmed (email disabled) — ${date}.` });
       fetchData();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -1878,23 +1917,29 @@ const TrialBookingsManager = () => {
                     <TableCell className="text-right">
                       {b.status === "pending" ? (
                         <div className="flex gap-1 justify-end flex-wrap">
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1 flex-wrap">
                             <Select
-                              value={String(trialDaysMap[b.id] ?? 1)}
-                              onValueChange={(v) => setTrialDaysMap((prev) => ({ ...prev, [b.id]: Number(v) }))}
+                              value={trialSlotMap[b.id] ?? upcomingSlots[0]?.value ?? ""}
+                              onValueChange={(v) => setTrialSlotMap((prev) => ({ ...prev, [b.id]: v }))}
                             >
-                              <SelectTrigger className="h-7 w-[72px] text-xs">
-                                <SelectValue />
+                              <SelectTrigger className="h-7 w-[160px] text-xs">
+                                <SelectValue placeholder="Pick class date" />
                               </SelectTrigger>
                               <SelectContent>
-                                {TRIAL_DAY_OPTIONS.map((d) => (
-                                  <SelectItem key={d} value={String(d)} className="text-xs">
-                                    {d}d
+                                {upcomingSlots.map((s) => (
+                                  <SelectItem key={s.value} value={s.value} className="text-xs">
+                                    {s.label}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
-                            <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleConfirm(b, trialDaysMap[b.id] ?? 1)}>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7"
+                              disabled={actioningId === b.id || !upcomingSlots.length}
+                              onClick={() => handleConfirm(b, trialSlotMap[b.id] ?? upcomingSlots[0]?.value ?? "")}
+                            >
                               <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
                             </Button>
                           </div>
