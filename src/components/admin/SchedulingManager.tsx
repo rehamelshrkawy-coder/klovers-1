@@ -1629,7 +1629,7 @@ interface UpcomingSlot {
   start_time: string;
 }
 
-function getUpcomingSlotDates(slots: TrialSlot[], weeksAhead = 8): UpcomingSlot[] {
+function getUpcomingSlotDates(slots: TrialSlot[], weeksAhead = 3): UpcomingSlot[] {
   const results: UpcomingSlot[] = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
