@@ -164,6 +164,16 @@ Deno.serve(async (req) => {
     const trialDate = nextDateForDay(day_of_week);
     const timezone = "Africa/Cairo";
 
+    // Registrations close 1 day before the class
+    const trialMs = new Date(trialDate + "T00:00:00Z").getTime();
+    const todayMs = new Date(new Date().toISOString().split("T")[0] + "T00:00:00Z").getTime();
+    if (Math.round((trialMs - todayMs) / 86_400_000) <= 1) {
+      return new Response(
+        JSON.stringify({ ok: false, success: false, error: "Booking is closed — registrations close 1 day before the class." }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // 1. Upsert lead
     const goalWithPhone = [
       goal || "Free trial",
