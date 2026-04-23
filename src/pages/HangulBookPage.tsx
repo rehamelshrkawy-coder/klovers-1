@@ -2733,6 +2733,60 @@ function BackCoverEn() {
 ══════════════════════════════════════════════════ */
 export default function HangulBookPage() {
   const [preview, setPreview] = useState<Lang>("ar");
+  const [access, setAccess] = useState<"loading" | "granted" | "denied">("loading");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { navigate("/login", { replace: true }); return; }
+
+      // Admin bypass
+      const { data: adminRow } = await supabase
+        .from("admin_users").select("user_id").eq("user_id", user.id).maybeSingle();
+      if (adminRow) { if (!cancelled) setAccess("granted"); return; }
+
+      // Student: must have an assignment with available_from ≤ now
+      const { data: assignment } = await supabase
+        .from("book_assignments")
+        .select("available_from")
+        .eq("user_id", user.id)
+        .eq("book_id", "hangul-1")
+        .lte("available_from", new Date().toISOString())
+        .maybeSingle();
+
+      if (!cancelled) setAccess(assignment ? "granted" : "denied");
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (access === "loading") return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
+  if (access === "denied") return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-6 text-center">
+      <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
+        <Lock className="h-8 w-8 text-amber-600" />
+      </div>
+      <h1 className="text-2xl font-black">الكتاب غير متاح بعد</h1>
+      <p className="text-muted-foreground max-w-sm">
+        سيُفتح هذا الكتاب لك أسبوعاً واحداً قبل بدء مجموعتك. يُرجى التواصل مع الإدارة إذا كنت تعتقد أن هناك خطأ.
+      </p>
+      <p className="text-sm text-muted-foreground">
+        The book unlocks one week before your class group starts.
+      </p>
+      <button
+        onClick={() => navigate("/dashboard")}
+        className="px-6 py-2 bg-amber-500 text-black font-bold rounded-lg hover:bg-amber-400 transition-colors"
+      >
+        Back to Dashboard
+      </button>
+    </div>
+  );
 
   const printVersion = (lang: Lang) => {
     setPreview(lang);
