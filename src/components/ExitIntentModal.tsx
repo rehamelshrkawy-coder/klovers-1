@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Gift } from "lucide-react";
+import { X, Gift, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { logLeadEvent } from "@/lib/leadTracking";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +17,7 @@ const ExitIntentModal = () => {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const triggered = useRef(false);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const trigger = () => {
     if (triggered.current) return;
@@ -37,6 +39,29 @@ const ExitIntentModal = () => {
       clearTimeout(timer);
     };
   }, []);
+
+  // Focus trap
+  useEffect(() => {
+    if (!show) return;
+    const modal = modalRef.current;
+    if (!modal) return;
+    const focusable = modal.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    first?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last?.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first?.focus(); }
+      }
+    };
+    modal.addEventListener("keydown", onKeyDown);
+    return () => modal.removeEventListener("keydown", onKeyDown);
+  }, [show]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +100,7 @@ const ExitIntentModal = () => {
         aria-hidden="true"
       />
 
-      <div className="relative bg-background border border-border rounded-3xl shadow-2xl max-w-md w-full p-7 animate-in zoom-in-95 duration-200">
+      <div ref={modalRef} className="relative bg-background border border-border rounded-3xl shadow-2xl max-w-md w-full p-7 animate-in zoom-in-95 duration-200">
         <button
           onClick={() => setShow(false)}
           className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
@@ -95,7 +120,13 @@ const ExitIntentModal = () => {
                 ? "هنبعتلك ورقة هانغول + ١٠٪ خصم على أول حصة مدفوعة."
                 : "We'll send you the Hangul sheet + 10% off your first paid class."}
             </p>
-            <Button onClick={() => setShow(false)} className="w-full">
+            <Button asChild className="w-full gap-2 mb-3" onClick={() => setShow(false)}>
+              <Link to="/hangul-starter">
+                {isAr ? "اعرض ورقة هانغول الآن" : "View Hangul Sheet Now"}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button variant="ghost" onClick={() => setShow(false)} className="w-full text-muted-foreground">
               {isAr ? "رجوع للصفحة" : "Back to site"}
             </Button>
           </div>
@@ -130,7 +161,7 @@ const ExitIntentModal = () => {
                 className="h-12 text-base"
                 autoFocus
               />
-              {error && <p className="text-xs text-destructive">{error}</p>}
+              {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
               <Button type="submit" size="lg" className="w-full gap-2 font-bold">
                 <Gift className="h-4 w-4" />
                 {isAr ? "أرسلوا لي الورقة" : "Send Me the Sheet"}

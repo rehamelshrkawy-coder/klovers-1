@@ -26,7 +26,7 @@ const SectionFallback = () => (
 );
 
 const Index = () => {
-  useSEO({ title: "Learn Korean Online", description: "Join Klovers Korean Lovers Academy. Interactive online Korean lessons, placement tests, and gamified learning for all levels.", canonical: "https://kloversegy.com/" });
+  useSEO({ title: "Korean Classes in Arabic | Klovers Academy", description: "Join Klovers Korean Lovers Academy. Interactive online Korean lessons, placement tests, and gamified learning for all levels.", canonical: "https://kloversegy.com/" });
 
   useEffect(() => {
     const schema = {

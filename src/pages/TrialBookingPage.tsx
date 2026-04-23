@@ -20,7 +20,7 @@ import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { track } from "@/lib/tracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
-import { CheckCircle2, CalendarPlus, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag } from "lucide-react";
+import { CheckCircle2, CalendarPlus, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BookingResult {
@@ -269,6 +269,36 @@ const TrialBookingPage = () => {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-foreground">{t("trialBooking.peekPlansTitle")}</p>
                     <p className="text-xs text-muted-foreground">{t("trialBooking.peekPlansDesc")}</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                </button>
+
+                {/* Referral / share */}
+                <button
+                  onClick={() => {
+                    track.custom("post_trial_cta_clicked", { cta: "share" });
+                    const shareText = language === "ar"
+                      ? "احجزت حصة كورية مجانية مع Klovers! جرب أنت كمان 🇰🇷"
+                      : "Just booked a free Korean class with Klovers! You should try it 🇰🇷";
+                    const shareUrl = "https://kloversegy.com/free-trial";
+                    if (navigator.share) {
+                      navigator.share({ title: "Klovers Free Trial", text: shareText, url: shareUrl }).catch(() => {});
+                    } else {
+                      window.open(`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`, "_blank", "noopener,noreferrer");
+                    }
+                  }}
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-primary/50 hover:shadow-md transition-all group"
+                >
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Share2 className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-foreground">
+                      {language === "ar" ? "شارك مع صاحبك" : "Tell a friend"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {language === "ar" ? "خليهم يجربوا معاك — الحصة المجانية متاحة للكل" : "Invite a friend to join your free class"}
+                    </p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
                 </button>

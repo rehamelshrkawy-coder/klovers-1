@@ -15,7 +15,7 @@ const AVATAR_COLORS = [
 const STATS = [
   { value: "500+", label: "Students Taught" },
   { value: "4.9 ★", label: "Average Rating" },
-  { value: "15+", label: "Countries" },
+  { value: "4–8", label: "Students / Class" },
   { value: "98%", label: "Would Recommend" },
 ];
 
