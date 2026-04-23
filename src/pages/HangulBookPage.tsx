@@ -325,8 +325,279 @@ function VowCard({ v, lang }: { v: typeof VOWELS[0]; lang: Lang }) {
 }
 
 /* ══════════════════════════════════════════════════
+   SHARED INTRO DATA
+══════════════════════════════════════════════════ */
+
+const BOOKS_AR = [
+  { n:"١", icon:"🔤", title:"الهانغول — الأبجدية الكورية", sub:"هذا الكتاب", current:true },
+  { n:"٢", icon:"👋", title:"أهلاً وسهلاً — التحيات والمحادثة الأولى", sub:"الكتاب الثاني", current:false },
+  { n:"٣", icon:"🔢", title:"الأرقام والوقت والحياة اليومية", sub:"الكتاب الثالث", current:false },
+  { n:"٤", icon:"📖", title:"قواعد اللغة — الأساسيات", sub:"الكتاب الرابع", current:false },
+  { n:"٥", icon:"🎬", title:"المحادثة ولغة المسلسلات", sub:"الكتاب الخامس", current:false },
+  { n:"٦", icon:"🏆", title:"القراءة والكتابة والطلاقة", sub:"الكتاب السادس", current:false },
+];
+const BOOKS_EN = [
+  { n:"1", icon:"🔤", title:"Hangul — The Korean Alphabet", sub:"This Book", current:true },
+  { n:"2", icon:"👋", title:"Hello! — Greetings & Basic Conversation", sub:"Book Two", current:false },
+  { n:"3", icon:"🔢", title:"Numbers, Time & Daily Life", sub:"Book Three", current:false },
+  { n:"4", icon:"📖", title:"Grammar Foundations", sub:"Book Four", current:false },
+  { n:"5", icon:"🎬", title:"Conversation & K-Drama Language", sub:"Book Five", current:false },
+  { n:"6", icon:"🏆", title:"Reading, Writing & Fluency", sub:"Book Six", current:false },
+];
+
+/* ══════════════════════════════════════════════════
    BOOK PAGES — Arabic version
 ══════════════════════════════════════════════════ */
+
+/* ── History page AR ── */
+function HistoryAr() {
+  return (
+    <Page dir="rtl">
+      <SHead title="تاريخ اللغة الكورية" subtitle="رحلة ٢٠٠٠ عام من الكلمات والحكايات" />
+
+      {/* Timeline */}
+      <div style={{ position:"relative", marginBottom:"12px" }}>
+        {/* vertical line */}
+        <div style={{ position:"absolute", right:"18px", top:0, bottom:0, width:"3px", background:Y, borderRadius:"2px" }} />
+
+        {[
+          { era:"قبل ١٠٠٠ م", icon:"🏔️", title:"بدايات اللغة الكورية", body:"تطورت اللغة الكورية على مدى آلاف السنين في شبه الجزيرة الكورية. تُصنَّف اليوم كـ«لغة معزولة» — لا تنتمي لأي مجموعة لغوية أخرى في العالم. ليست صينية، وليست يابانية، وليست عربية — إنها فريدة من نوعها!" },
+          { era:"١٠٠٠–١٤٤٢ م", icon:"📜", title:"عصر الهانجا — حروف المستعارة", body:"قبل اختراع الهانغول، كان الكوريون يستخدمون الحروف الصينية (한자 هانجا). كانت صعبة التعلم جداً — فقط النخبة والعلماء كانوا يقرؤون ويكتبون. أكثر من ٩٥٪ من الشعب الكوري كان أمياً بالكامل. القوانين والعقود والأدب — كلها كانت مكتوبة بحروف لا يفهمها الغالبية!" },
+          { era:"١٤٤٣ م 🌟", icon:"👑", title:"ثورة الملك سيجونغ", body:"أدرك الملك سيجونغ أن هذا ظلم بيّن. قال: «كيف يمكن لشعب أن يحكم نفسه إذا لم يستطع القراءة؟» فأسس مجمعاً من ثمانية علماء نوابغ في «قاعة الحكماء» (집현전) وعملوا سنوات في سرية تامة لاختراع أبجدية جديدة تناسب الأصوات الكورية تماماً." },
+          { era:"١٤٤٦ م", icon:"📚", title:"إعلان هونمينجونغأوم", body:"أُعلن عن الأبجدية الجديدة تحت اسم «훈민정음» (هونمينجونغأوم) بمعنى «الأصوات الصحيحة لتعليم الشعب». واجه الملك معارضة شديدة من الطبقة الحاكمة التي أرادت الإبقاء على امتيازاتها — لكنه أصرّ. واليوم يُحتفل بيوم الهانغول كل عام في التاسع من أكتوبر." },
+        ].map((item, i) => (
+          <div key={i} style={{ display:"flex", gap:"12px", marginBottom:"10px", alignItems:"flex-start", flexDirection:"row-reverse" }}>
+            <div style={{ width:"36px", height:"36px", background:Y, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px", flexShrink:0, zIndex:1 }}>{item.icon}</div>
+            <div style={{ flex:1, background: i===2?"#111":"#f9f9f9", border:`2px solid ${i===2?Y:"#e5e5e5"}`, borderRadius:"10px", padding:"10px 12px" }}>
+              <div style={{ fontSize:"9px", fontWeight:700, color:i===2?Y:"#888", marginBottom:"2px" }}>{item.era}</div>
+              <div style={{ fontSize:"11px", fontWeight:800, color:i===2?"#fff":BK, marginBottom:"4px" }}>{item.title}</div>
+              <div style={{ fontSize:"10px", color:i===2?"#ccc":"#555", lineHeight:1.8 }}>{item.body}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Fun fact strip */}
+      <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
+        <div style={{ fontSize:"28px" }}>🌍</div>
+        <div>
+          <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>حقيقة مذهلة!</div>
+          <div style={{ fontSize:"10px", color:BK2, lineHeight:1.6 }}>
+            يتحدث الكورية أكثر من <strong>٨٠ مليون شخص</strong> حول العالم. وقد صنّفت منظمة اليونسكو الهانغول كواحد من أكثر أنظمة الكتابة علمية ومنطقية في التاريخ البشري!
+          </div>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+/* ── King Sejong page AR ── */
+function SejongAr() {
+  return (
+    <Page dir="rtl">
+      <SHead title="الملك سيجونغ العظيم 👑" subtitle="الرجل الذي غيّر مصير شعب بكلمة واحدة: العدالة" />
+
+      {/* Hero portrait area */}
+      <div style={{ background:BK, borderRadius:"14px", padding:"16px", marginBottom:"12px", display:"grid", gridTemplateColumns:"120px 1fr", gap:"14px" }}>
+        {/* Portrait */}
+        <div style={{ background:"#1a1a00", borderRadius:"10px", border:`3px solid ${Y}`, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"12px", minHeight:"130px" }}>
+          <div style={{ fontSize:"56px", lineHeight:1 }}>👑</div>
+          <div style={{ fontSize:"22px", fontWeight:900, color:Y, marginTop:"6px", direction:"ltr" }}>세종</div>
+          <div style={{ fontSize:"9px", color:"#888", marginTop:"2px" }}>سيجونغ</div>
+        </div>
+        {/* Bio */}
+        <div style={{ color:"#fff" }}>
+          <div style={{ fontSize:"16px", fontWeight:900, color:Y, marginBottom:"8px" }}>سيجونغ الكبير</div>
+          <div style={{ display:"flex", flexDirection:"column", gap:"5px" }}>
+            {[
+              { icon:"🎂", label:"الميلاد", val:"١٥ مايو ١٣٩٧م" },
+              { icon:"👑", label:"الحكم", val:"١٤١٨ – ١٤٥٠م" },
+              { icon:"🏛️", label:"الأسرة", val:"أسرة جوسون الملكية" },
+              { icon:"📚", label:"إنجازه الأعظم", val:"اختراع الهانغول ١٤٤٣م" },
+              { icon:"🌟", label:"لقبه", val:"«أعظم ملوك كوريا»" },
+            ].map(r=>(
+              <div key={r.label} style={{ display:"flex", gap:"8px", alignItems:"center" }}>
+                <span style={{ fontSize:"13px" }}>{r.icon}</span>
+                <span style={{ fontSize:"9px", color:"#888", minWidth:"60px" }}>{r.label}</span>
+                <span style={{ fontSize:"10px", color:"#ddd", fontWeight:600 }}>{r.val}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* The creation story */}
+      <div style={{ marginBottom:"10px" }}>
+        <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"7px", display:"flex", alignItems:"center", gap:"6px" }}>
+          <span style={{ background:Y, padding:"2px 8px", borderRadius:"6px" }}>القصة</span>
+          كيف صُمِّمت الحروف؟
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"7px" }}>
+          {[
+            { icon:"👅", title:"شكل اللسان", body:"كل حرف ساكن صُمِّم بناءً على شكل اللسان والفم لحظة نطق الصوت — علم وفن في آنٍ واحد!" },
+            { icon:"🔬", title:"علم صوتي دقيق", body:"ㄱ = قاعدة اللسان ترتفع نحو الحلق. ㄴ = طرف اللسان يلمس سقف الفم. ㅁ = الشفتان منطبقتان." },
+            { icon:"🏗️", title:"بنية منطقية", body:"الحروف المشتقة من بعضها تتشابه في الشكل — ㄱ الأصل، ㄲ الشديدة، ㅋ المنفوخة. نظام متكامل ومتسق!" },
+          ].map(c=>(
+            <div key={c.title} style={{ background:YL, borderRadius:"10px", padding:"10px", border:`1px solid ${Y}` }}>
+              <div style={{ fontSize:"24px", marginBottom:"5px" }}>{c.icon}</div>
+              <div style={{ fontWeight:800, fontSize:"10px", color:BK, marginBottom:"4px" }}>{c.title}</div>
+              <div style={{ fontSize:"9px", color:"#555", lineHeight:1.7 }}>{c.body}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Quote */}
+      <div style={{ background:BK, borderRadius:"12px", padding:"14px", display:"flex", gap:"12px", alignItems:"flex-start" }}>
+        <div style={{ fontSize:"36px", color:Y, fontWeight:900, lineHeight:1, flexShrink:0 }}>"</div>
+        <div>
+          <div style={{ fontSize:"12px", color:"#fff", lineHeight:1.9, fontStyle:"italic" }}>
+            كل إنسان لديه ما يريد أن يقوله، لكن كثيرين لا يجدون طريقة للتعبير. أريد أن يكون كل شخص في مملكتي قادراً على القراءة والكتابة.
+          </div>
+          <div style={{ fontSize:"10px", color:Y, fontWeight:700, marginTop:"6px" }}>— الملك سيجونغ الكبير، ١٤٤٦م</div>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+/* ── Korean Culture page AR ── */
+function CultureAr() {
+  return (
+    <Page dir="rtl">
+      <SHead title="الثقافة الكورية 🌸" subtitle="خمسة آلاف عام من الجمال والفلسفة والفن" />
+
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
+
+        {/* K-Drama */}
+        <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🎬</div>
+          <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"5px" }}>المسلسلات الكورية (K-Drama)</div>
+          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.8 }}>
+            من أكثر المحتوى مشاهدةً على Netflix عالمياً. «لعبة الحبّار» و«المرآة المنكسرة» و«نسخة الحب» غيّرت مفهوم الدراما عالمياً. الكوريون يصنعون القصص التي تلمس القلوب!
+          </div>
+          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
+            {["❤️ رومانسي", "🕵️ إثارة", "😂 كوميدي", "👻 رعب"].map(t=>(
+              <span key={t} style={{ background:"#222", color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* K-Pop */}
+        <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🎵</div>
+          <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"5px" }}>موسيقى البوب الكوري (K-Pop)</div>
+          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.8 }}>
+            BTS، BLACKPINK، Stray Kids — نجوم عالميون حقيقيون. K-Pop ليس مجرد موسيقى، بل ظاهرة ثقافية شاملة: رقص، أزياء، فن بصري، ومجتمعات من المعجبين حول العالم!
+          </div>
+          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
+            {["BTS 💜", "BLACKPINK 🖤", "Stray Kids 🐺"].map(t=>(
+              <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Food */}
+        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🍜</div>
+          <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"5px" }}>المطبخ الكوري</div>
+          <div style={{ fontSize:"10px", color:"#555", lineHeight:1.8 }}>
+            الكيمتشي، البيبيمباب، التيكبوكي، السامجيوبسال — أطعمة تفاجئك وتُدمنها! المطبخ الكوري يعتمد على التوازن بين الحامض والحار والأومامي. وليس هناك وجبة كاملة بدون كيمتشي!
+          </div>
+          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
+            {["🥬 김치","🍚 비빔밥","🌶️ 떡볶이","🥩 삼겹살"].map(t=>(
+              <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Values & Spirit */}
+        <div style={{ background:"#f9f9f9", border:`2px solid #e5e5e5`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🌿</div>
+          <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"5px" }}>القيم والروح الكورية</div>
+          <div style={{ fontSize:"10px", color:"#555", lineHeight:1.8 }}>
+            <strong>빨리빨리 (بالي-بالي)</strong> = «يلا يلا!» — الكوريون يحبون السرعة والإتقان معاً. <strong>눈치 (نونتشي)</strong> = فهم المشاعر دون كلام. <strong>한 (هان)</strong> = إحساس عميق بالحنين والمقاومة — روح الشعب الكوري الأبدية.
+          </div>
+          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
+            {["👴 احترام الكبار", "👨‍👩‍👧 الأسرة أولاً", "📚 التعليم مقدس"].map(t=>(
+              <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Korean sentence teaser */}
+      <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"14px", alignItems:"center" }}>
+        <div style={{ fontSize:"32px" }}>💡</div>
+        <div>
+          <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"4px" }}>بعد إتمام هذه الكتب الستة ستتمكن من:</div>
+          <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
+            {["فهم المسلسلات الكورية بدون ترجمة 🎬","التحدث مع الكوريين بثقة 🗣️","قراءة اللافتات في كوريا 🪧","غناء أغاني K-Pop 🎵"].map(t=>(
+              <div key={t} style={{ background:"#222", color:"#ddd", fontSize:"10px", padding:"4px 8px", borderRadius:"8px" }}>{t}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+/* ── Course Overview page AR ── */
+function CourseAr() {
+  return (
+    <Page dir="rtl">
+      <SHead title="سلسلة كتب Klovers — ٦ كتب إلى الإتقان 📚" subtitle="خارطة رحلتك من الصفر إلى الطلاقة" />
+
+      <div style={{ background:BK, borderRadius:"12px", padding:"14px", marginBottom:"12px" }}>
+        <div style={{ fontSize:"11px", color:"#aaa", lineHeight:1.9 }}>
+          صُمِّمت سلسلة Klovers لتأخذك من <span style={{color:Y,fontWeight:800}}>لا تعرف حرفاً واحداً</span> إلى <span style={{color:Y,fontWeight:800}}>التحدث والكتابة بطلاقة</span> — بطريقة ممتعة تعتمد على مسلسلاتك المفضلة وموسيقاك الكورية المحبوبة. كل كتاب يبني على السابق.
+        </div>
+      </div>
+
+      <div style={{ display:"flex", flexDirection:"column", gap:"8px", marginBottom:"12px" }}>
+        {BOOKS_AR.map((b,i)=>(
+          <div key={i} style={{
+            background: b.current ? Y : "#f9f9f9",
+            border: `2px solid ${b.current ? Y : "#e5e5e5"}`,
+            borderRadius:"10px", padding:"10px 14px",
+            display:"flex", alignItems:"center", gap:"12px",
+            flexDirection:"row-reverse",
+          }}>
+            <div style={{
+              background: b.current ? BK : "#e0e0e0",
+              color: b.current ? Y : "#999",
+              fontWeight:900, fontSize:"18px",
+              width:"40px", height:"40px", borderRadius:"8px",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              flexShrink:0,
+            }}>الكتاب {b.n}</div>
+            <div style={{ fontSize:"22px", flexShrink:0 }}>{b.icon}</div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontWeight:800, fontSize:"12px", color: b.current ? BK : "#444" }}>{b.title}</div>
+              <div style={{ fontSize:"10px", color: b.current ? BK2 : "#999", marginTop:"2px" }}>
+                {b.current ? "📍 أنت هنا — ابدأ رحلتك!" : b.sub}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"8px" }}>
+        {[
+          { icon:"⏱️", title:"١٥–٢٠ دقيقة", sub:"يومياً تكفي" },
+          { icon:"🎯", title:"٦ كتب", sub:"من الصفر للطلاقة" },
+          { icon:"🎬", title:"لغة حقيقية", sub:"من المسلسلات والحياة" },
+        ].map(s=>(
+          <div key={s.title} style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"10px", padding:"10px", textAlign:"center" }}>
+            <div style={{ fontSize:"24px", marginBottom:"4px" }}>{s.icon}</div>
+            <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>{s.title}</div>
+            <div style={{ fontSize:"9px", color:"#666" }}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+    </Page>
+  );
+}
 
 function CoverAr() {
   return (
@@ -653,6 +924,241 @@ function AnswerAr() {
 /* ══════════════════════════════════════════════════
    BOOK PAGES — English version
 ══════════════════════════════════════════════════ */
+
+/* ── History page EN ── */
+function HistoryEn() {
+  return (
+    <Page dir="ltr">
+      <SHead title="The History of the Korean Language" subtitle="A 2,000-year journey of words, power, and revolution" />
+
+      <div style={{ position:"relative", marginBottom:"12px" }}>
+        <div style={{ position:"absolute", left:"18px", top:0, bottom:0, width:"3px", background:Y, borderRadius:"2px" }} />
+
+        {[
+          { era:"Before 1000 AD", icon:"🏔️", title:"Origins of Korean", body:"The Korean language developed over thousands of years on the Korean Peninsula. It is classified today as a language isolate — not related to Chinese, Japanese, or any other language family. It has its own unique grammar, vocabulary, and rhythm unlike any other language on Earth!" },
+          { era:"1000–1442 AD", icon:"📜", title:"The Era of Hanja — Borrowed Characters", body:"Before Hangul, Koreans used Chinese characters (漢字 Hanja). They were incredibly difficult to learn — only the elite scholarly class could read and write. Over 95% of the Korean population was completely illiterate. Laws, contracts, and all literature were written in a script most people could not understand." },
+          { era:"1443 AD 🌟", icon:"👑", title:"King Sejong's Revolution", body:"King Sejong the Great recognized this as a profound injustice. He said: 'How can a people govern themselves if they cannot read?' He assembled 8 brilliant scholars in the Hall of Worthies (집현전) and they worked for years in secret to invent a new alphabet perfectly suited to Korean sounds." },
+          { era:"1446 AD", icon:"📚", title:"Hunminjeongeum Announced", body:"The new alphabet was proclaimed as «훈민정음» (Hunminjeongeum) — 'The Correct Sounds for the Instruction of the People.' The ruling class fiercely opposed it, fearing loss of power — but the king prevailed. Today, Hangul Day is celebrated every October 9th worldwide." },
+        ].map((item, i) => (
+          <div key={i} style={{ display:"flex", gap:"12px", marginBottom:"10px", alignItems:"flex-start" }}>
+            <div style={{ width:"36px", height:"36px", background:Y, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px", flexShrink:0, zIndex:1 }}>{item.icon}</div>
+            <div style={{ flex:1, background: i===2 ? "#111" : "#f9f9f9", border:`2px solid ${i===2?Y:"#e5e5e5"}`, borderRadius:"10px", padding:"10px 12px" }}>
+              <div style={{ fontSize:"9px", fontWeight:700, color:i===2?Y:"#888", marginBottom:"2px" }}>{item.era}</div>
+              <div style={{ fontSize:"11px", fontWeight:800, color:i===2?"#fff":BK, marginBottom:"4px" }}>{item.title}</div>
+              <div style={{ fontSize:"10px", color:i===2?"#ccc":"#555", lineHeight:1.8 }}>{item.body}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
+        <div style={{ fontSize:"28px" }}>🌍</div>
+        <div>
+          <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>Amazing Fact!</div>
+          <div style={{ fontSize:"10px", color:BK2, lineHeight:1.6 }}>
+            Korean is spoken by over <strong>80 million people</strong> worldwide. UNESCO recognized Hangul as one of the most scientifically designed and logically structured writing systems ever created in human history!
+          </div>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+/* ── King Sejong page EN ── */
+function SejongEn() {
+  return (
+    <Page dir="ltr">
+      <SHead title="King Sejong the Great 👑" subtitle="The man who changed a nation's destiny with one word: justice" />
+
+      <div style={{ background:BK, borderRadius:"14px", padding:"16px", marginBottom:"12px", display:"grid", gridTemplateColumns:"120px 1fr", gap:"14px" }}>
+        <div style={{ background:"#1a1a00", borderRadius:"10px", border:`3px solid ${Y}`, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"12px", minHeight:"130px" }}>
+          <div style={{ fontSize:"56px", lineHeight:1 }}>👑</div>
+          <div style={{ fontSize:"22px", fontWeight:900, color:Y, marginTop:"6px" }}>세종</div>
+          <div style={{ fontSize:"9px", color:"#888", marginTop:"2px" }}>Sejong</div>
+        </div>
+        <div style={{ color:"#fff" }}>
+          <div style={{ fontSize:"16px", fontWeight:900, color:Y, marginBottom:"8px" }}>Sejong the Great</div>
+          <div style={{ display:"flex", flexDirection:"column", gap:"5px" }}>
+            {[
+              { icon:"🎂", label:"Born", val:"May 15, 1397 AD" },
+              { icon:"👑", label:"Reign", val:"1418 – 1450 AD" },
+              { icon:"🏛️", label:"Dynasty", val:"Joseon Royal Dynasty" },
+              { icon:"📚", label:"Greatest Achievement", val:"Invented Hangul in 1443" },
+              { icon:"🌟", label:"Title", val:"'Greatest King of Korea'" },
+            ].map(r=>(
+              <div key={r.label} style={{ display:"flex", gap:"8px", alignItems:"center" }}>
+                <span style={{ fontSize:"13px" }}>{r.icon}</span>
+                <span style={{ fontSize:"9px", color:"#888", minWidth:"70px" }}>{r.label}</span>
+                <span style={{ fontSize:"10px", color:"#ddd", fontWeight:600 }}>{r.val}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom:"10px" }}>
+        <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"7px", display:"flex", alignItems:"center", gap:"6px" }}>
+          <span style={{ background:Y, padding:"2px 8px", borderRadius:"6px" }}>The Story</span>
+          How were the letters designed?
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"7px" }}>
+          {[
+            { icon:"👅", title:"Tongue & Mouth Shape", body:"Every consonant was designed based on the exact shape of the tongue and mouth when producing that sound — science and art combined!" },
+            { icon:"🔬", title:"Precise Phonetics", body:"ㄱ = tongue root rising toward throat. ㄴ = tongue tip touching upper palate. ㅁ = lips pressed together. Each shape mirrors the sound." },
+            { icon:"🏗️", title:"Logical Structure", body:"Related letters look alike — ㄱ is the base, ㄲ is doubled, ㅋ has an extra stroke for aspiration. A complete, consistent system." },
+          ].map(c=>(
+            <div key={c.title} style={{ background:YL, borderRadius:"10px", padding:"10px", border:`1px solid ${Y}` }}>
+              <div style={{ fontSize:"24px", marginBottom:"5px" }}>{c.icon}</div>
+              <div style={{ fontWeight:800, fontSize:"10px", color:BK, marginBottom:"4px" }}>{c.title}</div>
+              <div style={{ fontSize:"9px", color:"#555", lineHeight:1.7 }}>{c.body}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ background:BK, borderRadius:"12px", padding:"14px", display:"flex", gap:"12px", alignItems:"flex-start" }}>
+        <div style={{ fontSize:"36px", color:Y, fontWeight:900, lineHeight:1, flexShrink:0 }}>"</div>
+        <div>
+          <div style={{ fontSize:"12px", color:"#fff", lineHeight:1.9, fontStyle:"italic" }}>
+            A wise man can acquaint himself with them before the morning is over; a stupid man can learn them in the space of ten days.
+          </div>
+          <div style={{ fontSize:"10px", color:Y, fontWeight:700, marginTop:"6px" }}>— King Sejong the Great, Hunminjeongeum Preface, 1446 AD</div>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+/* ── Culture page EN ── */
+function CultureEn() {
+  return (
+    <Page dir="ltr">
+      <SHead title="Korean Culture 🌸" subtitle="5,000 years of beauty, philosophy, and art" />
+
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
+        <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🎬</div>
+          <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"5px" }}>K-Drama</div>
+          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.8 }}>
+            Among Netflix's most-watched content worldwide. Shows like Squid Game, Crash Landing on You, and My Love from the Star changed global TV. Korean storytelling captures hearts like nothing else!
+          </div>
+          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
+            {["❤️ Romance","🕵️ Thriller","😂 Comedy","👻 Horror"].map(t=>(
+              <span key={t} style={{ background:"#222", color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🎵</div>
+          <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"5px" }}>K-Pop</div>
+          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.8 }}>
+            BTS, BLACKPINK, Stray Kids — genuine global superstars. K-Pop is more than music: it's dance, fashion, visual art, and a worldwide community of passionate fans!
+          </div>
+          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
+            {["BTS 💜","BLACKPINK 🖤","Stray Kids 🐺"].map(t=>(
+              <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🍜</div>
+          <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"5px" }}>Korean Food</div>
+          <div style={{ fontSize:"10px", color:"#555", lineHeight:1.8 }}>
+            Kimchi, Bibimbap, Tteokbokki, Samgyeopsal — foods that surprise and addict you! Korean cuisine balances sour, spicy, and umami. No meal is complete without kimchi on the table!
+          </div>
+          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
+            {["🥬 김치","🍚 비빔밥","🌶️ 떡볶이","🥩 삼겹살"].map(t=>(
+              <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ background:"#f9f9f9", border:`2px solid #e5e5e5`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🌿</div>
+          <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"5px" }}>Korean Values & Spirit</div>
+          <div style={{ fontSize:"10px", color:"#555", lineHeight:1.8 }}>
+            <strong>빨리빨리 (Ppalli-ppalli)</strong> = "hurry hurry" — Koreans value speed and excellence together. <strong>눈치 (Nunchi)</strong> = reading unspoken feelings. <strong>한 (Han)</strong> = a deep bittersweet longing — the eternal spirit of the Korean people.
+          </div>
+          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
+            {["👴 Respect Elders","👨‍👩‍👧 Family First","📚 Education Sacred"].map(t=>(
+              <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"14px", alignItems:"center" }}>
+        <div style={{ fontSize:"32px" }}>💡</div>
+        <div>
+          <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"4px" }}>After completing all 6 books you will be able to:</div>
+          <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
+            {["Watch K-dramas without subtitles 🎬","Speak to Koreans with confidence 🗣️","Read signs in Korea 🪧","Sing along to K-Pop songs 🎵"].map(t=>(
+              <div key={t} style={{ background:"#222", color:"#ddd", fontSize:"10px", padding:"4px 8px", borderRadius:"8px" }}>{t}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+/* ── Course Overview page EN ── */
+function CourseEn() {
+  return (
+    <Page dir="ltr">
+      <SHead title="The Klovers Series — 6 Books to Fluency 📚" subtitle="Your complete roadmap from zero to confident Korean" />
+
+      <div style={{ background:BK, borderRadius:"12px", padding:"14px", marginBottom:"12px" }}>
+        <div style={{ fontSize:"11px", color:"#aaa", lineHeight:1.9 }}>
+          The Klovers series takes you from <span style={{color:Y,fontWeight:800}}>knowing nothing</span> to <span style={{color:Y,fontWeight:800}}>speaking and writing fluently</span> — using the K-dramas and music you already love as your learning material. Each book builds on the last.
+        </div>
+      </div>
+
+      <div style={{ display:"flex", flexDirection:"column", gap:"8px", marginBottom:"12px" }}>
+        {BOOKS_EN.map((b,i)=>(
+          <div key={i} style={{
+            background: b.current ? Y : "#f9f9f9",
+            border:`2px solid ${b.current ? Y : "#e5e5e5"}`,
+            borderRadius:"10px", padding:"10px 14px",
+            display:"flex", alignItems:"center", gap:"12px",
+          }}>
+            <div style={{
+              background: b.current ? BK : "#e0e0e0",
+              color: b.current ? Y : "#999",
+              fontWeight:900, fontSize:"14px",
+              width:"44px", height:"40px", borderRadius:"8px",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              flexShrink:0, textAlign:"center", lineHeight:1.2,
+            }}>Book{"\n"}{b.n}</div>
+            <div style={{ fontSize:"22px", flexShrink:0 }}>{b.icon}</div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontWeight:800, fontSize:"12px", color: b.current ? BK : "#444" }}>{b.title}</div>
+              <div style={{ fontSize:"10px", color: b.current ? BK2 : "#999", marginTop:"2px" }}>
+                {b.current ? "📍 You are here — start your journey!" : b.sub}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"8px" }}>
+        {[
+          { icon:"⏱️", title:"15–20 min", sub:"per day is enough" },
+          { icon:"🎯", title:"6 Books", sub:"zero to fluency" },
+          { icon:"🎬", title:"Real Language", sub:"from dramas & life" },
+        ].map(s=>(
+          <div key={s.title} style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"10px", padding:"10px", textAlign:"center" }}>
+            <div style={{ fontSize:"24px", marginBottom:"4px" }}>{s.icon}</div>
+            <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>{s.title}</div>
+            <div style={{ fontSize:"9px", color:"#666" }}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+    </Page>
+  );
+}
 
 function CoverEn() {
   return (
@@ -1052,6 +1558,10 @@ export default function HangulBookPage() {
         {isAr ? (
           <>
             <CoverAr />
+            <HistoryAr />
+            <SejongAr />
+            <CultureAr />
+            <CourseAr />
             <WelcomeAr />
             <ConsonantsAr slice={[0,7]} page={1} />
             <ConsonantsAr slice={[7,14]} page={2} />
@@ -1064,6 +1574,10 @@ export default function HangulBookPage() {
         ) : (
           <>
             <CoverEn />
+            <HistoryEn />
+            <SejongEn />
+            <CultureEn />
+            <CourseEn />
             <WelcomeEn />
             <ConsonantsEn slice={[0,7]} page={1} />
             <ConsonantsEn slice={[7,14]} page={2} />
