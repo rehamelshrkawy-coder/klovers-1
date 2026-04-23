@@ -165,7 +165,7 @@ const FreeTrialPage = () => {
                 onClick={handleBookCta}
                 className="w-full sm:w-auto gap-2 text-base font-bold h-13 px-8"
               >
-                {t("freeTrial.cta")}
+                {t("freeTrial.ctaSecondary")}
                 <ArrowRight className="h-5 w-5" />
               </Button>
 
