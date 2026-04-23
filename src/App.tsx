@@ -162,7 +162,7 @@ const App = () => (
                 <Route path="/learn-korean-kdramas" element={<KDramaLearningPage />} />
                 <Route path="/interview-training" element={<KoreanInterviewPage />} />
                 <Route path="/welcome-back" element={<ReturningStudentsLandingPage />} />
-                <Route path="/hangul-book" element={<HangulBookPage />} />
+                <Route path="/hangul-book" element={<AuthProtectedRoute><HangulBookPage /></AuthProtectedRoute>} />
                 <Route path="/enrollment-status" element={<AuthProtectedRoute><EnrollmentStatusPage /></AuthProtectedRoute>} />
                 <Route path="/hangul-starter" element={<HangulStarterPage />} />
                 <Route path="/practice-interview" element={<InterviewTrainingPage />} />

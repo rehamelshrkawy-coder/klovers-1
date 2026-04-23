@@ -223,6 +223,7 @@ const StudentDashboard = () => {
   const [weeklyXp, setWeeklyXp] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
   const [pendingEnrollments, setPendingEnrollments] = useState<{ id: string; plan_type: string; approval_status: string }[]>([]);
+  const [bookAssignment, setBookAssignment] = useState<{ available_from: string } | null | undefined>(undefined);
   const vocabStorageKey = `vocab_xp_${new Date().toISOString().split("T")[0]}`;
   const [vocabClaimed, setVocabClaimed] = useState(() => !!localStorage.getItem(`vocab_xp_${new Date().toISOString().split("T")[0]}`));
   const navigate = useNavigate();
@@ -403,6 +404,15 @@ const StudentDashboard = () => {
       } else {
         setHasNoData(true);
       }
+
+      // Book assignment (outside enrollment block — assigned regardless of approval)
+      const { data: bookData } = await supabase
+        .from("book_assignments")
+        .select("available_from")
+        .eq("user_id", session.user.id)
+        .eq("book_id", "hangul-1")
+        .maybeSingle();
+      setBookAssignment(bookData ?? null);
 
       setLoading(false);
       if (!isOnboardingDone()) setShowWelcome(true);
@@ -761,6 +771,49 @@ const StudentDashboard = () => {
               ))}
             </div>
           </div>
+
+          {/* ── Hangul Book card ── */}
+          {bookAssignment !== undefined && bookAssignment !== null && (() => {
+            const now = Date.now();
+            const unlockMs = new Date(bookAssignment.available_from).getTime();
+            const isLive = unlockMs <= now;
+            const daysLeft = Math.ceil((unlockMs - now) / (1000 * 60 * 60 * 24));
+            return (
+              <div className={`relative overflow-hidden rounded-2xl border p-4 flex items-center gap-4 ${isLive ? "bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/20 border-amber-200/80 dark:border-amber-800/60" : "bg-muted/30 border-border/60"}`}>
+                {/* Glow ring when live */}
+                {isLive && <div className="absolute inset-0 rounded-2xl ring-2 ring-amber-400/30 pointer-events-none" />}
+                {/* Book icon */}
+                <div className={`h-14 w-14 rounded-xl flex items-center justify-center shrink-0 text-2xl font-black ${isLive ? "bg-amber-400 text-black shadow-lg shadow-amber-400/40" : "bg-muted text-muted-foreground"}`}>
+                  {isLive ? "📖" : "🔒"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm text-foreground leading-tight">Hangul Book 1 — الهانغول</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {isLive
+                      ? "Your book is ready! Learn the Korean alphabet."
+                      : `Unlocks in ${daysLeft} day${daysLeft !== 1 ? "s" : ""} · ${new Date(bookAssignment.available_from).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`}
+                  </p>
+                  {isLive && (
+                    <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                      <span className="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium">🎬 K-Drama</span>
+                      <span className="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium">🎵 K-Pop</span>
+                      <span className="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium">Level 1</span>
+                    </div>
+                  )}
+                </div>
+                {isLive ? (
+                  <Button size="sm" className="shrink-0 bg-amber-400 hover:bg-amber-500 text-black font-bold shadow-md" onClick={() => navigate("/hangul-book")}>
+                    Open Book →
+                  </Button>
+                ) : (
+                  <div className="shrink-0 text-center">
+                    <div className="text-2xl font-black text-muted-foreground leading-none">{daysLeft}</div>
+                    <div className="text-[10px] text-muted-foreground">days</div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── Discover Korea Gallery ── */}
           {(() => {
