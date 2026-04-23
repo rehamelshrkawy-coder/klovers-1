@@ -89,7 +89,7 @@ const LeadFunnelPanel: React.FC = () => {
         .from("lead_events")
         .select("id, session_id, user_id, source_type, source_page, cta_label, campaign, utm_source, utm_medium, created_at")
         .order("created_at", { ascending: false })
-        .limit(500);
+        .limit(5000);
       if (rangeDate) q = q.gte("created_at", rangeDate);
       const { data, error } = await q;
       if (error) throw error;
@@ -108,10 +108,33 @@ const LeadFunnelPanel: React.FC = () => {
         .from("lead_funnel")
         .select("*")
         .order("first_seen", { ascending: false })
-        .limit(500);
+        .limit(5000);
       if (error) throw error;
       return (data ?? []) as FunnelRow[];
     },
+  });
+
+  // Week-over-week delta for KPI cards
+  const prevRangeDate = useMemo(() => {
+    if (range === "all") return null;
+    const d = new Date();
+    d.setDate(d.getDate() - parseInt(range) * 2);
+    return d.toISOString();
+  }, [range]);
+
+  const { data: prevFunnelRows = [] } = useQuery({
+    queryKey: ["lead_funnel_prev", range],
+    queryFn: async () => {
+      if (!prevRangeDate || !rangeDate) return [];
+      const { data } = await supabase
+        .from("lead_funnel")
+        .select("clicked_whatsapp, clicked_free_trial, started_placement, viewed_pricing_cta, received_broadcast, signup_completed")
+        .gte("first_seen", prevRangeDate)
+        .lt("first_seen", rangeDate)
+        .limit(5000);
+      return data ?? [];
+    },
+    enabled: range !== "all",
   });
 
   const refresh = () => { refetchEvents(); refetchFunnel(); };
@@ -126,7 +149,30 @@ const LeadFunnelPanel: React.FC = () => {
     const pricing = funnelRows.filter((r) => r.viewed_pricing_cta).length;
     const broadcast = funnelRows.filter((r) => r.received_broadcast).length;
     const signups = funnelRows.filter((r) => r.signup_completed).length;
-    return { total, wa, trial, placement, pricing, broadcast, signups };
+
+    const prevTotal = prevFunnelRows.length;
+    const prevWa = (prevFunnelRows as typeof funnelRows).filter((r) => r.clicked_whatsapp).length;
+    const prevTrial = (prevFunnelRows as typeof funnelRows).filter((r) => r.clicked_free_trial).length;
+    const prevPlacement = (prevFunnelRows as typeof funnelRows).filter((r) => r.started_placement).length;
+    const prevPricing = (prevFunnelRows as typeof funnelRows).filter((r) => r.viewed_pricing_cta).length;
+    const prevBroadcast = (prevFunnelRows as typeof funnelRows).filter((r) => r.received_broadcast).length;
+    const prevSignups = (prevFunnelRows as typeof funnelRows).filter((r) => r.signup_completed).length;
+
+    const delta = (cur: number, prev: number) =>
+      prev === 0 ? null : Math.round(((cur - prev) / prev) * 100);
+
+    return {
+      total, wa, trial, placement, pricing, broadcast, signups,
+      deltas: {
+        total: delta(total, prevTotal),
+        wa: delta(wa, prevWa),
+        trial: delta(trial, prevTrial),
+        placement: delta(placement, prevPlacement),
+        pricing: delta(pricing, prevPricing),
+        broadcast: delta(broadcast, prevBroadcast),
+        signups: delta(signups, prevSignups),
+      },
+    };
   }, [funnelRows]);
 
   // Source breakdown for the "sources" tab
@@ -212,14 +258,16 @@ const LeadFunnelPanel: React.FC = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
         {[
-          { label: "Sessions", value: stats.total, icon: Eye, color: "text-slate-600" },
-          { label: "WhatsApp Clicks", value: stats.wa, icon: MousePointerClick, color: "text-green-600" },
-          { label: "Placement Starts", value: stats.placement, icon: TrendingUp, color: "text-purple-600" },
-          { label: "Free Trial Clicks", value: stats.trial, icon: MousePointerClick, color: "text-blue-600" },
-          { label: "Pricing Views", value: stats.pricing, icon: Eye, color: "text-amber-600" },
-          { label: "Broadcast Sent", value: stats.broadcast, icon: Mail, color: "text-indigo-600", sub: pct(stats.broadcast, stats.total) },
-          { label: "Signups", value: stats.signups, icon: UserPlus, color: "text-rose-600", sub: pct(stats.signups, stats.total) },
-        ].map((kpi) => (
+          { label: "Sessions", value: stats.total, icon: Eye, color: "text-slate-600", deltaKey: "total" as const },
+          { label: "WhatsApp Clicks", value: stats.wa, icon: MousePointerClick, color: "text-green-600", deltaKey: "wa" as const },
+          { label: "Placement Starts", value: stats.placement, icon: TrendingUp, color: "text-purple-600", deltaKey: "placement" as const },
+          { label: "Free Trial Clicks", value: stats.trial, icon: MousePointerClick, color: "text-blue-600", deltaKey: "trial" as const },
+          { label: "Pricing Views", value: stats.pricing, icon: Eye, color: "text-amber-600", deltaKey: "pricing" as const },
+          { label: "Broadcast Sent", value: stats.broadcast, icon: Mail, color: "text-indigo-600", sub: pct(stats.broadcast, stats.total), deltaKey: "broadcast" as const },
+          { label: "Signups", value: stats.signups, icon: UserPlus, color: "text-rose-600", sub: pct(stats.signups, stats.total), deltaKey: "signups" as const },
+        ].map((kpi) => {
+          const d = stats.deltas?.[kpi.deltaKey] ?? null;
+          return (
           <Card key={kpi.label} className="rounded-xl">
             <CardContent className="p-3">
               {loading ? (
@@ -234,11 +282,17 @@ const LeadFunnelPanel: React.FC = () => {
                     {kpi.value}
                     {kpi.sub && <span className="text-xs font-normal text-muted-foreground ml-1">({kpi.sub})</span>}
                   </div>
+                  {d !== null && range !== "all" && (
+                    <div className={`text-[10px] font-medium mt-0.5 ${d >= 0 ? "text-green-600" : "text-red-500"}`}>
+                      {d >= 0 ? "▲" : "▼"} {Math.abs(d)}% vs prev
+                    </div>
+                  )}
                 </>
               )}
             </CardContent>
           </Card>
-        ))}
+          );
+        })}
       </div>
 
       {/* View toggle */}
