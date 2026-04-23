@@ -72,6 +72,46 @@ const TrialBookingPage = () => {
       });
   }, [user]);
 
+  // Pre-check for an existing active trial booking so users aren't thrown
+  // into the error "You already have a trial class booked" from the edge
+  // function — instead, show them their existing booking as the success
+  // screen. Fixes the UX cliff hitting ~4 sessions/month of users who
+  // bounce back to /trial-booking a second time.
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const todayCairo = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      const { data } = await supabase
+        .from("trial_bookings")
+        .select("trial_date, start_time, duration_min, timezone, calendar_url, status")
+        .eq("user_id", user.id)
+        .in("status", ["pending", "confirmed"])
+        .gte("trial_date", todayCairo)
+        .order("trial_date", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (data && data.trial_date) {
+        const d = new Date(data.trial_date + "T00:00:00");
+        const day_name = d.toLocaleDateString("en-US", { weekday: "long" });
+        setBookingResult({
+          trial_date: data.trial_date,
+          day_name,
+          start_time: data.start_time || "",
+          start_time_12h: data.start_time
+            ? (() => {
+                const [h, m] = (data.start_time as string).split(":").map(Number);
+                const ap = h >= 12 ? "PM" : "AM";
+                return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${ap}`;
+              })()
+            : "",
+          duration_min: data.duration_min || 45,
+          timezone: data.timezone || "Africa/Cairo",
+          calendar_url: data.calendar_url || "",
+        });
+      }
+    })();
+  }, [user]);
+
   // True when neither profile nor user_metadata has a level — we need to ask.
   const needsLevel =
     profileLoaded &&
@@ -208,78 +248,68 @@ const TrialBookingPage = () => {
               </p>
             </div>
 
-            {/* While-you-wait nurture bridge */}
-            <div className="bg-gradient-to-b from-primary/5 to-transparent border border-primary/20 rounded-2xl p-6 mb-6">
-              <div className="flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-wider mb-4">
+            {/* While-you-wait — single hero CTA. Previous 3-button panel
+                got 0 clicks: classic choice paralysis. Collapsing to one
+                clear next action (the only one that measurably lifts the
+                teacher's trial experience) and downgrading alternatives
+                to plain text links. */}
+            <div className="bg-gradient-to-b from-primary/10 to-transparent border border-primary/20 rounded-2xl p-6 mb-4 text-center">
+              <div className="flex items-center justify-center gap-2 text-xs font-semibold text-primary uppercase tracking-wider mb-2">
                 <Sparkles className="h-3.5 w-3.5" />
-                {daysUntil > 0 ? (daysUntil === 1 ? t("trialBooking.whileWait").replace("{days}", String(daysUntil)) : t("trialBooking.whileWaitPlural").replace("{days}", String(daysUntil))) : t("trialBooking.trialToday")}
+                {daysUntil > 0
+                  ? (daysUntil === 1
+                      ? t("trialBooking.whileWait").replace("{days}", String(daysUntil))
+                      : t("trialBooking.whileWaitPlural").replace("{days}", String(daysUntil)))
+                  : t("trialBooking.trialToday")}
               </div>
-
-              <div className="space-y-3">
-                {/* Placement test */}
-                <button
-                  onClick={() => {
-                    track.custom("post_trial_cta_clicked", { cta: "placement_test" });
-                    logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_placement_test" });
-                    navigate("/placement-test");
-                  }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-primary/50 hover:shadow-md transition-all group"
-                >
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <GraduationCap className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-foreground">{t("trialBooking.findLevelTitle")}</p>
-                    <p className="text-xs text-muted-foreground">{t("trialBooking.findLevelDesc")}</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
-                </button>
-
-                {/* Pricing teaser */}
-                <button
-                  onClick={() => {
-                    track.custom("post_trial_cta_clicked", { cta: "pricing" });
-                    logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_pricing" });
-                    navigate("/pricing");
-                  }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-primary/50 hover:shadow-md transition-all group"
-                >
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Tag className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-foreground">{t("trialBooking.peekPlansTitle")}</p>
-                    <p className="text-xs text-muted-foreground">{t("trialBooking.peekPlansDesc")}</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
-                </button>
-
-                {/* WhatsApp */}
-                <button
-                  onClick={() => {
-                    track.custom("post_trial_cta_clicked", { cta: "whatsapp" });
-                    const url = `${WHATSAPP_BASE}?text=${encodeURIComponent(t("trialBooking.whatsappSuccessMsg"))}`;
-                    trackAndOpenWhatsApp(url, { cta_label: "post_booking_whatsapp" });
-                  }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-primary/50 hover:shadow-md transition-all group"
-                >
-                  <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                    <MessageCircle className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-foreground">{t("trialBooking.whatsappPromptTitle")}</p>
-                    <p className="text-xs text-muted-foreground">{t("trialBooking.whatsappPromptDesc")}</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
-                </button>
-              </div>
+              <h2 className="text-xl font-bold text-foreground mb-2">{t("trialBooking.findLevelTitle")}</h2>
+              <p className="text-sm text-muted-foreground mb-5 max-w-sm mx-auto">
+                {t("trialBooking.findLevelDesc")}
+              </p>
+              <Button
+                size="lg"
+                className="gap-2 font-bold px-8 shadow-lg"
+                onClick={() => {
+                  track.custom("post_trial_cta_clicked", { cta: "placement_test" });
+                  logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_placement_test" });
+                  navigate("/placement-test");
+                }}
+              >
+                <GraduationCap className="h-4 w-4" />
+                {t("trialBooking.findLevelTitle")}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
             </div>
 
-            <div className="text-center">
-              <Button variant="ghost" onClick={() => navigate("/dashboard")} className="gap-2 text-muted-foreground">
-                <LayoutDashboard className="h-4 w-4" />
-                {t("trialBooking.goDashboard")}
-              </Button>
+            <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+              <button
+                onClick={() => {
+                  track.custom("post_trial_cta_clicked", { cta: "pricing" });
+                  logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_pricing" });
+                  navigate("/pricing");
+                }}
+                className="hover:text-foreground underline underline-offset-2 flex items-center gap-1"
+              >
+                <Tag className="h-3 w-3" /> {t("trialBooking.peekPlansTitle")}
+              </button>
+              <span aria-hidden>·</span>
+              <button
+                onClick={() => {
+                  track.custom("post_trial_cta_clicked", { cta: "whatsapp" });
+                  const url = `${WHATSAPP_BASE}?text=${encodeURIComponent(t("trialBooking.whatsappSuccessMsg"))}`;
+                  trackAndOpenWhatsApp(url, { cta_label: "post_booking_whatsapp" });
+                }}
+                className="hover:text-foreground underline underline-offset-2 flex items-center gap-1"
+              >
+                <MessageCircle className="h-3 w-3" /> {t("trialBooking.whatsappPromptTitle")}
+              </button>
+              <span aria-hidden>·</span>
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="hover:text-foreground underline underline-offset-2 flex items-center gap-1"
+              >
+                <LayoutDashboard className="h-3 w-3" /> {t("trialBooking.goDashboard")}
+              </button>
             </div>
           </div>
         </main>

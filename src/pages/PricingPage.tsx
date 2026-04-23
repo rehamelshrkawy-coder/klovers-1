@@ -142,41 +142,44 @@ const ExitNudge = () => {
 
   if (!visible) return null;
 
+  // Non-blocking bottom sheet — the full-screen modal got 16 impressions
+  // and 0 clicks because the blocker reflex ate the pitch before users
+  // read it. This version is a pinned bottom card with ONE primary CTA,
+  // WhatsApp demoted to a footer link, bilingual via existing i18n keys.
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-3">
-      <div className="bg-card text-card-foreground rounded-2xl shadow-2xl border border-border w-full max-w-md p-6 relative animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-0 left-0 right-0 z-50 p-3 sm:p-4 pointer-events-none animate-in slide-in-from-bottom-2 duration-300">
+      <div className="relative pointer-events-auto mx-auto max-w-lg bg-card border-2 border-primary/60 shadow-[0_20px_60px_rgba(0,0,0,0.25)] rounded-2xl overflow-hidden">
         <button
           onClick={() => setVisible(false)}
           aria-label={t("pricingPage.exitDismiss")}
-          className="absolute top-3 right-3 text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition-colors"
+          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-muted transition-colors z-10"
         >
-          <X className="h-4 w-4" />
+          <X className="h-3.5 w-3.5" />
         </button>
-        <div className="text-center space-y-1 mb-4">
-          <div className="text-4xl mb-2">🎁</div>
-          <h3 className="text-lg font-bold text-foreground">{t("pricingPage.exitTitle")}</h3>
-          <p className="text-sm text-muted-foreground leading-snug">
-            {t("pricingPage.exitBodyPre")} <strong className="text-foreground">{t("pricingPage.exitBodyHighlight")}</strong> {t("pricingPage.exitBodyPost")}
-          </p>
-        </div>
-        <div className="space-y-2">
-          <Link
-            to="/free-trial"
-            onClick={handleTrialClick}
-            className="block w-full bg-primary text-primary-foreground text-center font-semibold py-3 rounded-xl hover:bg-primary/90 transition-colors"
-          >
+        <Link
+          to="/free-trial"
+          onClick={handleTrialClick}
+          className="group flex items-center gap-4 p-4 hover:bg-primary/5 transition-colors"
+        >
+          <div className="text-3xl flex-shrink-0">🎁</div>
+          <div className="flex-1 min-w-0 pr-6">
+            <p className="font-bold text-foreground text-sm leading-tight">
+              {t("pricingPage.exitTitle")}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
+              {t("pricingPage.exitBodyHighlight")}
+            </p>
+          </div>
+          <div className="flex-shrink-0 bg-primary text-primary-foreground font-bold text-sm px-5 py-3 rounded-xl shadow-lg group-hover:shadow-xl group-hover:scale-[1.03] transition-all">
             {t("pricingPage.exitCta")}
-          </Link>
-          <button
-            onClick={handleWaClick}
-            className="w-full text-xs text-muted-foreground hover:text-foreground py-1"
-          >
-            {t("pricingPage.exitChat")}
-          </button>
-        </div>
-        <p className="text-[10px] text-muted-foreground text-center mt-3">
-          {t("pricingPage.exitFooter")}
-        </p>
+          </div>
+        </Link>
+        <button
+          onClick={handleWaClick}
+          className="block w-full text-center text-[10px] text-muted-foreground hover:text-foreground py-1.5 border-t border-border/50 bg-muted/20"
+        >
+          {t("pricingPage.exitChat")}
+        </button>
       </div>
     </div>
   );
