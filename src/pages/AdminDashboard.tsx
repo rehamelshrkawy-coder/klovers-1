@@ -213,6 +213,10 @@ const AdminDashboard = () => {
   const [classLinkTarget, setClassLinkTarget] = useState<Enrollment | null>(null);
   const [classLinkUrl, setClassLinkUrl] = useState("");
   const [classLinkSendToGroup, setClassLinkSendToGroup] = useState(false);
+  const [classLinkSlotDay, setClassLinkSlotDay] = useState("");
+  const [classLinkSlotTime, setClassLinkSlotTime] = useState("");
+  const [classLinkSlotTimezone, setClassLinkSlotTimezone] = useState("Africa/Cairo");
+  const [classLinkFirstClassDate, setClassLinkFirstClassDate] = useState("");
   const [isSendingClassLink, setIsSendingClassLink] = useState(false);
   const [receiptModal, setReceiptModal] = useState<{ url: string; isPdf: boolean; studentName: string } | null>(null);
   const [receiptModalLoading, setReceiptModalLoading] = useState(false);
@@ -444,6 +448,49 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleResendPaymentEmail = useCallback(async (e: Enrollment) => {
+    const { error } = await supabase.functions.invoke("send-confirmation-email", {
+      body: {
+        template: "payment_confirmed",
+        email: e.profiles?.email,
+        name: e.profiles?.name ?? "Student",
+        language: "ar",
+        plan_type: e.plan_type,
+        duration: e.duration,
+        sessions_total: e.sessions_total,
+        amount: e.amount,
+        currency: e.currency ?? "EGP",
+        tx_ref: e.tx_ref,
+      },
+    });
+    if (error) {
+      toast({ title: "Failed to resend", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Payment email resent", description: `Sent to ${e.profiles?.email}` });
+    }
+  }, []);
+
+  const handleResendApprovalEmail = useCallback(async (e: Enrollment) => {
+    const { error } = await supabase.functions.invoke("send-confirmation-email", {
+      body: {
+        template: "approval",
+        email: e.profiles?.email,
+        name: e.profiles?.name ?? "Student",
+        language: "ar",
+        plan_type: e.plan_type,
+        duration: e.duration,
+        sessions_total: e.sessions_total,
+        amount: e.amount,
+        currency: e.currency ?? "EGP",
+      },
+    });
+    if (error) {
+      toast({ title: "Failed to resend", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Approval email resent", description: `Sent to ${e.profiles?.email}` });
+    }
+  }, []);
+
   const handleSendClassLink = async () => {
     if (!classLinkTarget || !classLinkUrl.trim()) return;
     setIsSendingClassLink(true);
@@ -512,15 +559,29 @@ const AdminDashboard = () => {
           name: r.name,
           language: r.language,
           class_link_url: classLinkUrl.trim(),
+          slot_day: classLinkSlotDay.trim() || undefined,
+          slot_time: classLinkSlotTime.trim() || undefined,
+          slot_timezone: classLinkSlotTimezone || undefined,
         },
       });
       if (error) failed++; else sent++;
     }
 
     setIsSendingClassLink(false);
+
+    // Stamp class_link_sent_at and first_class_date on the enrollment
+    const stampData: Record<string, unknown> = { class_link_sent_at: new Date().toISOString() };
+    if (classLinkFirstClassDate) stampData.first_class_date = new Date(classLinkFirstClassDate).toISOString();
+    await supabase.from("enrollments").update(stampData).eq("id", classLinkTarget.id);
+    invalidateAll();
+
     setClassLinkTarget(null);
     setClassLinkUrl("");
     setClassLinkSendToGroup(false);
+    setClassLinkSlotDay("");
+    setClassLinkSlotTime("");
+    setClassLinkSlotTimezone("Africa/Cairo");
+    setClassLinkFirstClassDate("");
 
     if (failed > 0) {
       toast({ title: `Sent ${sent}, failed ${failed}`, variant: "destructive" });
@@ -1621,6 +1682,32 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                 </CardHeader>
+                {/* Funnel summary strip */}
+                {!loading && (() => {
+                  const paidUnplaced = enrollments.filter(e => e.payment_status === "PAID" && !e.matched_at && e.approval_status !== "REJECTED" && e.approval_status !== "CANCELLED").length;
+                  const noLink = enrollments.filter(e => e.approval_status === "APPROVED" && e.matched_at && !e.class_link_sent_at).length;
+                  const pendingReceipt = enrollments.filter(e => (e.payment_provider === "egypt_manual" || e.payment_provider === "manual") && (!e.receipt_url || e.receipt_url === "" || e.receipt_url === "manual") && (e.approval_status === "PENDING" || e.approval_status === "UNDER_REVIEW")).length;
+                  if (paidUnplaced === 0 && noLink === 0 && pendingReceipt === 0) return null;
+                  return (
+                    <div className="flex flex-wrap gap-2 px-6 pb-3">
+                      {paidUnplaced > 0 && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium dark:bg-amber-950/20 dark:border-amber-800 dark:text-amber-400">
+                          ⏳ {paidUnplaced} paid, awaiting placement
+                        </div>
+                      )}
+                      {noLink > 0 && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-800 text-xs font-medium dark:bg-red-950/20 dark:border-red-800 dark:text-red-400">
+                          🔗 {noLink} approved, no class link sent
+                        </div>
+                      )}
+                      {pendingReceipt > 0 && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-orange-800 text-xs font-medium dark:bg-orange-950/20 dark:border-orange-800 dark:text-orange-400">
+                          📄 {pendingReceipt} missing receipt
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
                 <CardContent className="pt-0">
               {loading ? (
                 <div className="py-2 space-y-2">
@@ -1779,6 +1866,8 @@ const AdminDashboard = () => {
                               onViewReceipt={handleViewReceipt}
                               onRequestResubmission={handleRequestResubmission}
                               onSendClassLink={(en) => { setClassLinkTarget(en); setClassLinkUrl(""); setClassLinkSendToGroup(false); }}
+                              onResendPaymentEmail={handleResendPaymentEmail}
+                              onResendApprovalEmail={handleResendApprovalEmail}
                             />
                           );
                         })}
@@ -2059,7 +2148,7 @@ const AdminDashboard = () => {
         </div>
       </div>
       {/* Send Class Link dialog */}
-      <Dialog open={!!classLinkTarget} onOpenChange={(open) => { if (!open) { setClassLinkTarget(null); setClassLinkUrl(""); setClassLinkSendToGroup(false); } }}>
+      <Dialog open={!!classLinkTarget} onOpenChange={(open) => { if (!open) { setClassLinkTarget(null); setClassLinkUrl(""); setClassLinkSendToGroup(false); setClassLinkSlotDay(""); setClassLinkSlotTime(""); setClassLinkSlotTimezone("Africa/Cairo"); setClassLinkFirstClassDate(""); } }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -2093,6 +2182,20 @@ const AdminDashboard = () => {
               <Label htmlFor="send-to-group" className="cursor-pointer font-normal">
                 Send to entire group (all active members)
               </Label>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="slot-day" className="text-xs text-muted-foreground">Day of week (optional)</Label>
+                <Input id="slot-day" placeholder="e.g. Monday" value={classLinkSlotDay} onChange={(e) => setClassLinkSlotDay(e.target.value)} className="h-8 text-sm" />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="slot-time" className="text-xs text-muted-foreground">Time (optional)</Label>
+                <Input id="slot-time" placeholder="e.g. 7:00 PM" value={classLinkSlotTime} onChange={(e) => setClassLinkSlotTime(e.target.value)} className="h-8 text-sm" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="first-class-date" className="text-xs text-muted-foreground">First class date/time — for pre-class reminder (optional)</Label>
+              <Input id="first-class-date" type="datetime-local" value={classLinkFirstClassDate} onChange={(e) => setClassLinkFirstClassDate(e.target.value)} className="h-8 text-sm" />
             </div>
           </div>
           <DialogFooter>
