@@ -58,6 +58,9 @@ export interface Enrollment {
   enrollment_status?: string;
   sessions_total?: number;
   negative_since?: string | null;
+  matched_at?: string | null;
+  approval_email_sent_at?: string | null;
+  payment_email_sent_at?: string | null;
 }
 
 // ── Student overview ─────────────────────────────────────────────────────────
