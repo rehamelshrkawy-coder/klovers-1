@@ -130,6 +130,8 @@ import { normalizeLevel, LEVEL_SELECT_OPTIONS } from "@/constants/levels";
 import type { Lead, Enrollment, AttendanceReq, OverviewRow } from "@/types/admin";
 import { formatTime, ADMIN_PAGE_SIZE as PAGE_SIZE, MAX_UNIT_PRICE, AT_RISK_SESSION_THRESHOLD, exportCSV } from "@/lib/admin-utils";
 import type { ProfileEntry } from "@/hooks/admin/useProfiles";
+import { StudentsTab } from "@/components/admin/tabs/StudentsTab";
+import { EnrollmentsTab } from "@/components/admin/tabs/EnrollmentsTab";
 import { useStudentOverview, buildOverviewByEmail } from "@/hooks/admin/useStudentOverview";
 import { useLeads } from "@/hooks/admin/useLeads";
 import { useEnrollments } from "@/hooks/admin/useEnrollments";
@@ -936,6 +938,13 @@ const AdminDashboard = () => {
 
   return (
     <TooltipProvider>
+      {/* Skip to main content — keyboard / screen reader shortcut */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+      >
+        Skip to main content
+      </a>
       <div id="main-content" className="min-h-screen bg-muted/30">
         {/* Header */}
         <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border/60 shadow-sm">
@@ -965,9 +974,9 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6" aria-live="polite" aria-atomic="false">
           {leadsError && (
-            <div className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <div role="alert" className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               <span className="mt-0.5 shrink-0">⚠️</span>
               <div className="flex-1">
                 <p className="font-medium">Data load error</p>
@@ -1090,7 +1099,7 @@ const AdminDashboard = () => {
 
           {/* Unified "Action needed" bar — stacks quick-actions into one row */}
           {(actionableEnrollments > 0 || trialStats.pending > 0) && (
-            <div className="rounded-xl border border-amber-400/60 bg-gradient-to-r from-amber-50 to-amber-100/30 dark:from-amber-950/25 dark:to-amber-900/10 overflow-hidden">
+            <div role="status" aria-label="Action items requiring attention" className="rounded-xl border border-amber-400/60 bg-gradient-to-r from-amber-50 to-amber-100/30 dark:from-amber-950/25 dark:to-amber-900/10 overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-2 border-b border-amber-400/30">
                 <Bell className="h-4 w-4 text-amber-600 animate-pulse" />
                 <span className="text-xs font-semibold text-amber-800 dark:text-amber-300 uppercase tracking-wide">
@@ -1325,700 +1334,73 @@ const AdminDashboard = () => {
 
             {/* STUDENTS TAB */}
             <TabsContent value="students">
-              <Card className="rounded-2xl">
-                <CardHeader className="pb-4">
-                  <div className="flex flex-col gap-4">
-                     <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <CardTitle className="text-base">Users</CardTitle>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">
-                          Read-only overview of every student. For manual enrollment, packages, or legacy records use
-                          <button
-                            type="button"
-                            onClick={() => setAdminTab("manage")}
-                            className="underline underline-offset-2 hover:text-foreground ml-1"
-                          >
-                            Student Admin →
-                          </button>
-                        </p>
-                      </div>
-                      <p className="text-xs text-muted-foreground shrink-0">{filteredUsers.length} of {overviewRows.length}</p>
-                    </div>
-                    {/* Responsive student filters */}
-                    {isMobile ? (
-                      <Select value={studentFilter} onValueChange={setStudentFilter}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {studentFilterOptions.map(opt => (
-                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <div className="flex gap-2 overflow-x-auto whitespace-nowrap">
-                        {studentFilterOptions.map(opt => (
-                          <Button
-                            key={opt.value}
-                            variant={studentFilter === opt.value ? "default" : "outline"}
-                            size="sm"
-                            className="rounded-full text-xs"
-                            onClick={() => setStudentFilter(opt.value)}
-                          >
-                            {opt.label}
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                    {/* Search + Level filter + Export */}
-                    <div className={`flex gap-2 ${isMobile ? "flex-col" : "flex-row"}`}>
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Search by name or email..."
-                          value={studentSearch}
-                          onChange={(e) => setStudentSearch(e.target.value)}
-                          className="pl-9"
-                          aria-label="Search students by name or email"
-                          type="search"
-                        />
-                      </div>
-                      <Select value={levelFilter} onValueChange={setLevelFilter}>
-                        <SelectTrigger className="w-full sm:w-40">
-                          <SelectValue placeholder="All Levels" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Levels</SelectItem>
-                          {LEVEL_SELECT_OPTIONS.map(opt => (
-                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size={isMobile ? "icon" : "sm"} aria-label="Toggle table columns">
-                            <Columns3 className="h-4 w-4" />
-                            {!isMobile && <span className="ml-1">Columns</span>}
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuLabel className="text-xs">Visible columns</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          {ALL_STUDENT_COLS.map(col => (
-                            <DropdownMenuCheckboxItem
-                              key={col}
-                              checked={visibleStudentCols.has(col)}
-                              onCheckedChange={() => toggleStudentCol(col)}
-                              onSelect={(e) => e.preventDefault()}
-                            >
-                              {STUDENT_COL_LABELS[col]}
-                            </DropdownMenuCheckboxItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      <Button variant="outline" size={isMobile ? "icon" : "sm"} onClick={() => {
-                        exportCSV(
-                          ["Name", "Email", "Country", "Level", "Remaining Sessions", "Status", "Source", "Joined"],
-                          filteredUsers.map(u => [u.name, u.email, u.country, u.level, u.sessions_remaining, u.derived_status, u.source_label, new Date(u.joined_at).toLocaleDateString()]),
-                          "students"
-                        );
-                      }}>
-                        <Download className="h-4 w-4" />
-                        {!isMobile && <span className="ml-1">Export CSV</span>}
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-              {loading ? (
-                <div className="py-2">
-                  <div className="flex items-center gap-3 py-3 border-b border-border/50">
-                    <Skeleton className="h-3 w-20" />
-                    <Skeleton className="h-3 w-40 flex-1" />
-                    <Skeleton className="h-3 w-16" />
-                    <Skeleton className="h-3 w-20" />
-                  </div>
-                  {Array.from({ length: 10 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 py-3 border-b border-border/30 last:border-0">
-                      <Skeleton className="h-9 w-9 rounded-full shrink-0" />
-                      <div className="flex-1 space-y-1.5">
-                        <Skeleton className="h-3.5 w-1/3" />
-                        <Skeleton className="h-3 w-1/2 opacity-70" />
-                      </div>
-                      <Skeleton className="h-5 w-16 rounded-full" />
-                      <Skeleton className="h-7 w-20 rounded-md" />
-                    </div>
-                  ))}
-                </div>
-              ) : sortedUsers.length === 0 ? (
-                <div className="text-center py-12 space-y-3">
-                  <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                    <Search className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-medium text-sm text-foreground">No students match your filters</p>
-                    <p className="text-xs text-muted-foreground">Try clearing filters or adjusting your search term</p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => { setStudentFilter("all"); setLevelFilter("all"); setStudentSearch(""); }}
-                  >
-                    <Eraser className="h-4 w-4 mr-1.5" /> Clear all filters
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  {/* Mobile card list — shown only on small screens */}
-                  {isMobile && (
-                    <div className="space-y-2 sm:hidden">
-                      {pagedUsers.map((u) => {
-                        const isAtRisk = u.derived_status === "ACTIVE" && u.sessions_remaining > 0 && u.sessions_remaining <= AT_RISK_SESSION_THRESHOLD;
-                        const isLocked = u.derived_status === "LOCKED";
-                        return (
-                          <div
-                            key={u.user_id}
-                            className={cn(
-                              "rounded-xl border bg-card p-3 space-y-2 cursor-pointer transition-shadow hover:shadow-sm",
-                              isAtRisk && "border-amber-300/60 bg-amber-50/60 dark:bg-amber-950/20",
-                              isLocked && "border-red-300/60 bg-red-50/60 dark:bg-red-950/20"
-                            )}
-                            onClick={() => setSelectedStudentId(selectedStudentId === u.user_id ? null : (u.enrollment_id ? u.user_id : null))}
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0">
-                                <p className="font-medium text-sm text-foreground truncate">{u.name || "—"}</p>
-                                <p className="text-xs text-muted-foreground truncate">{u.email}</p>
-                              </div>
-                              <Badge variant={getDerivedStatusBadgeVariant(u.derived_status)} className="text-xs shrink-0">{u.derived_status}</Badge>
-                            </div>
-                            <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-                              {u.level && <span className="px-1.5 py-0.5 rounded-full bg-muted font-medium">{u.level}</span>}
-                              <span>Sessions: <span className="font-mono font-semibold text-foreground">{u.sessions_remaining}</span></span>
-                              {u.amount_due > 0 && (
-                                <span className="text-destructive font-semibold">Owes {formatMoney(u.amount_due, u.currency)}</span>
-                              )}
-                              {u.sessions_total > 0 && (
-                                <span>
-                                  Attend: <span className={`font-semibold ${Math.round(((u.sessions_total - u.sessions_remaining) / u.sessions_total) * 100) >= 80 ? "text-green-600" : "text-amber-600"}`}>
-                                    {Math.round(((u.sessions_total - u.sessions_remaining) / u.sessions_total) * 100)}%
-                                  </span>
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {/* Desktop table — hidden on small screens */}
-                  <div className={cn("border rounded-xl overflow-auto", isMobile && "hidden sm:block")}>
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="sticky top-0 bg-background/95 backdrop-blur z-10 border-b">
-                          <TableHead className="py-3 px-3 font-semibold">Name</TableHead>
-                          <TableHead className="py-3 px-3 font-semibold">Email</TableHead>
-                          {visibleStudentCols.has("country") && (
-                            <TableHead className="py-3 px-3 font-semibold">Country</TableHead>
-                          )}
-                          {visibleStudentCols.has("level") && (
-                            <TableHead className="py-3 px-3 font-semibold">Level</TableHead>
-                          )}
-                          <TableHead
-                            className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary"
-                            onClick={() => setStudentSort(s => ({ col: "sessions_remaining", dir: s.col === "sessions_remaining" && s.dir === "asc" ? "desc" : "asc" }))}
-                            aria-sort={studentSort.col === "sessions_remaining" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
-                          >
-                            Remaining {studentSort.col === "sessions_remaining" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
-                          </TableHead>
-                          {visibleStudentCols.has("attendance") && (
-                            <TableHead
-                              className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary"
-                              onClick={() => setStudentSort(s => ({ col: "attendance_pct", dir: s.col === "attendance_pct" && s.dir === "asc" ? "desc" : "asc" }))}
-                              aria-sort={studentSort.col === "attendance_pct" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
-                            >
-                              Attend% {studentSort.col === "attendance_pct" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
-                            </TableHead>
-                          )}
-                          <TableHead className="py-3 px-3 font-semibold text-center">Negative</TableHead>
-                          <TableHead
-                            className="py-3 px-3 font-semibold text-right cursor-pointer select-none hover:text-primary"
-                            onClick={() => setStudentSort(s => ({ col: "amount_due", dir: s.col === "amount_due" && s.dir === "asc" ? "desc" : "asc" }))}
-                            aria-sort={studentSort.col === "amount_due" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
-                          >
-                            Amount Due {studentSort.col === "amount_due" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
-                          </TableHead>
-                          <TableHead
-                            className="py-3 px-3 font-semibold text-right cursor-pointer select-none hover:text-primary"
-                            onClick={() => setStudentSort(s => ({ col: "remaining_balance", dir: s.col === "remaining_balance" && s.dir === "asc" ? "desc" : "asc" }))}
-                            aria-sort={studentSort.col === "remaining_balance" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
-                          >
-                            Balance {studentSort.col === "remaining_balance" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
-                          </TableHead>
-                          <TableHead className="py-3 px-3 font-semibold">Status</TableHead>
-                          {visibleStudentCols.has("source") && (
-                            <TableHead className="py-3 px-3 font-semibold">Source</TableHead>
-                          )}
-                          {visibleStudentCols.has("joined") && (
-                            <TableHead
-                              className="py-3 px-3 font-semibold cursor-pointer select-none hover:text-primary"
-                              onClick={() => setStudentSort(s => ({ col: "joined_at", dir: s.col === "joined_at" && s.dir === "asc" ? "desc" : "asc" }))}
-                              aria-sort={studentSort.col === "joined_at" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
-                            >
-                              Joined {studentSort.col === "joined_at" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
-                            </TableHead>
-                          )}
-                          <TableHead className="py-3 px-3 w-10" />
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {pagedUsers.map((u) => {
-                          const isAtRisk = u.derived_status === "ACTIVE" && u.sessions_remaining > 0 && u.sessions_remaining <= AT_RISK_SESSION_THRESHOLD;
-                          const isLocked = u.derived_status === "LOCKED";
-                          return (
-                          <TableRow key={u.user_id} className={cn(
-                            "group odd:bg-muted/30 hover:bg-muted/50 transition cursor-pointer",
-                            selectedStudentId === u.user_id && "ring-2 ring-primary/40",
-                            isAtRisk && "bg-amber-50/60 dark:bg-amber-950/20 odd:bg-amber-50/60",
-                            isLocked && "bg-red-50/60 dark:bg-red-950/20 odd:bg-red-50/60"
-                          )} onClick={() => setSelectedStudentId(selectedStudentId === u.user_id ? null : (u.enrollment_id ? u.user_id : null))}>
-                            <TableCell className="py-3 px-3 font-medium">
-                              <div className="flex items-center gap-1.5">
-                                <span>{u.name || "—"}</span>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-6 w-6 shrink-0 text-muted-foreground hover:text-primary"
-                                  title="Manually enroll"
-                                  aria-label={`Manually enroll ${u.name || u.email}`}
-                                  onClick={e => { e.stopPropagation(); openManualEnroll(u); }}
-                                >
-                                  <UserPlus className="h-3.5 w-3.5" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                            <TableCell className="py-3 px-3">
-                              <div className="flex items-center gap-1 max-w-[240px]">
-                                <span className="truncate flex-1 text-sm">{u.email}</span>
-                                <button
-                                  className="shrink-0 p-0.5 rounded text-muted-foreground/60 hover:text-foreground hover:bg-muted focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary/50 transition-colors"
-                                  onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(u.email); toast({ title: "Copied" }); }}
-                                  aria-label={`Copy email ${u.email}`}
-                                >
-                                  <Copy className="h-3 w-3" />
-                                </button>
-                              </div>
-                            </TableCell>
-                            {visibleStudentCols.has("country") && (
-                              <TableCell className="py-3 px-3 text-muted-foreground">{u.country || "—"}</TableCell>
-                            )}
-                            {visibleStudentCols.has("level") && (
-                              <TableCell className="py-3 px-3 text-muted-foreground">{u.level || "—"}</TableCell>
-                            )}
-                            <TableCell className="py-3 px-3 text-center font-mono">{u.sessions_remaining}</TableCell>
-                            {visibleStudentCols.has("attendance") && (
-                            <TableCell className="py-3 px-3 text-center">
-                              {u.sessions_total > 0 ? (() => {
-                                const pct = Math.round(((u.sessions_total - u.sessions_remaining) / u.sessions_total) * 100);
-                                return (
-                                  <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${pct >= 80 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" : pct >= 50 ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"}`} aria-label={`${pct}% attendance`}>
-                                    {pct}%
-                                  </span>
-                                );
-                              })() : <span className="text-muted-foreground">—</span>}
-                            </TableCell>
-                            )}
-                            <TableCell className="py-3 px-3 text-center font-mono">
-                              {u.negative_sessions > 0 ? (
-                                <span className="inline-flex items-center gap-1 text-destructive font-semibold" aria-label={`${u.negative_sessions} negative sessions`}>
-                                  <AlertCircle className="h-3 w-3" aria-hidden="true" /> {u.negative_sessions}
-                                </span>
-                              ) : "—"}
-                            </TableCell>
-                            <TableCell className="py-3 px-3 text-right font-mono" onClick={(e) => e.stopPropagation()}>
-                              {u.amount_due > 0 ? (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <a
-                                        href={`mailto:${u.email}?subject=Outstanding Balance - Klovers&body=Hi ${(u.name || "").split(" ")[0]},%0A%0AYou have an outstanding balance of ${formatMoney(u.amount_due, u.currency)}. Please arrange payment at your earliest convenience.%0A%0ABest,%0AKlovers Team`}
-                                        className="inline-flex items-center gap-1 text-destructive hover:text-destructive/80 transition-colors text-xs font-semibold"
-                                        aria-label={`Send payment request to ${u.name}`}
-                                      >
-                                        {formatMoney(u.amount_due, u.currency)}
-                                        <Mail className="h-3 w-3 flex-shrink-0" />
-                                      </a>
-                                    </TooltipTrigger>
-                                    <TooltipContent>Send payment request email</TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              ) : "—"}
-                            </TableCell>
-                            <TableCell className="py-3 px-3 text-right font-mono">
-                              {u.remaining_balance > 0 ? (
-                                <span className="text-xs font-medium text-green-700 dark:text-green-400">
-                                  {formatMoney(u.remaining_balance, u.currency)}
-                                </span>
-                              ) : "—"}
-                            </TableCell>
-                            <TableCell className="py-3 px-3">
-                              <Badge variant={getDerivedStatusBadgeVariant(u.derived_status)} className="text-xs">{u.derived_status}</Badge>
-                            </TableCell>
-                            {visibleStudentCols.has("source") && (
-                              <TableCell className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs cursor-pointer hover:bg-accent transition-colors"
-                                  onClick={() => {
-                                    const f = u.source_label === "Stripe" ? "stripe" : u.source_label === "Egypt" ? "egypt" : null;
-                                    if (f) { setStudentFilter(f); setStudentPage(0); }
-                                  }}
-                                  title={`Filter by ${u.source_label}`}
-                                  role="button"
-                                  aria-label={`Filter students by source: ${u.source_label}`}
-                                >
-                                  {u.source_label}
-                                </Badge>
-                              </TableCell>
-                            )}
-                            {visibleStudentCols.has("joined") && (
-                              <TableCell className="py-3 px-3 text-muted-foreground text-xs">{formatDate(u.joined_at)}</TableCell>
-                            )}
-                            <TableCell className="py-3 px-3 w-10" onClick={(e) => e.stopPropagation()}>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <button
-                                    className="p-1 rounded text-destructive/60 hover:text-destructive hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-destructive/40 transition-colors"
-                                    aria-label="Delete student"
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete student?</AlertDialogTitle>
-                                    <AlertDialogDescription>This will permanently delete {u.name || u.email}'s profile. This cannot be undone.</AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => handleDeleteStudent(u.user_id)}>Delete</AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </TableCell>
-                          </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="flex items-center justify-between pt-4">
-                      <p className="text-xs text-muted-foreground">
-                        Page {studentPage + 1} of {totalPages} · {sortedUsers.length} results
-                      </p>
-                      <div className="flex items-center gap-1">
-                        <Button variant="outline" size="icon" className="h-8 w-8" disabled={studentPage === 0} onClick={() => setStudentPage(p => p - 1)}>
-                          <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="icon" className="h-8 w-8" disabled={studentPage >= totalPages - 1} onClick={() => setStudentPage(p => p + 1)}>
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-                </CardContent>
-              </Card>
-
-              {/* Attendance Panel */}
-              {selectedStudentId && (() => {
-                const student = overviewRows.find(u => u.user_id === selectedStudentId);
-                if (!student || !student.enrollment_id) return null;
-                return (
-                  <AdminAttendancePanel
-                    enrollmentId={student.enrollment_id}
-                    userId={student.user_id}
-                    studentName={student.name || student.email}
-                    sessionsRemaining={student.sessions_remaining}
-                    negativeSessions={student.negative_sessions}
-                    amountDue={student.amount_due}
-                    currency={student.currency}
-                    derivedStatus={student.derived_status}
-                    onClose={() => setSelectedStudentId(null)}
-                    onUpdated={invalidateAll}
-                  />
-                );
-              })()}
+              <StudentsTab
+                overviewRows={overviewRows}
+                filteredUsers={filteredUsers}
+                sortedUsers={sortedUsers}
+                pagedUsers={pagedUsers}
+                totalPages={totalPages}
+                studentPage={studentPage}
+                setStudentPage={setStudentPage}
+                studentFilter={studentFilter}
+                setStudentFilter={setStudentFilter}
+                levelFilter={levelFilter}
+                setLevelFilter={setLevelFilter}
+                studentSearch={studentSearch}
+                setStudentSearch={setStudentSearch}
+                studentSort={studentSort}
+                setStudentSort={setStudentSort}
+                selectedStudentId={selectedStudentId}
+                setSelectedStudentId={setSelectedStudentId}
+                visibleStudentCols={visibleStudentCols}
+                toggleStudentCol={toggleStudentCol}
+                studentFilterOptions={studentFilterOptions}
+                loading={loading}
+                setAdminTab={setAdminTab}
+                onDeleteStudent={handleDeleteStudent}
+                onManualEnroll={openManualEnroll}
+                invalidateAll={invalidateAll}
+              />
             </TabsContent>
 
+            {/* ENROLLMENTS TAB */}
             <TabsContent value="enrollments">
-              <Card className="rounded-2xl">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <CardTitle className="text-base">Enrollments</CardTitle>
-                    <div className="flex items-center gap-2">
-                      <label className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={showLegacyEnrollments}
-                          onChange={(e) => setShowLegacyEnrollments(e.target.checked)}
-                          className="rounded"
-                        />
-                        Show Legacy ({legacyEnrollmentCount})
-                      </label>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs"
-                        onClick={async () => {
-                          const { data, error } = await supabase.rpc("backfill_missing_enrollments");
-                          if (error) {
-                            toast({ title: "Backfill failed", description: error.message, variant: "destructive" });
-                          } else {
-                            const result = data as Record<string, number> | null;
-                            toast({ title: "Backfill complete", description: `Fixed: ${result?.fixed ?? 0}, Remaining: ${result?.remaining ?? 0}` });
-                            invalidateAll();
-                          }
-                        }}
-                      >
-                        Backfill Missing
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                {/* Funnel summary strip */}
-                {!loading && (() => {
-                  const paidUnplaced = enrollments.filter(e => e.payment_status === "PAID" && !e.matched_at && e.approval_status !== "REJECTED" && e.approval_status !== "CANCELLED").length;
-                  const noLink = enrollments.filter(e => e.approval_status === "APPROVED" && e.matched_at && !e.class_link_sent_at).length;
-                  const pendingReceipt = enrollments.filter(e => (e.payment_provider === "egypt_manual" || e.payment_provider === "manual") && (!e.receipt_url || e.receipt_url === "" || e.receipt_url === "manual") && (e.approval_status === "PENDING" || e.approval_status === "UNDER_REVIEW")).length;
-                  if (paidUnplaced === 0 && noLink === 0 && pendingReceipt === 0) return null;
-                  return (
-                    <div className="flex flex-wrap gap-2 px-6 pb-3">
-                      {paidUnplaced > 0 && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium dark:bg-amber-950/20 dark:border-amber-800 dark:text-amber-400">
-                          ⏳ {paidUnplaced} paid, awaiting placement
-                        </div>
-                      )}
-                      {noLink > 0 && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-800 text-xs font-medium dark:bg-red-950/20 dark:border-red-800 dark:text-red-400">
-                          🔗 {noLink} approved, no class link sent
-                        </div>
-                      )}
-                      {pendingReceipt > 0 && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-orange-800 text-xs font-medium dark:bg-orange-950/20 dark:border-orange-800 dark:text-orange-400">
-                          📄 {pendingReceipt} missing receipt
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-                <CardContent className="pt-0">
-              {loading ? (
-                <div className="py-2 space-y-2">
-                  <div className="flex gap-2 mb-3">
-                    <Skeleton className="h-10 flex-1 rounded-md" />
-                    <Skeleton className="h-10 w-28 rounded-md" />
-                  </div>
-                  {Array.from({ length: 7 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 px-3 py-3 rounded-lg border border-border/40">
-                      <Skeleton className="h-4 w-4 rounded" />
-                      <div className="flex-1 space-y-1.5">
-                        <Skeleton className="h-3.5 w-2/5" />
-                        <Skeleton className="h-3 w-1/3 opacity-70" />
-                      </div>
-                      <Skeleton className="h-5 w-20 rounded-full" />
-                      <Skeleton className="h-7 w-24 rounded-md" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <Tabs defaultValue="under_review" onValueChange={() => setEnrollmentPage(0)}>
-                  <div className="flex gap-2 mb-3">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search by name, email or plan…"
-                        value={enrollmentSearch}
-                        onChange={(e) => setEnrollmentSearch(e.target.value)}
-                        className="pl-9"
-                        aria-label="Search enrollments by name, email or plan"
-                        type="search"
-                      />
-                    </div>
-                    <Button
-                      size="sm"
-                      variant={showOverdueOnly ? "default" : "outline"}
-                      onClick={() => setShowOverdueOnly(v => !v)}
-                      className="shrink-0 gap-1.5"
-                    >
-                      <AlertCircle className="h-3.5 w-3.5" />
-                      {!isMobile && "Overdue only"}
-                    </Button>
-                  </div>
-                  {(() => {
-                    const missing = enrollments.filter(e => e.currency === "EGP" && !e.payment_method && (e.approval_status === "PENDING_PAYMENT" || e.approval_status === "UNDER_REVIEW"));
-                    if (missing.length === 0) return null;
-                    return (
-                      <div className="flex items-center justify-between gap-3 bg-amber-50 border border-amber-300 rounded-lg px-4 py-2.5 mb-3">
-                        <span className="text-sm text-amber-800 font-medium flex items-center gap-1.5">
-                          <AlertCircle className="h-4 w-4 shrink-0" />
-                          {missing.length} Egypt enrollment{missing.length > 1 ? "s" : ""} missing payment method
-                        </span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-xs border-amber-400 text-amber-800 hover:bg-amber-100 shrink-0"
-                          disabled={missing.some(e => sendingReminder.has(e.id))}
-                          onClick={async () => { for (const e of missing) await handleSendPaymentMethodReminder(e); }}
-                        >
-                          Notify All ({missing.length})
-                        </Button>
-                      </div>
-                    );
-                  })()}
-                  <TabsList className="flex gap-2 overflow-x-auto whitespace-nowrap pb-3 h-auto bg-transparent p-0 w-full">
-                    {[
-                      { value: "under_review", label: "Under Review", count: enrollments.filter(e => e.approval_status === "UNDER_REVIEW").length },
-                      { value: "pending_payment", label: "Pending Payment", count: enrollments.filter(e => e.approval_status === "PENDING_PAYMENT").length },
-                      { value: "pending", label: "Pending", count: enrollments.filter(e => e.approval_status === "PENDING").length },
-                      { value: "approved", label: "Approved", count: enrollments.filter(e => e.approval_status === "APPROVED").length },
-                      { value: "rejected", label: "Rejected", count: enrollments.filter(e => e.approval_status === "REJECTED").length },
-                    ].map(t => (
-                      <TabsTrigger key={t.value} value={t.value} className="shrink-0 rounded-full px-4 py-2 text-xs border border-border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary bg-background gap-1.5">
-                        {t.label} ({t.count})
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-
-                  {(["pending_payment", "under_review", "pending", "approved", "rejected"] as const).map((tab) => {
-                    const isLegacy = (e: Enrollment) => (!e.level || e.level.trim() === '') && (!e.preferred_day && (!e.preferred_days || e.preferred_days.length === 0));
-                    const filtered = enrollments.filter((e) => {
-                      const matchesTab = tab === "pending_payment" ? e.approval_status === "PENDING_PAYMENT"
-                        : tab === "under_review" ? e.approval_status === "UNDER_REVIEW"
-                        : tab === "pending" ? e.approval_status === "PENDING"
-                        : tab === "approved" ? e.approval_status === "APPROVED"
-                        : e.approval_status === "REJECTED";
-                      if (!matchesTab) return false;
-                      const isActionable = e.approval_status === "PENDING_PAYMENT" || e.approval_status === "UNDER_REVIEW";
-                      if (!showLegacyEnrollments && isLegacy(e) && !isActionable) return false;
-                      if (showOverdueOnly && !e.negative_since) return false;
-                      if (debouncedEnrollmentSearch) {
-                        const q = debouncedEnrollmentSearch.toLowerCase();
-                        const name = e.profiles?.name?.toLowerCase() ?? "";
-                        const email = e.profiles?.email?.toLowerCase() ?? "";
-                        const plan = e.plan_type?.toLowerCase() ?? "";
-                        if (!name.includes(q) && !email.includes(q) && !plan.includes(q)) return false;
-                      }
-                      return true;
-                    });
-                    const isActionableTab = tab === "under_review" || tab === "pending_payment";
-                    const enrollPageCount = Math.ceil(filtered.length / PAGE_SIZE);
-                    const pagedEnrollments = filtered.slice(enrollmentPage * PAGE_SIZE, (enrollmentPage + 1) * PAGE_SIZE);
-                    const allPageSelected = pagedEnrollments.length > 0 && pagedEnrollments.every(e => selectedEnrollmentIds.has(e.id));
-                    return (
-                      <TabsContent key={tab} value={tab} className="space-y-4">
-                        {isActionableTab && filtered.length > 1 && (
-                          <div className="flex items-center gap-2 px-1 pb-1 border-b border-border">
-                            <Checkbox
-                              id={`select-all-${tab}`}
-                              checked={allPageSelected}
-                              onCheckedChange={(checked) => {
-                                setSelectedEnrollmentIds(prev => {
-                                  const next = new Set(prev);
-                                  pagedEnrollments.forEach(e => checked ? next.add(e.id) : next.delete(e.id));
-                                  return next;
-                                });
-                              }}
-                            />
-                            <label htmlFor={`select-all-${tab}`} className="text-xs text-muted-foreground cursor-pointer select-none">
-                              {allPageSelected ? "Deselect all on page" : `Select all on page (${pagedEnrollments.length})`}
-                            </label>
-                          </div>
-                        )}
-                        {filtered.length === 0 ? (
-                          <p className="text-muted-foreground text-center py-8">No {tab.replace(/_/g, " ")} enrollments.</p>
-                        ) : pagedEnrollments.map((e) => {
-                          const profileEmail = e.profiles?.email?.toLowerCase() ?? "";
-                          const leadLvl = profileEmail && leadsByEmail[profileEmail]?.level?.trim()
-                            ? normalizeLevel(leadsByEmail[profileEmail].level)
-                            : "";
-                          const resolvedLevelFallback = (e.level?.trim() ? normalizeLevel(e.level) : null) ?? leadLvl ?? "";
-                          return (
-                            <EnrollmentCard
-                              key={e.id}
-                              enrollment={e}
-                              isActionableTab={isActionableTab}
-                              isSelected={selectedEnrollmentIds.has(e.id)}
-                              onToggleSelect={(id, checked) => {
-                                setSelectedEnrollmentIds(prev => {
-                                  const next = new Set(prev);
-                                  if (checked) next.add(id); else next.delete(id);
-                                  return next;
-                                });
-                              }}
-                              editingPrice={editingUnitPrice[e.id]}
-                              onStartEditPrice={(en) => setEditingUnitPrice(prev => ({ ...prev, [en.id]: String(en.unit_price) }))}
-                              onChangeEditPrice={(id, val) => setEditingUnitPrice(prev => ({ ...prev, [id]: val }))}
-                              isSendingReminder={sendingReminder.has(e.id)}
-                              onSendPaymentMethodReminder={handleSendPaymentMethodReminder}
-                              resolvedLevelFallback={resolvedLevelFallback}
-                              onApprove={(en) => handleEnrollmentAction(en, "APPROVED")}
-                              onApproveAndMatch={async (en) => { await handleEnrollmentAction(en, "APPROVED"); setAdminTab("group-matcher"); }}
-                              onReject={(en) => { setRejectTarget(en); setRejectReason("payment_not_received"); setRejectNote(""); }}
-                              onRevert={handleRevertEnrollment}
-                              onDelete={handleDeleteEnrollment}
-                              onViewReceipt={handleViewReceipt}
-                              onRequestResubmission={handleRequestResubmission}
-                              onSendClassLink={(en) => { setClassLinkTarget(en); setClassLinkUrl(""); setClassLinkSendToGroup(false); }}
-                              onResendPaymentEmail={handleResendPaymentEmail}
-                              onResendApprovalEmail={handleResendApprovalEmail}
-                            />
-                          );
-                        })}
-                        {enrollPageCount > 1 && (
-                          <div className="flex items-center justify-between pt-2">
-                            <p className="text-xs text-muted-foreground">
-                              Page {enrollmentPage + 1} of {enrollPageCount} · {filtered.length} enrollments
-                            </p>
-                            <div className="flex items-center gap-1">
-                              <Button variant="outline" size="icon" className="h-8 w-8" disabled={enrollmentPage === 0} onClick={() => setEnrollmentPage(p => p - 1)} aria-label="Previous page">
-                                <ChevronLeft className="h-4 w-4" />
-                              </Button>
-                              <Button variant="outline" size="icon" className="h-8 w-8" disabled={enrollmentPage >= enrollPageCount - 1} onClick={() => setEnrollmentPage(p => p + 1)} aria-label="Next page">
-                                <ChevronRight className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </TabsContent>
-                    );
-                  })}
-                </Tabs>
-              )}
-                </CardContent>
-              </Card>
+              <EnrollmentsTab
+                enrollments={enrollments}
+                loading={loading}
+                enrollmentSearch={enrollmentSearch}
+                setEnrollmentSearch={setEnrollmentSearch}
+                debouncedEnrollmentSearch={debouncedEnrollmentSearch}
+                enrollmentPage={enrollmentPage}
+                setEnrollmentPage={setEnrollmentPage}
+                selectedEnrollmentIds={selectedEnrollmentIds}
+                setSelectedEnrollmentIds={setSelectedEnrollmentIds}
+                bulkApproving={bulkApproving}
+                handleBulkApprove={handleBulkApprove}
+                showLegacyEnrollments={showLegacyEnrollments}
+                setShowLegacyEnrollments={setShowLegacyEnrollments}
+                legacyEnrollmentCount={legacyEnrollmentCount}
+                showOverdueOnly={showOverdueOnly}
+                setShowOverdueOnly={setShowOverdueOnly}
+                editingUnitPrice={editingUnitPrice}
+                setEditingUnitPrice={setEditingUnitPrice}
+                sendingReminder={sendingReminder}
+                onSendPaymentMethodReminder={handleSendPaymentMethodReminder}
+                sendingResend={sendingResend}
+                onResendPaymentEmail={handleResendPaymentEmail}
+                onResendApprovalEmail={handleResendApprovalEmail}
+                onEnrollmentAction={handleEnrollmentAction}
+                onReject={(en) => { setRejectTarget(en); setRejectReason("payment_not_received"); setRejectNote(""); }}
+                onRevert={handleRevertEnrollment}
+                onDelete={handleDeleteEnrollment}
+                onViewReceipt={handleViewReceipt}
+                onRequestResubmission={handleRequestResubmission}
+                onSendClassLink={(en) => { setClassLinkTarget(en); setClassLinkUrl(""); setClassLinkSendToGroup(false); }}
+                setAdminTab={setAdminTab}
+                leadsByEmail={leadsByEmail}
+                invalidateAll={invalidateAll}
+              />
             </TabsContent>
-
-            {/* Sticky bulk action bar — floats above bottom when enrollments are selected */}
-            {selectedEnrollmentIds.size > 0 && (
-              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-background/95 backdrop-blur border border-border shadow-xl rounded-2xl px-5 py-3 animate-slide-up">
-                <p className="text-sm font-semibold text-foreground">
-                  {selectedEnrollmentIds.size} enrollment{selectedEnrollmentIds.size > 1 ? "s" : ""} selected
-                </p>
-                <Button size="sm" onClick={handleBulkApprove} disabled={bulkApproving}>
-                  {bulkApproving ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Approving…</> : <><Check className="h-4 w-4 mr-1.5" /> Approve All</>}
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => setSelectedEnrollmentIds(new Set())}>
-                  <X className="h-4 w-4 mr-1.5" /> Clear
-                </Button>
-              </div>
-            )}
-
-            {/* LEADS TAB */}
             <TabsContent value="leads">
               <TabErrorBoundary name="Leads">
                 <Suspense fallback={<TabLoader />}>

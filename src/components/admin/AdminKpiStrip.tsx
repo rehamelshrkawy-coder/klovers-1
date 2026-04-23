@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Users, TrendingUp, AlertTriangle, DollarSign } from "lucide-react";
+import { ResponsiveContainer, LineChart, Line, Tooltip as RechartsTooltip } from "recharts";
 import { AT_RISK_SESSION_THRESHOLD } from "@/lib/admin-utils";
 import type { OverviewRow } from "@/types/admin";
 
@@ -17,6 +18,19 @@ interface KpiCard {
   label: string;
   sublabel?: string;
   alert?: boolean;
+  sparkData?: { v: number }[];
+  sparkColor?: string;
+}
+
+/** Build a 7-day enrollment count sparkline from overviewRows */
+function buildEnrollmentSparkline(rows: OverviewRow[]): { v: number }[] {
+  const now = Date.now();
+  const counts = new Array(7).fill(0);
+  for (const r of rows) {
+    const daysAgo = Math.floor((now - new Date(r.joined_at).getTime()) / 86_400_000);
+    if (daysAgo >= 0 && daysAgo < 7) counts[6 - daysAgo]++;
+  }
+  return counts.map(v => ({ v }));
 }
 
 export function AdminKpiStrip({ overviewRows, actionableEnrollments, isLoading }: Props) {
@@ -27,7 +41,6 @@ export function AdminKpiStrip({ overviewRows, actionableEnrollments, isLoading }
     );
     const locked = overviewRows.filter(r => r.derived_status === "LOCKED");
 
-    // Revenue: sum of amount from all APPROVED enrollments (amount_due = extra sessions owed)
     const totalRevenue = overviewRows.reduce((sum, r) => sum + (r.amount ?? 0), 0);
     const revenueStr = totalRevenue >= 1_000_000
       ? `${(totalRevenue / 1_000_000).toFixed(1)}M`
@@ -35,6 +48,8 @@ export function AdminKpiStrip({ overviewRows, actionableEnrollments, isLoading }
       ? `${(totalRevenue / 1_000).toFixed(0)}K`
       : String(totalRevenue);
     const currency = overviewRows.find(r => r.currency)?.currency ?? "EGP";
+
+    const enrollSparkline = buildEnrollmentSparkline(overviewRows);
 
     return [
       {
@@ -44,6 +59,8 @@ export function AdminKpiStrip({ overviewRows, actionableEnrollments, isLoading }
         value: activeRows.length,
         label: "Active Students",
         sublabel: `${overviewRows.length} total`,
+        sparkData: enrollSparkline,
+        sparkColor: "#3b82f6",
       },
       {
         icon: DollarSign,
@@ -91,7 +108,7 @@ export function AdminKpiStrip({ overviewRows, actionableEnrollments, isLoading }
             <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${kpi.iconBg}`}>
               <Icon className={`h-4 w-4 ${kpi.iconColor}`} aria-hidden="true" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               {isLoading ? (
                 <div className="h-5 w-12 bg-muted animate-pulse rounded mb-1" />
               ) : (
@@ -102,6 +119,27 @@ export function AdminKpiStrip({ overviewRows, actionableEnrollments, isLoading }
                 <p className="text-[10px] text-muted-foreground leading-tight truncate">{kpi.sublabel}</p>
               )}
             </div>
+            {kpi.sparkData && kpi.sparkData.length > 0 && !isLoading && (
+              <div className="w-14 h-8 shrink-0" aria-hidden="true">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={kpi.sparkData}>
+                    <Line
+                      type="monotone"
+                      dataKey="v"
+                      stroke={kpi.sparkColor ?? "#94a3b8"}
+                      strokeWidth={1.5}
+                      dot={false}
+                      isAnimationActive={false}
+                    />
+                    <RechartsTooltip
+                      contentStyle={{ fontSize: 10, padding: "2px 6px" }}
+                      formatter={(v: number) => [v, "enrollments"]}
+                      labelFormatter={() => ""}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
         );
       })}
