@@ -20,7 +20,7 @@ const STATS = [
 
 const Testimonials = () => {
   const { t, tArray } = useLanguage();
-  const items = tArray("testimonials", "items") as { name: string; quote: string; location: string }[];
+  const items = tArray("testimonials", "items") as { name: string; quote: string; location: string; photo?: string }[];
   const [visible, setVisible] = useState<Set<number>>(new Set());
   const refs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -100,10 +100,11 @@ const Testimonials = () => {
 
               {/* Author */}
               <div className="flex items-center gap-3 pt-4 border-t border-border">
-                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${AVATAR_COLORS[index % AVATAR_COLORS.length]} flex items-center justify-center flex-shrink-0 shadow-md`}>
-                  <span className="text-white font-bold text-sm">
-                    {item.name.charAt(0).toUpperCase()}
-                  </span>
+                <div className={`w-10 h-10 rounded-full flex-shrink-0 shadow-md overflow-hidden ${item.photo ? "" : `bg-gradient-to-br ${AVATAR_COLORS[index % AVATAR_COLORS.length]} flex items-center justify-center`}`}>
+                  {item.photo
+                    ? <img src={item.photo} alt={item.name} className="w-full h-full object-cover" />
+                    : <span className="text-white font-bold text-sm">{item.name.charAt(0).toUpperCase()}</span>
+                  }
                 </div>
                 <div>
                   <p className="font-semibold text-foreground text-sm">{item.name}</p>
