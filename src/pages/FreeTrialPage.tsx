@@ -178,7 +178,9 @@ const FreeTrialPage = () => {
                 <div className="flex flex-wrap gap-2 mt-8 justify-center md:justify-start">
                   {PERKS.map(({ icon: Icon, text }) => (
                     <div key={text} className="flex items-center gap-1.5 bg-muted border border-border rounded-full px-3 py-1.5 text-xs font-semibold text-foreground">
-                      <Icon className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-foreground/25 bg-background flex-shrink-0">
+                        <Icon className="h-3 w-3 text-primary" />
+                      </span>
                       {text}
                     </div>
                   ))}
