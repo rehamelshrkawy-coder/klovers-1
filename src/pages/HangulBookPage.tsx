@@ -1,25 +1,29 @@
 import { useState } from "react";
 
 /* ─── Brand tokens ─────────────────────────────── */
-const Y   = "#FFFF00";
-const YL  = "#FFFFBB";
+const Y   = "#FFFF00";   // primary yellow
+const YL  = "#FFFFBB";   // light yellow (warm accent)
+const GL  = "#C8FFD4";   // light mint green (clover accent)
+const GD  = "#166534";   // dark green (green on green)
 const BK  = "#111111";
 const BK2 = "#222222";
 
-/* ─── Unsplash photos (confirmed IDs) ──────────── */
+/* ─── Pexels free photos (confirmed IDs, no attribution required) ── */
+const PX = (id: number, w=800, h=500) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}&h=${h}&fit=crop`;
+
 const PHOTOS = {
-  seoulNight:   "https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=800&h=500&fit=crop&q=80",
-  seoulNeon:    "https://images.unsplash.com/photo-1598935898639-81586f7d2129?w=800&h=500&fit=crop&q=80",
-  hanbok:       "https://images.unsplash.com/photo-1583416750470-965b2707b355?w=800&h=500&fit=crop&q=80",
-  palace:       "https://images.unsplash.com/photo-1548115184-bc6544d06a58?w=800&h=500&fit=crop&q=80",
-  palaceGate:   "https://images.unsplash.com/photo-1538485399081-7191377e8241?w=800&h=500&fit=crop&q=80",
-  koreanFood:   "https://images.unsplash.com/photo-1590301157890-4810ed352733?w=800&h=500&fit=crop&q=80",
-  kimchi:       "https://images.unsplash.com/photo-1547592180-85f173990554?w=800&h=500&fit=crop&q=80",
-  cherryBlossom:"https://images.unsplash.com/photo-1519181245277-cffeb31da2e3?w=800&h=500&fit=crop&q=80",
-  kpopCrowd:    "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&h=500&fit=crop&q=80",
-  streetFood:   "https://images.unsplash.com/photo-1590301157890-4810ed352733?w=800&h=500&fit=crop&q=80",
-  temple:       "https://images.unsplash.com/photo-1534274867514-d5b47ef89ed7?w=800&h=500&fit=crop&q=80",
-  hanokVillage: "https://images.unsplash.com/photo-1601921004897-b7d582836990?w=800&h=500&fit=crop&q=80",
+  seoulNight:   PX(32164874),   // Cherry blossoms + Seoul Tower at night
+  seoulNeon:    PX(32164874),   // same scenic night shot (different crop via h)
+  hanbok:       PX(31743249),   // Woman in traditional hanbok at palace
+  palace:       PX(11870589),   // Gyeongbokgung Palace Seoul
+  palaceGate:   PX(36045999),   // Snowy Gyeongbokgung in winter
+  koreanFood:   PX(8954371),    // Korean kimchi in bowl
+  kimchi:       PX(8954371),    // Korean kimchi
+  cherryBlossom:PX(32164874),   // Cherry blossoms Seoul Tower night
+  kpopCrowd:    PX(18447992),   // Concert lights
+  temple:       PX(12176008),   // Landscape Gyeongbokgung with hanbok
+  hanokVillage: PX(11870589),   // Palace (hanok-style architecture)
 };
 
 /* ─── Custom Korean-style SVG Icons ─────────────── */
@@ -121,7 +125,7 @@ function DancheongBorder() {
       display:"flex", gap:"4px", alignItems:"center",
       padding:"6px 0", marginBottom:"8px",
     }}>
-      {["#0047AB","#C8102E",Y,"#2E8B57","#C8102E","#0047AB",Y,"#2E8B57","#C8102E","#0047AB",Y,"#2E8B57","#C8102E","#0047AB"].map((c,i) => (
+      {["#0047AB","#C8102E",Y,GL,"#C8102E","#0047AB",Y,GL,"#C8102E","#0047AB",Y,GL,"#C8102E","#0047AB"].map((c,i) => (
         <div key={i} style={{
           width:"14px", height:"14px", borderRadius:"2px",
           background: c, flexShrink:0,
@@ -429,20 +433,20 @@ function VowCard({ v, lang }: { v: typeof VOWELS[0]; lang: Lang }) {
   const isAr = lang === "ar";
   return (
     <div style={{
-      background:"#f9f9f9", border:`2px solid #E6E600`,
+      background:"#f9f9f9", border:`2px solid ${GL}`,
       borderRadius:"10px", padding:"8px",
       display:"grid", gridTemplateColumns:"58px 1fr", gap:"8px",
       pageBreakInside:"avoid", breakInside:"avoid", marginBottom:"6px",
       direction: isAr ? "rtl" : "ltr",
     }}>
       <div style={{
-        background:Y, borderRadius:"8px",
+        background:GL, borderRadius:"8px",
         display:"flex", flexDirection:"column",
         alignItems:"center", justifyContent:"center",
         minHeight:"64px", padding:"6px",
       }}>
-        <div style={{ fontSize:"40px", fontWeight:900, color:BK, lineHeight:1 }}>{v.char}</div>
-        <div style={{ fontSize:"10px", fontWeight:700, color:BK2, marginTop:"2px" }}>{v.roman}</div>
+        <div style={{ fontSize:"40px", fontWeight:900, color:GD, lineHeight:1 }}>{v.char}</div>
+        <div style={{ fontSize:"10px", fontWeight:700, color:GD, marginTop:"2px" }}>{v.roman}</div>
         <div style={{ fontSize:"15px" }}>{v.emoji}</div>
       </div>
       <div>
@@ -452,7 +456,7 @@ function VowCard({ v, lang }: { v: typeof VOWELS[0]; lang: Lang }) {
           borderRadius:"6px", padding:"3px 6px",
           fontSize:"10px", color:"#444", marginBottom:"3px",
         }}>🔊 {d.sound}</div>
-        <div style={{ background:YL, borderRadius:"6px", padding:"3px 6px", fontSize:"10px", color:"#555", marginBottom:"4px" }}>
+        <div style={{ background:GL, borderRadius:"6px", padding:"3px 6px", fontSize:"10px", color:GD, marginBottom:"4px" }}>
           💡 {d.mnemonic}
         </div>
         <div style={{ display:"flex", gap:"4px", flexWrap:"wrap" }}>
@@ -679,10 +683,10 @@ function CultureAr() {
         </div>
 
         {/* Values & Spirit */}
-        <div style={{ background:"#f9f9f9", border:`2px solid #e5e5e5`, borderRadius:"12px", padding:"12px" }}>
+        <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"12px", padding:"12px" }}>
           <div style={{ fontSize:"28px", marginBottom:"6px" }}>🌿</div>
-          <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"5px" }}>القيم والروح الكورية</div>
-          <div style={{ fontSize:"10px", color:"#555", lineHeight:1.8 }}>
+          <div style={{ fontWeight:800, fontSize:"12px", color:GD, marginBottom:"5px" }}>القيم والروح الكورية</div>
+          <div style={{ fontSize:"10px", color:GD, lineHeight:1.8 }}>
             <strong>빨리빨리 (بالي-بالي)</strong> = «يلا يلا!» — الكوريون يحبون السرعة والإتقان معاً. <strong>눈치 (نونتشي)</strong> = فهم المشاعر دون كلام. <strong>한 (هان)</strong> = إحساس عميق بالحنين والمقاومة — روح الشعب الكوري الأبدية.
           </div>
           <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
@@ -857,12 +861,12 @@ function WelcomeAr() {
             اخترع الملك سيجونغ الهانغول عام ١٤٤٣م. إنها <strong style={{color:Y}}>أبجدية صوتية</strong> — كل حرف يمثل صوتاً واحداً فقط. معظم المتعلمين يستطيعون القراءة في <strong style={{color:Y}}>٢ إلى ٣ أيام</strong> فقط!
           </p>
         </div>
-        <div style={{ background:Y, borderRadius:"12px", padding:"14px" }}>
-          <div style={{ fontSize:"12px", fontWeight:800, color:BK, marginBottom:"7px" }}>الأرقام السحرية</div>
+        <div style={{ background:GL, borderRadius:"12px", padding:"14px" }}>
+          <div style={{ fontSize:"12px", fontWeight:800, color:GD, marginBottom:"7px" }}>الأرقام السحرية</div>
           {[{n:"١٤", l:"حرفاً ساكناً أساسياً"},{n:"١٠", l:"حروف مد أساسية"},{n:"∞", l:"مقطع ممكن التكوين"}].map(({n,l})=>(
             <div key={n} style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"7px" }}>
-              <div style={{ background:BK, color:Y, fontWeight:900, fontSize:"18px", width:"36px", height:"36px", borderRadius:"8px", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{n}</div>
-              <div style={{ fontSize:"11px", color:BK2, fontWeight:600 }}>{l}</div>
+              <div style={{ background:GD, color:Y, fontWeight:900, fontSize:"18px", width:"36px", height:"36px", borderRadius:"8px", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{n}</div>
+              <div style={{ fontSize:"11px", color:GD, fontWeight:600 }}>{l}</div>
             </div>
           ))}
         </div>
@@ -924,7 +928,7 @@ function VowelsAr() {
   return (
     <Page dir="rtl">
       <SHead title="حروف المد (모음)" subtitle="حروف المد لا تقف وحدها — تحتاج دائماً حرفاً ساكناً" />
-      <div style={{ background:BK, borderRadius:"8px", padding:"6px 10px", fontSize:"10px", color:Y, marginBottom:"8px" }}>
+      <div style={{ background:GL, borderRadius:"8px", padding:"6px 10px", fontSize:"10px", color:GD, marginBottom:"8px", fontWeight:700 }}>
         🌟 إذا بدأت الكلمة بصوت مدّي، نضع الحرف الصامت ㅇ أمامه: مثال → أ = 아 (ㅇ + ㅏ)
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6px" }}>
@@ -1010,8 +1014,8 @@ function BatchimAr() {
         </div>
 
         <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>القاعدة الذهبية 🥇</div>
-          <div style={{ fontSize:"10px", color:BK2, lineHeight:1.9 }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"6px" }}>القاعدة الذهبية 🥇</div>
+          <div style={{ fontSize:"10px", color:GD, lineHeight:1.9 }}>
             رغم وجود أكثر من ١٤ حرفاً ساكناً، لا يوجد في اللغة الكورية سوى <strong>٧ أصوات نهائية فقط</strong> يمكن نطقها في نهاية المقطع. كل الحروف الأخرى تُحوَّل إلى أحد هذه الأصوات السبعة.
           </div>
           <div style={{ background:BK, borderRadius:"8px", padding:"8px", marginTop:"8px", textAlign:"center" }}>
@@ -1113,8 +1117,8 @@ function DoubleBatchimAr() {
           <div style={{ textAlign:"center", fontSize:"10px", color:"#aaa", marginTop:"5px" }}>닭 = داك (الدجاجة)</div>
         </div>
 
-        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>القاعدة الكبرى للربط 🔗</div>
+        <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"6px" }}>القاعدة الكبرى للربط 🔗</div>
           <div style={{ fontSize:"10px", color:BK2, lineHeight:1.9, marginBottom:"8px" }}>
             إذا جاء بعد الباتشيم المزدوج مقطع يبدأ بـ <strong>ㅇ</strong> الصامت، يتحرك الحرف <strong style={{color:"#C8102E"}}>الأيمن (الثاني)</strong> إلى المقطع التالي!
           </div>
@@ -1156,11 +1160,11 @@ function DoubleBatchimAr() {
         ))}
       </div>
 
-      <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
-        <MugunghwaIcon size={36} color={BK} />
+      <div style={{ background:GL, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
+        <MugunghwaIcon size={36} color={GD} />
         <div>
-          <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>نصيحة الخبراء</div>
-          <div style={{ fontSize:"10px", color:BK2, lineHeight:1.7 }}>
+          <div style={{ fontWeight:800, fontSize:"11px", color:GD }}>نصيحة الخبراء</div>
+          <div style={{ fontSize:"10px", color:GD, lineHeight:1.7 }}>
             لا تحفظ كل هذا فوراً! ابدأ بـ <strong>ㄺ (닭)، ㅄ (없다)، ㄻ (삶)</strong> — هذه الثلاثة تكفي لمستوى المبتدئين. ستتعلم الباقي تلقائياً من خلال القراءة.
           </div>
         </div>
@@ -1476,10 +1480,10 @@ function CultureEn() {
           </div>
         </div>
 
-        <div style={{ background:"#f9f9f9", border:`2px solid #e5e5e5`, borderRadius:"12px", padding:"12px" }}>
+        <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"12px", padding:"12px" }}>
           <div style={{ fontSize:"28px", marginBottom:"6px" }}>🌿</div>
-          <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"5px" }}>Korean Values & Spirit</div>
-          <div style={{ fontSize:"10px", color:"#555", lineHeight:1.8 }}>
+          <div style={{ fontWeight:800, fontSize:"12px", color:GD, marginBottom:"5px" }}>Korean Values & Spirit</div>
+          <div style={{ fontSize:"10px", color:GD, lineHeight:1.8 }}>
             <strong>빨리빨리 (Ppalli-ppalli)</strong> = "hurry hurry" — Koreans value speed and excellence together. <strong>눈치 (Nunchi)</strong> = reading unspoken feelings. <strong>한 (Han)</strong> = a deep bittersweet longing — the eternal spirit of the Korean people.
           </div>
           <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
@@ -1645,12 +1649,12 @@ function WelcomeEn() {
             King Sejong invented Hangul in 1443. It is a <strong style={{color:Y}}>phonetic alphabet</strong> — each letter represents exactly one sound. Most learners can read in just <strong style={{color:Y}}>2–3 days</strong> of focused practice!
           </p>
         </div>
-        <div style={{ background:Y, borderRadius:"12px", padding:"14px" }}>
-          <div style={{ fontSize:"12px", fontWeight:800, color:BK, marginBottom:"7px" }}>The Magic Numbers</div>
+        <div style={{ background:GL, borderRadius:"12px", padding:"14px" }}>
+          <div style={{ fontSize:"12px", fontWeight:800, color:GD, marginBottom:"7px" }}>The Magic Numbers</div>
           {[{n:"14",l:"basic consonants"},{n:"10",l:"basic vowels"},{n:"∞",l:"possible syllables"}].map(({n,l})=>(
             <div key={n} style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"7px" }}>
-              <div style={{ background:BK, color:Y, fontWeight:900, fontSize:"18px", width:"36px", height:"36px", borderRadius:"8px", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{n}</div>
-              <div style={{ fontSize:"11px", color:BK2, fontWeight:600 }}>{l}</div>
+              <div style={{ background:GD, color:Y, fontWeight:900, fontSize:"18px", width:"36px", height:"36px", borderRadius:"8px", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{n}</div>
+              <div style={{ fontSize:"11px", color:GD, fontWeight:600 }}>{l}</div>
             </div>
           ))}
         </div>
@@ -1710,7 +1714,7 @@ function VowelsEn() {
   return (
     <Page dir="ltr">
       <SHead title="Vowels (모음)" subtitle="Vowels never stand alone — they always need a consonant" />
-      <div style={{ background:BK, borderRadius:"8px", padding:"6px 10px", fontSize:"10px", color:Y, marginBottom:"8px" }}>
+      <div style={{ background:GL, borderRadius:"8px", padding:"6px 10px", fontSize:"10px", color:GD, marginBottom:"8px", fontWeight:700 }}>
         🌟 If a syllable starts with a vowel sound, use the silent ㅇ as a placeholder: e.g., "a" = 아 (ㅇ + ㅏ)
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6px" }}>
@@ -1793,9 +1797,9 @@ function BatchimEn() {
           </div>
         </div>
 
-        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>The Golden Rule 🥇</div>
-          <div style={{ fontSize:"10px", color:BK2, lineHeight:1.9 }}>
+        <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"6px" }}>The Golden Rule 🥇</div>
+          <div style={{ fontSize:"10px", color:GD, lineHeight:1.9 }}>
             Even though there are 14+ consonants, only <strong>7 final sounds</strong> can be pronounced in batchim position. Every other consonant reduces to one of these seven.
           </div>
           <div style={{ background:BK, borderRadius:"8px", padding:"8px", marginTop:"8px", textAlign:"center" }}>
@@ -1894,8 +1898,8 @@ function DoubleBatchimEn() {
           <div style={{ textAlign:"center", fontSize:"10px", color:"#aaa", marginTop:"5px" }}>닭 = dak (chicken) — ㄱ sounds, ㄹ is silent</div>
         </div>
 
-        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>Linking Rule for Double Batchim 🔗</div>
+        <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"6px" }}>Linking Rule for Double Batchim 🔗</div>
           <div style={{ fontSize:"10px", color:BK2, lineHeight:1.9, marginBottom:"8px" }}>
             When followed by a syllable starting with <strong>ㅇ</strong>, the <strong style={{color:"#C8102E"}}>right (second)</strong> consonant moves to the next syllable!
           </div>
@@ -1935,11 +1939,11 @@ function DoubleBatchimEn() {
         ))}
       </div>
 
-      <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
-        <MugunghwaIcon size={36} color={BK} />
+      <div style={{ background:GL, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
+        <MugunghwaIcon size={36} color={GD} />
         <div>
-          <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>Expert Tip</div>
-          <div style={{ fontSize:"10px", color:BK2, lineHeight:1.7 }}>
+          <div style={{ fontWeight:800, fontSize:"11px", color:GD }}>Expert Tip</div>
+          <div style={{ fontSize:"10px", color:GD, lineHeight:1.7 }}>
             Don't memorize all of these at once! Start with <strong>ㄺ (닭), ㅄ (없다), ㄻ (삶)</strong> — these three cover 80% of double batchim you'll meet at beginner level. The rest will come naturally through reading.
           </div>
         </div>
