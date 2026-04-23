@@ -6,6 +6,152 @@ const YL  = "#FFFFBB";
 const BK  = "#111111";
 const BK2 = "#222222";
 
+/* ─── Unsplash photos (confirmed IDs) ──────────── */
+const PHOTOS = {
+  seoulNight:   "https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=800&h=500&fit=crop&q=80",
+  seoulNeon:    "https://images.unsplash.com/photo-1598935898639-81586f7d2129?w=800&h=500&fit=crop&q=80",
+  hanbok:       "https://images.unsplash.com/photo-1583416750470-965b2707b355?w=800&h=500&fit=crop&q=80",
+  palace:       "https://images.unsplash.com/photo-1548115184-bc6544d06a58?w=800&h=500&fit=crop&q=80",
+  palaceGate:   "https://images.unsplash.com/photo-1538485399081-7191377e8241?w=800&h=500&fit=crop&q=80",
+  koreanFood:   "https://images.unsplash.com/photo-1590301157890-4810ed352733?w=800&h=500&fit=crop&q=80",
+  kimchi:       "https://images.unsplash.com/photo-1547592180-85f173990554?w=800&h=500&fit=crop&q=80",
+  cherryBlossom:"https://images.unsplash.com/photo-1519181245277-cffeb31da2e3?w=800&h=500&fit=crop&q=80",
+  kpopCrowd:    "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&h=500&fit=crop&q=80",
+  streetFood:   "https://images.unsplash.com/photo-1590301157890-4810ed352733?w=800&h=500&fit=crop&q=80",
+  temple:       "https://images.unsplash.com/photo-1534274867514-d5b47ef89ed7?w=800&h=500&fit=crop&q=80",
+  hanokVillage: "https://images.unsplash.com/photo-1601921004897-b7d582836990?w=800&h=500&fit=crop&q=80",
+};
+
+/* ─── Custom Korean-style SVG Icons ─────────────── */
+
+function TaegeukIcon({ size = 40 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="48" fill="none" stroke={Y} strokeWidth="3" />
+      {/* Top half - blue */}
+      <path d="M50 2 A48 48 0 0 1 50 98 A24 24 0 0 1 50 50 A24 24 0 0 0 50 2Z" fill="#0047AB" />
+      {/* Bottom half - red */}
+      <path d="M50 98 A48 48 0 0 1 50 2 A24 24 0 0 1 50 50 A24 24 0 0 0 50 98Z" fill="#C8102E" />
+      {/* Small circles */}
+      <circle cx="50" cy="26" r="12" fill="#0047AB" />
+      <circle cx="50" cy="74" r="12" fill="#C8102E" />
+    </svg>
+  );
+}
+
+function MugunghwaIcon({ size = 40, color = Y }: { size?: number; color?: string }) {
+  const petals = 5;
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100">
+      {Array.from({ length: petals }).map((_, i) => {
+        const angle = (i * 360) / petals - 90;
+        const rad = (angle * Math.PI) / 180;
+        const x = 50 + 28 * Math.cos(rad);
+        const y = 50 + 28 * Math.sin(rad);
+        return (
+          <ellipse
+            key={i}
+            cx={x} cy={y}
+            rx="16" ry="10"
+            fill={color}
+            opacity="0.85"
+            transform={`rotate(${angle + 90}, ${x}, ${y})`}
+          />
+        );
+      })}
+      <circle cx="50" cy="50" r="14" fill={BK} />
+      <circle cx="50" cy="50" r="8" fill={Y} />
+    </svg>
+  );
+}
+
+function PalaceRoofIcon({ size = 40, color = Y }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100">
+      {/* Curved roof */}
+      <path d="M10 60 Q15 30 50 20 Q85 30 90 60 Z" fill={color} />
+      {/* Roof ridge */}
+      <rect x="20" y="58" width="60" height="6" rx="3" fill={BK} />
+      {/* Upturned eaves */}
+      <path d="M10 60 Q5 55 3 45" stroke={color} strokeWidth="4" fill="none" strokeLinecap="round" />
+      <path d="M90 60 Q95 55 97 45" stroke={color} strokeWidth="4" fill="none" strokeLinecap="round" />
+      {/* Column */}
+      <rect x="44" y="64" width="12" height="30" rx="2" fill={color} opacity="0.7" />
+      {/* Base */}
+      <rect x="15" y="92" width="70" height="6" rx="3" fill={color} />
+    </svg>
+  );
+}
+
+function HanjaIcon({ size = 40 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100">
+      <rect width="100" height="100" rx="12" fill={BK} />
+      <text x="50" y="72" textAnchor="middle" fontSize="64" fill={Y} fontWeight="bold">字</text>
+    </svg>
+  );
+}
+
+function KoreanLanternIcon({ size = 40, color = Y }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100">
+      {/* String */}
+      <line x1="50" y1="0" x2="50" y2="12" stroke={color} strokeWidth="3" />
+      {/* Top cap */}
+      <path d="M30 12 Q50 8 70 12 L65 20 Q50 16 35 20Z" fill={color} />
+      {/* Body */}
+      <ellipse cx="50" cy="52" rx="26" ry="34" fill={color} opacity="0.9" />
+      {/* Ribs */}
+      {[28,40,52,64,76].map(y => (
+        <line key={y} x1={50 - Math.sqrt(Math.max(0, 26*26 - (y-52)*(y-52)))*0.9}
+              y1={y} x2={50 + Math.sqrt(Math.max(0, 26*26 - (y-52)*(y-52)))*0.9}
+              y2={y} stroke={BK} strokeWidth="2" opacity="0.4" />
+      ))}
+      {/* Bottom cap */}
+      <path d="M35 84 Q50 88 65 84 L70 92 Q50 96 30 92Z" fill={color} />
+      {/* Tassel */}
+      <line x1="50" y1="92" x2="50" y2="100" stroke="#C8102E" strokeWidth="3" />
+    </svg>
+  );
+}
+
+function DancheongBorder() {
+  return (
+    <div style={{
+      display:"flex", gap:"4px", alignItems:"center",
+      padding:"6px 0", marginBottom:"8px",
+    }}>
+      {["#0047AB","#C8102E",Y,"#2E8B57","#C8102E","#0047AB",Y,"#2E8B57","#C8102E","#0047AB",Y,"#2E8B57","#C8102E","#0047AB"].map((c,i) => (
+        <div key={i} style={{
+          width:"14px", height:"14px", borderRadius:"2px",
+          background: c, flexShrink:0,
+          clipPath: i%2===0 ? "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" : "none",
+        }} />
+      ))}
+    </div>
+  );
+}
+
+function Photo({ src, alt, h = 140, radius = 10, overlay = false }: {
+  src: string; alt: string; h?: number; radius?: number; overlay?: boolean;
+}) {
+  return (
+    <div style={{ position:"relative", borderRadius:`${radius}px`, overflow:"hidden", height:`${h}px` }}>
+      <img
+        src={src} alt={alt}
+        style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}
+        onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+      />
+      {overlay && (
+        <div style={{ position:"absolute", inset:0, background:"linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.8))" }} />
+      )}
+      <div style={{ position:"absolute", bottom:"4px", right:"6px", fontSize:"7px", color:"rgba(255,255,255,0.5)" }}>
+        Photo: Unsplash
+      </div>
+    </div>
+  );
+}
+
 type Lang = "ar" | "en";
 
 /* ══════════════════════════════════════════════════
@@ -355,6 +501,16 @@ function HistoryAr() {
     <Page dir="rtl">
       <SHead title="تاريخ اللغة الكورية" subtitle="رحلة ٢٠٠٠ عام من الكلمات والحكايات" />
 
+      {/* Photo + icon header */}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 90px", gap:"8px", marginBottom:"10px" }}>
+        <Photo src={PHOTOS.palaceGate} alt="Gyeongbokgung Palace Gate" h={90} radius={10} overlay />
+        <div style={{ display:"flex", flexDirection:"column", gap:"6px", alignItems:"center", justifyContent:"center", background:BK, borderRadius:"10px", padding:"8px" }}>
+          <PalaceRoofIcon size={48} color={Y} />
+          <div style={{ fontSize:"9px", color:"#aaa", textAlign:"center" }}>قصر كيونغبوككيونغ</div>
+        </div>
+      </div>
+      <DancheongBorder />
+
       {/* Timeline */}
       <div style={{ position:"relative", marginBottom:"12px" }}>
         {/* vertical line */}
@@ -379,7 +535,7 @@ function HistoryAr() {
 
       {/* Fun fact strip */}
       <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
-        <div style={{ fontSize:"28px" }}>🌍</div>
+        <MugunghwaIcon size={36} color={BK} />
         <div>
           <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>حقيقة مذهلة!</div>
           <div style={{ fontSize:"10px", color:BK2, lineHeight:1.6 }}>
@@ -399,15 +555,20 @@ function SejongAr() {
 
       {/* Hero portrait area */}
       <div style={{ background:BK, borderRadius:"14px", padding:"16px", marginBottom:"12px", display:"grid", gridTemplateColumns:"120px 1fr", gap:"14px" }}>
-        {/* Portrait */}
-        <div style={{ background:"#1a1a00", borderRadius:"10px", border:`3px solid ${Y}`, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"12px", minHeight:"130px" }}>
-          <div style={{ fontSize:"56px", lineHeight:1 }}>👑</div>
-          <div style={{ fontSize:"22px", fontWeight:900, color:Y, marginTop:"6px", direction:"ltr" }}>세종</div>
-          <div style={{ fontSize:"9px", color:"#888", marginTop:"2px" }}>سيجونغ</div>
+        {/* Portrait — real palace photo */}
+        <div style={{ borderRadius:"10px", overflow:"hidden", border:`3px solid ${Y}`, display:"flex", flexDirection:"column", minHeight:"130px" }}>
+          <Photo src={PHOTOS.palace} alt="Gyeongbokgung Palace" h={100} radius={0} />
+          <div style={{ background:"#1a1a00", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"6px", flex:1 }}>
+            <div style={{ fontSize:"18px", fontWeight:900, color:Y, direction:"ltr" }}>세종대왕</div>
+            <div style={{ fontSize:"8px", color:"#888", marginTop:"1px" }}>سيجونغ الكبير</div>
+          </div>
         </div>
         {/* Bio */}
         <div style={{ color:"#fff" }}>
-          <div style={{ fontSize:"16px", fontWeight:900, color:Y, marginBottom:"8px" }}>سيجونغ الكبير</div>
+          <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"8px" }}>
+            <PalaceRoofIcon size={28} color={Y} />
+            <div style={{ fontSize:"16px", fontWeight:900, color:Y }}>سيجونغ الكبير</div>
+          </div>
           <div style={{ display:"flex", flexDirection:"column", gap:"5px" }}>
             {[
               { icon:"🎂", label:"الميلاد", val:"١٥ مايو ١٣٩٧م" },
@@ -470,37 +631,42 @@ function CultureAr() {
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
 
         {/* K-Drama */}
-        <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🎬</div>
-          <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"5px" }}>المسلسلات الكورية (K-Drama)</div>
-          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.8 }}>
-            من أكثر المحتوى مشاهدةً على Netflix عالمياً. «لعبة الحبّار» و«المرآة المنكسرة» و«نسخة الحب» غيّرت مفهوم الدراما عالمياً. الكوريون يصنعون القصص التي تلمس القلوب!
-          </div>
-          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
-            {["❤️ رومانسي", "🕵️ إثارة", "😂 كوميدي", "👻 رعب"].map(t=>(
-              <span key={t} style={{ background:"#222", color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
-            ))}
+        <div style={{ background:BK, borderRadius:"12px", overflow:"hidden" }}>
+          <Photo src={PHOTOS.seoulNeon} alt="Seoul neon" h={75} radius={0} overlay />
+          <div style={{ padding:"10px" }}>
+            <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>المسلسلات الكورية (K-Drama)</div>
+            <div style={{ fontSize:"9px", color:"#ccc", lineHeight:1.7 }}>
+              من أكثر المحتوى مشاهدةً على Netflix عالمياً. «لعبة الحبّار» غيّرت مفهوم الدراما عالمياً!
+            </div>
+            <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
+              {["❤️ رومانسي", "🕵️ إثارة", "😂 كوميدي"].map(t=>(
+                <span key={t} style={{ background:"#222", color:Y, fontSize:"8px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* K-Pop */}
-        <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🎵</div>
-          <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"5px" }}>موسيقى البوب الكوري (K-Pop)</div>
-          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.8 }}>
-            BTS، BLACKPINK، Stray Kids — نجوم عالميون حقيقيون. K-Pop ليس مجرد موسيقى، بل ظاهرة ثقافية شاملة: رقص، أزياء، فن بصري، ومجتمعات من المعجبين حول العالم!
-          </div>
-          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
-            {["BTS 💜", "BLACKPINK 🖤", "Stray Kids 🐺"].map(t=>(
-              <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
-            ))}
+        <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
+          <Photo src={PHOTOS.kpopCrowd} alt="K-Pop concert" h={75} radius={0} overlay />
+          <div style={{ padding:"10px" }}>
+            <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>موسيقى البوب الكوري (K-Pop)</div>
+            <div style={{ fontSize:"9px", color:"#ccc", lineHeight:1.7 }}>
+              BTS، BLACKPINK، Stray Kids — نجوم عالميون. K-Pop ظاهرة ثقافية شاملة!
+            </div>
+            <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
+              {["BTS 💜", "BLACKPINK 🖤", "Stray Kids 🐺"].map(t=>(
+                <span key={t} style={{ background:BK, color:Y, fontSize:"8px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Food */}
-        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🍜</div>
-          <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"5px" }}>المطبخ الكوري</div>
+        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
+          <Photo src={PHOTOS.kimchi} alt="Korean kimchi" h={65} radius={0} />
+          <div style={{ padding:"10px" }}>
+          <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"4px" }}>المطبخ الكوري</div>
           <div style={{ fontSize:"10px", color:"#555", lineHeight:1.8 }}>
             الكيمتشي، البيبيمباب، التيكبوكي، السامجيوبسال — أطعمة تفاجئك وتُدمنها! المطبخ الكوري يعتمد على التوازن بين الحامض والحار والأومامي. وليس هناك وجبة كاملة بدون كيمتشي!
           </div>
@@ -508,6 +674,7 @@ function CultureAr() {
             {["🥬 김치","🍚 비빔밥","🌶️ 떡볶이","🥩 삼겹살"].map(t=>(
               <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
             ))}
+          </div>
           </div>
         </div>
 
@@ -528,7 +695,7 @@ function CultureAr() {
 
       {/* Korean sentence teaser */}
       <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"14px", alignItems:"center" }}>
-        <div style={{ fontSize:"32px" }}>💡</div>
+        <KoreanLanternIcon size={40} color={Y} />
         <div>
           <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"4px" }}>بعد إتمام هذه الكتب الستة ستتمكن من:</div>
           <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
@@ -617,23 +784,28 @@ function CoverAr() {
       {/* Huge background character */}
       <div style={{ position:"absolute", top:"-20px", left:"-20px", fontSize:"300px", fontWeight:900, color:"#1a1a00", lineHeight:1, userSelect:"none" }}>글</div>
 
+      {/* Photo banner */}
+      <div style={{ width:"100%", maxWidth:"400px", marginBottom:"14px", borderRadius:"14px", overflow:"hidden", border:`3px solid ${Y}` }}>
+        <Photo src={PHOTOS.seoulNight} alt="Seoul at night" h={120} radius={0} overlay />
+      </div>
+
       {/* Logo */}
-      <div style={{ background:Y, borderRadius:"40px", padding:"8px 24px", display:"flex", alignItems:"center", gap:"10px", marginBottom:"22px" }}>
-        <span style={{ fontSize:"24px" }}>🍀</span>
+      <div style={{ background:Y, borderRadius:"40px", padding:"8px 24px", display:"flex", alignItems:"center", gap:"10px", marginBottom:"16px" }}>
+        <TaegeukIcon size={28} />
         <span style={{ fontSize:"20px", fontWeight:900, color:BK, letterSpacing:"3px" }}>KLOVERS</span>
       </div>
 
       {/* Korean hero */}
-      <div style={{ textAlign:"center", marginBottom:"18px" }}>
-        <div style={{ fontSize:"96px", fontWeight:900, color:Y, lineHeight:1 }}>한글</div>
+      <div style={{ textAlign:"center", marginBottom:"14px" }}>
+        <div style={{ fontSize:"88px", fontWeight:900, color:Y, lineHeight:1 }}>한글</div>
         <div style={{ fontSize:"12px", color:"#777", letterSpacing:"8px", marginTop:"4px" }}>H • A • N • G • U • L</div>
       </div>
 
       {/* Title box */}
-      <div style={{ border:`3px solid ${Y}`, borderRadius:"16px", padding:"20px 28px", textAlign:"center", maxWidth:"340px", marginBottom:"18px" }}>
-        <div style={{ fontSize:"30px", fontWeight:900, color:"#fff", lineHeight:1.2 }}>كتاب الهانغول الرسمي</div>
+      <div style={{ border:`3px solid ${Y}`, borderRadius:"16px", padding:"16px 24px", textAlign:"center", maxWidth:"340px", marginBottom:"14px" }}>
+        <div style={{ fontSize:"26px", fontWeight:900, color:"#fff", lineHeight:1.2 }}>كتاب الهانغول الرسمي</div>
         <div style={{ fontSize:"14px", color:Y, fontWeight:700, marginTop:"6px" }}>النسخة العربية-الكورية</div>
-        <div style={{ marginTop:"10px", display:"flex", justifyContent:"center", gap:"6px", flexWrap:"wrap" }}>
+        <div style={{ marginTop:"8px", display:"flex", justifyContent:"center", gap:"6px", flexWrap:"wrap" }}>
           {["🎬 مسلسلات", "🎵 كيبوب", "🌸 ثقافة كورية"].map(t => (
             <span key={t} style={{ background:"#222", color:Y, fontSize:"10px", fontWeight:700, padding:"3px 8px", borderRadius:"20px" }}>{t}</span>
           ))}
@@ -641,14 +813,21 @@ function CoverAr() {
       </div>
 
       {/* Level badge */}
-      <div style={{ background:Y, borderRadius:"40px", padding:"8px 28px", textAlign:"center", marginBottom:"18px" }}>
+      <div style={{ background:Y, borderRadius:"40px", padding:"8px 28px", textAlign:"center", marginBottom:"12px" }}>
         <div style={{ fontSize:"13px", fontWeight:900, color:BK }}>المستوى الأول — مبتدئ</div>
       </div>
 
+      {/* Dancheong decoration + photo row */}
+      <div style={{ display:"flex", gap:"8px", justifyContent:"center", marginBottom:"8px" }}>
+        <div style={{ borderRadius:"8px", overflow:"hidden", border:`2px solid ${Y}33` }}><Photo src={PHOTOS.hanbok} alt="Hanbok" h={50} radius={0} /></div>
+        <div style={{ borderRadius:"8px", overflow:"hidden", border:`2px solid ${Y}33` }}><Photo src={PHOTOS.cherryBlossom} alt="Cherry blossom" h={50} radius={0} /></div>
+        <div style={{ borderRadius:"8px", overflow:"hidden", border:`2px solid ${Y}33` }}><Photo src={PHOTOS.temple} alt="Korean temple" h={50} radius={0} /></div>
+      </div>
+
       {/* Alphabet strip */}
-      <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", justifyContent:"center", maxWidth:"300px" }}>
+      <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", justifyContent:"center", maxWidth:"300px" }}>
         {"ㄱㄴㄷㄹㅁㅂㅅㅇㅏㅓㅗㅜㅡㅣ".split("").map((ch, i) => (
-          <div key={i} style={{ background: i%2===0?"#1a1a00":"#222", border:`1px solid ${Y}33`, borderRadius:"6px", width:"28px", height:"28px", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"16px", color:Y, fontWeight:700 }}>{ch}</div>
+          <div key={i} style={{ background: i%2===0?"#1a1a00":"#222", border:`1px solid ${Y}33`, borderRadius:"6px", width:"26px", height:"26px", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"15px", color:Y, fontWeight:700 }}>{ch}</div>
         ))}
       </div>
 
@@ -931,6 +1110,16 @@ function HistoryEn() {
     <Page dir="ltr">
       <SHead title="The History of the Korean Language" subtitle="A 2,000-year journey of words, power, and revolution" />
 
+      {/* Photo + icon header */}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 90px", gap:"8px", marginBottom:"10px" }}>
+        <Photo src={PHOTOS.hanokVillage} alt="Bukchon Hanok Village" h={90} radius={10} overlay />
+        <div style={{ display:"flex", flexDirection:"column", gap:"6px", alignItems:"center", justifyContent:"center", background:BK, borderRadius:"10px", padding:"8px" }}>
+          <PalaceRoofIcon size={48} color={Y} />
+          <div style={{ fontSize:"9px", color:"#aaa", textAlign:"center" }}>Joseon Dynasty</div>
+        </div>
+      </div>
+      <DancheongBorder />
+
       <div style={{ position:"relative", marginBottom:"12px" }}>
         <div style={{ position:"absolute", left:"18px", top:0, bottom:0, width:"3px", background:Y, borderRadius:"2px" }} />
 
@@ -952,7 +1141,7 @@ function HistoryEn() {
       </div>
 
       <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
-        <div style={{ fontSize:"28px" }}>🌍</div>
+        <MugunghwaIcon size={36} color={BK} />
         <div>
           <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>Amazing Fact!</div>
           <div style={{ fontSize:"10px", color:BK2, lineHeight:1.6 }}>
@@ -971,13 +1160,18 @@ function SejongEn() {
       <SHead title="King Sejong the Great 👑" subtitle="The man who changed a nation's destiny with one word: justice" />
 
       <div style={{ background:BK, borderRadius:"14px", padding:"16px", marginBottom:"12px", display:"grid", gridTemplateColumns:"120px 1fr", gap:"14px" }}>
-        <div style={{ background:"#1a1a00", borderRadius:"10px", border:`3px solid ${Y}`, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"12px", minHeight:"130px" }}>
-          <div style={{ fontSize:"56px", lineHeight:1 }}>👑</div>
-          <div style={{ fontSize:"22px", fontWeight:900, color:Y, marginTop:"6px" }}>세종</div>
-          <div style={{ fontSize:"9px", color:"#888", marginTop:"2px" }}>Sejong</div>
+        <div style={{ borderRadius:"10px", overflow:"hidden", border:`3px solid ${Y}`, display:"flex", flexDirection:"column", minHeight:"130px" }}>
+          <Photo src={PHOTOS.palaceGate} alt="Gyeongbokgung Gate" h={100} radius={0} />
+          <div style={{ background:"#1a1a00", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"6px", flex:1 }}>
+            <div style={{ fontSize:"18px", fontWeight:900, color:Y }}>세종대왕</div>
+            <div style={{ fontSize:"8px", color:"#888", marginTop:"1px" }}>Sejong the Great</div>
+          </div>
         </div>
         <div style={{ color:"#fff" }}>
-          <div style={{ fontSize:"16px", fontWeight:900, color:Y, marginBottom:"8px" }}>Sejong the Great</div>
+          <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"8px" }}>
+            <PalaceRoofIcon size={28} color={Y} />
+            <div style={{ fontSize:"16px", fontWeight:900, color:Y }}>Sejong the Great</div>
+          </div>
           <div style={{ display:"flex", flexDirection:"column", gap:"5px" }}>
             {[
               { icon:"🎂", label:"Born", val:"May 15, 1397 AD" },
@@ -1036,42 +1230,48 @@ function CultureEn() {
       <SHead title="Korean Culture 🌸" subtitle="5,000 years of beauty, philosophy, and art" />
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
-        <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🎬</div>
-          <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"5px" }}>K-Drama</div>
-          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.8 }}>
-            Among Netflix's most-watched content worldwide. Shows like Squid Game, Crash Landing on You, and My Love from the Star changed global TV. Korean storytelling captures hearts like nothing else!
-          </div>
-          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
-            {["❤️ Romance","🕵️ Thriller","😂 Comedy","👻 Horror"].map(t=>(
-              <span key={t} style={{ background:"#222", color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🎵</div>
-          <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"5px" }}>K-Pop</div>
-          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.8 }}>
-            BTS, BLACKPINK, Stray Kids — genuine global superstars. K-Pop is more than music: it's dance, fashion, visual art, and a worldwide community of passionate fans!
-          </div>
-          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
-            {["BTS 💜","BLACKPINK 🖤","Stray Kids 🐺"].map(t=>(
-              <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
-            ))}
+        <div style={{ background:BK, borderRadius:"12px", overflow:"hidden" }}>
+          <Photo src={PHOTOS.seoulNight} alt="Seoul night skyline" h={75} radius={0} overlay />
+          <div style={{ padding:"10px" }}>
+            <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>K-Drama</div>
+            <div style={{ fontSize:"9px", color:"#ccc", lineHeight:1.7 }}>
+              Among Netflix's most-watched content. Squid Game changed global TV. Korean storytelling captures hearts!
+            </div>
+            <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
+              {["❤️ Romance","🕵️ Thriller","😂 Comedy"].map(t=>(
+                <span key={t} style={{ background:"#222", color:Y, fontSize:"8px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🍜</div>
-          <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"5px" }}>Korean Food</div>
-          <div style={{ fontSize:"10px", color:"#555", lineHeight:1.8 }}>
-            Kimchi, Bibimbap, Tteokbokki, Samgyeopsal — foods that surprise and addict you! Korean cuisine balances sour, spicy, and umami. No meal is complete without kimchi on the table!
+        <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
+          <Photo src={PHOTOS.kpopCrowd} alt="K-Pop concert crowd" h={75} radius={0} overlay />
+          <div style={{ padding:"10px" }}>
+            <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>K-Pop</div>
+            <div style={{ fontSize:"9px", color:"#ccc", lineHeight:1.7 }}>
+              BTS, BLACKPINK, Stray Kids — global superstars. K-Pop is dance, fashion, art, and worldwide fandom!
+            </div>
+            <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
+              {["BTS 💜","BLACKPINK 🖤","Stray Kids 🐺"].map(t=>(
+                <span key={t} style={{ background:BK, color:Y, fontSize:"8px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
+              ))}
+            </div>
           </div>
-          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
+        </div>
+
+        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
+          <Photo src={PHOTOS.koreanFood} alt="Korean food" h={65} radius={0} />
+          <div style={{ padding:"10px" }}>
+          <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"4px" }}>Korean Food</div>
+          <div style={{ fontSize:"9px", color:"#555", lineHeight:1.7 }}>
+            Kimchi, Bibimbap, Tteokbokki — foods that surprise and addict you! Korean cuisine balances sour, spicy, and umami.
+          </div>
+          <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
             {["🥬 김치","🍚 비빔밥","🌶️ 떡볶이","🥩 삼겹살"].map(t=>(
-              <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
+              <span key={t} style={{ background:BK, color:Y, fontSize:"8px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
             ))}
+          </div>
           </div>
         </div>
 
@@ -1090,7 +1290,7 @@ function CultureEn() {
       </div>
 
       <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"14px", alignItems:"center" }}>
-        <div style={{ fontSize:"32px" }}>💡</div>
+        <KoreanLanternIcon size={40} color={Y} />
         <div>
           <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"4px" }}>After completing all 6 books you will be able to:</div>
           <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
@@ -1176,31 +1376,43 @@ function CoverEn() {
 
       <div style={{ position:"absolute", top:"-20px", right:"-20px", fontSize:"300px", fontWeight:900, color:"#1a1a00", lineHeight:1, userSelect:"none" }}>한</div>
 
-      <div style={{ background:Y, borderRadius:"40px", padding:"8px 24px", display:"flex", alignItems:"center", gap:"10px", marginBottom:"22px" }}>
-        <span style={{ fontSize:"24px" }}>🍀</span>
+      {/* Photo banner */}
+      <div style={{ width:"100%", maxWidth:"400px", marginBottom:"14px", borderRadius:"14px", overflow:"hidden", border:`3px solid ${Y}` }}>
+        <Photo src={PHOTOS.seoulNeon} alt="Seoul neon lights" h={120} radius={0} overlay />
+      </div>
+
+      <div style={{ background:Y, borderRadius:"40px", padding:"8px 24px", display:"flex", alignItems:"center", gap:"10px", marginBottom:"16px" }}>
+        <TaegeukIcon size={28} />
         <span style={{ fontSize:"20px", fontWeight:900, color:BK, letterSpacing:"3px" }}>KLOVERS</span>
       </div>
 
-      <div style={{ textAlign:"center", marginBottom:"18px" }}>
-        <div style={{ fontSize:"96px", fontWeight:900, color:Y, lineHeight:1 }}>한글</div>
+      <div style={{ textAlign:"center", marginBottom:"14px" }}>
+        <div style={{ fontSize:"88px", fontWeight:900, color:Y, lineHeight:1 }}>한글</div>
         <div style={{ fontSize:"12px", color:"#777", letterSpacing:"8px", marginTop:"4px" }}>H • A • N • G • U • L</div>
       </div>
 
-      <div style={{ border:`3px solid ${Y}`, borderRadius:"16px", padding:"20px 28px", textAlign:"center", maxWidth:"340px", marginBottom:"18px" }}>
-        <div style={{ fontSize:"30px", fontWeight:900, color:"#fff", lineHeight:1.2 }}>Official Hangul Starter Book</div>
+      <div style={{ border:`3px solid ${Y}`, borderRadius:"16px", padding:"16px 24px", textAlign:"center", maxWidth:"340px", marginBottom:"14px" }}>
+        <div style={{ fontSize:"26px", fontWeight:900, color:"#fff", lineHeight:1.2 }}>Official Hangul Starter Book</div>
         <div style={{ fontSize:"14px", color:Y, fontWeight:700, marginTop:"6px" }}>English–Korean Edition</div>
-        <div style={{ marginTop:"10px", display:"flex", justifyContent:"center", gap:"6px", flexWrap:"wrap" }}>
+        <div style={{ marginTop:"8px", display:"flex", justifyContent:"center", gap:"6px", flexWrap:"wrap" }}>
           {["🎬 K-Drama", "🎵 K-Pop", "🌸 Korean Culture"].map(t=>(
             <span key={t} style={{ background:"#222", color:Y, fontSize:"10px", fontWeight:700, padding:"3px 8px", borderRadius:"20px" }}>{t}</span>
           ))}
         </div>
       </div>
 
-      <div style={{ background:Y, borderRadius:"40px", padding:"8px 28px", textAlign:"center", marginBottom:"18px" }}>
+      <div style={{ background:Y, borderRadius:"40px", padding:"8px 28px", textAlign:"center", marginBottom:"12px" }}>
         <div style={{ fontSize:"13px", fontWeight:900, color:BK }}>Level 1 — Beginner</div>
       </div>
 
-      <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", justifyContent:"center", maxWidth:"300px" }}>
+      {/* Culture photo row */}
+      <div style={{ display:"flex", gap:"8px", justifyContent:"center", marginBottom:"8px" }}>
+        <div style={{ borderRadius:"8px", overflow:"hidden", border:`2px solid ${Y}33` }}><Photo src={PHOTOS.palace} alt="Korean palace" h={50} radius={0} /></div>
+        <div style={{ borderRadius:"8px", overflow:"hidden", border:`2px solid ${Y}33` }}><Photo src={PHOTOS.cherryBlossom} alt="Cherry blossom" h={50} radius={0} /></div>
+        <div style={{ borderRadius:"8px", overflow:"hidden", border:`2px solid ${Y}33` }}><Photo src={PHOTOS.hanokVillage} alt="Hanok village" h={50} radius={0} /></div>
+      </div>
+
+      <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", justifyContent:"center", maxWidth:"300px" }}>
         {"ㄱㄴㄷㄹㅁㅂㅅㅇㅏㅓㅗㅜㅡㅣ".split("").map((ch,i)=>(
           <div key={i} style={{ background:i%2===0?"#1a1a00":"#222", border:`1px solid ${Y}33`, borderRadius:"6px", width:"28px", height:"28px", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"16px", color:Y, fontWeight:700 }}>{ch}</div>
         ))}
