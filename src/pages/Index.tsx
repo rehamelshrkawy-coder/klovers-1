@@ -71,7 +71,37 @@ const Index = () => {
     el.setAttribute("type", "application/ld+json");
     el.textContent = JSON.stringify(schema);
     document.head.appendChild(el);
-    return () => { el.remove(); };
+
+    const bizSchema = {
+      "@context": "https://schema.org",
+      "@type": "EducationalOrganization",
+      name: "Klovers Korean Academy",
+      url: "https://kloversegy.com",
+      logo: "https://kloversegy.com/klovers-logo.jpg",
+      description: "Online Korean language school teaching Arabic speakers. Live classes, small groups, A1–C2 levels.",
+      email: "koreanlovers.net@gmail.com",
+      telephone: "+601121777560",
+      sameAs: [
+        "https://www.facebook.com/Klovers.net/",
+        "https://www.tiktok.com/@klovers.net",
+        "https://t.me/+Fu5T7d4wLMsxNDY9",
+      ],
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Korean Language Courses",
+        itemListElement: [
+          { "@type": "Offer", itemOffered: { "@type": "Course", name: "Group Korean Classes" } },
+          { "@type": "Offer", itemOffered: { "@type": "Course", name: "Private Korean Classes" } },
+        ],
+      },
+    };
+    const bizEl = document.createElement("script");
+    bizEl.id = "home-biz-jsonld";
+    bizEl.setAttribute("type", "application/ld+json");
+    bizEl.textContent = JSON.stringify(bizSchema);
+    document.head.appendChild(bizEl);
+
+    return () => { el.remove(); bizEl.remove(); };
   }, []);
 
   return (

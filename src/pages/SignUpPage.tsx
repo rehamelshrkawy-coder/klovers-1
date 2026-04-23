@@ -186,6 +186,27 @@ const SignUpPage = () => {
                 required
                 minLength={6}
               />
+              {password.length > 0 && (() => {
+                const strength = password.length >= 10 && /[A-Z]/.test(password) && /[0-9]/.test(password) ? 3
+                  : password.length >= 8 ? 2
+                  : 1;
+                const labels = isAr
+                  ? ["ضعيفة", "جيدة", "قوية"]
+                  : ["Weak", "Good", "Strong"];
+                const colors = ["bg-red-500", "bg-yellow-500", "bg-green-500"];
+                return (
+                  <div className="space-y-1">
+                    <div className="flex gap-1">
+                      {[1, 2, 3].map((s) => (
+                        <div key={s} className={`h-1 flex-1 rounded-full transition-colors duration-200 ${s <= strength ? colors[strength - 1] : "bg-muted"}`} />
+                      ))}
+                    </div>
+                    <p className={`text-xs ${strength === 1 ? "text-red-500" : strength === 2 ? "text-yellow-600" : "text-green-600"}`}>
+                      {labels[strength - 1]}
+                    </p>
+                  </div>
+                );
+              })()}
               {redirectTo !== "/trial-booking" && (
                 <Select value={level} onValueChange={setLevel}>
                   <SelectTrigger>

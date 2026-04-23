@@ -572,6 +572,27 @@ const BlogPostPage = () => {
             </div>
           )}
 
+          {/* Free trial CTA — conversion bridge mid-article journey */}
+          <div className="my-10 bg-primary/5 border border-primary/20 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1">
+                {isAr ? "تعلم الكورية مع مدرس حقيقي" : "Learn Korean with a real teacher"}
+              </p>
+              <p className="font-bold text-foreground text-base leading-snug">
+                {isAr ? "أول حصة مجانية — بدون بطاقة بنكية" : "Your first class is free — no credit card"}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isAr ? "مجموعات صغيرة، شرح بالعربي، جدول مرن." : "Small groups, Arabic instruction, flexible schedule."}
+              </p>
+            </div>
+            <Button asChild className="gap-2 shrink-0">
+              <Link to="/free-trial">
+                {isAr ? "احجز مجانًا" : "Book Free Class"}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+
           {/* Comments */}
           <BlogComments postId={post.id} isAr={isAr} />
 
