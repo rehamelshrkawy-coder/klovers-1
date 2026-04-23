@@ -24,7 +24,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminAttendancePanel from "@/components/admin/AdminAttendancePanel";
 import type { AttendanceRow, AttendanceReq, GroupMember, OverviewRow } from "@/types/admin";
-import { formatTime, getAttendanceStatusColor as statusColor } from "@/lib/admin-utils";
+import { formatTime, getAttendanceStatusColor as statusColor, convertSlotToTimezone } from "@/lib/admin-utils";
+import { getAdminTimezone } from "@/lib/viewerTimezone";
 
 interface GroupPackageInfo {
   package_id: string | null;
@@ -812,8 +813,11 @@ const GroupAttendanceManager = ({
                   {groupPackageInfo?.day_of_week != null && (
                     <div className="flex flex-wrap gap-1.5">
                       <Badge variant="secondary" className="text-xs font-normal gap-1">
-                        📅 {DAY_NAMES[groupPackageInfo.day_of_week]}
-                        {groupPackageInfo.start_time && ` · ${formatStartTime(groupPackageInfo.start_time)}`}
+                        {(() => {
+                          const adminTz = getAdminTimezone();
+                          const l = convertSlotToTimezone(groupPackageInfo.day_of_week, groupPackageInfo.start_time || "00:00", "Africa/Cairo", adminTz);
+                          return <>📅 {l.weekday}{groupPackageInfo.start_time ? ` · ${l.timeFormatted} ${adminTz}` : ""}</>;
+                        })()}
                         {groupPackageInfo.timezone && ` · ${groupPackageInfo.timezone}`}
                       </Badge>
                       <Badge variant="outline" className="text-xs font-normal text-muted-foreground">
@@ -1150,8 +1154,12 @@ const GroupAttendanceManager = ({
                     const activeMembers = g.members.filter(m => m.member_status === "active");
                     const waitlistMembers = g.members.filter(m => m.member_status === "waitlist");
                     const isExpanded = expandedGroups.has(g.id);
-                    const dayName = DAY_NAMES[g.day_of_week] || "—";
-                    const timeStr = formatStartTime(g.start_time);
+                    const adminTz = getAdminTimezone();
+                    const localSlot = (g.day_of_week != null && g.start_time)
+                      ? convertSlotToTimezone(g.day_of_week, g.start_time, "Africa/Cairo", adminTz)
+                      : null;
+                    const dayName = localSlot?.weekday || DAY_NAMES[g.day_of_week] || "—";
+                    const timeStr = localSlot?.timeFormatted || formatStartTime(g.start_time);
 
                     return (
                       <div key={g.id} className="border rounded-lg overflow-hidden">

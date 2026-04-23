@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AdminTrialBooking, TrialBookingStatus } from '@/types/trial-admin';
+import { convertDateTimeToTimezone } from '@/lib/admin-utils';
+import { getAdminTimezone } from '@/lib/viewerTimezone';
 
 const STATUS_COLORS: Record<TrialBookingStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-200',
@@ -127,7 +129,17 @@ export default function RequestsTable({ bookings }: { bookings: AdminTrialBookin
                   {b.phone && <div className="text-xs text-muted-foreground">{b.phone}</div>}
                 </td>
                 <td className="px-3 py-2 font-mono">
-                  {b.day_name}, {b.trial_date} · {b.start_time}
+                  {(() => {
+                    const adminTz = getAdminTimezone();
+                    const srcTz = (b as any).timezone || 'Africa/Cairo';
+                    const lcl = convertDateTimeToTimezone(b.trial_date, b.start_time, srcTz, adminTz);
+                    return (
+                      <>
+                        {lcl.weekday || b.day_name}, {lcl.dateStr} · {lcl.timeFormatted}
+                        <div className="text-[10px] text-muted-foreground">src: {b.day_name}, {b.trial_date} {b.start_time} {srcTz}</div>
+                      </>
+                    );
+                  })()}
                 </td>
                 <td className="px-3 py-2">
                   <span

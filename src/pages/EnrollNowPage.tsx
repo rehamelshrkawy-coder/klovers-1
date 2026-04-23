@@ -28,6 +28,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 import { track } from "@/lib/tracking";
+import { convertSlotToTimezone } from "@/lib/admin-utils";
+import { setUserTimezone } from "@/lib/viewerTimezone";
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -121,6 +123,7 @@ const EnrollNowPage = () => {
 
   // Schedule preferences — restore from URL if returning from signup
   const [timezone, setTimezone] = useState(() => p("tz") || Intl.DateTimeFormat().resolvedOptions().timeZone);
+  useEffect(() => { setUserTimezone(timezone); }, [timezone]);
   const [preferredDays, setPreferredDays] = useState<string[]>(() => {
     const d = p("days") || p("day");
     return d ? d.split(",").map((s: string) => s.trim()).filter(Boolean) : [];
@@ -225,7 +228,7 @@ const EnrollNowPage = () => {
       const normalizedLevel = normalizeLevel(selectedLevel);
       const { data } = await supabase
         .from("schedule_packages")
-        .select("id, day_of_week, start_time, capacity")
+        .select("id, day_of_week, start_time, capacity, timezone")
         .eq("level", normalizedLevel)
         .eq("is_active", true)
         .neq("course_type", "private")
@@ -260,18 +263,16 @@ const EnrollNowPage = () => {
         pkgMemberCount[g.package_id] = (pkgMemberCount[g.package_id] || 0) + (memberCounts[g.id] || 0);
       }
 
-      // Deduplicate by day_of_week, keeping first occurrence, include seatsLeft
+      // Deduplicate by admin-side day_of_week; convert each slot to the learner's timezone for display
       const seen = new Set<number>();
       const slots: { day: string; time: string; packageId: string; seatsLeft: number }[] = [];
       for (const r of rows) {
         if (!seen.has(r.day_of_week)) {
           seen.add(r.day_of_week);
-          const [h, m] = (r.start_time as string).split(":").map(Number);
-          const ampm = h >= 12 ? "PM" : "AM";
-          const hour12 = h % 12 || 12;
-          const timeLabel = `${hour12}:${String(m).padStart(2, "0")} ${ampm}`;
+          const srcTz = r.timezone || "Africa/Cairo";
+          const local = convertSlotToTimezone(r.day_of_week, r.start_time, srcTz, timezone);
           const seatsLeft = Math.max(0, (r.capacity || 5) - (pkgMemberCount[r.id] || 0));
-          slots.push({ day: DAY_NAMES[r.day_of_week as number], time: timeLabel, packageId: r.id, seatsLeft });
+          slots.push({ day: local.weekday, time: local.timeFormatted, packageId: r.id, seatsLeft });
         }
       }
       setLevelSlots(slots);
@@ -838,7 +839,7 @@ const EnrollNowPage = () => {
               {/* Timezone */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2"><Clock className="h-4 w-4" /> {t("enrollNow.timezone")}</Label>
-                <Select value={timezone} onValueChange={setTimezone}>
+                <Select value={timezone} onValueChange={(tz) => { setTimezone(tz); setUserTimezone(tz); }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {(Intl as any).supportedValuesOf("timeZone").map((tz: string) => (

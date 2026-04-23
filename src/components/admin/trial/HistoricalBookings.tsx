@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AdminTrialBooking, TrialBookingStatus } from '@/types/trial-admin';
+import { convertDateTimeToTimezone } from '@/lib/admin-utils';
+import { getAdminTimezone } from '@/lib/viewerTimezone';
 
 // Previous Trial Classes — shows ALL records whose date has passed OR whose
 // slot has been retired. We intentionally label these as "Historical Trial
@@ -77,16 +79,21 @@ export default function HistoricalBookings({
             const first = rows[0];
             const slotExists = rows.some((r) => r.slot_exists);
             const lifecycle = first.slot_lifecycle ?? (slotExists ? 'active' : 'retired');
+            const adminTz = getAdminTimezone();
+            const srcTz = (first as any).timezone || 'Africa/Cairo';
+            const lcl = convertDateTimeToTimezone(first.trial_date, first.start_time, srcTz, adminTz);
             return (
               <article key={key} className="rounded-md border bg-card p-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <div className="flex flex-wrap items-baseline gap-3">
                     <span className="font-semibold">
-                      {first.day_name} · {first.trial_date}
+                      {lcl.weekday || first.day_name} · {lcl.dateStr}
+                      <span className="ml-2 text-[10px] font-normal text-muted-foreground">(src: {first.day_name} {first.trial_date})</span>
                     </span>
                     <span className="font-mono text-sm">
-                      {first.start_time}{' '}
+                      {lcl.timeFormatted}{' '}
                       {first.slot_duration_min ? `(${first.slot_duration_min} min)` : ''}
+                      <span className="ml-1 text-[10px] text-muted-foreground">({first.start_time} {srcTz})</span>
                     </span>
                     <SlotLifecycleBadge lifecycle={lifecycle} />
                   </div>

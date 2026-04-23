@@ -1,4 +1,6 @@
 import { AdminTrialSlotOccurrence } from '@/types/trial-admin';
+import { convertDateTimeToTimezone } from '@/lib/admin-utils';
+import { getAdminTimezone } from '@/lib/viewerTimezone';
 
 function StatusBadge({ slot }: { slot: AdminTrialSlotOccurrence }) {
   if (slot.is_full) {
@@ -58,17 +60,22 @@ export default function UpcomingSlots({
               </tr>
             </thead>
             <tbody>
-              {(compact ? slots.slice(0, 6) : slots).map((s) => (
+              {(compact ? slots.slice(0, 6) : slots).map((s) => {
+                const adminTz = getAdminTimezone();
+                const lcl = convertDateTimeToTimezone(s.occurrence_date, s.start_time, s.timezone, adminTz);
+                return (
                 <tr
                   key={`${s.slot_id}-${s.occurrence_date}`}
                   className="border-t hover:bg-muted/30"
                 >
                   <td className="px-3 py-2 font-mono tabular-nums">
-                    {s.occurrence_date}
+                    {lcl.dateStr}
+                    <div className="text-[10px] text-muted-foreground">({s.occurrence_date} src)</div>
                   </td>
-                  <td className="px-3 py-2">{s.day_name}</td>
+                  <td className="px-3 py-2">{lcl.weekday || s.day_name}</td>
                   <td className="px-3 py-2 font-mono">
-                    {s.start_time} <span className="text-muted-foreground">({s.timezone})</span>
+                    {lcl.timeFormatted} <span className="text-muted-foreground">({adminTz})</span>
+                    <div className="text-[10px] text-muted-foreground">{s.start_time} {s.timezone}</div>
                   </td>
                   <td className="px-3 py-2">{s.duration_min} min</td>
                   <td className="px-3 py-2 text-right tabular-nums">{s.capacity}</td>
@@ -78,7 +85,8 @@ export default function UpcomingSlots({
                     <StatusBadge slot={s} />
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

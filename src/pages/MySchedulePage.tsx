@@ -15,7 +15,8 @@ import { getLevelShortLabel } from "@/constants/levels";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-import { formatTime } from "@/lib/admin-utils";
+import { formatTime, convertSlotToTimezone } from "@/lib/admin-utils";
+import { getUserTimezone } from "@/lib/viewerTimezone";
 
 interface PackageDetails {
   id: string;
@@ -295,14 +296,21 @@ const MySchedulePage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex flex-wrap gap-3">
+                {(() => {
+                  const uTz = getUserTimezone();
+                  const lcl = convertSlotToTimezone(packageDetails.day_of_week, packageDetails.start_time, packageDetails.timezone, uTz);
+                  return (
+                <div className="flex flex-wrap gap-3 items-center">
                   <Badge variant="outline" className="text-sm">{getLevelShortLabel(packageDetails.level)}</Badge>
-                  <span className="text-sm text-foreground font-medium">{DAY_NAMES[packageDetails.day_of_week]}</span>
+                  <span className="text-sm text-foreground font-medium">{lcl.weekday}</span>
                   <span className="text-sm text-muted-foreground flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5" /> {formatTime(packageDetails.start_time)} · {packageDetails.duration_min}min
+                    <Clock className="h-3.5 w-3.5" /> {lcl.timeFormatted} · {packageDetails.duration_min}min
                   </span>
-                  <span className="text-xs text-muted-foreground">{packageDetails.timezone.replace(/_/g, " ")}</span>
+                  <span className="text-xs text-muted-foreground">{uTz.replace(/_/g, " ")}</span>
+                  <span className="text-[11px] text-muted-foreground/70 basis-full">({DAY_NAMES[packageDetails.day_of_week]} {formatTime(packageDetails.start_time)} {packageDetails.timezone.replace(/_/g, " ")})</span>
                 </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           ) : (
@@ -364,19 +372,23 @@ const MySchedulePage = () => {
                   {alternatives.length > 0 && (
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-foreground">Available alternatives:</p>
-                      {alternatives.map((alt) => (
+                      {alternatives.map((alt) => {
+                        const aTz = getUserTimezone();
+                        const aLcl = convertSlotToTimezone(alt.day_of_week, alt.start_time, alt.timezone, aTz);
+                        return (
                         <div key={alt.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
                           <div>
                             <p className="text-sm font-medium text-foreground">
-                              {DAY_NAMES[alt.day_of_week]} · {formatTime(alt.start_time)}
+                              {aLcl.weekday} · {aLcl.timeFormatted}
                             </p>
-                            <p className="text-xs text-muted-foreground">{alt.duration_min}min · {alt.timezone.replace(/_/g, " ")} · {alt.seats_left} seats left</p>
+                            <p className="text-xs text-muted-foreground">{alt.duration_min}min · {aTz.replace(/_/g, " ")} · {alt.seats_left} seats left</p>
                           </div>
                           <Button size="sm" disabled={assigning} onClick={() => handleAssignToAlternative(alt)}>
                             {assigning ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ArrowRight className="h-4 w-4 mr-1" /> Choose</>}
                           </Button>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                   {alternatives.length === 0 && (

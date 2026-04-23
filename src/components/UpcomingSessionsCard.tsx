@@ -16,7 +16,18 @@ interface UpcomingSession {
   attendance_status: string | null;
 }
 
-import { formatTime } from "@/lib/admin-utils";
+import { formatTime, convertDateTimeToTimezone } from "@/lib/admin-utils";
+import { getUserTimezone } from "@/lib/viewerTimezone";
+
+function tzOffsetMs(date: Date, tz: string): number {
+  const p = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, hour12: false,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).formatToParts(date).reduce((a, x) => { a[x.type] = x.value; return a; }, {} as Record<string, string>);
+  const h = p.hour === "24" ? 0 : +p.hour;
+  return Date.UTC(+p.year, +p.month - 1, +p.day, h, +p.minute, +p.second) - date.getTime();
+}
 
 function formatDate(d: string) {
   const date = new Date(d + "T12:00:00");
@@ -34,16 +45,14 @@ function daysUntil(d: string) {
   return diff;
 }
 
-/** Returns true if today's local time is within the class window (10 min before → end) */
-function isClassActive(sessionDate: string, startTime: string, durationMin: number): boolean {
-  const today = new Date();
-  const sessionDay = new Date(sessionDate + "T12:00:00");
-  if (today.toDateString() !== sessionDay.toDateString()) return false;
-
-  const [h, m] = startTime.split(":").map(Number);
-  const startMs = new Date().setHours(h, m, 0, 0);
-  const openMs = startMs - 10 * 60 * 1000;       // 10 min before
-  const closeMs = startMs + durationMin * 60 * 1000; // class end
+/** Returns true if the class is within the window (10 min before → end). Works across timezones. */
+function isClassActive(sessionDate: string, startTime: string, durationMin: number, sourceTz: string): boolean {
+  const [y, mo, d] = sessionDate.split("-").map(Number);
+  const [h, mi] = startTime.split(":").map(Number);
+  const guess = Date.UTC(y, mo - 1, d, h, mi);
+  const startMs = guess - tzOffsetMs(new Date(guess), sourceTz);
+  const openMs = startMs - 10 * 60 * 1000;
+  const closeMs = startMs + durationMin * 60 * 1000;
   const nowMs = Date.now();
   return nowMs >= openMs && nowMs <= closeMs;
 }
@@ -83,8 +92,10 @@ const UpcomingSessionsCard = () => {
   if (sessions.length === 0) return null;
 
   const next = sessions[0];
-  const days = daysUntil(next.session_date);
-  const classActive = isClassActive(next.session_date, next.start_time, next.duration_min);
+  const userTz = getUserTimezone();
+  const nextLocal = convertDateTimeToTimezone(next.session_date, next.start_time, next.timezone || "Africa/Cairo", userTz);
+  const days = daysUntil(nextLocal.dateStr);
+  const classActive = isClassActive(next.session_date, next.start_time, next.duration_min, next.timezone || "Africa/Cairo");
 
   return (
     <Card className="border-primary/20">
@@ -100,11 +111,12 @@ const UpcomingSessionsCard = () => {
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">Next Class</p>
-              <p className="font-bold text-foreground text-lg">{formatDate(next.session_date)}</p>
+              <p className="font-bold text-foreground text-lg">{formatDate(nextLocal.dateStr)}</p>
               <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                 <Clock className="h-3.5 w-3.5" />
-                {formatTime(next.start_time)} · {next.duration_min} min · {next.timezone}
+                {nextLocal.timeFormatted} · {next.duration_min} min · {userTz.replace(/_/g, " ")}
               </p>
+              <p className="text-[11px] text-muted-foreground/70">({formatDate(next.session_date)} {formatTime(next.start_time)} {(next.timezone || "Africa/Cairo").replace(/_/g, " ")})</p>
               <p className="text-xs text-muted-foreground mt-1">{next.group_name} · {next.level}</p>
 
               {/* Join Class button */}
@@ -136,15 +148,18 @@ const UpcomingSessionsCard = () => {
         </div>
 
         {/* Remaining sessions */}
-        {sessions.slice(1).map(s => (
+        {sessions.slice(1).map(s => {
+          const l = convertDateTimeToTimezone(s.session_date, s.start_time, s.timezone || "Africa/Cairo", userTz);
+          return (
           <div key={s.session_id} className="flex items-center justify-between px-2 py-2 rounded-lg hover:bg-accent/30 transition-colors">
             <div>
-              <p className="text-sm font-medium text-foreground">{formatDate(s.session_date)}</p>
-              <p className="text-xs text-muted-foreground">{formatTime(s.start_time)} · {s.group_name}</p>
+              <p className="text-sm font-medium text-foreground">{formatDate(l.dateStr)}</p>
+              <p className="text-xs text-muted-foreground">{l.timeFormatted} · {s.group_name}</p>
             </div>
-            <span className="text-xs text-muted-foreground">In {daysUntil(s.session_date)}d</span>
+            <span className="text-xs text-muted-foreground">In {daysUntil(l.dateStr)}d</span>
           </div>
-        ))}
+          );
+        })}
       </CardContent>
     </Card>
   );

@@ -9,6 +9,8 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { Check, X, RefreshCw, CalendarPlus, Loader2 } from "lucide-react";
 import { TRIAL_CONFIRMATION_EMAIL_ENABLED } from "@/lib/siteConfig";
+import { convertDateTimeToTimezone } from "@/lib/admin-utils";
+import { getAdminTimezone } from "@/lib/viewerTimezone";
 
 interface TrialBooking {
   id: string;
@@ -194,12 +196,21 @@ const TrialRequestsPanel = () => {
               </TableHeader>
               <TableBody>
                 {bookings.map((b) => {
-                  const dayTime = b.day_of_week != null && b.start_time
+                  const adminTz = getAdminTimezone();
+                  const srcTz = (b as any).timezone || "Africa/Cairo";
+                  const lcl = (b.trial_date && b.start_time)
+                    ? convertDateTimeToTimezone(b.trial_date, b.start_time, srcTz, adminTz)
+                    : null;
+                  const dayTime = lcl
+                    ? `${lcl.weekday} ${lcl.timeFormatted}`
+                    : (b.day_of_week != null && b.start_time
                     ? `${DAY_NAMES[b.day_of_week]} ${formatTime12h(b.start_time)}`
-                    : "â";
-                  const trialDate = b.trial_date
-                    ? new Date(b.trial_date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                    : "â";
+                    : "—");
+                  const trialDate = lcl
+                    ? new Date(lcl.dateStr + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                    : (b.trial_date
+                        ? new Date(b.trial_date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                        : "—");
                   const bookedAt = new Date(b.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
                   return (
