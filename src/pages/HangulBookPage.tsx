@@ -340,7 +340,7 @@ function Page({ children, dir = "ltr" }: { children: React.ReactNode; dir?: "ltr
       style={{
         width:"210mm", minHeight:"297mm", padding:"14mm 13mm",
         boxSizing:"border-box", background:"#fff",
-        position:"relative", overflow:"hidden",
+        position:"relative",
         pageBreakAfter:"always", breakAfter:"page",
         direction: dir,
       }}
@@ -411,7 +411,7 @@ function ConsCard({ c, lang }: { c: typeof CONSONANTS[0]; lang: Lang }) {
           {d.ex.map((ex, i) => (
             <div key={i} style={{
               background:BK2, borderRadius:"5px",
-              padding:"3px 7px", fontSize:"9px", color:"#fff",
+              padding:"3px 7px", fontSize:"10px", color:"#fff",
             }}>
               <span style={{ color:Y, fontWeight:800 }}>{ex.k}</span>
               {" "}({ex.r}) — {ex.m}
@@ -459,7 +459,7 @@ function VowCard({ v, lang }: { v: typeof VOWELS[0]; lang: Lang }) {
           {d.ex.map((ex, i) => (
             <div key={i} style={{
               background:BK2, borderRadius:"5px",
-              padding:"2px 6px", fontSize:"9px", color:"#fff",
+              padding:"2px 6px", fontSize:"10px", color:"#fff",
             }}>
               <span style={{ color:Y, fontWeight:800 }}>{ex.k}</span> — {ex.m}
             </div>
@@ -506,7 +506,7 @@ function HistoryAr() {
         <Photo src={PHOTOS.palaceGate} alt="Gyeongbokgung Palace Gate" h={90} radius={10} overlay />
         <div style={{ display:"flex", flexDirection:"column", gap:"6px", alignItems:"center", justifyContent:"center", background:BK, borderRadius:"10px", padding:"8px" }}>
           <PalaceRoofIcon size={48} color={Y} />
-          <div style={{ fontSize:"9px", color:"#aaa", textAlign:"center" }}>قصر كيونغبوككيونغ</div>
+          <div style={{ fontSize:"10px", color:"#aaa", textAlign:"center" }}>قصر كيونغبوككيونغ</div>
         </div>
       </div>
       <DancheongBorder />
@@ -525,7 +525,7 @@ function HistoryAr() {
           <div key={i} style={{ display:"flex", gap:"12px", marginBottom:"10px", alignItems:"flex-start", flexDirection:"row-reverse" }}>
             <div style={{ width:"36px", height:"36px", background:Y, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px", flexShrink:0, zIndex:1 }}>{item.icon}</div>
             <div style={{ flex:1, background: i===2?"#111":"#f9f9f9", border:`2px solid ${i===2?Y:"#e5e5e5"}`, borderRadius:"10px", padding:"10px 12px" }}>
-              <div style={{ fontSize:"9px", fontWeight:700, color:i===2?Y:"#888", marginBottom:"2px" }}>{item.era}</div>
+              <div style={{ fontSize:"10px", fontWeight:700, color:i===2?Y:"#888", marginBottom:"2px" }}>{item.era}</div>
               <div style={{ fontSize:"11px", fontWeight:800, color:i===2?"#fff":BK, marginBottom:"4px" }}>{item.title}</div>
               <div style={{ fontSize:"10px", color:i===2?"#ccc":"#555", lineHeight:1.8 }}>{item.body}</div>
             </div>
@@ -560,7 +560,7 @@ function SejongAr() {
           <Photo src={PHOTOS.palace} alt="Gyeongbokgung Palace" h={100} radius={0} />
           <div style={{ background:"#1a1a00", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"6px", flex:1 }}>
             <div style={{ fontSize:"18px", fontWeight:900, color:Y, direction:"ltr" }}>세종대왕</div>
-            <div style={{ fontSize:"8px", color:"#888", marginTop:"1px" }}>سيجونغ الكبير</div>
+            <div style={{ fontSize:"10px", color:"#888", marginTop:"1px" }}>سيجونغ الكبير</div>
           </div>
         </div>
         {/* Bio */}
@@ -579,7 +579,7 @@ function SejongAr() {
             ].map(r=>(
               <div key={r.label} style={{ display:"flex", gap:"8px", alignItems:"center" }}>
                 <span style={{ fontSize:"13px" }}>{r.icon}</span>
-                <span style={{ fontSize:"9px", color:"#888", minWidth:"60px" }}>{r.label}</span>
+                <span style={{ fontSize:"10px", color:"#888", minWidth:"60px" }}>{r.label}</span>
                 <span style={{ fontSize:"10px", color:"#ddd", fontWeight:600 }}>{r.val}</span>
               </div>
             ))}
@@ -602,7 +602,7 @@ function SejongAr() {
             <div key={c.title} style={{ background:YL, borderRadius:"10px", padding:"10px", border:`1px solid ${Y}` }}>
               <div style={{ fontSize:"24px", marginBottom:"5px" }}>{c.icon}</div>
               <div style={{ fontWeight:800, fontSize:"10px", color:BK, marginBottom:"4px" }}>{c.title}</div>
-              <div style={{ fontSize:"9px", color:"#555", lineHeight:1.7 }}>{c.body}</div>
+              <div style={{ fontSize:"10px", color:"#555", lineHeight:1.7 }}>{c.body}</div>
             </div>
           ))}
         </div>
@@ -635,12 +635,12 @@ function CultureAr() {
           <Photo src={PHOTOS.seoulNeon} alt="Seoul neon" h={75} radius={0} overlay />
           <div style={{ padding:"10px" }}>
             <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>المسلسلات الكورية (K-Drama)</div>
-            <div style={{ fontSize:"9px", color:"#ccc", lineHeight:1.7 }}>
+            <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.7 }}>
               من أكثر المحتوى مشاهدةً على Netflix عالمياً. «لعبة الحبّار» غيّرت مفهوم الدراما عالمياً!
             </div>
             <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
               {["❤️ رومانسي", "🕵️ إثارة", "😂 كوميدي"].map(t=>(
-                <span key={t} style={{ background:"#222", color:Y, fontSize:"8px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
+                <span key={t} style={{ background:"#222", color:Y, fontSize:"10px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
               ))}
             </div>
           </div>
@@ -651,12 +651,12 @@ function CultureAr() {
           <Photo src={PHOTOS.kpopCrowd} alt="K-Pop concert" h={75} radius={0} overlay />
           <div style={{ padding:"10px" }}>
             <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>موسيقى البوب الكوري (K-Pop)</div>
-            <div style={{ fontSize:"9px", color:"#ccc", lineHeight:1.7 }}>
+            <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.7 }}>
               BTS، BLACKPINK، Stray Kids — نجوم عالميون. K-Pop ظاهرة ثقافية شاملة!
             </div>
             <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
               {["BTS 💜", "BLACKPINK 🖤", "Stray Kids 🐺"].map(t=>(
-                <span key={t} style={{ background:BK, color:Y, fontSize:"8px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
+                <span key={t} style={{ background:BK, color:Y, fontSize:"10px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
               ))}
             </div>
           </div>
@@ -672,7 +672,7 @@ function CultureAr() {
           </div>
           <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
             {["🥬 김치","🍚 비빔밥","🌶️ 떡볶이","🥩 삼겹살"].map(t=>(
-              <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
+              <span key={t} style={{ background:BK, color:Y, fontSize:"10px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
             ))}
           </div>
           </div>
@@ -687,7 +687,7 @@ function CultureAr() {
           </div>
           <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
             {["👴 احترام الكبار", "👨‍👩‍👧 الأسرة أولاً", "📚 التعليم مقدس"].map(t=>(
-              <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
+              <span key={t} style={{ background:BK, color:Y, fontSize:"10px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
             ))}
           </div>
         </div>
@@ -758,7 +758,7 @@ function CourseAr() {
           <div key={s.title} style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"10px", padding:"10px", textAlign:"center" }}>
             <div style={{ fontSize:"24px", marginBottom:"4px" }}>{s.icon}</div>
             <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>{s.title}</div>
-            <div style={{ fontSize:"9px", color:"#666" }}>{s.sub}</div>
+            <div style={{ fontSize:"10px", color:"#666" }}>{s.sub}</div>
           </div>
         ))}
       </div>
@@ -883,7 +883,7 @@ function WelcomeAr() {
               <div key={i} style={{fontSize:"24px",fontWeight:900,color:BK}}>{item.label}</div>
             ):(
               <div key={i} style={{textAlign:"center"}}>
-                <div style={{fontSize:"9px",color:"#555",marginBottom:"3px",direction:"rtl"}}>{item.label}</div>
+                <div style={{fontSize:"10px",color:"#555",marginBottom:"3px",direction:"rtl"}}>{item.label}</div>
                 <div style={{background:item.bg,borderRadius:"10px",padding:"8px 14px",fontSize:"40px",fontWeight:900,color:item.fg,lineHeight:1,border:item.bg==="transparent"?"none":`2px solid ${Y}`}}>{item.char}</div>
                 {item.sub&&<div style={{fontSize:"10px",color:"#555",marginTop:"3px"}}>{item.sub}</div>}
               </div>
@@ -897,8 +897,8 @@ function WelcomeAr() {
       <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"5px" }}>
         {plan.map((p,i)=>(
           <div key={i} style={{ background:i===6?Y:BK, borderRadius:"8px", padding:"7px 3px", textAlign:"center" }}>
-            <div style={{ fontSize:"9px", fontWeight:800, color:i===6?BK:Y }}>{p.d}</div>
-            <div style={{ fontSize:"8px", color:i===6?BK2:"#aaa", marginTop:"3px", lineHeight:1.4 }}>{p.t}</div>
+            <div style={{ fontSize:"10px", fontWeight:800, color:i===6?BK:Y }}>{p.d}</div>
+            <div style={{ fontSize:"10px", color:i===6?BK2:"#aaa", marginTop:"3px", lineHeight:1.4 }}>{p.t}</div>
           </div>
         ))}
       </div>
@@ -948,7 +948,7 @@ function SyllableAr() {
           <div key={r.n} style={{ background:BK, borderRadius:"10px", padding:"10px" }}>
             <div style={{ fontSize:"22px", color:Y, fontWeight:900 }}>{r.n}</div>
             <div style={{ fontSize:"10px", fontWeight:700, color:"#fff", lineHeight:1.6, marginBottom:"3px" }}>{r.t}</div>
-            <div style={{ fontSize:"9px", color:"#aaa", marginBottom:"4px" }}>{r.n2}</div>
+            <div style={{ fontSize:"10px", color:"#aaa", marginBottom:"4px" }}>{r.n2}</div>
             <div style={{ fontSize:"14px", color:Y, fontWeight:800 }}>{r.ex}</div>
           </div>
         ))}
@@ -957,10 +957,10 @@ function SyllableAr() {
       <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:"5px" }}>
         {SYLLABLES.map(s=>(
           <div key={s.b} style={{ background:BK, borderRadius:"8px", padding:"7px 4px", textAlign:"center" }}>
-            <div style={{ fontSize:"8px", color:"#555", direction:"ltr" }}>{s.c}+{s.v}</div>
+            <div style={{ fontSize:"10px", color:"#555", direction:"ltr" }}>{s.c}+{s.v}</div>
             <div style={{ fontSize:"32px", fontWeight:900, color:Y, lineHeight:1 }}>{s.b}</div>
-            <div style={{ fontSize:"9px", color:"#aaa" }}>{s.r}</div>
-            <div style={{ fontSize:"8px", color:"#888" }}>{s.ar}</div>
+            <div style={{ fontSize:"10px", color:"#aaa" }}>{s.r}</div>
+            <div style={{ fontSize:"10px", color:"#888" }}>{s.ar}</div>
           </div>
         ))}
       </div>
@@ -1003,7 +1003,7 @@ function BatchimAr() {
                   {b.bot && <div style={{ fontSize:"11px", color:BK, fontWeight:900, borderTop:"1px solid rgba(0,0,0,0.2)", marginTop:"3px", paddingTop:"3px", width:"100%", textAlign:"center" }}>{b.bot}</div>}
                 </div>
                 <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginTop:"5px" }}>{b.label}</div>
-                <div style={{ fontSize:"8px", color:"#777", direction:"rtl" }}>{b.note}</div>
+                <div style={{ fontSize:"10px", color:"#777", direction:"rtl" }}>{b.note}</div>
               </div>
             ))}
           </div>
@@ -1020,7 +1020,7 @@ function BatchimAr() {
                 <div key={s} style={{ background:Y, color:BK, fontWeight:900, fontSize:"14px", width:"32px", height:"32px", borderRadius:"8px", display:"flex", alignItems:"center", justifyContent:"center" }}>{s}</div>
               ))}
             </div>
-            <div style={{ fontSize:"9px", color:"#aaa", marginTop:"5px" }}>الأصوات النهائية السبعة</div>
+            <div style={{ fontSize:"10px", color:"#aaa", marginTop:"5px" }}>الأصوات النهائية السبعة</div>
           </div>
         </div>
       </div>
@@ -1038,7 +1038,7 @@ function BatchimAr() {
             </div>
             <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
               {row.ex.map(e=>(
-                <span key={e.k} style={{ background:BK2, color:"#ddd", fontSize:"9px", padding:"2px 5px", borderRadius:"4px", direction:"rtl" }}>
+                <span key={e.k} style={{ background:BK2, color:"#ddd", fontSize:"10px", padding:"2px 5px", borderRadius:"4px", direction:"rtl" }}>
                   <span style={{color:Y,fontWeight:800}}>{e.k}</span> {e.r} — {e.m}
                 </span>
               ))}
@@ -1063,9 +1063,9 @@ function BatchimAr() {
             ].map(e=>(
               <div key={e.w} style={{ background:"#1a1a1a", borderRadius:"8px", padding:"8px 10px", direction:"ltr" }}>
                 <div style={{ fontSize:"16px", color:Y, fontWeight:900 }}>{e.w}</div>
-                <div style={{ fontSize:"8px", color:"#666", marginTop:"2px" }}>{e.before}</div>
-                <div style={{ fontSize:"9px", color:"#4ade80", fontWeight:700 }}>{e.after}</div>
-                <div style={{ fontSize:"8px", color:"#888", direction:"rtl" }}>{e.m}</div>
+                <div style={{ fontSize:"10px", color:"#666", marginTop:"2px" }}>{e.before}</div>
+                <div style={{ fontSize:"10px", color:"#4ade80", fontWeight:700 }}>{e.after}</div>
+                <div style={{ fontSize:"10px", color:"#888", direction:"rtl" }}>{e.m}</div>
               </div>
             ))}
           </div>
@@ -1110,7 +1110,7 @@ function DoubleBatchimAr() {
               </div>
             </div>
           </div>
-          <div style={{ textAlign:"center", fontSize:"9px", color:"#aaa", marginTop:"5px" }}>닭 = داك (الدجاجة)</div>
+          <div style={{ textAlign:"center", fontSize:"10px", color:"#aaa", marginTop:"5px" }}>닭 = داك (الدجاجة)</div>
         </div>
 
         <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
@@ -1127,7 +1127,7 @@ function DoubleBatchimAr() {
               <div key={e.w} style={{ background:BK, borderRadius:"6px", padding:"6px 10px", display:"flex", justifyContent:"space-between", alignItems:"center", direction:"ltr" }}>
                 <span style={{ fontSize:"16px", color:Y, fontWeight:900 }}>{e.w}</span>
                 <span style={{ fontSize:"11px", color:"#4ade80", fontWeight:700 }}>→ [{e.r}]</span>
-                <span style={{ fontSize:"9px", color:"#888", direction:"rtl" }}>{e.m}</span>
+                <span style={{ fontSize:"10px", color:"#888", direction:"rtl" }}>{e.m}</span>
               </div>
             ))}
           </div>
@@ -1145,12 +1145,12 @@ function DoubleBatchimAr() {
             textAlign:"center",
           }}>
             <div style={{ fontSize:"22px", color:Y, fontWeight:900, direction:"ltr", letterSpacing:"2px" }}>{g.chars}</div>
-            <div style={{ fontSize:"9px", color:"#aaa", marginTop:"2px" }}>تُنطق كـ</div>
+            <div style={{ fontSize:"10px", color:"#aaa", marginTop:"2px" }}>تُنطق كـ</div>
             <div style={{ background:Y, color:BK, fontWeight:900, fontSize:"18px", borderRadius:"6px", padding:"2px 8px", margin:"4px auto", display:"inline-block", direction:"ltr" }}>{g.read}</div>
             <div style={{ borderTop:`1px solid ${Y}33`, marginTop:"6px", paddingTop:"6px" }}>
               <div style={{ fontSize:"18px", color:Y, fontWeight:900, direction:"ltr" }}>{g.ex}</div>
-              <div style={{ fontSize:"9px", color:"#aaa" }}>{g.rom}</div>
-              <div style={{ fontSize:"9px", color:"#777" }}>{g.m}</div>
+              <div style={{ fontSize:"10px", color:"#aaa" }}>{g.rom}</div>
+              <div style={{ fontSize:"10px", color:"#777" }}>{g.m}</div>
             </div>
           </div>
         ))}
@@ -1181,7 +1181,7 @@ function KdramaAr() {
               <div style={{ fontSize:"22px", fontWeight:900, color:BK, background:Y, display:"inline-block", padding:"1px 8px", borderRadius:"6px", marginBottom:"2px", direction:"ltr" }}>{v.k}</div>
               <div style={{ fontSize:"10px", fontWeight:700, color:"#777", direction:"ltr" }}>{v.r}</div>
               <div style={{ fontSize:"11px", color:BK, fontWeight:700 }}>{v.m}</div>
-              <div style={{ fontSize:"9px", color:"#888", fontStyle:"italic" }}>{v.note}</div>
+              <div style={{ fontSize:"10px", color:"#888", fontStyle:"italic" }}>{v.note}</div>
             </div>
           </div>
         ))}
@@ -1272,7 +1272,7 @@ function AnswerAr() {
           {CONSONANTS.map(c=>(
             <div key={c.char} style={{ textAlign:"center" }}>
               <div style={{ fontSize:"22px", color:Y, fontWeight:900, lineHeight:1 }}>{c.char}</div>
-              <div style={{ fontSize:"8px", color:"#aaa" }}>{c.roman}</div>
+              <div style={{ fontSize:"10px", color:"#aaa" }}>{c.roman}</div>
               <div style={{ fontSize:"12px" }}>{c.emoji}</div>
             </div>
           ))}
@@ -1283,7 +1283,7 @@ function AnswerAr() {
           {VOWELS.map(v=>(
             <div key={v.char} style={{ textAlign:"center" }}>
               <div style={{ fontSize:"20px", color:"#fff9c4", fontWeight:900, lineHeight:1 }}>{v.char}</div>
-              <div style={{ fontSize:"8px", color:"#aaa" }}>{v.roman}</div>
+              <div style={{ fontSize:"10px", color:"#aaa" }}>{v.roman}</div>
               <div style={{ fontSize:"11px" }}>{v.emoji}</div>
             </div>
           ))}
@@ -1316,7 +1316,7 @@ function HistoryEn() {
         <Photo src={PHOTOS.hanokVillage} alt="Bukchon Hanok Village" h={90} radius={10} overlay />
         <div style={{ display:"flex", flexDirection:"column", gap:"6px", alignItems:"center", justifyContent:"center", background:BK, borderRadius:"10px", padding:"8px" }}>
           <PalaceRoofIcon size={48} color={Y} />
-          <div style={{ fontSize:"9px", color:"#aaa", textAlign:"center" }}>Joseon Dynasty</div>
+          <div style={{ fontSize:"10px", color:"#aaa", textAlign:"center" }}>Joseon Dynasty</div>
         </div>
       </div>
       <DancheongBorder />
@@ -1333,7 +1333,7 @@ function HistoryEn() {
           <div key={i} style={{ display:"flex", gap:"12px", marginBottom:"10px", alignItems:"flex-start" }}>
             <div style={{ width:"36px", height:"36px", background:Y, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px", flexShrink:0, zIndex:1 }}>{item.icon}</div>
             <div style={{ flex:1, background: i===2 ? "#111" : "#f9f9f9", border:`2px solid ${i===2?Y:"#e5e5e5"}`, borderRadius:"10px", padding:"10px 12px" }}>
-              <div style={{ fontSize:"9px", fontWeight:700, color:i===2?Y:"#888", marginBottom:"2px" }}>{item.era}</div>
+              <div style={{ fontSize:"10px", fontWeight:700, color:i===2?Y:"#888", marginBottom:"2px" }}>{item.era}</div>
               <div style={{ fontSize:"11px", fontWeight:800, color:i===2?"#fff":BK, marginBottom:"4px" }}>{item.title}</div>
               <div style={{ fontSize:"10px", color:i===2?"#ccc":"#555", lineHeight:1.8 }}>{item.body}</div>
             </div>
@@ -1365,7 +1365,7 @@ function SejongEn() {
           <Photo src={PHOTOS.palaceGate} alt="Gyeongbokgung Gate" h={100} radius={0} />
           <div style={{ background:"#1a1a00", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"6px", flex:1 }}>
             <div style={{ fontSize:"18px", fontWeight:900, color:Y }}>세종대왕</div>
-            <div style={{ fontSize:"8px", color:"#888", marginTop:"1px" }}>Sejong the Great</div>
+            <div style={{ fontSize:"10px", color:"#888", marginTop:"1px" }}>Sejong the Great</div>
           </div>
         </div>
         <div style={{ color:"#fff" }}>
@@ -1383,7 +1383,7 @@ function SejongEn() {
             ].map(r=>(
               <div key={r.label} style={{ display:"flex", gap:"8px", alignItems:"center" }}>
                 <span style={{ fontSize:"13px" }}>{r.icon}</span>
-                <span style={{ fontSize:"9px", color:"#888", minWidth:"70px" }}>{r.label}</span>
+                <span style={{ fontSize:"10px", color:"#888", minWidth:"70px" }}>{r.label}</span>
                 <span style={{ fontSize:"10px", color:"#ddd", fontWeight:600 }}>{r.val}</span>
               </div>
             ))}
@@ -1405,7 +1405,7 @@ function SejongEn() {
             <div key={c.title} style={{ background:YL, borderRadius:"10px", padding:"10px", border:`1px solid ${Y}` }}>
               <div style={{ fontSize:"24px", marginBottom:"5px" }}>{c.icon}</div>
               <div style={{ fontWeight:800, fontSize:"10px", color:BK, marginBottom:"4px" }}>{c.title}</div>
-              <div style={{ fontSize:"9px", color:"#555", lineHeight:1.7 }}>{c.body}</div>
+              <div style={{ fontSize:"10px", color:"#555", lineHeight:1.7 }}>{c.body}</div>
             </div>
           ))}
         </div>
@@ -1435,12 +1435,12 @@ function CultureEn() {
           <Photo src={PHOTOS.seoulNight} alt="Seoul night skyline" h={75} radius={0} overlay />
           <div style={{ padding:"10px" }}>
             <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>K-Drama</div>
-            <div style={{ fontSize:"9px", color:"#ccc", lineHeight:1.7 }}>
+            <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.7 }}>
               Among Netflix's most-watched content. Squid Game changed global TV. Korean storytelling captures hearts!
             </div>
             <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
               {["❤️ Romance","🕵️ Thriller","😂 Comedy"].map(t=>(
-                <span key={t} style={{ background:"#222", color:Y, fontSize:"8px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
+                <span key={t} style={{ background:"#222", color:Y, fontSize:"10px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
               ))}
             </div>
           </div>
@@ -1450,12 +1450,12 @@ function CultureEn() {
           <Photo src={PHOTOS.kpopCrowd} alt="K-Pop concert crowd" h={75} radius={0} overlay />
           <div style={{ padding:"10px" }}>
             <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>K-Pop</div>
-            <div style={{ fontSize:"9px", color:"#ccc", lineHeight:1.7 }}>
+            <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.7 }}>
               BTS, BLACKPINK, Stray Kids — global superstars. K-Pop is dance, fashion, art, and worldwide fandom!
             </div>
             <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
               {["BTS 💜","BLACKPINK 🖤","Stray Kids 🐺"].map(t=>(
-                <span key={t} style={{ background:BK, color:Y, fontSize:"8px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
+                <span key={t} style={{ background:BK, color:Y, fontSize:"10px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
               ))}
             </div>
           </div>
@@ -1465,12 +1465,12 @@ function CultureEn() {
           <Photo src={PHOTOS.koreanFood} alt="Korean food" h={65} radius={0} />
           <div style={{ padding:"10px" }}>
           <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"4px" }}>Korean Food</div>
-          <div style={{ fontSize:"9px", color:"#555", lineHeight:1.7 }}>
+          <div style={{ fontSize:"10px", color:"#555", lineHeight:1.7 }}>
             Kimchi, Bibimbap, Tteokbokki — foods that surprise and addict you! Korean cuisine balances sour, spicy, and umami.
           </div>
           <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
             {["🥬 김치","🍚 비빔밥","🌶️ 떡볶이","🥩 삼겹살"].map(t=>(
-              <span key={t} style={{ background:BK, color:Y, fontSize:"8px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
+              <span key={t} style={{ background:BK, color:Y, fontSize:"10px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
             ))}
           </div>
           </div>
@@ -1484,7 +1484,7 @@ function CultureEn() {
           </div>
           <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
             {["👴 Respect Elders","👨‍👩‍👧 Family First","📚 Education Sacred"].map(t=>(
-              <span key={t} style={{ background:BK, color:Y, fontSize:"9px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
+              <span key={t} style={{ background:BK, color:Y, fontSize:"10px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
             ))}
           </div>
         </div>
@@ -1553,7 +1553,7 @@ function CourseEn() {
           <div key={s.title} style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"10px", padding:"10px", textAlign:"center" }}>
             <div style={{ fontSize:"24px", marginBottom:"4px" }}>{s.icon}</div>
             <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>{s.title}</div>
-            <div style={{ fontSize:"9px", color:"#666" }}>{s.sub}</div>
+            <div style={{ fontSize:"10px", color:"#666" }}>{s.sub}</div>
           </div>
         ))}
       </div>
@@ -1670,7 +1670,7 @@ function WelcomeEn() {
               <div key={i} style={{fontSize:"24px",fontWeight:900,color:BK}}>{item.label}</div>
             ):(
               <div key={i} style={{textAlign:"center"}}>
-                <div style={{fontSize:"9px",color:"#555",marginBottom:"3px"}}>{item.label}</div>
+                <div style={{fontSize:"10px",color:"#555",marginBottom:"3px"}}>{item.label}</div>
                 <div style={{background:item.bg,borderRadius:"10px",padding:"8px 14px",fontSize:"40px",fontWeight:900,color:item.fg,lineHeight:1,border:`2px solid ${Y}`}}>{item.char}</div>
                 {item.sub&&<div style={{fontSize:"10px",color:"#555",marginTop:"3px"}}>{item.sub}</div>}
               </div>
@@ -1683,8 +1683,8 @@ function WelcomeEn() {
       <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"5px" }}>
         {plan.map((p,i)=>(
           <div key={i} style={{ background:i===6?Y:BK, borderRadius:"8px", padding:"7px 3px", textAlign:"center" }}>
-            <div style={{ fontSize:"9px", fontWeight:800, color:i===6?BK:Y }}>{p.d}</div>
-            <div style={{ fontSize:"8px", color:i===6?BK2:"#aaa", marginTop:"3px", lineHeight:1.4 }}>{p.t}</div>
+            <div style={{ fontSize:"10px", fontWeight:800, color:i===6?BK:Y }}>{p.d}</div>
+            <div style={{ fontSize:"10px", color:i===6?BK2:"#aaa", marginTop:"3px", lineHeight:1.4 }}>{p.t}</div>
           </div>
         ))}
       </div>
@@ -1734,7 +1734,7 @@ function SyllableEn() {
           <div key={r.n} style={{ background:BK, borderRadius:"10px", padding:"10px" }}>
             <div style={{ fontSize:"22px", color:Y, fontWeight:900 }}>{r.n}</div>
             <div style={{ fontSize:"10px", fontWeight:700, color:"#fff", lineHeight:1.6, marginBottom:"3px" }}>{r.t}</div>
-            <div style={{ fontSize:"9px", color:"#aaa", marginBottom:"4px" }}>{r.n2}</div>
+            <div style={{ fontSize:"10px", color:"#aaa", marginBottom:"4px" }}>{r.n2}</div>
             <div style={{ fontSize:"14px", color:Y, fontWeight:800 }}>{r.ex}</div>
           </div>
         ))}
@@ -1743,10 +1743,10 @@ function SyllableEn() {
       <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:"5px" }}>
         {SYLLABLES.map(s=>(
           <div key={s.b} style={{ background:BK, borderRadius:"8px", padding:"7px 4px", textAlign:"center" }}>
-            <div style={{ fontSize:"8px", color:"#555" }}>{s.c}+{s.v}</div>
+            <div style={{ fontSize:"10px", color:"#555" }}>{s.c}+{s.v}</div>
             <div style={{ fontSize:"32px", fontWeight:900, color:Y, lineHeight:1 }}>{s.b}</div>
-            <div style={{ fontSize:"9px", color:"#aaa" }}>{s.r}</div>
-            <div style={{ fontSize:"8px", color:"#888" }}>{s.en}</div>
+            <div style={{ fontSize:"10px", color:"#aaa" }}>{s.r}</div>
+            <div style={{ fontSize:"10px", color:"#888" }}>{s.en}</div>
           </div>
         ))}
       </div>
@@ -1787,7 +1787,7 @@ function BatchimEn() {
                   {b.bot && <div style={{ fontSize:"11px", color:BK, fontWeight:900, borderTop:"1px solid rgba(0,0,0,0.2)", marginTop:"3px", paddingTop:"3px", width:"100%", textAlign:"center" }}>{b.bot}</div>}
                 </div>
                 <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginTop:"5px" }}>{b.label}</div>
-                <div style={{ fontSize:"8px", color:"#777" }}>{b.note}</div>
+                <div style={{ fontSize:"10px", color:"#777" }}>{b.note}</div>
               </div>
             ))}
           </div>
@@ -1804,7 +1804,7 @@ function BatchimEn() {
                 <div key={s} style={{ background:Y, color:BK, fontWeight:900, fontSize:"13px", padding:"4px 8px", borderRadius:"8px" }}>{s}</div>
               ))}
             </div>
-            <div style={{ fontSize:"9px", color:"#aaa", marginTop:"5px" }}>The 7 final sounds</div>
+            <div style={{ fontSize:"10px", color:"#aaa", marginTop:"5px" }}>The 7 final sounds</div>
           </div>
         </div>
       </div>
@@ -1821,7 +1821,7 @@ function BatchimEn() {
             </div>
             <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
               {row.ex.map(e=>(
-                <span key={e.k} style={{ background:BK2, color:"#ddd", fontSize:"9px", padding:"2px 5px", borderRadius:"4px" }}>
+                <span key={e.k} style={{ background:BK2, color:"#ddd", fontSize:"10px", padding:"2px 5px", borderRadius:"4px" }}>
                   <span style={{color:Y,fontWeight:800}}>{e.k}</span> [{e.r}] {e.m}
                 </span>
               ))}
@@ -1845,9 +1845,9 @@ function BatchimEn() {
             ].map(e=>(
               <div key={e.w} style={{ background:"#1a1a1a", borderRadius:"8px", padding:"8px 10px" }}>
                 <div style={{ fontSize:"16px", color:Y, fontWeight:900 }}>{e.w}</div>
-                <div style={{ fontSize:"8px", color:"#666", marginTop:"2px" }}>{e.wrong}</div>
-                <div style={{ fontSize:"9px", color:"#4ade80", fontWeight:700 }}>{e.right}</div>
-                <div style={{ fontSize:"8px", color:"#888" }}>{e.m}</div>
+                <div style={{ fontSize:"10px", color:"#666", marginTop:"2px" }}>{e.wrong}</div>
+                <div style={{ fontSize:"10px", color:"#4ade80", fontWeight:700 }}>{e.right}</div>
+                <div style={{ fontSize:"10px", color:"#888" }}>{e.m}</div>
               </div>
             ))}
           </div>
@@ -1891,7 +1891,7 @@ function DoubleBatchimEn() {
               </div>
             </div>
           </div>
-          <div style={{ textAlign:"center", fontSize:"9px", color:"#aaa", marginTop:"5px" }}>닭 = dak (chicken) — ㄱ sounds, ㄹ is silent</div>
+          <div style={{ textAlign:"center", fontSize:"10px", color:"#aaa", marginTop:"5px" }}>닭 = dak (chicken) — ㄱ sounds, ㄹ is silent</div>
         </div>
 
         <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
@@ -1908,7 +1908,7 @@ function DoubleBatchimEn() {
               <div key={e.w} style={{ background:BK, borderRadius:"6px", padding:"6px 10px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                 <span style={{ fontSize:"16px", color:Y, fontWeight:900 }}>{e.w}</span>
                 <span style={{ fontSize:"11px", color:"#4ade80", fontWeight:700 }}>{e.r}</span>
-                <span style={{ fontSize:"9px", color:"#888" }}>{e.m}</span>
+                <span style={{ fontSize:"10px", color:"#888" }}>{e.m}</span>
               </div>
             ))}
           </div>
@@ -1924,12 +1924,12 @@ function DoubleBatchimEn() {
             border:`2px solid ${Y}44`, textAlign:"center",
           }}>
             <div style={{ fontSize:"22px", color:Y, fontWeight:900, letterSpacing:"2px" }}>{g.chars}</div>
-            <div style={{ fontSize:"9px", color:"#aaa", marginTop:"2px" }}>sounds like</div>
+            <div style={{ fontSize:"10px", color:"#aaa", marginTop:"2px" }}>sounds like</div>
             <div style={{ background:Y, color:BK, fontWeight:900, fontSize:"18px", borderRadius:"6px", padding:"2px 8px", margin:"4px auto", display:"inline-block" }}>{g.read}</div>
             <div style={{ borderTop:`1px solid ${Y}33`, marginTop:"6px", paddingTop:"6px" }}>
               <div style={{ fontSize:"18px", color:Y, fontWeight:900 }}>{g.ex}</div>
-              <div style={{ fontSize:"9px", color:"#aaa" }}>[{g.rom}]</div>
-              <div style={{ fontSize:"9px", color:"#777" }}>{g.m}</div>
+              <div style={{ fontSize:"10px", color:"#aaa" }}>[{g.rom}]</div>
+              <div style={{ fontSize:"10px", color:"#777" }}>{g.m}</div>
             </div>
           </div>
         ))}
@@ -1960,7 +1960,7 @@ function KdramaEn() {
               <div style={{ fontSize:"22px", fontWeight:900, color:BK, background:Y, display:"inline-block", padding:"1px 8px", borderRadius:"6px", marginBottom:"2px" }}>{v.k}</div>
               <div style={{ fontSize:"10px", fontWeight:700, color:"#777" }}>{v.r}</div>
               <div style={{ fontSize:"11px", color:BK, fontWeight:700 }}>{v.m}</div>
-              <div style={{ fontSize:"9px", color:"#888", fontStyle:"italic" }}>{v.note}</div>
+              <div style={{ fontSize:"10px", color:"#888", fontStyle:"italic" }}>{v.note}</div>
             </div>
           </div>
         ))}
@@ -2051,7 +2051,7 @@ function AnswerEn() {
           {CONSONANTS.map(c=>(
             <div key={c.char} style={{ textAlign:"center" }}>
               <div style={{ fontSize:"22px", color:Y, fontWeight:900, lineHeight:1 }}>{c.char}</div>
-              <div style={{ fontSize:"8px", color:"#aaa" }}>{c.roman}</div>
+              <div style={{ fontSize:"10px", color:"#aaa" }}>{c.roman}</div>
               <div style={{ fontSize:"12px" }}>{c.emoji}</div>
             </div>
           ))}
@@ -2062,7 +2062,7 @@ function AnswerEn() {
           {VOWELS.map(v=>(
             <div key={v.char} style={{ textAlign:"center" }}>
               <div style={{ fontSize:"20px", color:"#fff9c4", fontWeight:900, lineHeight:1 }}>{v.char}</div>
-              <div style={{ fontSize:"8px", color:"#aaa" }}>{v.roman}</div>
+              <div style={{ fontSize:"10px", color:"#aaa" }}>{v.roman}</div>
               <div style={{ fontSize:"11px" }}>{v.emoji}</div>
             </div>
           ))}
@@ -2096,6 +2096,8 @@ export default function HangulBookPage() {
   return (
     <>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Cairo:wght@400;700;900&display=swap');
+
         @media print {
           body * { visibility: hidden !important; }
           #hangul-book, #hangul-book * { visibility: visible !important; }
@@ -2107,7 +2109,28 @@ export default function HangulBookPage() {
         @media screen {
           .book-page { box-shadow: 0 4px 24px rgba(0,0,0,0.15); margin: 0 auto 28px; }
         }
-        #hangul-book { background: #e5e5e5; }
+        #hangul-book {
+          background: #e5e5e5;
+          font-family: 'Cairo', 'Noto Sans KR', system-ui, sans-serif;
+          counter-reset: book-page;
+        }
+        .book-page {
+          counter-increment: book-page;
+        }
+        .book-page::after {
+          content: counter(book-page);
+          position: absolute;
+          bottom: 7px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-size: 9px;
+          font-weight: 700;
+          color: rgba(255,255,255,0.65);
+          font-family: 'Noto Sans KR', sans-serif;
+          letter-spacing: 1px;
+          pointer-events: none;
+          z-index: 5;
+        }
       `}</style>
 
       {/* Top bar */}
