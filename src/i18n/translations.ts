@@ -13,7 +13,7 @@ export const translations = {
     hero: {
       badge: "⭐ 4.9 · Rated by 200+ students worldwide",
       title1: "Learn Korean —",
-      title2: "Live Online Classes",
+      title2: "From Anywhere in the World",
       subtitle: "Live Korean classes with a certified teacher. Join 500+ K-drama fans who no longer need subtitles — Arabic support available.",
       startNow: "Book a Free Class",
       viewPricing: "See Pricing",
