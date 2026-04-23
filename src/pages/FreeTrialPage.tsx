@@ -160,7 +160,7 @@ const FreeTrialPage = () => {
                   <div className="flex items-center gap-2">
                     <div className="flex -space-x-2">
                       {["S","M","H","Y","A"].map((l) => (
-                        <div key={l} className="w-8 h-8 rounded-full bg-primary/25 border-2 border-background flex items-center justify-center text-[10px] font-black text-foreground">{l}</div>
+                        <div key={l} className="w-8 h-8 rounded-full bg-foreground border-2 border-background flex items-center justify-center text-[10px] font-black text-background">{l}</div>
                       ))}
                     </div>
                     <div className="text-start">
