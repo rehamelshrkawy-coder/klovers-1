@@ -555,13 +555,9 @@ function HistoryAr() {
     <Page dir="rtl">
       <SHead title="تاريخ اللغة الكورية" subtitle="رحلة ٢٠٠٠ عام من الكلمات والحكايات" />
 
-      {/* Photo + icon header */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 90px", gap:"8px", marginBottom:"10px" }}>
-        <Photo src={PHOTOS.palaceGate} alt="Gyeongbokgung Palace Gate" h={90} radius={10} overlay />
-        <div style={{ display:"flex", flexDirection:"column", gap:"6px", alignItems:"center", justifyContent:"center", background:BK, borderRadius:"10px", padding:"8px" }}>
-          <PalaceRoofIcon size={48} color={Y} />
-          <div style={{ fontSize:"11px", color:"#aaa", textAlign:"center" }}>قصر كيونغبوككيونغ</div>
-        </div>
+      {/* Photo header */}
+      <div style={{ marginBottom:"10px", borderRadius:"10px", overflow:"hidden" }}>
+        <Photo src={PHOTOS.palaceGate} alt="Gyeongbokgung Palace Gate" h={110} radius={10} overlay />
       </div>
       <DancheongBorder />
 
@@ -787,11 +783,14 @@ function CourseAr() {
             <div style={{
               background: b.current ? BK : "#e0e0e0",
               color: b.current ? Y : "#999",
-              fontWeight:900, fontSize:"18px",
+              fontWeight:900,
               width:"40px", height:"40px", borderRadius:"8px",
-              display:"flex", alignItems:"center", justifyContent:"center",
-              flexShrink:0,
-            }}>الكتاب {b.n}</div>
+              display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+              flexShrink:0, gap:"1px",
+            }}>
+              <span style={{ fontSize:"9px", fontWeight:700, opacity:0.7 }}>كتاب</span>
+              <span style={{ fontSize:"18px", lineHeight:1 }}>{b.n}</span>
+            </div>
             <div style={{ fontSize:"22px", flexShrink:0 }}>{b.icon}</div>
             <div style={{ flex:1 }}>
               <div style={{ fontWeight:800, fontSize:"12px", color: b.current ? BK : "#444" }}>{b.title}</div>
@@ -1505,13 +1504,9 @@ function HistoryEn() {
     <Page dir="ltr">
       <SHead title="The History of the Korean Language" subtitle="A 2,000-year journey of words, power, and revolution" />
 
-      {/* Photo + icon header */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 90px", gap:"8px", marginBottom:"10px" }}>
-        <Photo src={PHOTOS.hanokVillage} alt="Bukchon Hanok Village" h={90} radius={10} overlay />
-        <div style={{ display:"flex", flexDirection:"column", gap:"6px", alignItems:"center", justifyContent:"center", background:BK, borderRadius:"10px", padding:"8px" }}>
-          <PalaceRoofIcon size={48} color={Y} />
-          <div style={{ fontSize:"11px", color:"#aaa", textAlign:"center" }}>Joseon Dynasty</div>
-        </div>
+      {/* Photo header */}
+      <div style={{ marginBottom:"10px", borderRadius:"10px", overflow:"hidden" }}>
+        <Photo src={PHOTOS.hanokVillage} alt="Bukchon Hanok Village" h={110} radius={10} overlay />
       </div>
       <DancheongBorder />
 
@@ -1722,11 +1717,14 @@ function CourseEn() {
             <div style={{
               background: b.current ? BK : "#e0e0e0",
               color: b.current ? Y : "#999",
-              fontWeight:900, fontSize:"14px",
+              fontWeight:900,
               width:"44px", height:"40px", borderRadius:"8px",
-              display:"flex", alignItems:"center", justifyContent:"center",
-              flexShrink:0, textAlign:"center", lineHeight:1.2,
-            }}>Book{"\n"}{b.n}</div>
+              display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+              flexShrink:0, gap:"1px",
+            }}>
+              <span style={{ fontSize:"9px", fontWeight:700, opacity:0.7 }}>Book</span>
+              <span style={{ fontSize:"18px", lineHeight:1 }}>{b.n}</span>
+            </div>
             <div style={{ fontSize:"22px", flexShrink:0 }}>{b.icon}</div>
             <div style={{ flex:1 }}>
               <div style={{ fontWeight:800, fontSize:"12px", color: b.current ? BK : "#444" }}>{b.title}</div>
