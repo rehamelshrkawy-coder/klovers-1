@@ -1,10 +1,11 @@
 import { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, DollarSign, Gift, Users, Star, Globe } from "lucide-react";
+import { ArrowRight, DollarSign, Gift, Users, Star, Globe, MessageCircle } from "lucide-react";
 import heroPoster from "@/assets/hero-korean.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
-import { logLeadEvent } from "@/lib/leadTracking";
+import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
+import { WHATSAPP_BASE } from "@/lib/siteConfig";
 
 const useCountUp = (target: number, duration = 1800) => {
   const [count, setCount] = useState(0);
@@ -30,7 +31,8 @@ const useCountUp = (target: number, duration = 1800) => {
 };
 
 const HeroSection = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isAr = language === "ar";
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoReady, setVideoReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -177,6 +179,21 @@ const HeroSection = () => {
                 {t("hero", "startNow")}
                 <ArrowRight className="h-5 w-5" />
               </Link>
+            </Button>
+            <Button
+              size="lg"
+              asChild
+              className="gap-2.5 text-base font-bold px-8 bg-[#25D366] hover:bg-[#1ebe5d] text-white border-0"
+            >
+              <a
+                href={WHATSAPP_BASE}
+                onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(WHATSAPP_BASE, { cta_label: "homepage_hero_whatsapp" }); }}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="h-5 w-5" />
+                {isAr ? "واتساب" : "WhatsApp Us"}
+              </a>
             </Button>
             <Button
               size="lg"

@@ -40,7 +40,7 @@ const FreeTrialPage = () => {
     { day: t("freeTrial.dayWednesday"), time: "5:30 PM" },
   ];
 
-  const TESTIMONIALS = [
+  const TESTIMONIALS: { quote: string; name: string; role: string; initial: string; photo?: string }[] = [
     {
       quote: t("freeTrial.testimonial1Quote"),
       name:  t("freeTrial.testimonial1Name"),
@@ -224,8 +224,11 @@ const FreeTrialPage = () => {
                     "{t_.quote}"
                   </p>
                   <div className="flex items-center gap-3 pt-2 border-t border-border">
-                    <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-sm font-black text-black flex-shrink-0">
-                      {t_.initial}
+                    <div className={`w-9 h-9 rounded-full flex-shrink-0 overflow-hidden ${t_.photo ? "" : "bg-primary flex items-center justify-center"}`}>
+                      {t_.photo
+                        ? <img src={t_.photo} alt={t_.name} className="w-full h-full object-cover" />
+                        : <span className="text-sm font-black text-black">{t_.initial}</span>
+                      }
                     </div>
                     <div>
                       <p className="text-sm font-bold text-foreground leading-tight">{t_.name}</p>
