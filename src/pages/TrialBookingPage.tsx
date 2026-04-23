@@ -216,6 +216,25 @@ const TrialBookingPage = () => {
               </div>
 
               <div className="space-y-3">
+                {/* WhatsApp — primary action: fastest confirmation + human touch */}
+                <button
+                  onClick={() => {
+                    track.custom("post_trial_cta_clicked", { cta: "whatsapp" });
+                    const url = `${WHATSAPP_BASE}?text=${encodeURIComponent(t("trialBooking.whatsappSuccessMsg"))}`;
+                    trackAndOpenWhatsApp(url, { cta_label: "post_booking_whatsapp" });
+                  }}
+                  className="w-full flex items-center gap-4 bg-green-50 dark:bg-green-950/30 border-2 border-green-400 rounded-xl p-4 text-left hover:bg-green-100 dark:hover:bg-green-950/50 hover:shadow-md transition-all group"
+                >
+                  <div className="h-10 w-10 rounded-full bg-[#25D366] flex items-center justify-center shrink-0">
+                    <MessageCircle className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-foreground">{t("trialBooking.whatsappPromptTitle")}</p>
+                    <p className="text-xs text-muted-foreground">{t("trialBooking.whatsappPromptDesc")}</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-green-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+                </button>
+
                 {/* Placement test */}
                 <button
                   onClick={() => {
@@ -250,25 +269,6 @@ const TrialBookingPage = () => {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-foreground">{t("trialBooking.peekPlansTitle")}</p>
                     <p className="text-xs text-muted-foreground">{t("trialBooking.peekPlansDesc")}</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
-                </button>
-
-                {/* WhatsApp */}
-                <button
-                  onClick={() => {
-                    track.custom("post_trial_cta_clicked", { cta: "whatsapp" });
-                    const url = `${WHATSAPP_BASE}?text=${encodeURIComponent(t("trialBooking.whatsappSuccessMsg"))}`;
-                    trackAndOpenWhatsApp(url, { cta_label: "post_booking_whatsapp" });
-                  }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-primary/50 hover:shadow-md transition-all group"
-                >
-                  <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                    <MessageCircle className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-foreground">{t("trialBooking.whatsappPromptTitle")}</p>
-                    <p className="text-xs text-muted-foreground">{t("trialBooking.whatsappPromptDesc")}</p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
                 </button>
