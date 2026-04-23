@@ -19,7 +19,8 @@ const LEVELS = LEVEL_SELECT_OPTIONS;
 const DAY_NAMES_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const DAY_NAMES_AR = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
-import { formatTime } from "@/lib/admin-utils";
+import { formatTime, convertSlotToTimezone } from "@/lib/admin-utils";
+import { getUserTimezone } from "@/lib/viewerTimezone";
 
 interface ResubRequest {
   id: string;
@@ -249,19 +250,26 @@ const ResubmitSchedulePage = () => {
                             : "border-border hover:border-primary/50"
                         }`}
                       >
+                        {(() => {
+                          const userTz = getUserTimezone();
+                          const local = convertSlotToTimezone(pkg.day_of_week, pkg.start_time, pkg.timezone, userTz);
+                          return (
                         <div className="flex items-center justify-between">
                           <div className="space-y-1">
-                            <p className="font-semibold text-foreground">{DAY_NAMES[pkg.day_of_week]}</p>
+                            <p className="font-semibold text-foreground">{local.weekday}</p>
                             <div className="flex items-center gap-3 text-sm text-muted-foreground">
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3.5 w-3.5" />
-                                {formatTime(pkg.start_time)} · {pkg.duration_min}{t("mySchedule.minutes")}
+                                {local.timeFormatted} · {pkg.duration_min}{t("mySchedule.minutes")}
                               </span>
-                              <span className="text-xs">{pkg.timezone.replace(/_/g, " ")}</span>
+                              <span className="text-xs">{userTz.replace(/_/g, " ")}</span>
                             </div>
+                            <p className="text-[11px] text-muted-foreground/70">({DAY_NAMES[pkg.day_of_week]} {formatTime(pkg.start_time)} {pkg.timezone.replace(/_/g, " ")})</p>
                           </div>
                           <Badge variant="outline">{getLevelShortLabel(pkg.level)}</Badge>
                         </div>
+                          );
+                        })()}
                       </button>
                     ))}
                   </div>

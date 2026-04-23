@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { normalizeLevel, getLevelShortLabel } from "@/constants/levels";
+import { convertSlotToTimezone } from "@/lib/admin-utils";
+import { getAdminTimezone } from "@/lib/viewerTimezone";
 
 interface UnmatchedEnrollment {
   id: string;
@@ -975,6 +977,10 @@ const GroupMatcher = () => {
               const isReady = cluster.members.length >= 3;
               const dayName = DAY_NAMES[cluster.packageDay] || "Unknown";
               const levelLabel = getLevelShortLabel(cluster.packageLevel);
+              const adminTz = getAdminTimezone();
+              const localSlot = (cluster.packageDay >= 0 && cluster.packageTime && cluster.packageTime !== "—")
+                ? convertSlotToTimezone(cluster.packageDay, cluster.packageTime, cluster.packageTimezone || "Africa/Cairo", adminTz)
+                : null;
               return (
                 <Card key={cluster.key} className={isReady ? "border-primary/50 bg-primary/5" : ""}>
                   <CardHeader className="pb-3">
@@ -982,10 +988,10 @@ const GroupMatcher = () => {
                       <div className="flex items-center gap-2">
                         <CardTitle className="text-base flex items-center gap-2">
                           <CalendarDays className="h-4 w-4" />
-                          {dayName}
+                          {localSlot?.weekday || dayName}
                         </CardTitle>
                         <Badge variant={isReady ? "default" : "secondary"}>
-                          {cluster.packageTime}
+                          {localSlot?.timeFormatted || cluster.packageTime} {localSlot ? `(${adminTz})` : ""}
                         </Badge>
                         <Badge variant="outline" className="text-xs">
                           {levelLabel}

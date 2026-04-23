@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import { CheckCircle, Mail, RefreshCw, Users, XCircle } from "lucide-react";
-import { formatTime } from "@/lib/admin-utils";
+import { formatTime, convertDateTimeToTimezone } from "@/lib/admin-utils";
+import { getAdminTimezone } from "@/lib/viewerTimezone";
 import { getLevelShortLabel } from "@/constants/levels";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -372,10 +373,12 @@ const TrialClassesManager = () => {
   const formatSessionLabel = (date: string | null, time: string | null, dow: number) => {
     // NULL (or legacy sentinel) → unscheduled placeholder.
     if (!date || !time || time === "TBA" || date === "2099-12-31") return "TBA — Unscheduled";
-    const d = new Date(`${date}T00:00:00`);
-    const weekday = DAY_NAMES[dow] || d.toLocaleDateString("en-US", { weekday: "long" });
+    const adminTz = getAdminTimezone();
+    const lcl = convertDateTimeToTimezone(date, time, "Africa/Cairo", adminTz);
+    const d = new Date(`${lcl.dateStr}T00:00:00`);
+    const weekday = lcl.weekday || DAY_NAMES[dow] || d.toLocaleDateString("en-US", { weekday: "long" });
     const dateLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    return `${weekday}, ${dateLabel} — ${formatTime(time)}`;
+    return `${weekday}, ${dateLabel} — ${lcl.timeFormatted} (${adminTz})`;
   };
 
   const isLegacySlot = (time: string | null) => !!time && !activeSlots.some((s) => s.start_time === time);

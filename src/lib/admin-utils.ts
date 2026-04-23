@@ -78,6 +78,36 @@ export function convertSlotToTimezone(
   return { weekday: tgtParts.weekday, dayIndex, timeFormatted };
 }
 
+/**
+ * Convert a specific calendar datetime from source tz to target tz.
+ * Accepts `YYYY-MM-DD` + `HH:MM`. Returns localized date, time, weekday.
+ */
+export function convertDateTimeToTimezone(
+  dateStr: string,
+  timeHHMM: string,
+  sourceTz: string,
+  targetTz: string,
+): { dateStr: string; timeFormatted: string; weekday: string } {
+  if (!dateStr || !timeHHMM || !/^\d{1,2}:\d{2}$/.test(timeHHMM)) {
+    return { dateStr, timeFormatted: formatTime(timeHHMM), weekday: "" };
+  }
+  const [y, mo, d] = dateStr.split("-").map(Number);
+  const [h, mi] = timeHHMM.split(":").map(Number);
+  const guess = Date.UTC(y, mo - 1, d, h, mi);
+  const offset = tzOffsetMs(new Date(guess), sourceTz);
+  const instant = new Date(guess - offset);
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: targetTz, weekday: "long",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "numeric", minute: "2-digit", hour12: true,
+  }).formatToParts(instant).reduce((a, p) => { a[p.type] = p.value; return a; }, {} as Record<string, string>);
+  return {
+    dateStr: `${parts.year}-${parts.month}-${parts.day}`,
+    timeFormatted: `${parts.hour}:${parts.minute} ${parts.dayPeriod}`,
+    weekday: parts.weekday,
+  };
+}
+
 // ── Attendance status colors ─────────────────────────────────────────────────
 
 /** Ring + background classes for attendance status badges. */

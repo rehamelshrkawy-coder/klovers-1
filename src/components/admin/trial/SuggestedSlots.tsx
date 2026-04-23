@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { TrialSlotSuggestion } from '@/types/trial-admin';
 import { useCreateTrialSlot } from '@/hooks/useTrialAdmin';
+import { convertSlotToTimezone } from '@/lib/admin-utils';
+import { getAdminTimezone } from '@/lib/viewerTimezone';
 
 export default function SuggestedSlots({
   suggestions,
@@ -66,6 +68,8 @@ export default function SuggestedSlots({
           {show.map((s) => {
             const key = `${s.day_of_week}-${s.start_time}`;
             const pending = pendingKey === key;
+            const adminTz = getAdminTimezone();
+            const lcl = convertSlotToTimezone(s.day_of_week, s.start_time, s.timezone, adminTz);
             const tone =
               s.score >= 140
                 ? 'border-emerald-300 bg-emerald-50 dark:bg-emerald-950/20'
@@ -79,7 +83,8 @@ export default function SuggestedSlots({
               >
                 <div className="flex items-baseline justify-between">
                   <div className="text-base font-semibold">
-                    {s.day_name} · {s.start_time}
+                    {lcl.weekday} · {lcl.timeFormatted}
+                    <div className="text-[10px] font-normal text-muted-foreground">src: {s.day_name} {s.start_time} {s.timezone}</div>
                   </div>
                   <span
                     className="rounded-full bg-white/70 px-2 py-0.5 text-xs font-medium tabular-nums dark:bg-white/10"
@@ -89,7 +94,7 @@ export default function SuggestedSlots({
                   </span>
                 </div>
                 <div className="mt-1 text-xs text-muted-foreground">
-                  {s.duration_min} min · {s.timezone}
+                  {s.duration_min} min · {adminTz}
                 </div>
 
                 <ul className="mt-3 list-disc space-y-1 pl-4 text-sm">

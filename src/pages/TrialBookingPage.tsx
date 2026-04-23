@@ -22,6 +22,8 @@ import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
 import { CheckCircle2, CalendarPlus, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { convertDateTimeToTimezone } from "@/lib/admin-utils";
+import { getUserTimezone } from "@/lib/viewerTimezone";
 
 interface BookingResult {
   trial_date: string;
@@ -222,6 +224,10 @@ const TrialBookingPage = () => {
 
     const trialDateMs = new Date(bookingResult.trial_date + "T00:00:00").getTime();
     const daysUntil = Math.max(0, Math.round((trialDateMs - Date.now()) / 86400000));
+    const userTz = getUserTimezone();
+    const localized = convertDateTimeToTimezone(bookingResult.trial_date, bookingResult.start_time, bookingResult.timezone || "Africa/Cairo", userTz);
+    const localDate = new Date(localized.dateStr + "T00:00:00");
+    const localFormattedDate = localDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
     return (
       <div className="min-h-screen bg-background">
@@ -237,9 +243,12 @@ const TrialBookingPage = () => {
               <div className="inline-flex items-center gap-3 bg-card border border-border rounded-2xl px-5 py-3 text-left">
                 <CalendarPlus className="h-5 w-5 text-primary shrink-0" />
                 <div>
-                  <p className="font-bold text-foreground">{formattedDate}</p>
+                  <p className="font-bold text-foreground">{localFormattedDate}</p>
                   <p className="text-sm text-muted-foreground">
-                    {bookingResult.start_time_12h} · {bookingResult.duration_min} {t("mySchedule.minutes")} · {t("trialBooking.cairoTime")}
+                    {localized.timeFormatted} · {bookingResult.duration_min} {t("mySchedule.minutes")} · {userTz.replace(/_/g, " ")}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground/70">
+                    ({formattedDate} {bookingResult.start_time_12h} {(bookingResult.timezone || "Africa/Cairo").replace(/_/g, " ")})
                   </p>
                 </div>
               </div>
@@ -394,7 +403,7 @@ const TrialBookingPage = () => {
             <div className="max-w-lg mx-auto bg-card border border-border rounded-3xl p-8 shadow-xl">
               <h2 className="text-2xl font-bold text-foreground mb-1">{t("trialBooking.pickTimeTitle")}</h2>
               <p className="text-sm text-muted-foreground mb-6">
-                {t("trialBooking.pickTimeDesc")}
+                {t("trialBooking.pickTimeDesc")} <span className="opacity-70">({getUserTimezone().replace(/_/g, " ")})</span>
               </p>
 
               {/* Inline level dropdown — only shown when profile/user_metadata has no level */}

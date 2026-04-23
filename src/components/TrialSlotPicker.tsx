@@ -12,6 +12,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CalendarDays } from "lucide-react";
 import { DAY_NAMES, formatTime12h } from "@/lib/calendarUrl";
+import { convertSlotToTimezone } from "@/lib/admin-utils";
+import { getUserTimezone } from "@/lib/viewerTimezone";
 
 interface TrialSlot {
   day_of_week: number;
@@ -113,19 +115,19 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
     );
   }
 
+  const userTz = getUserTimezone();
   const labelFor = (s: TrialSlot) => {
-    const day = DAY_NAMES[s.day_of_week] ?? `Day ${s.day_of_week}`;
-    const time = formatTime12h(s.start_time);
+    const srcTz = s.timezone || "Africa/Cairo";
+    const local = convertSlotToTimezone(s.day_of_week, s.start_time, srcTz, userTz);
     const cap = s.capacity ?? DEFAULT_CAPACITY;
     const spotsLeft = cap - s.booked_count;
-    const tzLabel = s.timezone ? ` (${s.timezone})` : "";
-    return `${day} at ${time}${tzLabel} — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
+    return `${local.weekday} at ${local.timeFormatted} (${userTz.replace(/_/g, " ")}) — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
   };
 
   const keyFor = (s: TrialSlot) => `${s.day_of_week}|${s.start_time}`;
 
   const selectedSlot = availableSlots.find((s) => keyFor(s) === selectedKey);
-  const footerTimezone = selectedSlot?.timezone
+  const sourceTimezone = selectedSlot?.timezone
     ?? availableSlots[0]?.timezone
     ?? "Africa/Cairo";
 
@@ -162,7 +164,7 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        All times are in {footerTimezone}
+        Times shown in your timezone ({userTz.replace(/_/g, " ")}) · source: {sourceTimezone}
       </p>
 
       <Button

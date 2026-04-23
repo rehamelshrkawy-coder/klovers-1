@@ -47,7 +47,8 @@ interface RosterRow {
   admin_approved: boolean;
 }
 
-import { formatTime } from "@/lib/admin-utils";
+import { formatTime, convertSlotToTimezone } from "@/lib/admin-utils";
+import { getAdminTimezone } from "@/lib/viewerTimezone";
 
 function formatDate(d: string) {
   const date = new Date(d + "T12:00:00");
@@ -202,7 +203,7 @@ const SessionAttendanceManager = () => {
                 <SelectContent>
                   {groups.map(g => (
                     <SelectItem key={g.id} value={g.id}>
-                      {g.name} — {g.level} · {DAY_NAMES[g.day_of_week]} {formatTime(g.start_time)}
+                      {(() => { const adminTz = getAdminTimezone(); const l = convertSlotToTimezone(g.day_of_week, g.start_time, "Africa/Cairo", adminTz); return `${g.name} — ${g.level} · ${l.weekday.slice(0,3)} ${l.timeFormatted}`; })()}
                     </SelectItem>
                   ))}
                 </SelectContent>

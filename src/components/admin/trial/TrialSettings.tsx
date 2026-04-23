@@ -7,6 +7,8 @@ import {
   useAllTrialSlots,
   useRetireTrialSlot,
 } from '@/hooks/useTrialAdmin';
+import { convertSlotToTimezone } from '@/lib/admin-utils';
+import { getAdminTimezone } from '@/lib/viewerTimezone';
 
 export default function TrialSettingsPanel({
   settings,
@@ -108,13 +110,18 @@ export default function TrialSettingsPanel({
                   </td>
                 </tr>
               )}
-              {slots.map((s) => (
+              {slots.map((s) => {
+                const adminTz = getAdminTimezone();
+                const lcl = convertSlotToTimezone(s.day_of_week, s.start_time, s.timezone, adminTz);
+                return (
                 <tr key={s.id} className="border-t">
                   <td className="px-3 py-2">
-                    {['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][s.day_of_week]}
+                    {lcl.weekday}
+                    <div className="text-[10px] text-muted-foreground">src: {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][s.day_of_week]}</div>
                   </td>
                   <td className="px-3 py-2 font-mono">
-                    {s.start_time} · {s.duration_min}m · {s.timezone}
+                    {lcl.timeFormatted} · {s.duration_min}m · {adminTz}
+                    <div className="text-[10px] text-muted-foreground">src: {s.start_time} {s.timezone}</div>
                   </td>
                   <td className="px-3 py-2">{s.capacity}</td>
                   <td className="px-3 py-2">
@@ -135,7 +142,8 @@ export default function TrialSettingsPanel({
                     </select>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

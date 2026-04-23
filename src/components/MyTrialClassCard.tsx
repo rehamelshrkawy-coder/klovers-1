@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, CalendarPlus, Clock, Loader2 } from "lucide-react";
 import { buildGoogleCalendarUrl, formatTime12h } from "@/lib/calendarUrl";
+import { convertDateTimeToTimezone } from "@/lib/admin-utils";
+import { getUserTimezone } from "@/lib/viewerTimezone";
 
 interface TrialBookingRow {
   id: string;
@@ -67,8 +69,10 @@ const MyTrialClassCard = () => {
   if (!booking) return null;
 
   const isConfirmed = booking.status === "confirmed";
-  const days = daysUntil(booking.trial_date);
   const timezone = booking.timezone || "Africa/Cairo";
+  const userTz = getUserTimezone();
+  const local = convertDateTimeToTimezone(booking.trial_date, booking.start_time, timezone, userTz);
+  const days = daysUntil(local.dateStr);
 
   const calendarUrl = buildGoogleCalendarUrl({
     title: "Free Korean Trial Class — Klovers Academy",
@@ -91,11 +95,12 @@ const MyTrialClassCard = () => {
         <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-foreground text-lg">{formatDate(booking.trial_date)}</p>
+              <p className="font-bold text-foreground text-lg">{formatDate(local.dateStr)}</p>
               <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                 <Clock className="h-3.5 w-3.5" />
-                {formatTime12h(booking.start_time)} · {TRIAL_DURATION_MIN} min · {timezone}
+                {local.timeFormatted} · {TRIAL_DURATION_MIN} min · {userTz.replace(/_/g, " ")}
               </p>
+              <p className="text-[11px] text-muted-foreground/70">({formatDate(booking.trial_date)} {formatTime12h(booking.start_time)} {timezone.replace(/_/g, " ")})</p>
 
               {isConfirmed ? (
                 <a
