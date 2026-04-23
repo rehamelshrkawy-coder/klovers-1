@@ -7,7 +7,7 @@ import { useSEO } from "@/hooks/useSEO";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { logLeadEvent } from "@/lib/leadTracking";
-import { Gift, Users, Clock, Star, ArrowRight, CalendarDays, Video, ClipboardList, Sparkles } from "lucide-react";
+import { Gift, Users, Clock, Star, ArrowRight, Video, ClipboardList, Sparkles, CalendarDays } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const FreeTrialPage = () => {
@@ -87,140 +87,142 @@ const FreeTrialPage = () => {
       <Header />
       <main className="pt-16">
 
-        {/* ── HERO — full yellow ──────────────────────── */}
-        <section className="relative bg-primary overflow-hidden py-16 md:py-24">
-          {/* Korean character watermark */}
-          <span
-            aria-hidden
-            className="absolute inset-0 flex items-center justify-center text-[26rem] md:text-[36rem] font-black leading-none select-none pointer-events-none"
-            style={{ color: "rgba(0,0,0,0.06)" }}
-          >
-            한
-          </span>
+        {/* ── HERO ──────────────────────────────────────── */}
+        <section className="py-16 md:py-24 border-b border-border overflow-hidden">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <div className="grid md:grid-cols-[1fr_220px] gap-10 items-center">
 
-          <div className="relative container mx-auto px-4 text-center max-w-2xl">
-            {/* Badge */}
-            <span className="inline-block bg-foreground text-background text-xs font-black tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6">
-              {t("freeTrial.badge")}
-            </span>
+              {/* Text */}
+              <div className="text-center md:text-start">
+                {/* Live badge */}
+                <span className="inline-flex items-center gap-2 bg-primary/15 border border-primary/30 text-foreground text-xs font-black tracking-[0.15em] uppercase px-3 py-1.5 rounded-full mb-6">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  {t("freeTrial.badge")}
+                </span>
 
-            {/* Headline */}
-            <h1 className="text-5xl md:text-8xl font-black text-foreground tracking-tight mb-5 leading-[0.95]">
-              {t("freeTrial.heroTitle1")}
-              <br />
-              <span className="text-foreground text-outlined-lg">{t("freeTrial.heroTitleFree")}</span>
-            </h1>
+                {/* Headline with highlighted "Free" */}
+                <h1 className="text-6xl md:text-8xl font-black text-foreground leading-[0.88] mb-6 tracking-tight">
+                  {t("freeTrial.heroTitle1")}
+                  <br />
+                  <span className="relative inline-block mt-2">
+                    <span className="absolute -inset-x-2 -inset-y-1 bg-primary -skew-x-2 rounded-lg" aria-hidden />
+                    <span className="relative">{t("freeTrial.heroTitleFree")}</span>
+                  </span>
+                </h1>
 
-            <p className="text-base md:text-lg text-foreground/70 max-w-sm mx-auto mb-8">
-              {t("freeTrial.heroSubtitle")}
-            </p>
+                <p className="text-base md:text-lg text-muted-foreground max-w-sm mb-8 mx-auto md:mx-0">
+                  {t("freeTrial.heroSubtitle")}
+                </p>
 
-            {/* Social proof pill */}
-            <div className="inline-flex items-center gap-2 bg-foreground/10 border border-foreground/20 rounded-full px-4 py-2 mb-6">
-              <div className="flex -space-x-1.5">
-                {["N","M","H","Y","J"].map((l) => (
-                  <div
-                    key={l}
-                    className="w-6 h-6 rounded-full bg-foreground/20 border-2 border-primary flex items-center justify-center text-[9px] font-black text-foreground"
+                {/* CTA + social proof row */}
+                <div className="flex flex-col sm:flex-row items-center md:items-center gap-4 justify-center md:justify-start">
+                  <Button
+                    size="lg"
+                    onClick={handleBookCta}
+                    className="gap-2 text-base font-bold h-14 px-8 shadow-xl hover:scale-[1.02] transition-transform"
                   >
-                    {l}
+                    {t("freeTrial.cta")}
+                    <ArrowRight className="h-5 w-5" />
+                  </Button>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex -space-x-2">
+                      {["N","M","H","Y","J"].map((l) => (
+                        <div key={l} className="w-8 h-8 rounded-full bg-primary/25 border-2 border-background flex items-center justify-center text-[10px] font-black text-foreground">{l}</div>
+                      ))}
+                    </div>
+                    <div className="text-start">
+                      <p className="text-xs font-bold text-foreground leading-tight">{t("freeTrial.bookedSuffixCount")}</p>
+                      <p className="text-[11px] text-muted-foreground leading-tight">{t("freeTrial.bookedSuffixText")}</p>
+                    </div>
                   </div>
-                ))}
-              </div>
-              <p className="text-xs text-foreground/80">
-                <span className="font-bold text-foreground">{t("freeTrial.bookedSuffixCount")}</span>{" "}
-                {t("freeTrial.bookedSuffixText")}
-              </p>
-            </div>
-
-            {/* CTA */}
-            <div className="flex flex-col items-center gap-3">
-              <Button
-                size="lg"
-                onClick={handleBookCta}
-                className="bg-foreground text-background hover:bg-foreground/90 gap-2 text-base font-bold h-14 px-10 shadow-2xl hover:scale-[1.02] transition-transform"
-              >
-                {t("freeTrial.cta")}
-                <ArrowRight className="h-5 w-5" />
-              </Button>
-              <p className="text-xs text-foreground/60">
-                {user ? t("freeTrial.noteSignedIn") : t("freeTrial.noteSignedOut")}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ── PERKS STRIP — dark ─────────────────────── */}
-        <section className="bg-foreground py-4 border-b border-background/10">
-          <div className="container mx-auto px-4 max-w-3xl">
-            <div className="flex flex-wrap justify-center gap-x-8 gap-y-3">
-              {PERKS.map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-center gap-2 text-sm font-semibold text-background/80">
-                  <Icon className="h-4 w-4 text-primary flex-shrink-0" />
-                  {text}
                 </div>
-              ))}
+
+                <p className="text-xs text-muted-foreground mt-3 text-center md:text-start">
+                  {user ? t("freeTrial.noteSignedIn") : t("freeTrial.noteSignedOut")}
+                </p>
+
+                {/* Perks */}
+                <div className="flex flex-wrap gap-2 mt-8 justify-center md:justify-start">
+                  {PERKS.map(({ icon: Icon, text }) => (
+                    <div key={text} className="flex items-center gap-1.5 bg-muted border border-border rounded-full px-3 py-1.5 text-xs font-semibold text-foreground">
+                      <Icon className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                      {text}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Decorative card */}
+              <div className="hidden md:flex justify-center">
+                <div className="relative w-48 h-60 bg-primary rounded-3xl shadow-2xl flex items-center justify-center rotate-6 hover:rotate-2 transition-transform duration-500 cursor-default select-none">
+                  <span className="text-9xl font-black leading-none" style={{ color: "rgba(0,0,0,0.1)" }}>한</span>
+                  <div className="absolute -bottom-4 -left-4 bg-foreground text-background rounded-2xl px-4 py-3 shadow-xl -rotate-3">
+                    <p className="text-[10px] font-bold text-background/60 uppercase tracking-wider">Free Trial</p>
+                    <p className="text-sm font-black text-background leading-tight">No credit card</p>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>
 
-        {/* ── WHAT TO EXPECT ─────────────────────────── */}
-        <section className="py-20">
+        {/* ── WHAT TO EXPECT — dark ──────────────────────── */}
+        <section className="py-20 bg-foreground">
           <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-3xl md:text-4xl font-black text-foreground text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-black text-background text-center mb-12">
               {t("freeTrial.whatToExpectTitle")}
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-background/10 border border-background/10 rounded-3xl overflow-hidden">
               {STEPS.map(({ icon: Icon, num, text }) => (
-                <div
-                  key={num}
-                  className="relative overflow-hidden flex flex-col gap-4 bg-card border-2 border-border rounded-3xl p-6 shadow-sm hover:border-primary hover:shadow-lg transition-all duration-200 group"
-                >
-                  {/* Large decorative step number */}
-                  <span
-                    aria-hidden
-                    className="absolute -bottom-3 -end-2 text-9xl font-black leading-none select-none pointer-events-none transition-colors duration-200 group-hover:text-primary/20"
-                    style={{ color: "rgba(0,0,0,0.05)" }}
-                  >
-                    {num}
-                  </span>
-
-                  <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-sm">
-                    <Icon className="h-6 w-6 text-black" />
+                <div key={num} className="flex flex-col items-start gap-5 bg-foreground hover:bg-white/5 transition-colors p-8">
+                  <div className="flex items-center gap-3">
+                    <span className="text-5xl font-black text-primary leading-none">{num}</span>
+                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                      <Icon className="h-5 w-5 text-background" />
+                    </div>
                   </div>
-
-                  <p className="text-sm font-semibold text-foreground leading-relaxed relative z-10">{text}</p>
+                  <p className="text-sm font-semibold text-background/75 leading-relaxed">{text}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── SCHEDULE — dark ────────────────────────── */}
-        <section className="bg-foreground py-16 pb-24">
-          <div className="container mx-auto px-4 max-w-md text-center">
-            <div className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-primary/20 mb-4">
-              <CalendarDays className="h-5 w-5 text-primary" />
+        {/* ── SCHEDULE — ticket style ────────────────────── */}
+        <section className="py-20 pb-28">
+          <div className="container mx-auto px-4 max-w-xl">
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 mb-3">
+                <CalendarDays className="h-5 w-5 text-primary" />
+                <h2 className="text-3xl font-black text-foreground">{t("freeTrial.slotsTitle")}</h2>
+              </div>
+              <p className="text-sm text-muted-foreground">{t("freeTrial.slotsSubtitle")}</p>
             </div>
 
-            <h2 className="text-3xl font-black text-background mb-2">
-              {t("freeTrial.slotsTitle")}
-            </h2>
-            <p className="text-sm text-background/50 mb-8">
-              {t("freeTrial.slotsSubtitle")}
-            </p>
-
-            {/* Slot cards */}
-            <div className="grid grid-cols-3 gap-3 mb-8">
+            {/* Ticket cards */}
+            <div className="grid grid-cols-3 gap-4 mb-10">
               {SLOT_HIGHLIGHTS.map((s) => (
                 <div
                   key={s.day}
-                  className="rounded-2xl border border-background/15 bg-background/8 p-4 text-center hover:border-primary/50 hover:bg-background/15 transition-colors"
-                  style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
+                  className="border-2 border-foreground rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_black] hover:shadow-[2px_2px_0px_0px_black] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150 cursor-default"
                 >
-                  <p className="text-[11px] font-bold text-background/50 uppercase tracking-wider mb-2">{s.day}</p>
-                  <p className="text-xl font-black text-primary">{s.time}</p>
+                  {/* Ticket header */}
+                  <div className="bg-foreground py-2 px-3 text-center">
+                    <p className="text-[10px] font-black text-primary uppercase tracking-widest">{s.day}</p>
+                  </div>
+                  {/* Perforated edge */}
+                  <div className="relative flex items-center">
+                    <div className="absolute -left-[9px] w-4 h-4 bg-background border-2 border-foreground rounded-full" />
+                    <div className="flex-1 border-t-2 border-dashed border-foreground/30 mx-1" />
+                    <div className="absolute -right-[9px] w-4 h-4 bg-background border-2 border-foreground rounded-full" />
+                  </div>
+                  {/* Ticket body */}
+                  <div className="py-4 px-3 text-center bg-background">
+                    <p className="text-xl font-black text-foreground leading-none">{s.time}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -228,13 +230,13 @@ const FreeTrialPage = () => {
             <Button
               size="lg"
               onClick={handleBookCta}
-              className="w-full bg-primary text-black hover:bg-primary/90 gap-2 text-base font-bold h-14 shadow-xl hover:scale-[1.01] transition-transform"
+              className="w-full gap-2 text-base font-bold h-14 shadow-xl hover:scale-[1.01] transition-transform"
             >
               {t("freeTrial.ctaSecondary")}
               <ArrowRight className="h-5 w-5" />
             </Button>
 
-            <p className="text-xs text-background/40 mt-4">
+            <p className="text-xs text-muted-foreground text-center mt-4">
               {user ? t("freeTrial.noteSignedIn") : t("freeTrial.noteSignedOut")}
             </p>
           </div>
