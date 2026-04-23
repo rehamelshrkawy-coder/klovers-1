@@ -12,12 +12,48 @@ const SESSION_KEY = "exit_modal_shown";
 const ExitIntentModal = () => {
   const { language } = useLanguage();
   const isAr = language === "ar";
+  const [eligible, setEligible] = useState(false);
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const triggered = useRef(false);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  // Gate: only show for admins or students whose class starts within 7 days
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+
+      // Admin check — presence in admin_users table
+      const { data: adminRow } = await supabase
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (adminRow) {
+        if (!cancelled) setEligible(true);
+        return;
+      }
+
+      // Student: check if any book_assignment unlocks within the next 7 days
+      const now = new Date();
+      const in7 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const { data: assignment } = await supabase
+        .from("book_assignments")
+        .select("available_from")
+        .eq("user_id", user.id)
+        .gte("available_from", now.toISOString())
+        .lte("available_from", in7.toISOString())
+        .maybeSingle();
+
+      if (assignment && !cancelled) setEligible(true);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const trigger = () => {
     if (triggered.current) return;
@@ -28,17 +64,17 @@ const ExitIntentModal = () => {
   };
 
   useEffect(() => {
+    if (!eligible) return;
     const onMouseLeave = (e: MouseEvent) => {
       if (e.clientY < 5) trigger();
     };
     document.addEventListener("mouseleave", onMouseLeave);
-    // Fallback timer: show after 45s if still on page
     const timer = setTimeout(trigger, 45_000);
     return () => {
       document.removeEventListener("mouseleave", onMouseLeave);
       clearTimeout(timer);
     };
-  }, []);
+  }, [eligible]);
 
   // Focus trap
   useEffect(() => {
@@ -69,7 +105,6 @@ const ExitIntentModal = () => {
       setError(isAr ? "أدخل بريدًا إلكترونيًا صحيحًا" : "Enter a valid email address");
       return;
     }
-    // Fire-and-forget: log lead + submit to leads system
     try {
       logLeadEvent({
         source_type: "exit_intent",
@@ -93,7 +128,6 @@ const ExitIntentModal = () => {
       aria-modal="true"
       aria-label={isAr ? "عرض خاص" : "Special offer"}
     >
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={() => setShow(false)}
