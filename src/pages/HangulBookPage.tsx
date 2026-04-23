@@ -472,6 +472,18 @@ function ConsCard({ c, lang }: { c: typeof CONSONANTS[0]; lang: Lang }) {
             </div>
           ))}
         </div>
+        {/* Writing practice lines — Aleksandrova method */}
+        <div style={{ marginTop:"5px", borderTop:"1px dashed #ddd", paddingTop:"4px" }}>
+          <div style={{ fontSize:"10px", color:"#999", marginBottom:"3px" }}>{isAr ? "✏️ تدرب على الكتابة:" : "✏️ Practice writing:"}</div>
+          <div style={{ display:"flex", gap:"3px" }}>
+            <div style={{ position:"relative", width:"28px", height:"28px", border:"1px dashed #ccc", borderRadius:"4px", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+              <span style={{ fontSize:"19px", color:"rgba(0,0,0,0.09)", fontWeight:900, position:"absolute", lineHeight:1 }}>{c.char}</span>
+            </div>
+            {[1,2,3,4,5].map(n=>(
+              <div key={n} style={{ width:"28px", height:"28px", border:"1px dashed #ccc", borderRadius:"4px", flexShrink:0 }} />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -743,6 +755,24 @@ function CultureAr() {
         </div>
       </div>
 
+      {/* Diamond — 정(jeong) concept: 5th culture card */}
+      <div style={{ background:"#2d1b4e", border:"2px solid #a78bfa", borderRadius:"12px", padding:"12px", marginBottom:"10px" }}>
+        <div style={{ display:"flex", gap:"10px", alignItems:"flex-start" }}>
+          <div style={{ fontSize:"36px", color:"#a78bfa", fontWeight:900, lineHeight:1, flexShrink:0, direction:"ltr" }}>정</div>
+          <div>
+            <div style={{ fontWeight:800, fontSize:"12px", color:"#a78bfa", marginBottom:"4px" }}>정 (Jeong) — أعمق مفهوم في الثقافة الكورية</div>
+            <div style={{ fontSize:"11px", color:"#d8b4fe", lineHeight:1.8 }}>
+              <strong style={{color:"#a78bfa"}}>정 (جيونغ)</strong> هي كلمة لا تُترجم بسهولة — إنها ذلك الشعور العميق بالارتباط والألفة الذي يتشكّل تدريجياً بين الناس. ليست حباً عاطفياً بالضرورة — بل رابطة روحية تنشأ من مشاركة اللحظات اليومية. في المسلسلات الكورية، ستسمع: <span style={{color:"#fff",fontWeight:800,direction:"ltr"}}>«정이 들었어»</span> = «أصبحت قريباً منك بشكل لم أتوقعه»
+            </div>
+            <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
+              {["💜 رابطة عاطفية", "🕰️ تتشكل مع الوقت", "🎬 قلب الدراما الكورية"].map(t=>(
+                <span key={t} style={{ background:"rgba(167,139,250,0.2)", color:"#a78bfa", fontSize:"11px", padding:"2px 6px", borderRadius:"10px", border:"1px solid rgba(167,139,250,0.4)" }}>{t}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Korean sentence teaser */}
       <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"14px", alignItems:"center" }}>
         <KoreanLanternIcon size={40} color={Y} />
@@ -897,8 +927,8 @@ function CoverAr() {
 
         {/* Arabic title */}
         <div style={{ textAlign:"center", padding:"0 14mm", marginBottom:"7mm" }}>
-          <div style={{ fontSize:"32px", fontWeight:900, color:"#ffffff", lineHeight:1.15, marginBottom:"5px" }}>
-            كتاب الهانغول الرسمي
+          <div style={{ fontSize:"28px", fontWeight:900, color:"#ffffff", lineHeight:1.15, marginBottom:"5px" }}>
+            اقرأ الكورية في ٧ أيام
           </div>
           <div style={{ fontSize:"13px", color:"rgba(255,255,0,0.75)", fontWeight:700, letterSpacing:"1px" }}>
             النسخة العربية–الكورية الحصرية
@@ -1086,9 +1116,17 @@ function TocAr() {
 }
 
 function ConsonantsAr({ slice, page }: { slice:[number,number]; page:number }) {
+  const count = slice[1] - slice[0];
+  const kpopLyrics = page === 1
+    ? { lyric:"사랑해", rom:"sa-rang-hae", meaning:"أحبك", song:"BTS — Boy In Luv" }
+    : { lyric:"고마워", rom:"go-ma-wo", meaning:"شكراً", song:"IU — Palette" };
   return (
     <Page dir="rtl">
       <SHead title={`الحروف الساكنة (자음) — الجزء ${page===1?"١":"٢"} من ٢`} subtitle="كل مقطع كوري يبدأ بحرف ساكن" />
+      {/* Marzano "I can..." learning objective */}
+      <div style={{ background:"#f0fff4", border:"2px solid #22c55e", borderRadius:"8px", padding:"7px 10px", fontSize:"11px", color:"#166534", marginBottom:"7px", fontWeight:700 }}>
+        ✅ بنهاية هذه الصفحة ستتمكن من: قراءة ونطق <strong>{count}</strong> حروف كورية جديدة وكتابتها بنفسك!
+      </div>
       <div style={{ background:YL, borderRadius:"8px", padding:"6px 10px", fontSize:"11px", color:BK2, marginBottom:"8px" }}>
         💡 هناك ١٤ حرفاً ساكناً أساسياً، و٥ حروف ساكنة مُشدَّدة (مع نفخة هواء). تعلّم الأساسية أولاً!
       </div>
@@ -1101,6 +1139,22 @@ function ConsonantsAr({ slice, page }: { slice:[number,number]; page:number }) {
           <div style={{ fontSize:"12px", fontWeight:800, color:Y }}>🔊 اسمع النطق الصحيح</div>
           <div style={{ fontSize:"11px", color:"#888", marginTop:"3px" }}>امسح الكود أو زر: <span style={{color:Y}}>klovers.academy/audio</span></div>
         </div>
+      </div>
+      {/* Mogi K-Pop lyric strip */}
+      <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"8px", padding:"7px 12px", marginTop:"6px", display:"flex", gap:"10px", alignItems:"center" }}>
+        <div style={{ fontSize:"20px" }}>🎵</div>
+        <div>
+          <div style={{ fontSize:"10px", color:"rgba(255,255,0,0.65)", marginBottom:"2px", fontWeight:700 }}>كلمات K-Pop بالحروف التي تعلمتها للتو:</div>
+          <span style={{ fontSize:"18px", color:Y, fontWeight:900, direction:"ltr" }}>{kpopLyrics.lyric}</span>
+          <span style={{ fontSize:"11px", color:"#aaa", marginRight:"6px" }}> [{kpopLyrics.rom}] = {kpopLyrics.meaning}</span>
+          <span style={{ fontSize:"10px", color:"#555" }}>— {kpopLyrics.song}</span>
+        </div>
+      </div>
+      {/* Nunan micro-task */}
+      <div style={{ background:GL, border:`1px solid ${GD}`, borderRadius:"8px", padding:"8px 10px", marginTop:"6px" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"3px" }}>📝 جربها الآن!</div>
+        <div style={{ fontSize:"11px", color:GD, marginBottom:"5px" }}>حاول كتابة اسمك الأول بالحروف الكورية التي تعلمتها:</div>
+        <div style={{ height:"24px", border:"1px dashed #aaa", borderRadius:"4px", background:"#fff" }} />
       </div>
     </Page>
   );
@@ -1283,6 +1337,11 @@ function DoubleBatchimAr() {
   return (
     <Page dir="rtl">
       <SHead title="الباتشيم المزدوج (겹받침)" subtitle="حرفان ساكنان في الأسفل — اقرأ حرفاً واحداً فقط!" />
+      {/* Larsen-Freeman: don't memorize warning */}
+      <div style={{ background:"#fff8e1", border:"2px solid #fbbf24", borderRadius:"8px", padding:"7px 12px", fontSize:"11px", color:"#92400e", marginBottom:"8px" }}>
+        <strong>⚠️ تنبيه مهم للمبتدئين:</strong> لا تحاول حفظ هذه الجداول كلها الآن! هذا محتوى متقدم — فهم المبدأ يكفي تماماً.
+        الباتشيم المزدوج سيصبح طبيعياً جداً بعد قراءة ١٠٠ كلمة فقط. <strong>سيُشرح بالتفصيل في الكتاب الثاني.</strong>
+      </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
         <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
@@ -1387,6 +1446,25 @@ function PracticeAr() {
   return (
     <Page dir="rtl">
       <SHead title="تمارين تطبيقية ✏️" subtitle="اختبر نفسك!" />
+      {/* Knowles self-assessment checklist */}
+      <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"10px", padding:"10px 12px", marginBottom:"10px" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"7px" }}>✅ قائمة التحقق الذاتي — هل أنت مستعد للتمارين؟</div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4px" }}>
+          {[
+            "أستطيع نطق الـ١٤ حرفاً الساكناً",
+            "أستطيع نطق الحروف المدية العشرة",
+            "أستطيع بناء مقطع بسيط مثل 가، 나",
+            "أعرف ما هو الباتشيم",
+            "ألاحظ أن الكورية تُكتب في كتل",
+            "فهمت قاعدة الربط الصوتي",
+          ].map((item, i) => (
+            <div key={i} style={{ display:"flex", gap:"7px", alignItems:"flex-start" }}>
+              <div style={{ width:"16px", height:"16px", border:`2px solid ${GD}`, borderRadius:"3px", flexShrink:0, marginTop:"1px" }} />
+              <span style={{ fontSize:"10px", color:GD, lineHeight:1.5 }}>{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <div style={{ background:BK, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
         <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>تمرين ١ — اختر الصوت الصحيح لكل حرف</div>
@@ -1679,6 +1757,24 @@ function CultureEn() {
         </div>
       </div>
 
+      {/* Diamond — 정(jeong) concept: 5th culture card */}
+      <div style={{ background:"#2d1b4e", border:"2px solid #a78bfa", borderRadius:"12px", padding:"12px", marginBottom:"10px" }}>
+        <div style={{ display:"flex", gap:"10px", alignItems:"flex-start" }}>
+          <div style={{ fontSize:"36px", color:"#a78bfa", fontWeight:900, lineHeight:1, flexShrink:0 }}>정</div>
+          <div>
+            <div style={{ fontWeight:800, fontSize:"12px", color:"#a78bfa", marginBottom:"4px" }}>정 (Jeong) — The untranslatable heart of Korean culture</div>
+            <div style={{ fontSize:"11px", color:"#d8b4fe", lineHeight:1.8 }}>
+              <strong style={{color:"#a78bfa"}}>정 (Jeong)</strong> has no direct English equivalent — it's the deep emotional bond that slowly forms between people through shared daily moments. Not romantic love exactly, but a soul-level attachment. In K-dramas you'll constantly hear: <span style={{color:"#fff",fontWeight:800}}>«정이 들었어»</span> = "I've grown attached to you without realizing it."
+            </div>
+            <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
+              {["💜 Emotional bond","🕰️ Grows over time","🎬 Heart of K-Drama"].map(t=>(
+                <span key={t} style={{ background:"rgba(167,139,250,0.2)", color:"#a78bfa", fontSize:"11px", padding:"2px 6px", borderRadius:"10px", border:"1px solid rgba(167,139,250,0.4)" }}>{t}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"14px", alignItems:"center" }}>
         <KoreanLanternIcon size={40} color={Y} />
         <div>
@@ -1831,8 +1927,8 @@ function CoverEn() {
 
         {/* English title */}
         <div style={{ textAlign:"center", padding:"0 14mm", marginBottom:"7mm" }}>
-          <div style={{ fontSize:"32px", fontWeight:900, color:"#ffffff", lineHeight:1.15, marginBottom:"5px" }}>
-            Official Hangul Starter Book
+          <div style={{ fontSize:"28px", fontWeight:900, color:"#ffffff", lineHeight:1.15, marginBottom:"5px" }}>
+            Read Korean in 7 Days
           </div>
           <div style={{ fontSize:"13px", color:"rgba(255,255,0,0.75)", fontWeight:700, letterSpacing:"1px" }}>
             Exclusive English–Korean Edition
@@ -2018,9 +2114,17 @@ function TocEn() {
 }
 
 function ConsonantsEn({ slice, page }: { slice:[number,number]; page:number }) {
+  const count = slice[1] - slice[0];
+  const kpopLyrics = page === 1
+    ? { lyric:"사랑해", rom:"sa-rang-hae", meaning:"I love you", song:"BTS — Boy In Luv" }
+    : { lyric:"고마워", rom:"go-ma-wo", meaning:"Thank you", song:"IU — Palette" };
   return (
     <Page dir="ltr">
       <SHead title={`Consonants (자음) — Part ${page} of 2`} subtitle="Every Korean syllable begins with a consonant" />
+      {/* Marzano "I can..." learning objective */}
+      <div style={{ background:"#f0fff4", border:"2px solid #22c55e", borderRadius:"8px", padding:"7px 10px", fontSize:"11px", color:"#166534", marginBottom:"7px", fontWeight:700 }}>
+        ✅ By the end of this page you will be able to: read, pronounce, and write <strong>{count}</strong> new Korean letters!
+      </div>
       <div style={{ background:YL, borderRadius:"8px", padding:"6px 10px", fontSize:"11px", color:BK2, marginBottom:"8px" }}>
         💡 There are 14 basic consonants plus 5 aspirated (with a puff of air). Master the basics first!
       </div>
@@ -2033,6 +2137,22 @@ function ConsonantsEn({ slice, page }: { slice:[number,number]; page:number }) {
           <div style={{ fontSize:"12px", fontWeight:800, color:Y }}>🔊 Hear the correct pronunciation</div>
           <div style={{ fontSize:"11px", color:"#888", marginTop:"3px" }}>Scan or visit: <span style={{color:Y}}>klovers.academy/audio</span></div>
         </div>
+      </div>
+      {/* Mogi K-Pop lyric strip */}
+      <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"8px", padding:"7px 12px", marginTop:"6px", display:"flex", gap:"10px", alignItems:"center" }}>
+        <div style={{ fontSize:"20px" }}>🎵</div>
+        <div>
+          <div style={{ fontSize:"10px", color:"rgba(255,255,0,0.65)", marginBottom:"2px", fontWeight:700 }}>K-Pop lyric using letters you just learned:</div>
+          <span style={{ fontSize:"18px", color:Y, fontWeight:900 }}>{kpopLyrics.lyric}</span>
+          <span style={{ fontSize:"11px", color:"#aaa", marginLeft:"6px" }}>[{kpopLyrics.rom}] = "{kpopLyrics.meaning}"</span>
+          <span style={{ fontSize:"10px", color:"#555", marginLeft:"4px" }}>— {kpopLyrics.song}</span>
+        </div>
+      </div>
+      {/* Nunan micro-task */}
+      <div style={{ background:GL, border:`1px solid ${GD}`, borderRadius:"8px", padding:"8px 10px", marginTop:"6px" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"3px" }}>📝 Now try it!</div>
+        <div style={{ fontSize:"11px", color:GD, marginBottom:"5px" }}>Try spelling your first name using the Korean letters you just learned:</div>
+        <div style={{ height:"24px", border:"1px dashed #aaa", borderRadius:"4px", background:"#fff" }} />
       </div>
     </Page>
   );
@@ -2211,6 +2331,11 @@ function DoubleBatchimEn() {
   return (
     <Page dir="ltr">
       <SHead title="Double Batchim — 겹받침 (Gyeop-batchim)" subtitle="Two consonants at the bottom — only one is pronounced!" />
+      {/* Larsen-Freeman: don't memorize warning */}
+      <div style={{ background:"#fff8e1", border:"2px solid #fbbf24", borderRadius:"8px", padding:"7px 12px", fontSize:"11px", color:"#92400e", marginBottom:"8px" }}>
+        <strong>⚠️ Beginner notice:</strong> Don't try to memorize all of this right now! Understanding the principle is enough.
+        Double batchim becomes natural after reading just 100 Korean words. <strong>This will be covered in depth in Book 2.</strong>
+      </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
         <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
@@ -2312,6 +2437,25 @@ function PracticeEn() {
   return (
     <Page dir="ltr">
       <SHead title="Practice Exercises ✏️" subtitle="Test yourself!" />
+      {/* Knowles self-assessment checklist */}
+      <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"10px", padding:"10px 12px", marginBottom:"10px" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"7px" }}>✅ Self-Assessment Checklist — Ready for the exercises?</div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4px" }}>
+          {[
+            "I can pronounce all 14 consonants",
+            "I can pronounce all 10 vowels",
+            "I can build a syllable like 가, 나, 사",
+            "I know what batchim is",
+            "I notice Korean is written in blocks",
+            "I understand the linking sound rule",
+          ].map((item, i) => (
+            <div key={i} style={{ display:"flex", gap:"7px", alignItems:"flex-start" }}>
+              <div style={{ width:"16px", height:"16px", border:`2px solid ${GD}`, borderRadius:"3px", flexShrink:0, marginTop:"1px" }} />
+              <span style={{ fontSize:"10px", color:GD, lineHeight:1.5 }}>{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <div style={{ background:BK, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
         <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>Exercise 1 — Circle the correct romanization</div>
