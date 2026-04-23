@@ -61,6 +61,11 @@ export interface Enrollment {
   matched_at?: string | null;
   approval_email_sent_at?: string | null;
   payment_email_sent_at?: string | null;
+  class_link_sent_at?: string | null;
+  first_class_date?: string | null;
+  forming_escalation_sent_at?: string | null;
+  rejection_followup_sent_at?: string | null;
+  pre_class_reminder_sent_at?: string | null;
 }
 
 // ── Student overview ─────────────────────────────────────────────────────────

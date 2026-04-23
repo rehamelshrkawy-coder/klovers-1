@@ -9,7 +9,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { AlertCircle, Check, Eye, Link, Pencil, Trash2, Undo2, X } from "lucide-react";
+import { AlertCircle, Check, Eye, Link, Mail, Pencil, Trash2, Undo2, X } from "lucide-react";
 import type { Enrollment } from "@/types/admin";
 import { formatMoney } from "@/lib/format";
 
@@ -40,6 +40,8 @@ export interface EnrollmentCardProps {
   onViewReceipt: (e: Enrollment) => void;
   onRequestResubmission: (e: Enrollment) => void;
   onSendClassLink: (e: Enrollment) => void;
+  onResendPaymentEmail: (e: Enrollment) => void;
+  onResendApprovalEmail: (e: Enrollment) => void;
 }
 
 function paymentMethodLabel(method: string | null | undefined): string {
@@ -70,6 +72,8 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
     onViewReceipt,
     onRequestResubmission,
     onSendClassLink,
+    onResendPaymentEmail,
+    onResendApprovalEmail,
   } = props;
 
   const overdueDays = e.negative_since
@@ -98,6 +102,11 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
   const waitingDays =
     !e.matched_at && e.payment_status === "PAID" && e.payment_email_sent_at
       ? Math.floor((Date.now() - new Date(e.payment_email_sent_at).getTime()) / 86400000)
+      : 0;
+
+  const noClassLinkDays =
+    e.approval_status === "APPROVED" && e.matched_at && !e.class_link_sent_at
+      ? Math.floor((Date.now() - new Date(e.matched_at).getTime()) / 86400000)
       : 0;
 
   const egyptMissingPaymentMethod =
@@ -129,6 +138,11 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                 {waitingDays > 0 && (
                   <Badge variant="outline" className="text-[10px] h-5 px-1.5 shrink-0 border-amber-400 text-amber-700 bg-amber-50 dark:text-amber-400 dark:border-amber-600 dark:bg-amber-950/20">
                     Waiting {waitingDays}d
+                  </Badge>
+                )}
+                {noClassLinkDays >= 3 && (
+                  <Badge variant="outline" className="text-[10px] h-5 px-1.5 shrink-0 border-red-400 text-red-700 bg-red-50 dark:text-red-400 dark:border-red-600 dark:bg-red-950/20">
+                    No link! {noClassLinkDays}d
                   </Badge>
                 )}
               </div>
@@ -279,6 +293,44 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                   <Link className="h-4 w-4 mr-1" /> Send Class Link
                 </Button>
               )}
+              {e.payment_status === "PAID" && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                  title="Resend payment confirmed email"
+                  onClick={() => onResendPaymentEmail(e)}
+                >
+                  <Mail className="h-3.5 w-3.5 mr-1" /> Resend ✉
+                </Button>
+              )}
+              {e.approval_status === "APPROVED" && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                  title="Resend approval email"
+                  onClick={() => onResendApprovalEmail(e)}
+                >
+                  <Mail className="h-3.5 w-3.5 mr-1" /> Resend ✅
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-xs text-green-600 hover:text-green-700 hover:bg-green-50"
+                title="Open WhatsApp with pre-composed message"
+                onClick={() => {
+                  const msg = encodeURIComponent(
+                    e.approval_status === "APPROVED"
+                      ? `مرحباً ${e.profiles?.name || ""}، تم قبول تسجيلك في KLovers. هل تحتاج أي مساعدة قبل حصتك الأولى؟`
+                      : `مرحباً ${e.profiles?.name || ""}، فريق KLovers معك. هل تحتاج مساعدة بخصوص تسجيلك؟`
+                  );
+                  window.open(`https://wa.me/?text=${msg}`, "_blank");
+                }}
+              >
+                <span style={{fontSize: "14px"}}>💬</span>
+              </Button>
               {e.approval_status === "APPROVED" && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>

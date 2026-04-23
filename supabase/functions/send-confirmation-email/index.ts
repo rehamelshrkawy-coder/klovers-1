@@ -14,10 +14,15 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "group_forming" | "receipt_nudge";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder";
   class_link_url?: string;
   tx_ref?: string;
   payment_date?: string;
+  slot_day?: string;
+  slot_time?: string;
+  slot_timezone?: string;
+  first_class_date?: string;
+  alert_items?: Array<{ name: string; email: string; days_waiting: number }>;
   rebook_url?: string;
   available_slots?: Array<{ day_of_week: number; start_time: string; timezone?: string }>;
   enrollment_id?: string;
@@ -31,9 +36,6 @@ interface EmailPayload {
   group_timezone?: string;
   group_level?: string;
   custom_message?: string;
-  slot_day?: string;
-  slot_time?: string;
-  slot_timezone?: string;
   slot_level?: string;
   preferred_day?: string;
   preferred_time?: string;
@@ -58,6 +60,41 @@ const BRAND_TEXT = "#333333";
 const BRAND_MUTED = "#666666";
 const LOGO_URL = "https://kloversegy.com/klovers-logo.jpg";
 const SITE_URL = "https://kloversegy.com";
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+async function logEmail(opts: {
+  template: string;
+  toEmail: string;
+  toName?: string;
+  status: "sent" | "failed";
+  resendId?: string;
+  error?: string;
+}) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/email_logs`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`,
+        "Prefer": "return=minimal",
+      },
+      body: JSON.stringify({
+        template: opts.template,
+        to_email: opts.toEmail,
+        to_name: opts.toName,
+        status: opts.status,
+        resend_id: opts.resendId,
+        error: opts.error,
+      }),
+    });
+  } catch {
+    // never throw from logging
+  }
+}
 
 function brandWrapper(content: string, isRtl: boolean) {
   const dir = isRtl ? 'direction: rtl; text-align: right;' : '';
@@ -324,6 +361,7 @@ function buildApprovalEmail(p: EmailPayload) {
         <div style="margin: 24px 0; text-align: center;">
           ${brandButton("لوحة الطالب", "https://kloversegy.com/dashboard")}
         </div>
+        <p style="color: ${BRAND_MUTED}; font-size: 12px; margin-top: 20px; border-top: 1px solid #e0e0e0; padding-top: 16px;">🎁 <strong>بتحب KLovers؟</strong> ادعُ صديقاً وتحصلوا كلاكما على حصة مجانية. <a href="https://kloversegy.com/refer" style="color: ${BRAND_DARK}; font-weight: bold;">شارك رابطك ←</a></p>
       `, true),
     };
   }
@@ -337,6 +375,7 @@ function buildApprovalEmail(p: EmailPayload) {
       <div style="margin: 24px 0; text-align: center;">
         ${brandButton("Go to Dashboard", "https://kloversegy.com/dashboard")}
       </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 12px; margin-top: 20px; border-top: 1px solid #e0e0e0; padding-top: 16px;">🎁 <strong>Loving KLovers?</strong> Refer a friend and you both get a free class. <a href="https://kloversegy.com/refer" style="color: ${BRAND_DARK}; font-weight: bold;">Share your link →</a></p>
     `, false),
   };
 }
@@ -823,7 +862,7 @@ function buildPaymentConfirmedEmail(p: EmailPayload) {
       subject: "KLovers — تم استلام دفعتك! مقعدك محجوز ✅",
       html: brandWrapper(`
         <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! ✅</h1>
-        <p>تم استلام دفعتك بنجاح وتأكيد حجز مقعدك.</p>
+        <p>تم استلام دفعتك بنجاح وتأكيد حجز مقعدك. مجموعتك تتشكل الآن — نقوم بمطابقتك مع طلاب على نفس مستواك.</p>
         ${brandTable(rows)}
         ${timelineAr}
         <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px;">احتفظ بهذا البريد الإلكتروني كإيصال للدفع.</p>
@@ -835,7 +874,7 @@ function buildPaymentConfirmedEmail(p: EmailPayload) {
     subject: "KLovers — Payment Received! Your Seat is Reserved ✅",
     html: brandWrapper(`
       <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! ✅</h1>
-      <p>We've confirmed your payment and your seat is reserved.</p>
+      <p>We've confirmed your payment and your seat is reserved. Your group is forming now — we're matching you with students at the same level.</p>
       ${brandTable(rows)}
       ${timelineEn}
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px;">Save this email as your payment receipt.</p>
@@ -925,6 +964,19 @@ function buildReceiptNudgeEmail(p: EmailPayload) {
 function buildClassLinkEmail(p: EmailPayload) {
   const isAr = p.language === "ar";
   const linkUrl = p.class_link_url || "#";
+  const tz = (p.slot_timezone || "Africa/Cairo").replace(/_/g, " ");
+
+  const scheduleBlock = p.slot_day
+    ? `<div style="background: ${BRAND_GRAY}; padding: 12px 16px; border-radius: 6px; margin: 12px 0;">
+        <p style="margin: 0; font-size: 14px;">📅 <strong>${p.slot_day}</strong>${p.slot_time ? ` at ${p.slot_time}` : ""} <span style="color: ${BRAND_MUTED}; font-size: 12px;">(${tz})</span></p>
+      </div>`
+    : "";
+
+  const scheduleBlockAr = p.slot_day
+    ? `<div style="background: ${BRAND_GRAY}; padding: 12px 16px; border-radius: 6px; margin: 12px 0;">
+        <p style="margin: 0; font-size: 14px;">📅 <strong>${p.slot_day}</strong>${p.slot_time ? ` الساعة ${p.slot_time}` : ""} <span style="color: ${BRAND_MUTED}; font-size: 12px;">(${tz})</span></p>
+      </div>`
+    : "";
 
   if (isAr) {
     return {
@@ -932,6 +984,7 @@ function buildClassLinkEmail(p: EmailPayload) {
       html: brandWrapper(`
         <h1 style="color: ${BRAND_DARK}; font-size: 22px;">حصتك جاهزة يا ${p.name}! 🎓</h1>
         <p>تم تشكيل مجموعتك الدراسية بالكامل وحصتك مجدولة ومستعدة للبدء.</p>
+        ${scheduleBlockAr}
         <div style="background: ${BRAND_GRAY}; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid ${BRAND_YELLOW}; text-align: center;">
           <p style="margin: 0 0 12px; font-weight: bold; font-size: 15px;">رابط الانضمام لحصتك:</p>
           ${brandButton("انضم للحصة الآن", linkUrl)}
@@ -946,12 +999,133 @@ function buildClassLinkEmail(p: EmailPayload) {
     html: brandWrapper(`
       <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Your class is ready, ${p.name}! 🎓</h1>
       <p>Your study group is fully formed and your class is scheduled and ready to start.</p>
+      ${scheduleBlock}
       <div style="background: ${BRAND_GRAY}; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid ${BRAND_YELLOW}; text-align: center;">
         <p style="margin: 0 0 12px; font-weight: bold; font-size: 15px;">Your class meeting link:</p>
         ${brandButton("Join Your Class", linkUrl)}
       </div>
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px;">Save this link — you'll use it to join all your classes.</p>
       <p style="color: ${BRAND_MUTED}; font-size: 13px;">Any questions? Message us on WhatsApp.</p>
+    `, false),
+  };
+}
+
+function buildGroupFormingEscalationEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const waUrl = "https://wa.me/201010003084";
+  if (isAr) {
+    return {
+      subject: "KLovers — نعتذر عن الانتظار — مجموعتك قادمة قريباً 🙏",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}،</h1>
+        <p>نعلم أن الانتظار قد يكون صعباً، ونقدّر صبرك الكبير.</p>
+        <p>ما زلنا نعمل على إتمام تشكيل مجموعتك — نريد التأكد من حصولك على أفضل معلم وجدول يناسبك تماماً.</p>
+        <div style="background: #fffbeb; border: 1px solid #f59e0b; border-radius: 8px; padding: 14px 18px; margin: 16px 0;">
+          <p style="margin: 0; color: #92400e; font-size: 13px;">⚡ ستتلقى بريداً إلكترونياً يتضمن رابط حصتك فور اكتمال تشكيل المجموعة.</p>
+        </div>
+        <p>لو عندك أي سؤال أو قلق، كلمنا مباشرة على واتساب:</p>
+        <div style="margin: 20px 0; text-align: center;">
+          <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 واتساب</a>
+        </div>
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — Sorry for the wait — your group is almost there 🙏",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name},</h1>
+      <p>We know waiting isn't fun, and we really appreciate your patience.</p>
+      <p>We're still working on forming your class group — we want to make sure you get the best teacher match and schedule for you.</p>
+      <div style="background: #fffbeb; border: 1px solid #f59e0b; border-radius: 8px; padding: 14px 18px; margin: 16px 0;">
+        <p style="margin: 0; color: #92400e; font-size: 13px;">⚡ You'll receive your class meeting link the moment your group is complete.</p>
+      </div>
+      <p>If you have any questions or concerns, message us directly on WhatsApp:</p>
+      <div style="margin: 20px 0; text-align: center;">
+        <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 WhatsApp</a>
+      </div>
+    `, false),
+  };
+}
+
+function buildRejectionFollowupEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const enrollUrl = "https://kloversegy.com/enroll-now";
+  if (isAr) {
+    return {
+      subject: "KLovers — لا تفوّت فرصتك — اختر موعدك الآن 📅",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}،</h1>
+        <p>لاحظنا أنك لم تختر موعداً جديداً بعد.</p>
+        <p>لا يزال بإمكانك إعادة التسجيل واختيار وقت يناسبك — لدينا مواعيد متاحة وطلابنا ينتظرونك في المجموعة!</p>
+        <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+          <p style="margin: 0; font-size: 14px;">📅 اختر موعدك الجديد وسنقوم بمطابقتك مع المجموعة المناسبة.</p>
+        </div>
+        <div style="margin: 24px 0; text-align: center;">
+          ${brandButton("اختر موعدك الآن", enrollUrl)}
+        </div>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px;">هذه آخر رسالة متابعة — بعدها القرار بيدك دائماً.</p>
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — Don't miss your spot — pick a new time 📅",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name},</h1>
+      <p>We noticed you haven't picked a new time slot yet.</p>
+      <p>You can still re-enroll and choose a schedule that works for you — we have availability and your future classmates are waiting!</p>
+      <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+        <p style="margin: 0; font-size: 14px;">📅 Pick your new slot and we'll match you with the right group.</p>
+      </div>
+      <div style="margin: 24px 0; text-align: center;">
+        ${brandButton("Pick Your Time Now", enrollUrl)}
+      </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px;">This is our last follow-up — the door is always open for you.</p>
+    `, false),
+  };
+}
+
+function buildPreClassReminderEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const waUrl = "https://wa.me/201010003084";
+  const dateStr = p.first_class_date || "";
+  if (isAr) {
+    return {
+      subject: "KLovers — حصتك الأولى غداً! 🎯 استعد الآن",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">يا ${p.name}، حصتك الأولى غداً! 🎯</h1>
+        ${dateStr ? `<div style="background: ${BRAND_GRAY}; padding: 12px 16px; border-radius: 6px; margin: 12px 0; text-align: center;"><p style="margin: 0; font-size: 16px; font-weight: bold;">📅 ${dateStr} (القاهرة)</p></div>` : ""}
+        <p>إليك كيف تستفيد من حصتك للأقصى:</p>
+        <ul style="color: ${BRAND_TEXT}; padding-right: 20px; line-height: 2;">
+          <li>🎧 جرّب الكاميرا والميكروفون قبل الحصة بـ 10 دقائق</li>
+          <li>📝 اكتب 2–3 أشياء تريد تعلمها في الكورية</li>
+          <li>☕ خذ مشروباً — الحصة ممتعة وستمر سريعاً</li>
+          <li>🔗 الرابط وصلك في إيميل سابق — ابحث عن "رابط الحصة"</li>
+        </ul>
+        <p>متحمس لبداية رحلتك! 🚀</p>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px;">أي سؤال؟ كلمنا على واتساب.</p>
+        <div style="margin: 20px 0; text-align: center;">
+          <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 واتساب</a>
+        </div>
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — Your first class is tomorrow! 🎯 Get ready",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Your first class is tomorrow, ${p.name}! 🎯</h1>
+      ${dateStr ? `<div style="background: ${BRAND_GRAY}; padding: 12px 16px; border-radius: 6px; margin: 12px 0; text-align: center;"><p style="margin: 0; font-size: 16px; font-weight: bold;">📅 ${dateStr} (Cairo time)</p></div>` : ""}
+      <p>Here's how to make the most of your first class:</p>
+      <ul style="color: ${BRAND_TEXT}; padding-left: 20px; line-height: 2;">
+        <li>🎧 Test your camera and microphone 10 minutes before class</li>
+        <li>📝 Write down 2–3 things you want to learn in Korean</li>
+        <li>☕ Grab a drink — it's going to be fun and fly by</li>
+        <li>🔗 Your class link was sent in a previous email — search for "class meeting link"</li>
+      </ul>
+      <p>So excited for you to start this journey! 🚀</p>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px;">Any questions? Message us on WhatsApp.</p>
+      <div style="margin: 20px 0; text-align: center;">
+        <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 WhatsApp</a>
+      </div>
     `, false),
   };
 }
@@ -966,7 +1140,8 @@ serve(async (req) => {
       throw new Error("RESEND_API_KEY is not configured");
     }
 
-    const payload: EmailPayload = await req.json();
+    let payload: EmailPayload = {} as EmailPayload;
+    payload = await req.json();
     const { email, name, language, template } = payload;
 
     if (!email || !name) {
@@ -1042,6 +1217,15 @@ serve(async (req) => {
       case "receipt_nudge":
         ({ subject, html } = buildReceiptNudgeEmail(payload));
         break;
+      case "group_forming_escalation":
+        ({ subject, html } = buildGroupFormingEscalationEmail(payload));
+        break;
+      case "rejection_followup":
+        ({ subject, html } = buildRejectionFollowupEmail(payload));
+        break;
+      case "pre_class_reminder":
+        ({ subject, html } = buildPreClassReminderEmail(payload));
+        break;
       case "enrollment":
       default:
         ({ subject, html } = buildEnrollmentEmail(payload));
@@ -1050,6 +1234,7 @@ serve(async (req) => {
 
     const result = await sendEmail(email, subject, html);
     console.log(`Email sent to ${email} (${template || "enrollment"}):`, result);
+    await logEmail({ template: template || "enrollment", toEmail: email, toName: name, status: "sent", resendId: result.id });
 
     return new Response(
       JSON.stringify({ success: true, message: "Email sent", id: result.id }),
@@ -1058,6 +1243,12 @@ serve(async (req) => {
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("Email error:", msg);
+    // best-effort log — payload may be undefined if error happened during req.json()
+    try {
+      if (typeof payload !== "undefined") {
+        await logEmail({ template: payload.template || "unknown", toEmail: payload.email || "unknown", toName: payload.name, status: "failed", error: msg });
+      }
+    } catch { /* ignore */ }
     return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
