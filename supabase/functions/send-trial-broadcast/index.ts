@@ -27,18 +27,18 @@ async function sendEmail(to: string, subject: string, html: string) {
 }
 
 function buildBroadcastEmail(name: string): { subject: string; html: string } {
-  const displayName = name?.trim() || "طالب عزيز";
+  const displayName = name?.trim() || "Student";
 
   return {
-    subject: "🎓 كلاس تجريبي مجاني — احجز مكانك الآن!",
+    subject: "🎓 Free Trial Class — Book Your Spot Now! | كلاس تجريبي مجاني — احجز مكانك!",
     html: `
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Tahoma,Arial,sans-serif;direction:rtl;">
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Tahoma,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:40px 20px;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;">
@@ -47,8 +47,9 @@ function buildBroadcastEmail(name: string): { subject: string; html: string } {
   <tr>
     <td style="background:#000000;padding:32px 40px;text-align:center;">
       <p style="margin:0 0 8px;color:#FFFF00;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;">KLovers Academy</p>
-      <h1 style="margin:0;color:#ffffff;font-size:26px;font-weight:700;line-height:1.3;">
-        🎓 كلاس تجريبي مجاني — أماكن محدودة!
+      <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;line-height:1.4;">
+        🎓 Free Trial Class — Limited Spots!<br>
+        <span style="font-size:20px;">كلاس تجريبي مجاني — أماكن محدودة!</span>
       </h1>
     </td>
   </tr>
@@ -57,70 +58,86 @@ function buildBroadcastEmail(name: string): { subject: string; html: string } {
   <tr>
     <td style="padding:36px 40px;">
 
-      <p style="color:#374151;font-size:17px;line-height:1.8;margin:0 0 20px;">
-        أهلاً <strong>${displayName}</strong>،
+      <!-- English section -->
+      <p style="color:#374151;font-size:17px;line-height:1.8;margin:0 0 12px;">
+        Hi <strong>${displayName}</strong>,
+      </p>
+      <p style="color:#374151;font-size:15px;line-height:1.8;margin:0 0 6px;">
+        We're opening <strong>free trial Korean classes</strong> and you're invited to book your spot now! 🌟
+      </p>
+      <p style="color:#374151;font-size:15px;line-height:1.8;margin:0 0 24px;">
+        Spots are limited — first come, first served.
       </p>
 
-      <p style="color:#374151;font-size:16px;line-height:1.8;margin:0 0 20px;">
-        عندنا أخبار حلوة! 🌟<br>
-        بنفتح <strong>كلاسات تجريبية مجانية</strong> في اللغة الكورية — وأنت مدعو/ة تحجز مكانك دلوقتي.
-      </p>
+      <!-- Divider -->
+      <hr style="border:none;border-top:1px dashed #e5e7eb;margin:0 0 24px;">
 
-      <!-- Trial dates box -->
-      <div style="background:#fafafa;border:2px solid #FFFF00;border-radius:10px;padding:24px 28px;margin:24px 0;">
-        <p style="margin:0 0 16px;font-size:16px;font-weight:700;color:#111827;">📅 مواعيد الكلاسات التجريبية:</p>
+      <!-- Arabic section -->
+      <div dir="rtl" style="text-align:right;">
+        <p style="color:#374151;font-size:17px;line-height:1.8;margin:0 0 12px;">
+          أهلاً <strong>${displayName}</strong>،
+        </p>
+        <p style="color:#374151;font-size:15px;line-height:1.8;margin:0 0 6px;">
+          بنفتح <strong>كلاسات تجريبية مجانية</strong> في اللغة الكورية — وأنت مدعو/ة تحجز مكانك دلوقتي! 🌟
+        </p>
+        <p style="color:#374151;font-size:15px;line-height:1.8;margin:0 0 24px;">
+          الأماكن محدودة وبتتملي بسرعة.
+        </p>
+      </div>
+
+      <!-- Trial schedule box -->
+      <div style="background:#fafafa;border:2px solid #FFFF00;border-radius:10px;padding:24px 28px;margin:0 0 20px;">
+        <p style="margin:0 0 4px;font-size:15px;font-weight:700;color:#111827;">📅 Trial Schedule / مواعيد الكلاسات:</p>
+        <p style="margin:0 0 16px;font-size:13px;color:#6b7280;">(Cairo Time / توقيت القاهرة)</p>
 
         <table style="width:100%;border-collapse:collapse;">
           <tr>
-            <td style="padding:10px 0;border-bottom:1px solid #e5e7eb;">
-              <span style="font-size:18px;">🗓️</span>
-              <strong style="color:#111827;font-size:15px;margin-right:8px;">السبت</strong>
-              <span style="color:#6b7280;font-size:15px;">الساعة 4:00 مساءً (توقيت القاهرة)</span>
+            <td style="padding:11px 0;border-bottom:1px solid #e5e7eb;">
+              <span style="font-size:16px;">🗓️</span>
+              <strong style="color:#111827;font-size:15px;"> Saturday / السبت</strong>
+              <span style="color:#6b7280;font-size:14px;"> — 4:00 PM</span>
             </td>
           </tr>
           <tr>
-            <td style="padding:10px 0;border-bottom:1px solid #e5e7eb;">
-              <span style="font-size:18px;">🗓️</span>
-              <strong style="color:#111827;font-size:15px;margin-right:8px;">الأحد</strong>
-              <span style="color:#6b7280;font-size:15px;">الساعة 6:30 مساءً (توقيت القاهرة)</span>
+            <td style="padding:11px 0;border-bottom:1px solid #e5e7eb;">
+              <span style="font-size:16px;">🗓️</span>
+              <strong style="color:#111827;font-size:15px;"> Sunday / الأحد</strong>
+              <span style="color:#6b7280;font-size:14px;"> — 6:30 PM</span>
             </td>
           </tr>
           <tr>
-            <td style="padding:10px 0;">
-              <span style="font-size:18px;">🗓️</span>
-              <strong style="color:#111827;font-size:15px;margin-right:8px;">الأربعاء</strong>
-              <span style="color:#6b7280;font-size:15px;">الساعة 5:30 مساءً (توقيت القاهرة)</span>
+            <td style="padding:11px 0;">
+              <span style="font-size:16px;">🗓️</span>
+              <strong style="color:#111827;font-size:15px;"> Wednesday / الأربعاء</strong>
+              <span style="color:#6b7280;font-size:14px;"> — 5:30 PM</span>
             </td>
           </tr>
         </table>
       </div>
 
       <!-- Deadline notice -->
-      <div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:14px 18px;margin:0 0 24px;">
+      <div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:14px 18px;margin:0 0 28px;">
         <p style="margin:0;font-size:14px;color:#92400e;">
-          ⏰ <strong>آخر موعد للحجز:</strong> يوم واحد قبل الكلاس — لا تأخرش!
+          ⏰ <strong>Booking closes 1 day before each class</strong><br>
+          <span dir="rtl">آخر موعد للحجز: يوم واحد قبل الكلاس — لا تأخرش!</span>
         </p>
       </div>
 
-      <p style="color:#374151;font-size:15px;line-height:1.8;margin:0 0 28px;">
-        الأماكن محدودة في كل كلاس، وبتتملي بسرعة. اضغط/ي على الزرار دلوقتي واحجز/احجزي مكانك! 🚀
-      </p>
-
       <!-- CTA -->
       <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td align="center" style="padding:8px 0 28px;">
+        <tr><td align="center" style="padding:0 0 28px;">
           <a href="https://kloversegy.com/trial-booking"
-             style="background:#FFFF00;color:#000000;text-decoration:none;padding:16px 44px;border-radius:8px;font-size:17px;font-weight:700;display:inline-block;letter-spacing:0.3px;">
-            احجز كلاسك المجاني الآن ←
+             style="background:#FFFF00;color:#000000;text-decoration:none;padding:16px 44px;border-radius:8px;font-size:17px;font-weight:700;display:inline-block;">
+            Book My Free Class ← احجز الآن
           </a>
         </td></tr>
       </table>
 
-      <hr style="border:none;border-top:1px solid #e5e7eb;margin:8px 0 24px;">
-
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 20px;">
       <p style="color:#6b7280;font-size:13px;line-height:1.7;margin:0;text-align:center;">
-        لو عندك أي سؤال، ابعت لنا على واتساب أو رد على الإيميل ده.<br>
-        ✨ <strong style="color:#111827;">فريق KLovers</strong>
+        Questions? Reply to this email or reach us on WhatsApp.<br>
+        <span dir="rtl">عندك سؤال؟ رد على الإيميل ده أو تواصل معنا على واتساب.</span><br><br>
+        ✨ <strong style="color:#111827;">The KLovers Team / فريق KLovers</strong>
       </p>
 
     </td>
