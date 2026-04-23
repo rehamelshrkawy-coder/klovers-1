@@ -20,7 +20,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Stage = "prep" | "day1" | "day3";
+type Stage = "prep" | "day1" | "day3" | "day7";
 
 interface Booking {
   id: string;
@@ -32,6 +32,7 @@ interface Booking {
   followup_prep_sent_at: string | null;
   followup_day1_sent_at: string | null;
   followup_day3_sent_at: string | null;
+  followup_day7_sent_at: string | null;
 }
 
 function pickLanguage(level: string | null): "ar" | "en" {
@@ -42,24 +43,30 @@ function pickLanguage(level: string | null): "ar" | "en" {
   return "ar";
 }
 
-const STAGE_TEMPLATE: Record<Stage, "trial_prep" | "trial_followup_day1" | "trial_followup_day3"> = {
+const STAGE_TEMPLATE: Record<Stage, "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "trial_followup_day7"> = {
   prep: "trial_prep",
   day1: "trial_followup_day1",
   day3: "trial_followup_day3",
+  day7: "trial_followup_day7",
 };
 
-const STAGE_COLUMN: Record<Stage, "followup_prep_sent_at" | "followup_day1_sent_at" | "followup_day3_sent_at"> = {
+const STAGE_COLUMN: Record<Stage, "followup_prep_sent_at" | "followup_day1_sent_at" | "followup_day3_sent_at" | "followup_day7_sent_at"> = {
   prep: "followup_prep_sent_at",
   day1: "followup_day1_sent_at",
   day3: "followup_day3_sent_at",
+  day7: "followup_day7_sent_at",
 };
 
 // Offset in days from today (Cairo) to the trial_date we want to target.
-// prep → trial is tomorrow (+1); day1 → trial was yesterday (-1); day3 → -3.
+// prep  → trial is tomorrow  (+1)
+// day1  → 2 days after trial (-2) — softer cadence, not next morning
+// day3  → 3 days after trial (-3) — WhatsApp nudge
+// day7  → 7 days after trial (-7) — qualitative check-in + share link
 const STAGE_DAY_OFFSET: Record<Stage, number> = {
   prep: 1,
-  day1: -1,
+  day1: -2,
   day3: -3,
+  day7: -7,
 };
 
 async function dispatchStage(
@@ -115,6 +122,18 @@ async function dispatchStage(
     }
     if (!b.email) { skipped++; continue; }
 
+    // For day-7, include a referral share link from the profile
+    let referralUrl: string | undefined;
+    if (stage === "day7" && b.user_id) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("unsubscribe_token")
+        .eq("user_id", b.user_id)
+        .maybeSingle();
+      referralUrl = `https://kloversegy.com/free-trial?ref=${b.user_id}`;
+      void profile; // unsubscribe_token fetched but handled in send-confirmation-email
+    }
+
     try {
       const { error: sendErr } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
@@ -123,6 +142,7 @@ async function dispatchStage(
           language: pickLanguage(b.level),
           template: STAGE_TEMPLATE[stage],
           level: b.level,
+          ...(referralUrl ? { referral_url: referralUrl } : {}),
         },
       });
       if (sendErr) throw new Error(sendErr.message);
@@ -146,7 +166,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
     const results = await Promise.all(
-      (["prep", "day1", "day3"] as Stage[]).map(s => dispatchStage(supabase, s)),
+      (["prep", "day1", "day3", "day7"] as Stage[]).map(s => dispatchStage(supabase, s)),
     );
 
     console.log("trial-followups:", JSON.stringify(results));

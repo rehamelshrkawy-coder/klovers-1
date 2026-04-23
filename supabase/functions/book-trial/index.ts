@@ -164,9 +164,11 @@ Deno.serve(async (req) => {
     const trialDate = nextDateForDay(day_of_week);
     const timezone = "Africa/Cairo";
 
-    // Registrations close 1 day before the class
+    // Registrations close 1 day before the class (compare in Cairo time UTC+2, no DST)
+    const cairoNow = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    const cairoDayStr = cairoNow.toISOString().split("T")[0];
     const trialMs = new Date(trialDate + "T00:00:00Z").getTime();
-    const todayMs = new Date(new Date().toISOString().split("T")[0] + "T00:00:00Z").getTime();
+    const todayMs = new Date(cairoDayStr + "T00:00:00Z").getTime();
     if (Math.round((trialMs - todayMs) / 86_400_000) <= 1) {
       return new Response(
         JSON.stringify({ ok: false, success: false, error: "Booking is closed — registrations close 1 day before the class." }),

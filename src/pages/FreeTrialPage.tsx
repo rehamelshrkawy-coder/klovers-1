@@ -71,16 +71,29 @@ const FreeTrialPage = () => {
     const el = document.createElement("script");
     el.id = "free-trial-jsonld";
     el.setAttribute("type", "application/ld+json");
-    el.textContent = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Course",
-      "name": "Free Trial Korean Class",
-      "description": "30-minute live Korean class with a real teacher. Free, no credit card required.",
-      "provider": { "@type": "Organization", "name": "Klovers Korean Academy", "url": "https://kloversegy.com" },
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "category": "Free Trial" },
-      "inLanguage": "ko",
-      "url": "https://kloversegy.com/free-trial",
-    });
+    el.textContent = JSON.stringify([
+      {
+        "@context": "https://schema.org",
+        "@type": "Course",
+        "name": "Free Trial Korean Class",
+        "description": "30-minute live Korean class with a real teacher. Free, no credit card required.",
+        "provider": { "@type": "Organization", "name": "Klovers Korean Academy", "url": "https://kloversegy.com" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "category": "Free Trial" },
+        "inLanguage": "ko",
+        "url": "https://kloversegy.com/free-trial",
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "Is the trial class really free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — completely free, no credit card required. You attend a 30-minute live class with a real teacher." } },
+          { "@type": "Question", "name": "What level do I need to be?", "acceptedAnswer": { "@type": "Answer", "text": "Any level is welcome. Most students start from zero (Hangul). The teacher will assess your level during the class." } },
+          { "@type": "Question", "name": "When are the trial classes?", "acceptedAnswer": { "@type": "Answer", "text": "Every Saturday at 4:00 PM, Sunday at 6:30 PM, and Wednesday at 5:30 PM Cairo time." } },
+          { "@type": "Question", "name": "How do I book?", "acceptedAnswer": { "@type": "Answer", "text": "Click 'Book My Free Class', choose a day, and confirm. You'll receive an email with the class link and a Google Calendar invite." } },
+          { "@type": "Question", "name": "What happens after the trial?", "acceptedAnswer": { "@type": "Answer", "text": "After your trial you'll receive a level recommendation and pricing options if you'd like to continue with a full course." } },
+        ],
+      },
+    ]);
     document.head.appendChild(el);
     return () => { el.remove(); };
   }, []);
@@ -89,6 +102,16 @@ const FreeTrialPage = () => {
   const { user, loading } = useAuth();
   const [searchParams] = useSearchParams();
   const referredBy = searchParams.get("ref") || "";
+
+  // Live booking count for social proof
+  const [bookedCount, setBookedCount] = useState<number | null>(null);
+  useEffect(() => {
+    supabase
+      .from("trial_bookings")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["confirmed", "completed"])
+      .then(({ count }) => { if (count !== null) setBookedCount(count); });
+  }, []);
 
   // Guest inline booking state
   const [guestMode, setGuestMode] = useState(false);
@@ -107,8 +130,21 @@ const FreeTrialPage = () => {
     }
   }, [referredBy]);
 
+  // Fire landing_viewed only after 50% scroll depth — reduces noise vs page load
   useEffect(() => {
-    logLeadEvent({ source_type: "free_trial", cta_label: "landing_viewed" });
+    let fired = false;
+    const onScroll = () => {
+      if (fired) return;
+      const scrolled = window.scrollY + window.innerHeight;
+      const total = document.documentElement.scrollHeight;
+      if (scrolled / total >= 0.5) {
+        fired = true;
+        logLeadEvent({ source_type: "free_trial", cta_label: "landing_viewed" });
+        window.removeEventListener("scroll", onScroll);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const handleBookCta = () => {
@@ -209,7 +245,9 @@ const FreeTrialPage = () => {
                         ))}
                       </div>
                       <div className="text-start">
-                        <p className="text-sm font-black text-foreground leading-tight">{t("freeTrial.socialCount")}</p>
+                        <p className="text-sm font-black text-foreground leading-tight">
+                          {bookedCount !== null ? `${bookedCount}+ students` : t("freeTrial.socialCount")}
+                        </p>
                         <p className="text-xs text-muted-foreground leading-tight">{t("freeTrial.socialCountText")}</p>
                       </div>
                     </div>

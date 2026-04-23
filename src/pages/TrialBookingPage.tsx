@@ -198,10 +198,18 @@ const TrialBookingPage = () => {
     }
   };
 
-  // Fire once when success state renders, for funnel measurement.
+  // Fire once when success state renders: funnel + Meta Pixel + GA4
   useEffect(() => {
     if (bookingResult) {
       track.custom("post_trial_screen_shown", { trial_date: bookingResult.trial_date });
+      // Meta Pixel Lead event — signals a qualified conversion for paid ads
+      track.lead({ content_name: "trial_booked", trial_date: bookingResult.trial_date });
+      // Log funnel event for acquisition attribution
+      logLeadEvent({
+        source_type: "free_trial",
+        cta_label: "trial_booked_confirmed",
+        metadata: { trial_date: bookingResult.trial_date, day_name: bookingResult.day_name },
+      });
     }
   }, [bookingResult]);
 
