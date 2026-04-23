@@ -11,10 +11,10 @@ export const translations = {
       langToggle: "العربية",
     },
     hero: {
-      badge: "⭐ 4.9 · Rated by 200+ Egyptian students",
+      badge: "⭐ 4.9 · Rated by 200+ students worldwide",
       title1: "Learn Korean —",
-      title2: "Taught in Arabic",
-      subtitle: "Live online Korean classes explained in Arabic by a certified teacher. Join 500+ Arab K-drama fans who no longer need subtitles.",
+      title2: "Live Online Classes",
+      subtitle: "Live Korean classes with a certified teacher. Join 500+ K-drama fans who no longer need subtitles — Arabic support available.",
       startNow: "Book a Free Class",
       viewPricing: "See Pricing",
     },
