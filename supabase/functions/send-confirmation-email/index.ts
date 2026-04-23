@@ -867,6 +867,12 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (template === "payment_method_reminder" && !payload.enrollment_id) {
+      return new Response(JSON.stringify({ error: "enrollment_id is required for the payment_method_reminder template" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     let subject: string;
     let html: string;
