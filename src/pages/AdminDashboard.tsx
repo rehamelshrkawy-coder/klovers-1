@@ -37,6 +37,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AdminKpiStrip } from "@/components/admin/AdminKpiStrip";
+
 // Lazy-load heavy tab components — each loads only when its tab is first opened
 const BlogManager = lazy(() => import("@/components/admin/BlogManager"));
 const StudentManager = lazy(() => import("@/components/admin/StudentManager"));
@@ -126,8 +128,8 @@ class TabErrorBoundary extends Component<
 
 import { normalizeLevel, LEVEL_SELECT_OPTIONS } from "@/constants/levels";
 import type { Lead, Enrollment, AttendanceReq, OverviewRow } from "@/types/admin";
-import { formatTime, ADMIN_PAGE_SIZE as PAGE_SIZE } from "@/lib/admin-utils";
-import { useProfiles } from "@/hooks/admin/useProfiles";
+import { formatTime, ADMIN_PAGE_SIZE as PAGE_SIZE, MAX_UNIT_PRICE, AT_RISK_SESSION_THRESHOLD, exportCSV } from "@/lib/admin-utils";
+import type { ProfileEntry } from "@/hooks/admin/useProfiles";
 import { useStudentOverview, buildOverviewByEmail } from "@/hooks/admin/useStudentOverview";
 import { useLeads } from "@/hooks/admin/useLeads";
 import { useEnrollments } from "@/hooks/admin/useEnrollments";
@@ -142,9 +144,25 @@ const AdminDashboard = () => {
   const queryClient = useQueryClient();
 
   // ── React Query: shared data (cached, deduplicated) ───────────────────────
-  const { data: profileMap } = useProfiles();
   const { data: overviewRows = [], isLoading: overviewLoading } = useStudentOverview();
   const overviewByEmail = useMemo(() => buildOverviewByEmail(overviewRows), [overviewRows]);
+
+  // Build profileMap from overviewRows (already fetched) instead of a separate
+  // 5000-row profiles query. Eliminates one full-table scan on every page load.
+  const profileMap = useMemo<Record<string, ProfileEntry>>(() => {
+    const map: Record<string, ProfileEntry> = {};
+    for (const r of overviewRows) {
+      map[r.user_id] = {
+        user_id: r.user_id,
+        name: r.name,
+        email: r.email,
+        level: r.level ?? null,
+        country: r.country ?? null,
+      };
+    }
+    return map;
+  }, [overviewRows]);
+
   const { data: leads = [], isLoading: leadsLoading, error: leadsQueryError } = useLeads({ overviewByEmail });
   const { data: enrollments = [], isLoading: enrollmentsLoading } = useEnrollments({ profileMap });
   const { data: attendanceReqs = [], isLoading: attendanceLoading } = useAttendanceRequests({ profileMap, overviewRows });
@@ -233,6 +251,7 @@ const AdminDashboard = () => {
   const [selectedEnrollmentIds, setSelectedEnrollmentIds] = useState<Set<string>>(new Set());
   const [bulkApproving, setBulkApproving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [sendingResend, setSendingResend] = useState<Set<string>>(new Set());
   const [showOverdueOnly, setShowOverdueOnly] = useState(false);
   const navigate = useNavigate();
 
@@ -449,47 +468,61 @@ const AdminDashboard = () => {
   };
 
   const handleResendPaymentEmail = useCallback(async (e: Enrollment) => {
-    const { error } = await supabase.functions.invoke("send-confirmation-email", {
-      body: {
-        template: "payment_confirmed",
-        email: e.profiles?.email,
-        name: e.profiles?.name ?? "Student",
-        language: "ar",
-        plan_type: e.plan_type,
-        duration: e.duration,
-        sessions_total: e.sessions_total,
-        amount: e.amount,
-        currency: e.currency ?? "EGP",
-        tx_ref: e.tx_ref,
-      },
-    });
-    if (error) {
-      toast({ title: "Failed to resend", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Payment email resent", description: `Sent to ${e.profiles?.email}` });
+    const key = `pay-${e.id}`;
+    if (sendingResend.has(key)) return;
+    setSendingResend(prev => new Set(prev).add(key));
+    try {
+      const { error } = await supabase.functions.invoke("send-confirmation-email", {
+        body: {
+          template: "payment_confirmed",
+          email: e.profiles?.email,
+          name: e.profiles?.name ?? "Student",
+          language: "ar",
+          plan_type: e.plan_type,
+          duration: e.duration,
+          sessions_total: e.sessions_total,
+          amount: e.amount,
+          currency: e.currency ?? "EGP",
+          tx_ref: e.tx_ref,
+        },
+      });
+      if (error) {
+        toast({ title: "Failed to resend", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Payment email resent", description: `Sent to ${e.profiles?.email}` });
+      }
+    } finally {
+      setSendingResend(prev => { const s = new Set(prev); s.delete(key); return s; });
     }
-  }, []);
+  }, [sendingResend]);
 
   const handleResendApprovalEmail = useCallback(async (e: Enrollment) => {
-    const { error } = await supabase.functions.invoke("send-confirmation-email", {
-      body: {
-        template: "approval",
-        email: e.profiles?.email,
-        name: e.profiles?.name ?? "Student",
-        language: "ar",
-        plan_type: e.plan_type,
-        duration: e.duration,
-        sessions_total: e.sessions_total,
-        amount: e.amount,
-        currency: e.currency ?? "EGP",
-      },
-    });
-    if (error) {
-      toast({ title: "Failed to resend", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Approval email resent", description: `Sent to ${e.profiles?.email}` });
+    const key = `appr-${e.id}`;
+    if (sendingResend.has(key)) return;
+    setSendingResend(prev => new Set(prev).add(key));
+    try {
+      const { error } = await supabase.functions.invoke("send-confirmation-email", {
+        body: {
+          template: "approval",
+          email: e.profiles?.email,
+          name: e.profiles?.name ?? "Student",
+          language: "ar",
+          plan_type: e.plan_type,
+          duration: e.duration,
+          sessions_total: e.sessions_total,
+          amount: e.amount,
+          currency: e.currency ?? "EGP",
+        },
+      });
+      if (error) {
+        toast({ title: "Failed to resend", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Approval email resent", description: `Sent to ${e.profiles?.email}` });
+      }
+    } finally {
+      setSendingResend(prev => { const s = new Set(prev); s.delete(key); return s; });
     }
-  }, []);
+  }, [sendingResend]);
 
   const handleSendClassLink = async () => {
     if (!classLinkTarget || !classLinkUrl.trim()) return;
@@ -644,7 +677,7 @@ const AdminDashboard = () => {
         toast({ title: "Invalid price", description: "Unit price must be greater than zero.", variant: "destructive" });
         return;
       }
-      if (price > 10000) {
+      if (price > MAX_UNIT_PRICE) {
         toast({ title: "Invalid price", description: "Unit price seems too high. Please verify.", variant: "destructive" });
         return;
       }
@@ -742,7 +775,21 @@ const AdminDashboard = () => {
         toast({ title: "Error", description: error.message || "Failed to approve.", variant: "destructive" });
         return;
       }
-      toast({ title: "Attendance approved", description: `Sessions remaining: ${data}` });
+      const newRemaining = typeof data === "number" ? data : null;
+      toast({ title: "Attendance approved", description: `Sessions remaining: ${newRemaining ?? "?"}` });
+
+      // Notify student when they cross into the LOCKED threshold for the first time
+      if (newRemaining !== null && newRemaining <= 0 && req.profiles?.email) {
+        void supabase.functions.invoke("send-confirmation-email", {
+          body: {
+            template: "sessions_exhausted",
+            email: req.profiles.email,
+            name: req.profiles.name ?? "Student",
+            language: "ar",
+            sessions_remaining: newRemaining,
+          },
+        });
+      }
     } else {
       const { error } = await supabase.rpc("reject_attendance_request", {
         _request_id: req.id,
@@ -934,6 +981,12 @@ const AdminDashboard = () => {
               </button>
             </div>
           )}
+          <AdminKpiStrip
+            overviewRows={overviewRows}
+            actionableEnrollments={actionableEnrollments}
+            isLoading={overviewLoading}
+          />
+
           <LifecycleFunnel
             leadsCount={lifecycleLeads}
             registeredCount={overviewRows.length}
@@ -1365,13 +1418,11 @@ const AdminDashboard = () => {
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <Button variant="outline" size={isMobile ? "icon" : "sm"} onClick={() => {
-                        const headers = ["Name", "Email", "Country", "Level", "Remaining Sessions", "Status", "Source", "Joined"];
-                        const rows = filteredUsers.map(u => [u.name, u.email, u.country, u.level, u.sessions_remaining, u.derived_status, u.source_label, new Date(u.joined_at).toLocaleDateString()]);
-                        const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(",")).join("\n");
-                        const blob = new Blob([csv], { type: "text/csv" });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement("a"); a.href = url; a.download = `students-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
-                        URL.revokeObjectURL(url);
+                        exportCSV(
+                          ["Name", "Email", "Country", "Level", "Remaining Sessions", "Status", "Source", "Joined"],
+                          filteredUsers.map(u => [u.name, u.email, u.country, u.level, u.sessions_remaining, u.derived_status, u.source_label, new Date(u.joined_at).toLocaleDateString()]),
+                          "students"
+                        );
                       }}>
                         <Download className="h-4 w-4" />
                         {!isMobile && <span className="ml-1">Export CSV</span>}
@@ -1419,7 +1470,50 @@ const AdminDashboard = () => {
                 </div>
               ) : (
                 <>
-                  <div className="border rounded-xl overflow-auto">
+                  {/* Mobile card list — shown only on small screens */}
+                  {isMobile && (
+                    <div className="space-y-2 sm:hidden">
+                      {pagedUsers.map((u) => {
+                        const isAtRisk = u.derived_status === "ACTIVE" && u.sessions_remaining > 0 && u.sessions_remaining <= AT_RISK_SESSION_THRESHOLD;
+                        const isLocked = u.derived_status === "LOCKED";
+                        return (
+                          <div
+                            key={u.user_id}
+                            className={cn(
+                              "rounded-xl border bg-card p-3 space-y-2 cursor-pointer transition-shadow hover:shadow-sm",
+                              isAtRisk && "border-amber-300/60 bg-amber-50/60 dark:bg-amber-950/20",
+                              isLocked && "border-red-300/60 bg-red-50/60 dark:bg-red-950/20"
+                            )}
+                            onClick={() => setSelectedStudentId(selectedStudentId === u.user_id ? null : (u.enrollment_id ? u.user_id : null))}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="font-medium text-sm text-foreground truncate">{u.name || "—"}</p>
+                                <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                              </div>
+                              <Badge variant={getDerivedStatusBadgeVariant(u.derived_status)} className="text-xs shrink-0">{u.derived_status}</Badge>
+                            </div>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                              {u.level && <span className="px-1.5 py-0.5 rounded-full bg-muted font-medium">{u.level}</span>}
+                              <span>Sessions: <span className="font-mono font-semibold text-foreground">{u.sessions_remaining}</span></span>
+                              {u.amount_due > 0 && (
+                                <span className="text-destructive font-semibold">Owes {formatMoney(u.amount_due, u.currency)}</span>
+                              )}
+                              {u.sessions_total > 0 && (
+                                <span>
+                                  Attend: <span className={`font-semibold ${Math.round(((u.sessions_total - u.sessions_remaining) / u.sessions_total) * 100) >= 80 ? "text-green-600" : "text-amber-600"}`}>
+                                    {Math.round(((u.sessions_total - u.sessions_remaining) / u.sessions_total) * 100)}%
+                                  </span>
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {/* Desktop table — hidden on small screens */}
+                  <div className={cn("border rounded-xl overflow-auto", isMobile && "hidden sm:block")}>
                     <Table>
                       <TableHeader>
                         <TableRow className="sticky top-0 bg-background/95 backdrop-blur z-10 border-b">
@@ -1434,6 +1528,7 @@ const AdminDashboard = () => {
                           <TableHead
                             className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary"
                             onClick={() => setStudentSort(s => ({ col: "sessions_remaining", dir: s.col === "sessions_remaining" && s.dir === "asc" ? "desc" : "asc" }))}
+                            aria-sort={studentSort.col === "sessions_remaining" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                           >
                             Remaining {studentSort.col === "sessions_remaining" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
                           </TableHead>
@@ -1441,6 +1536,7 @@ const AdminDashboard = () => {
                             <TableHead
                               className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary"
                               onClick={() => setStudentSort(s => ({ col: "attendance_pct", dir: s.col === "attendance_pct" && s.dir === "asc" ? "desc" : "asc" }))}
+                              aria-sort={studentSort.col === "attendance_pct" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                             >
                               Attend% {studentSort.col === "attendance_pct" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
                             </TableHead>
@@ -1449,12 +1545,14 @@ const AdminDashboard = () => {
                           <TableHead
                             className="py-3 px-3 font-semibold text-right cursor-pointer select-none hover:text-primary"
                             onClick={() => setStudentSort(s => ({ col: "amount_due", dir: s.col === "amount_due" && s.dir === "asc" ? "desc" : "asc" }))}
+                            aria-sort={studentSort.col === "amount_due" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                           >
                             Amount Due {studentSort.col === "amount_due" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
                           </TableHead>
                           <TableHead
                             className="py-3 px-3 font-semibold text-right cursor-pointer select-none hover:text-primary"
                             onClick={() => setStudentSort(s => ({ col: "remaining_balance", dir: s.col === "remaining_balance" && s.dir === "asc" ? "desc" : "asc" }))}
+                            aria-sort={studentSort.col === "remaining_balance" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                           >
                             Balance {studentSort.col === "remaining_balance" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
                           </TableHead>
@@ -1466,6 +1564,7 @@ const AdminDashboard = () => {
                             <TableHead
                               className="py-3 px-3 font-semibold cursor-pointer select-none hover:text-primary"
                               onClick={() => setStudentSort(s => ({ col: "joined_at", dir: s.col === "joined_at" && s.dir === "asc" ? "desc" : "asc" }))}
+                              aria-sort={studentSort.col === "joined_at" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                             >
                               Joined {studentSort.col === "joined_at" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
                             </TableHead>
@@ -1474,8 +1573,16 @@ const AdminDashboard = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {pagedUsers.map((u) => (
-                          <TableRow key={u.user_id} className={cn("group odd:bg-muted/30 hover:bg-muted/50 transition cursor-pointer", selectedStudentId === u.user_id && "ring-2 ring-primary/40")} onClick={() => setSelectedStudentId(selectedStudentId === u.user_id ? null : (u.enrollment_id ? u.user_id : null))}>
+                        {pagedUsers.map((u) => {
+                          const isAtRisk = u.derived_status === "ACTIVE" && u.sessions_remaining > 0 && u.sessions_remaining <= AT_RISK_SESSION_THRESHOLD;
+                          const isLocked = u.derived_status === "LOCKED";
+                          return (
+                          <TableRow key={u.user_id} className={cn(
+                            "group odd:bg-muted/30 hover:bg-muted/50 transition cursor-pointer",
+                            selectedStudentId === u.user_id && "ring-2 ring-primary/40",
+                            isAtRisk && "bg-amber-50/60 dark:bg-amber-950/20 odd:bg-amber-50/60",
+                            isLocked && "bg-red-50/60 dark:bg-red-950/20 odd:bg-red-50/60"
+                          )} onClick={() => setSelectedStudentId(selectedStudentId === u.user_id ? null : (u.enrollment_id ? u.user_id : null))}>
                             <TableCell className="py-3 px-3 font-medium">
                               <div className="flex items-center gap-1.5">
                                 <span>{u.name || "—"}</span>
@@ -1601,7 +1708,8 @@ const AdminDashboard = () => {
                               </AlertDialog>
                             </TableCell>
                           </TableRow>
-                        ))}
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
