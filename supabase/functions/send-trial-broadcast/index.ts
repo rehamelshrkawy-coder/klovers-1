@@ -126,7 +126,7 @@ function buildBroadcastEmail(name: string): { subject: string; html: string } {
       <!-- CTA -->
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr><td align="center" style="padding:0 0 28px;">
-          <a href="https://kloversegy.com/trial-booking"
+          <a href="https://kloversegy.com/trial-booking?utm_source=email&utm_medium=broadcast&utm_campaign=trial_broadcast"
              style="background:#FFFF00;color:#000000;text-decoration:none;padding:16px 44px;border-radius:8px;font-size:17px;font-weight:700;display:inline-block;">
             Book My Free Class ← احجز الآن
           </a>
@@ -168,7 +168,7 @@ serve(async (req) => {
     // Fetch all profiles with email, excluding unsubscribed
     const { data: profiles, error } = await supabase
       .from("profiles")
-      .select("name, email, email_unsubscribed")
+      .select("user_id, name, email, email_unsubscribed")
       .not("email", "is", null)
       .neq("email_unsubscribed", true);
 
@@ -195,6 +195,17 @@ serve(async (req) => {
       try {
         const { subject, html } = buildBroadcastEmail(profile.name);
         await sendEmail(profile.email, subject, html);
+        // Log funnel event so broadcast shows up in admin analytics
+        await supabase.from("lead_events").insert({
+          session_id: crypto.randomUUID(),
+          user_id: profile.user_id ?? null,
+          source_type: "email",
+          source_page: "/email/trial-broadcast",
+          cta_label: "trial_broadcast_sent",
+          campaign: "trial_broadcast",
+          utm_source: "email",
+          utm_medium: "broadcast",
+        }).catch((e: unknown) => console.warn("lead_events insert failed:", e));
         results.push({ email: profile.email, status: "sent" });
         // Respect Resend rate limits
         await new Promise((r) => setTimeout(r, 120));

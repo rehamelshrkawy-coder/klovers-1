@@ -10,7 +10,8 @@ export type LeadSource =
   | "placement_test"
   | "pricing"
   | "enroll"
-  | "contact";
+  | "contact"
+  | "email";
 
 interface LogOpts {
   source_type: LeadSource;

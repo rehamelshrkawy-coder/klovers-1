@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, TrendingUp, MousePointerClick, Users, UserPlus, Eye, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { RefreshCw, TrendingUp, MousePointerClick, Users, UserPlus, Eye, ChevronLeft, ChevronRight, Download, Mail } from "lucide-react";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -37,6 +37,7 @@ interface FunnelRow {
   clicked_free_trial: boolean | null;
   started_placement: boolean | null;
   viewed_pricing_cta: boolean | null;
+  received_broadcast: boolean | null;
   user_id: string | null;
   signup_completed: boolean | null;
 }
@@ -56,6 +57,7 @@ const SOURCE_COLORS: Record<string, string> = {
   pricing: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
   enroll: "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300",
   contact: "bg-gray-100 text-gray-800 dark:bg-gray-900/40 dark:text-gray-300",
+  email: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300",
 };
 
 const PAGE_SIZE = 30;
@@ -122,8 +124,9 @@ const LeadFunnelPanel: React.FC = () => {
     const trial = funnelRows.filter((r) => r.clicked_free_trial).length;
     const placement = funnelRows.filter((r) => r.started_placement).length;
     const pricing = funnelRows.filter((r) => r.viewed_pricing_cta).length;
+    const broadcast = funnelRows.filter((r) => r.received_broadcast).length;
     const signups = funnelRows.filter((r) => r.signup_completed).length;
-    return { total, wa, trial, placement, pricing, signups };
+    return { total, wa, trial, placement, pricing, broadcast, signups };
   }, [funnelRows]);
 
   // Source breakdown for the "sources" tab
@@ -207,13 +210,14 @@ const LeadFunnelPanel: React.FC = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
         {[
           { label: "Sessions", value: stats.total, icon: Eye, color: "text-slate-600" },
           { label: "WhatsApp Clicks", value: stats.wa, icon: MousePointerClick, color: "text-green-600" },
           { label: "Placement Starts", value: stats.placement, icon: TrendingUp, color: "text-purple-600" },
           { label: "Free Trial Clicks", value: stats.trial, icon: MousePointerClick, color: "text-blue-600" },
           { label: "Pricing Views", value: stats.pricing, icon: Eye, color: "text-amber-600" },
+          { label: "Broadcast Sent", value: stats.broadcast, icon: Mail, color: "text-indigo-600", sub: pct(stats.broadcast, stats.total) },
           { label: "Signups", value: stats.signups, icon: UserPlus, color: "text-rose-600", sub: pct(stats.signups, stats.total) },
         ].map((kpi) => (
           <Card key={kpi.label} className="rounded-xl">
