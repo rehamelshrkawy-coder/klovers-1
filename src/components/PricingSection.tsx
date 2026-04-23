@@ -209,13 +209,17 @@ const PricingSection = () => {
                   >
                     {tierT("tagline") || tierKey}
                   </Badge>
-                  {tierKey === "regional" && !isDiscountedCountry && (
+                  {/* Most Popular: on local for discounted countries, on regional globally */}
+                  {isDiscountedCountry && (
                     <Badge className="bg-amber-500 text-white">⭐ Most Popular</Badge>
                   )}
                   {isDiscountedCountry && (
-                    <Badge className="bg-green-500 text-white animate-pulse">
+                    <Badge className="bg-green-500 text-white">
                       <Sparkles className="h-3 w-3 mr-1" /> Discount!
                     </Badge>
+                  )}
+                  {tierKey === "regional" && !isDiscountedCountry && isActive && (
+                    <Badge className="bg-amber-500 text-white">⭐ Most Popular</Badge>
                   )}
                 </div>
 
@@ -250,17 +254,26 @@ const PricingSection = () => {
 
                   <div className="space-y-3 mb-6">
                     {classType === "group" ? (
-                      (selectedCountry === "Egypt" && tierKey === "local" ? egpGroupPrices : tierPrices[tierKey]).map((price: any) => (
+                      (selectedCountry === "Egypt" && tierKey === "local" ? egpGroupPrices : tierPrices[tierKey]).map((price: any) => {
+                        const isBestValue = price.duration === "3 Months";
+                        return (
                         <div
                           key={price.duration}
                           className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                            isActive ? "bg-accent" : "bg-muted/50"
+                            isActive && isBestValue
+                              ? "bg-primary/15 border border-primary/40 ring-1 ring-primary/20"
+                              : isActive ? "bg-accent" : "bg-muted/50"
                           }`}
                         >
                           <div>
-                            <p className="font-semibold text-foreground text-sm">
-                              {t("pricing", `durations.${price.duration}`) !== `durations.${price.duration}` ? t("pricing", `durations.${price.duration}`) : price.duration}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-foreground text-sm">
+                                {t("pricing", `durations.${price.duration}`) !== `durations.${price.duration}` ? t("pricing", `durations.${price.duration}`) : price.duration}
+                              </p>
+                              {isActive && isBestValue && (
+                                <span className="text-[10px] font-bold text-primary bg-primary/10 border border-primary/30 px-1.5 py-0.5 rounded-full leading-none">Best Value</span>
+                              )}
+                            </div>
                             <p className="text-xs text-muted-foreground">
                               {t("pricing", `classes.${price.classes}`) !== `classes.${price.classes}` ? t("pricing", `classes.${price.classes}`) : price.classes}
                             </p>
@@ -281,19 +294,29 @@ const PricingSection = () => {
                             )}
                           </div>
                         </div>
-                      ))
+                        );
+                      })
                     ) : (
-                      (selectedCountry === "Egypt" && tierKey === "local" ? egpPrivatePrices : privatePrices[tierKey]).map((price: any) => (
+                      (selectedCountry === "Egypt" && tierKey === "local" ? egpPrivatePrices : privatePrices[tierKey]).map((price: any) => {
+                        const isBestValue = price.duration === "3 Months";
+                        return (
                         <div
                           key={`private-${price.duration}`}
                           className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                            isActive ? "bg-accent" : "bg-muted/50"
+                            isActive && isBestValue
+                              ? "bg-primary/15 border border-primary/40 ring-1 ring-primary/20"
+                              : isActive ? "bg-accent" : "bg-muted/50"
                           }`}
                         >
                           <div>
-                            <p className="font-semibold text-foreground text-sm">
-                              {t("pricing", `durations.${price.duration}`) !== `durations.${price.duration}` ? t("pricing", `durations.${price.duration}`) : price.duration}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-foreground text-sm">
+                                {t("pricing", `durations.${price.duration}`) !== `durations.${price.duration}` ? t("pricing", `durations.${price.duration}`) : price.duration}
+                              </p>
+                              {isActive && isBestValue && (
+                                <span className="text-[10px] font-bold text-primary bg-primary/10 border border-primary/30 px-1.5 py-0.5 rounded-full leading-none">Best Value</span>
+                              )}
+                            </div>
                             <p className="text-xs text-muted-foreground">
                               {t("pricing", `classes.${price.classes}`) !== `classes.${price.classes}` ? t("pricing", `classes.${price.classes}`) : price.classes}
                             </p>
@@ -309,7 +332,8 @@ const PricingSection = () => {
                             )}
                           </div>
                         </div>
-                      ))
+                        );
+                      })
                     )}
                   </div>
 

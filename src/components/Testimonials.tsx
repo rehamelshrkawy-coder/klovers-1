@@ -100,10 +100,15 @@ const Testimonials = () => {
 
               {/* Author */}
               <div className="flex items-center gap-3 pt-4 border-t border-border">
-                <div className={`w-10 h-10 rounded-full flex-shrink-0 shadow-md overflow-hidden ${item.photo ? "" : `bg-gradient-to-br ${AVATAR_COLORS[index % AVATAR_COLORS.length]} flex items-center justify-center`}`}>
+                <div className="w-10 h-10 rounded-full flex-shrink-0 shadow-md overflow-hidden bg-muted">
                   {item.photo
-                    ? <img src={item.photo} alt={item.name} className="w-full h-full object-cover" />
-                    : <span className="text-white font-bold text-sm">{item.name.charAt(0).toUpperCase()}</span>
+                    ? <img src={item.photo} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
+                    : <img
+                        src={`https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(item.name)}&backgroundColor=ffdd00,ffd700`}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                   }
                 </div>
                 <div>
