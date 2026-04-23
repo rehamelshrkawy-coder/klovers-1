@@ -13,7 +13,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { BookOpen, Plus, Trash2, Search, Clock, CheckCircle2, Lock } from "lucide-react";
+import { BookOpen, Plus, Trash2, Search, Clock, CheckCircle2, Lock, ExternalLink, Download } from "lucide-react";
 
 interface Profile {
   user_id: string;
@@ -154,7 +154,26 @@ const BookAssignmentManager = () => {
               Assigned to students who purchased a class. Unlocks on the specified date (default: 1 week after assignment).
             </div>
           </div>
-          <Badge variant="secondary" className="ml-auto shrink-0">{assignments.length} assigned</Badge>
+          <div className="ml-auto flex items-center gap-2 shrink-0">
+            <Badge variant="secondary">{assignments.length} assigned</Badge>
+            <Button
+              variant="outline" size="sm"
+              className="gap-1.5 h-7 text-xs"
+              onClick={() => window.open("/hangul-book", "_blank")}
+            >
+              <ExternalLink className="h-3 w-3" /> Preview
+            </Button>
+            <Button
+              variant="outline" size="sm"
+              className="gap-1.5 h-7 text-xs"
+              onClick={() => {
+                const win = window.open("/hangul-book", "_blank");
+                if (win) win.addEventListener("load", () => win.print());
+              }}
+            >
+              <Download className="h-3 w-3" /> Download PDF
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
