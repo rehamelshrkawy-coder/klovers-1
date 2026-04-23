@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Search, Download, Trash2, Check, X, Eye, Undo2, AlertCircle, Bell, ChevronLeft, ChevronRight, Pencil, Mail, Eraser, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Copy, Clock, Tag, UserPlus, Loader2, Image, Trophy, TrendingUp, Link } from "lucide-react";
+import { LogOut, Search, Download, Trash2, Check, X, Eye, Undo2, AlertCircle, Bell, ChevronLeft, ChevronRight, Pencil, Mail, Eraser, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Copy, Clock, Tag, UserPlus, Loader2, Image, Trophy, TrendingUp, Link, BookOpen } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, Columns3, Package } from "lucide-react";
@@ -61,6 +61,7 @@ const ImageAuditPanel = lazy(() => import("@/components/admin/ImageAuditPanel"))
 const LeadsPanel = lazy(() => import("@/components/admin/LeadsPanel").catch(() => import("@/components/admin/LeadsPanel")));
 const LeagueUsersPanel = lazy(() => import("@/components/admin/LeagueUsersPanel"));
 const LeadFunnelPanel = lazy(() => import("@/components/admin/LeadFunnelPanel"));
+const BookAssignmentManager = lazy(() => import("@/components/admin/BookAssignmentManager"));
 
 const TabLoader = () => (
   <div className="flex items-center justify-center py-20">
@@ -797,7 +798,7 @@ const AdminDashboard = () => {
 
   const TAB_GROUPS: { id: string; label: string; icon: typeof Users; tabs: string[] }[] = [
     { id: "ops",     label: "Operations", icon: BarChart3, tabs: ["students", "enrollments", "leads", "trials", "lead-funnel", "manage", "sales", "promos"] },
-    { id: "learn",   label: "Learning",   icon: Users,     tabs: ["group-attendance", "group-matcher", "placement-tests", "session-attendance", "preferences", "league-users"] },
+    { id: "learn",   label: "Learning",   icon: Users,     tabs: ["group-attendance", "group-matcher", "placement-tests", "session-attendance", "preferences", "league-users", "books"] },
     { id: "content", label: "Content",    icon: Sparkles,  tabs: ["blog", "seo-orchestration", "image-audit", "campaigns"] },
     { id: "config",  label: "Config",     icon: Settings,  tabs: ["notifications", "scheduling", "availability", "settings"] },
   ];
@@ -1168,6 +1169,11 @@ const AdminDashboard = () => {
                 {inActiveGroup("league-users") && (
                   <TabsTrigger value="league-users" className={TAB_CLS}>
                     <Trophy className="h-3.5 w-3.5" /> Leagues
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("books") && (
+                  <TabsTrigger value="books" className={TAB_CLS}>
+                    <BookOpen className="h-3.5 w-3.5" /> Books
                   </TabsTrigger>
                 )}
                 {inActiveGroup("blog") && (
@@ -2034,6 +2040,27 @@ const AdminDashboard = () => {
                   <LeagueUsersPanel />
                 </Suspense>
               </TabErrorBoundary>
+            </TabsContent>
+
+            {/* BOOKS TAB */}
+            <TabsContent value="books">
+              <Card className="rounded-2xl">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-amber-500" /> Book Assignments
+                  </CardTitle>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Assign the Hangul Book 1 to students who purchased a class. Set an unlock date — default is 1 week after assignment. Students see a locked card until their date arrives.
+                  </p>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <TabErrorBoundary name="Book Assignments">
+                    <Suspense fallback={<TabLoader />}>
+                      <BookAssignmentManager />
+                    </Suspense>
+                  </TabErrorBoundary>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* SALES ANALYTICS TAB */}
