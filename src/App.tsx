@@ -67,6 +67,7 @@ const KoreanInterviewPage = lazy(() => import("./pages/KoreanInterviewPage"));
 const ReturningStudentsLandingPage = lazy(() => import("./pages/ReturningStudentsLandingPage"));
 const HangulBookPage = lazy(() => import("./pages/HangulBookPage"));
 const EnrollmentStatusPage = lazy(() => import("./pages/EnrollmentStatusPage"));
+const HangulStarterPage = lazy(() => import("./pages/HangulStarterPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -163,6 +164,7 @@ const App = () => (
                 <Route path="/welcome-back" element={<ReturningStudentsLandingPage />} />
                 <Route path="/hangul-book" element={<HangulBookPage />} />
                 <Route path="/enrollment-status" element={<AuthProtectedRoute><EnrollmentStatusPage /></AuthProtectedRoute>} />
+                <Route path="/hangul-starter" element={<HangulStarterPage />} />
                 <Route path="/practice-interview" element={<InterviewTrainingPage />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/reset" element={<ProtectedRoute><AdminResetPage /></ProtectedRoute>} />
