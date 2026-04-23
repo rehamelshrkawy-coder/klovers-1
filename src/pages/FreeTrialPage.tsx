@@ -13,6 +13,7 @@ import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { Gift, Users, Clock, Star, ArrowRight, Video, ClipboardList, Sparkles, CalendarDays, AlertCircle, CheckCircle2, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import TrialSlotPicker from "@/components/TrialSlotPicker";
+import AvatarInitials from "@/components/AvatarInitials";
 
 const Stars = ({ count = 5 }: { count?: number }) => (
   <div className="flex gap-0.5">
@@ -44,20 +45,16 @@ const FreeTrialPage = () => {
     { day: t("freeTrial.dayWednesday"), time: "5:30 PM" },
   ];
 
-  const TESTIMONIALS: { quote: string; name: string; role: string; initial: string; photo?: string }[] = [
+  const TESTIMONIALS: { quote: string; name: string; role: string }[] = [
     {
       quote: t("freeTrial.testimonial1Quote"),
       name:  t("freeTrial.testimonial1Name"),
       role:  t("freeTrial.testimonial1Role"),
-      initial: "S",
-      photo: "https://api.dicebear.com/9.x/micah/svg?seed=MagedAziz&backgroundColor=ffd700",
     },
     {
       quote: t("freeTrial.testimonial2Quote"),
       name:  t("freeTrial.testimonial2Name"),
       role:  t("freeTrial.testimonial2Role"),
-      initial: "A",
-      photo: "https://api.dicebear.com/9.x/micah/svg?seed=AyayaSalah&backgroundColor=ffd700",
     },
   ];
 
@@ -263,12 +260,7 @@ const FreeTrialPage = () => {
                     "{t_.quote}"
                   </p>
                   <div className="flex items-center gap-3 pt-2 border-t border-border">
-                    <div className={`w-9 h-9 rounded-full flex-shrink-0 overflow-hidden ${t_.photo ? "" : "bg-primary flex items-center justify-center"}`}>
-                      {t_.photo
-                        ? <img src={t_.photo} alt={t_.name} className="w-full h-full object-cover" />
-                        : <span className="text-sm font-black text-black">{t_.initial}</span>
-                      }
-                    </div>
+                    <AvatarInitials name={t_.name} size={36} />
                     <div>
                       <p className="text-sm font-bold text-foreground leading-tight">{t_.name}</p>
                       <p className="text-xs text-muted-foreground leading-tight">{t_.role}</p>

@@ -231,7 +231,7 @@ const HeroSection = () => {
                     {display}
                   </span>
                 </div>
-                <span className="text-white/75 text-xs sm:text-sm font-medium tracking-wide">
+                <span className="text-white/90 text-xs sm:text-sm font-medium tracking-wide">
                   {label}
                 </span>
               </div>

@@ -1,13 +1,12 @@
 import { lazy, Suspense, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
-import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import WhyLearnKorean from "@/components/WhyLearnKorean";
 import Footer from "@/components/Footer";
 import StickyEnrollBar from "@/components/StickyEnrollBar";
 import ReturningStudentBanner from "@/components/ReturningStudentBanner";
+import InterviewBannerChip from "@/components/InterviewBannerChip";
 
 // Lazy-load below-fold sections for faster initial paint
 const MeetTeacher = lazy(() => import("@/components/MeetTeacher"));
@@ -27,7 +26,6 @@ const SectionFallback = () => (
 );
 
 const Index = () => {
-  const { t } = useLanguage();
   useSEO({ title: "Learn Korean Online", description: "Join Klovers Korean Lovers Academy. Interactive online Korean lessons, placement tests, and gamified learning for all levels.", canonical: "https://kloversegy.com/" });
 
   useEffect(() => {
@@ -83,24 +81,10 @@ const Index = () => {
         {/* Attention — strong hook, CTA, social proof stats */}
         <HeroSection />
 
-        {/* Korean Interview Training Banner */}
-        <div className="bg-secondary text-secondary-foreground">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center">
-            <div className="flex items-center gap-2">
-              <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">{t("homeBanner.badge")}</span>
-              <span className="text-sm font-medium">{t("homeBanner.text")}</span>
-            </div>
-            <Link
-              to="/interview-training"
-              className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-[#E6E600] transition-colors"
-            >
-              {t("homeBanner.cta")}
-            </Link>
-          </div>
-        </div>
-
         {/* Returning students promotional banner */}
         <ReturningStudentBanner />
+        {/* Interview training chip — non-intrusive floating, dismissible */}
+        <InterviewBannerChip />
 
         {/* Interest — immediately answer "how does this work?" */}
         <Suspense fallback={<SectionFallback />}>

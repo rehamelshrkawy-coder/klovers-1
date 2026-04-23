@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { logLeadEvent } from "@/lib/leadTracking";
+import { supabase } from "@/integrations/supabase/client";
 
 const SESSION_KEY = "exit_modal_shown";
 
@@ -43,12 +44,16 @@ const ExitIntentModal = () => {
       setError(isAr ? "أدخل بريدًا إلكترونيًا صحيحًا" : "Enter a valid email address");
       return;
     }
+    // Fire-and-forget: log lead + submit to leads system
     try {
       logLeadEvent({
         source_type: "exit_intent",
         cta_label: "exit_intent_hangul_sheet",
         metadata: { email },
       });
+      supabase.functions.invoke("submit-lead", {
+        body: { email, source: "exit_intent_hangul_sheet", name: "Hangul Sheet Request" },
+      }).catch(() => {});
     } catch {}
     setSubmitted(true);
   };

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Star } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import AvatarInitials from "@/components/AvatarInitials";
 
 const AVATAR_COLORS = [
   "from-[#E8D9FF] to-[#EFE6FF]",
@@ -100,17 +101,10 @@ const Testimonials = () => {
 
               {/* Author */}
               <div className="flex items-center gap-3 pt-4 border-t border-border">
-                <div className="w-10 h-10 rounded-full flex-shrink-0 shadow-md overflow-hidden bg-muted">
-                  {item.photo
-                    ? <img src={item.photo} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
-                    : <img
-                        src={`https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(item.name)}&backgroundColor=ffdd00,ffd700`}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                  }
-                </div>
+                {item.photo
+                  ? <img src={item.photo} alt={item.name} className="w-10 h-10 rounded-full flex-shrink-0 shadow-md object-cover" loading="lazy" />
+                  : <AvatarInitials name={item.name} size={40} className="shadow-md" />
+                }
                 <div>
                   <p className="font-semibold text-foreground text-sm">{item.name}</p>
                   <p className="text-xs text-muted-foreground">{item.location}</p>
