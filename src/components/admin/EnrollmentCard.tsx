@@ -82,6 +82,19 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
     e.approval_status === "PENDING" ||
     e.approval_status === "UNDER_REVIEW" ||
     e.approval_status === "PENDING_PAYMENT";
+
+  const isManualPayment = e.payment_provider === "egypt_manual" || e.payment_provider === "manual";
+  const hasReceipt = !!e.receipt_url && e.receipt_url.trim() !== "" && e.receipt_url !== "manual";
+  const approveBlockedNoReceipt = isManualPayment && !hasReceipt;
+  const approveBlockedNoPlacement = !e.matched_at;
+  const canApprove = !approveBlockedNoReceipt && !approveBlockedNoPlacement;
+
+  const approveBlockReason = approveBlockedNoReceipt
+    ? "Receipt required — ask the student to upload their payment receipt first."
+    : approveBlockedNoPlacement
+      ? "Run the Matcher tab to assign this student to a class slot first."
+      : undefined;
+
   const egyptMissingPaymentMethod =
     e.currency === "EGP" &&
     !e.payment_method &&
@@ -200,40 +213,43 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
               <Badge variant={e.approval_status === "APPROVED" ? "default" : e.approval_status === "REJECTED" ? "destructive" : "secondary"}>
                 {e.approval_status}
               </Badge>
-              {(() => {
-                const hasReceipt = !!e.receipt_url && e.receipt_url.length > 0 && e.receipt_url !== "manual";
-                const isManual = e.payment_provider === "egypt_manual" || e.payment_provider === "manual";
-                const needsReceipt = isManual && !hasReceipt && isActionableStatus;
-                return (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!hasReceipt}
-                    className={hasReceipt
-                      ? "border-green-400 text-green-700 hover:bg-green-50 dark:text-green-400 dark:border-green-600 dark:hover:bg-green-950/30"
-                      : needsReceipt
-                        ? "border-amber-400 text-amber-700 bg-amber-50 dark:text-amber-400 dark:border-amber-600 cursor-not-allowed"
-                        : "opacity-50 cursor-not-allowed"
-                    }
-                    title={hasReceipt ? "View payment receipt" : needsReceipt ? "Receipt required before approval" : "No receipt uploaded yet"}
-                    onClick={() => onViewReceipt(e)}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    {hasReceipt ? "Receipt ✓" : needsReceipt ? "⚠ Receipt Missing" : "No Receipt"}
-                  </Button>
-                );
-              })()}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hasReceipt}
+                className={hasReceipt
+                  ? "border-green-400 text-green-700 hover:bg-green-50 dark:text-green-400 dark:border-green-600 dark:hover:bg-green-950/30"
+                  : approveBlockedNoReceipt && isActionableStatus
+                    ? "border-amber-400 text-amber-700 bg-amber-50 dark:text-amber-400 dark:border-amber-600 cursor-not-allowed"
+                    : "opacity-50 cursor-not-allowed"
+                }
+                title={hasReceipt ? "View payment receipt" : approveBlockedNoReceipt && isActionableStatus ? "Receipt required before approval" : "No receipt uploaded yet"}
+                onClick={() => onViewReceipt(e)}
+              >
+                <Eye className="h-4 w-4 mr-1" />
+                {hasReceipt ? "Receipt ✓" : approveBlockedNoReceipt && isActionableStatus ? "⚠ Receipt Missing" : "No Receipt"}
+              </Button>
               {isActionableStatus && (
                 <>
                   <Button size="sm" variant="outline" onClick={() => onStartEditPrice(e)}>
                     <Pencil className="h-4 w-4 mr-1" /> Edit
                   </Button>
                   {e.plan_type === "group" ? (
-                    <Button size="sm" onClick={() => onApproveAndMatch(e)}>
+                    <Button
+                      size="sm"
+                      disabled={!canApprove}
+                      title={approveBlockReason}
+                      onClick={() => onApproveAndMatch(e)}
+                    >
                       <Check className="h-4 w-4 mr-1" /> Approve & Match
                     </Button>
                   ) : (
-                    <Button size="sm" onClick={() => onApprove(e)}>
+                    <Button
+                      size="sm"
+                      disabled={!canApprove}
+                      title={approveBlockReason}
+                      onClick={() => onApprove(e)}
+                    >
                       <Check className="h-4 w-4 mr-1" /> Approve
                     </Button>
                   )}
