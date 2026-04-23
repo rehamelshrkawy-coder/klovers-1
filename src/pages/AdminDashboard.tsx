@@ -619,6 +619,10 @@ const AdminDashboard = () => {
       if (!enrollment) continue;
       // Skip enrollments not yet placed by the matcher
       if (!enrollment.matched_at) { failed++; continue; }
+      // Skip manual-payment enrollments missing a receipt
+      const isManual = enrollment.payment_provider === "egypt_manual" || enrollment.payment_provider === "manual";
+      const hasReceipt = enrollment.receipt_url && enrollment.receipt_url.trim() !== "" && enrollment.receipt_url !== "manual";
+      if (isManual && !hasReceipt) { failed++; continue; }
       try {
         const { error } = await supabase.from("enrollments").update({
           status: "APPROVED", approval_status: "APPROVED", reviewed_at: new Date().toISOString(),
