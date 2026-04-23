@@ -34,7 +34,7 @@ const HeroSection = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoReady, setVideoReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
-  const { count: studentCount, ref: studentRef } = useCountUp(1000);
+  const { count: studentCount, ref: studentRef } = useCountUp(500);
   const { count: ratingCount, ref: ratingRef } = useCountUp(49, 1200);
   const { count: countryCount, ref: countryRef } = useCountUp(15);
 
@@ -158,8 +158,7 @@ const HeroSection = () => {
             className="text-base sm:text-xl md:text-2xl text-white/85 max-w-xl mx-auto leading-relaxed text-pretty"
             style={{ textShadow: "0 2px 16px rgba(0,0,0,0.9)" }}
           >
-            Live interactive Korean classes with <span className="font-semibold" style={{ color: "#ffff00" }}>real progress</span>.{" "}
-            Join <span className="text-white font-semibold">1,000+ students</span> learning the right way.
+            {t("hero", "subtitle")}
           </p>
 
           {/* CTA Buttons */}
@@ -170,7 +169,11 @@ const HeroSection = () => {
               className="gap-2.5 text-base font-bold px-10 shadow-2xl"
               style={{ boxShadow: "0 0 36px hsl(60 100% 50% / 0.3), 0 8px 24px rgba(0,0,0,0.4)" }}
             >
-              <Link to="/enroll-now">
+              <Link
+                to="/free-trial"
+                onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "homepage_hero_free_trial" }); } catch {} }}
+              >
+                <Gift className="h-5 w-5" />
                 {t("hero", "startNow")}
                 <ArrowRight className="h-5 w-5" />
               </Link>
@@ -181,12 +184,8 @@ const HeroSection = () => {
               asChild
               className="gap-2.5 text-base font-bold px-10 bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/50 backdrop-blur-sm"
             >
-              <Link
-                to="/free-trial"
-                onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "homepage_hero_free_trial" }); } catch {} }}
-              >
-                <Gift className="h-5 w-5" />
-                Free Trial Class
+              <Link to="/pricing">
+                {t("hero", "viewPricing")}
               </Link>
             </Button>
           </div>
@@ -202,7 +201,7 @@ const HeroSection = () => {
             {[
               { icon: Users, ref: studentRef, display: `${studentCount.toLocaleString('en-US')}+`, label: "Students Taught" },
               { icon: Star,  ref: ratingRef,  display: `${(ratingCount / 10).toFixed(1)} ★`, label: "Average Rating" },
-              { icon: Globe, ref: countryRef, display: `${countryCount.toLocaleString('en-US')}+`, label: "Countries" },
+              { icon: Globe, ref: countryRef, display: "4–8", label: "Students Per Class" },
             ].map(({ icon: Icon, ref: itemRef, display, label }) => (
               <div key={label} className="flex flex-col items-center gap-1 text-center group">
                 <div className="flex items-center gap-1.5">

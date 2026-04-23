@@ -7,9 +7,9 @@ import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { trackAndOpenWhatsApp } from "@/lib/leadTracking";
 
 const SOCIAL_PROOF = [
-  { icon: Users, value: "1,000+", label: "Active Students" },
+  { icon: Users, value: "500+", label: "Active Students" },
   { icon: Star,  value: "4.9★",   label: "Average Rating" },
-  { icon: Zap,   value: "45",      label: "Live Lessons"   },
+  { icon: Zap,   value: "4–8",    label: "Students Per Class" },
 ];
 
 // Floating Korean characters for visual texture
@@ -35,7 +35,7 @@ const FinalCTA = () => {
   useEffect(() => {
     if (!visible) return;
     let start = 0;
-    const target = 1000;
+    const target = 500;
     const step = Math.ceil(target / 60);
     const id = setInterval(() => {
       start = Math.min(start + step, target);
@@ -129,7 +129,7 @@ const FinalCTA = () => {
           }`}
         >
           <Button size="lg" variant="secondary" asChild className="gap-2 h-13 px-8 text-base shadow-xl min-w-[200px] font-bold">
-            <Link to="/enroll-now">
+            <Link to="/free-trial">
               {t("finalCta", "button")}
               <ArrowRight className="h-5 w-5" />
             </Link>
@@ -160,7 +160,7 @@ const FinalCTA = () => {
         </div>
 
         <p className="text-primary-foreground/50 text-xs">
-          {isAr ? "لا يلزم بطاقة ائتمان · إلغاء في أي وقت · نرد خلال دقائق" : "No credit card required · Cancel anytime · We reply in minutes"}
+          {isAr ? "لا بطاقة ائتمان · ٣٠ دقيقة · معلمة حقيقية · نرد خلال دقائق" : "No credit card · 30 minutes · Real teacher · We reply in minutes"}
         </p>
       </div>
     </section>
