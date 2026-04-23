@@ -366,32 +366,9 @@ serve(async (req) => {
         }
       }
 
-      // Send confirmation email
-      try {
-        const emailLang = existingUserData?.user?.user_metadata?.language || "en";
-        const emailRes = await fetch(
-          `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-confirmation-email`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
-            },
-            body: JSON.stringify({
-              email,
-              name,
-              plan_type: plan.classType,
-              duration: plan.duration,
-              sessions_total: plan.classesIncluded,
-              amount: actualAmount,
-              language: emailLang,
-            }),
-          }
-        );
-        if (!emailRes.ok) console.error("Failed to send confirmation email:", await emailRes.text());
-      } catch (emailErr) {
-        console.error("Email sending error:", emailErr);
-      }
+      // Approval email is now sent by the DB trigger (email_student_on_approval)
+      // after both payment and slot matching are confirmed (matched_at IS NOT NULL).
+      // Sending it here would be premature (before matching) and cause duplicates.
     }
 
     return new Response(JSON.stringify({ received: true }), {

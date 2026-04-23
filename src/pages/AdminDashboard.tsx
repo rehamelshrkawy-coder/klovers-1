@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Search, Download, Trash2, Check, X, Eye, Undo2, AlertCircle, Bell, ChevronLeft, ChevronRight, Pencil, Mail, Eraser, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Copy, Clock, Tag, UserPlus, Loader2, Image, Trophy, TrendingUp } from "lucide-react";
+import { LogOut, Search, Download, Trash2, Check, X, Eye, Undo2, AlertCircle, Bell, ChevronLeft, ChevronRight, Pencil, Mail, Eraser, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Copy, Clock, Tag, UserPlus, Loader2, Image, Trophy, TrendingUp, Link } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, Columns3, Package } from "lucide-react";
@@ -210,6 +210,12 @@ const AdminDashboard = () => {
   const [sendingReminder, setSendingReminder] = useState<Set<string>>(new Set());
   const [rejectTarget, setRejectTarget] = useState<Enrollment | null>(null);
   const [rejectReason, setRejectReason] = useState<"payment_not_received" | "time_slots_unavailable" | "other">("payment_not_received");
+  const [classLinkTarget, setClassLinkTarget] = useState<Enrollment | null>(null);
+  const [classLinkUrl, setClassLinkUrl] = useState("");
+  const [classLinkSendToGroup, setClassLinkSendToGroup] = useState(false);
+  const [isSendingClassLink, setIsSendingClassLink] = useState(false);
+  const [receiptModal, setReceiptModal] = useState<{ url: string; isPdf: boolean; studentName: string } | null>(null);
+  const [receiptModalLoading, setReceiptModalLoading] = useState(false);
   const [rejectNote, setRejectNote] = useState("");
   const [rejecting, setRejecting] = useState(false);
   const [studentFilter, setStudentFilter] = useState("all");
@@ -372,21 +378,26 @@ const AdminDashboard = () => {
   const handleViewReceipt = useCallback(async (e: Enrollment) => {
     if (!e.receipt_url || e.receipt_url.length === 0) return;
     if (e.receipt_url.startsWith("stripe:")) {
-      toast({ title: "Stripe payment", description: "This enrollment was paid via Stripe — no manual receipt." });
+      toast({ title: "Stripe payment", description: "Paid via Stripe — no manual receipt to view." });
       return;
     }
-    if (e.receipt_url.startsWith("http")) {
-      window.open(e.receipt_url, "_blank");
-      return;
+    setReceiptModalLoading(true);
+    let url = e.receipt_url;
+    if (!e.receipt_url.startsWith("http")) {
+      const { data, error } = await supabase.storage
+        .from("receipts")
+        .createSignedUrl(e.receipt_url, 3600);
+      if (error || !data?.signedUrl) {
+        toast({ title: "Error", description: "Could not load receipt.", variant: "destructive" });
+        setReceiptModalLoading(false);
+        return;
+      }
+      url = data.signedUrl;
     }
-    const { data, error } = await supabase.storage
-      .from("receipts")
-      .createSignedUrl(e.receipt_url, 300);
-    if (error || !data?.signedUrl) {
-      toast({ title: "Error", description: "Could not load receipt.", variant: "destructive" });
-      return;
-    }
-    window.open(data.signedUrl, "_blank");
+    const isPdf = e.receipt_url.toLowerCase().endsWith(".pdf");
+    const studentName = e.profiles?.name || e.profiles?.email || "Unknown";
+    setReceiptModal({ url, isPdf, studentName });
+    setReceiptModalLoading(false);
   }, []);
 
   // Request schedule resubmission — inserts a token row and copies link.
@@ -429,9 +440,117 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleSendClassLink = async () => {
+    if (!classLinkTarget || !classLinkUrl.trim()) return;
+    setIsSendingClassLink(true);
+
+    const recipients: { email: string; name: string; language?: string }[] = [];
+
+    if (classLinkSendToGroup) {
+      // Find the group this enrollment belongs to, then collect all active member emails
+      const { data: memberRow } = await supabase
+        .from("pkg_group_members")
+        .select("group_id")
+        .eq("enrollment_id", classLinkTarget.id)
+        .maybeSingle();
+
+      if (memberRow?.group_id) {
+        const { data: groupMembers } = await supabase
+          .from("pkg_group_members")
+          .select("user_id")
+          .eq("group_id", memberRow.group_id)
+          .eq("member_status", "active");
+
+        if (groupMembers && groupMembers.length > 0) {
+          const userIds = groupMembers.map((m: { user_id: string }) => m.user_id);
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("email, name, timezone")
+            .in("user_id", userIds);
+
+          if (profiles) {
+            for (const p of profiles) {
+              if (p.email && p.name) {
+                const tz = p.timezone || "";
+                const lang = tz.startsWith("Asia/") || tz.startsWith("Europe/") || tz.startsWith("America/") ? "en" : "ar";
+                recipients.push({ email: p.email, name: p.name, language: lang });
+              }
+            }
+          }
+        }
+      }
+
+      if (recipients.length === 0) {
+        toast({ title: "No group members found", description: "This enrollment has no active group members.", variant: "destructive" });
+        setIsSendingClassLink(false);
+        return;
+      }
+    } else {
+      const email = classLinkTarget.profiles?.email;
+      const name = classLinkTarget.profiles?.name ?? "Student";
+      if (!email) {
+        toast({ title: "No email found", description: "This enrollment has no email address.", variant: "destructive" });
+        setIsSendingClassLink(false);
+        return;
+      }
+      const tz = classLinkTarget.timezone || "";
+      const lang = tz.startsWith("Asia/") || tz.startsWith("Europe/") || tz.startsWith("America/") ? "en" : "ar";
+      recipients.push({ email, name, language: lang });
+    }
+
+    let sent = 0;
+    let failed = 0;
+    for (const r of recipients) {
+      const { error } = await supabase.functions.invoke("send-confirmation-email", {
+        body: {
+          template: "class_link",
+          email: r.email,
+          name: r.name,
+          language: r.language,
+          class_link_url: classLinkUrl.trim(),
+        },
+      });
+      if (error) failed++; else sent++;
+    }
+
+    setIsSendingClassLink(false);
+    setClassLinkTarget(null);
+    setClassLinkUrl("");
+    setClassLinkSendToGroup(false);
+
+    if (failed > 0) {
+      toast({ title: `Sent ${sent}, failed ${failed}`, variant: "destructive" });
+    } else {
+      toast({ title: `Class link sent to ${sent} student${sent !== 1 ? "s" : ""}` });
+    }
+  };
+
   const handleEnrollmentAction = async (enrollment: Enrollment, action: "APPROVED" | "REJECTED") => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
+
+    // Block approval until matcher has placed the student (matched_at is set by the
+    // matcher functions and is the authoritative signal that placement is complete).
+    if (action === "APPROVED" && !enrollment.matched_at) {
+      toast({
+        title: "Cannot approve yet",
+        description: "Assign the student to a class slot first (run the Matcher tab), then approve.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Block approval for manual/Egypt payments that have no receipt on file.
+    const isManualPayment = enrollment.payment_provider === "egypt_manual" || enrollment.payment_provider === "manual";
+    const hasReceipt = enrollment.receipt_url && enrollment.receipt_url.trim() !== "" && enrollment.receipt_url !== "manual";
+    if (action === "APPROVED" && isManualPayment && !hasReceipt) {
+      toast({
+        title: "Receipt required",
+        description: "Cannot approve — no payment receipt has been uploaded. Ask the student to submit their receipt first.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const updates: Record<string, unknown> = {
       status: action,
@@ -498,6 +617,8 @@ const AdminDashboard = () => {
     for (const id of ids) {
       const enrollment = enrollments.find(e => e.id === id);
       if (!enrollment) continue;
+      // Skip enrollments not yet placed by the matcher
+      if (!enrollment.matched_at) { failed++; continue; }
       try {
         const { error } = await supabase.from("enrollments").update({
           status: "APPROVED", approval_status: "APPROVED", reviewed_at: new Date().toISOString(),
@@ -1648,6 +1769,7 @@ const AdminDashboard = () => {
                               onDelete={handleDeleteEnrollment}
                               onViewReceipt={handleViewReceipt}
                               onRequestResubmission={handleRequestResubmission}
+                              onSendClassLink={(en) => { setClassLinkTarget(en); setClassLinkUrl(""); setClassLinkSendToGroup(false); }}
                             />
                           );
                         })}
@@ -1927,6 +2049,93 @@ const AdminDashboard = () => {
           </Suspense>
         </div>
       </div>
+      {/* Send Class Link dialog */}
+      <Dialog open={!!classLinkTarget} onOpenChange={(open) => { if (!open) { setClassLinkTarget(null); setClassLinkUrl(""); setClassLinkSendToGroup(false); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link className="h-4 w-4" /> Send Class Link
+            </DialogTitle>
+            <DialogDescription>
+              {classLinkTarget && (
+                <span>
+                  Sending to: <strong>{classLinkTarget.profiles?.name || classLinkTarget.profiles?.email || "Unknown"}</strong>
+                  {classLinkSendToGroup && " and their entire group"}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="class-link-url">Meeting Link (Zoom / Google Meet)</Label>
+              <Input
+                id="class-link-url"
+                placeholder="https://zoom.us/j/... or https://meet.google.com/..."
+                value={classLinkUrl}
+                onChange={(e) => setClassLinkUrl(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="send-to-group"
+                checked={classLinkSendToGroup}
+                onCheckedChange={(v) => setClassLinkSendToGroup(!!v)}
+              />
+              <Label htmlFor="send-to-group" className="cursor-pointer font-normal">
+                Send to entire group (all active members)
+              </Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setClassLinkTarget(null); setClassLinkUrl(""); setClassLinkSendToGroup(false); }}>
+              Cancel
+            </Button>
+            <Button
+              disabled={!classLinkUrl.trim() || isSendingClassLink}
+              onClick={handleSendClassLink}
+            >
+              {isSendingClassLink ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending…</> : <><Link className="h-4 w-4 mr-2" /> Send Link</>}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receipt preview modal */}
+      <Dialog open={!!receiptModal} onOpenChange={(open) => { if (!open) setReceiptModal(null); }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-4 w-4" /> Receipt — {receiptModal?.studentName}
+            </DialogTitle>
+            <DialogDescription>Payment receipt uploaded by the student.</DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-center min-h-[300px] bg-muted/30 rounded-lg overflow-hidden">
+            {receiptModal?.isPdf ? (
+              <div className="text-center space-y-3 p-6">
+                <p className="text-muted-foreground text-sm">PDF receipt — cannot preview inline.</p>
+                <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank")}>
+                  <Eye className="h-4 w-4 mr-2" /> Open PDF
+                </Button>
+              </div>
+            ) : receiptModal ? (
+              <img
+                src={receiptModal.url}
+                alt={`Receipt for ${receiptModal.studentName}`}
+                className="max-w-full max-h-[60vh] object-contain rounded"
+              />
+            ) : null}
+          </div>
+          <DialogFooter className="gap-2">
+            {receiptModal && !receiptModal.isPdf && (
+              <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank")}>
+                <Eye className="h-4 w-4 mr-2" /> Open full size
+              </Button>
+            )}
+            <Button onClick={() => setReceiptModal(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Rejection reason dialog — uses proper Dialog for focus trap + Escape handling */}
       <Dialog open={!!rejectTarget} onOpenChange={(open) => { if (!open) setRejectTarget(null); }}>
         <DialogContent className="max-w-md">

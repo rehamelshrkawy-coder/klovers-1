@@ -9,7 +9,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { AlertCircle, Check, Eye, Pencil, Trash2, Undo2, X } from "lucide-react";
+import { AlertCircle, Check, Eye, Link, Pencil, Trash2, Undo2, X } from "lucide-react";
 import type { Enrollment } from "@/types/admin";
 import { formatMoney } from "@/lib/format";
 
@@ -39,6 +39,7 @@ export interface EnrollmentCardProps {
   onDelete: (id: string) => void;
   onViewReceipt: (e: Enrollment) => void;
   onRequestResubmission: (e: Enrollment) => void;
+  onSendClassLink: (e: Enrollment) => void;
 }
 
 function paymentMethodLabel(method: string | null | undefined): string {
@@ -68,6 +69,7 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
     onDelete,
     onViewReceipt,
     onRequestResubmission,
+    onSendClassLink,
   } = props;
 
   const overdueDays = e.negative_since
@@ -198,20 +200,29 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
               <Badge variant={e.approval_status === "APPROVED" ? "default" : e.approval_status === "REJECTED" ? "destructive" : "secondary"}>
                 {e.approval_status}
               </Badge>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!e.receipt_url || e.receipt_url.length === 0}
-                className={e.receipt_url && e.receipt_url.length > 0
-                  ? "border-green-400 text-green-700 hover:bg-green-50 dark:text-green-400 dark:border-green-600 dark:hover:bg-green-950/30"
-                  : "opacity-50 cursor-not-allowed"
-                }
-                title={e.receipt_url && e.receipt_url.length > 0 ? "View payment receipt" : "No receipt uploaded yet"}
-                onClick={() => onViewReceipt(e)}
-              >
-                <Eye className="h-4 w-4 mr-1" />
-                {e.receipt_url && e.receipt_url.length > 0 ? "Receipt ✓" : "No Receipt"}
-              </Button>
+              {(() => {
+                const hasReceipt = !!e.receipt_url && e.receipt_url.length > 0 && e.receipt_url !== "manual";
+                const isManual = e.payment_provider === "egypt_manual" || e.payment_provider === "manual";
+                const needsReceipt = isManual && !hasReceipt && isActionableStatus;
+                return (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!hasReceipt}
+                    className={hasReceipt
+                      ? "border-green-400 text-green-700 hover:bg-green-50 dark:text-green-400 dark:border-green-600 dark:hover:bg-green-950/30"
+                      : needsReceipt
+                        ? "border-amber-400 text-amber-700 bg-amber-50 dark:text-amber-400 dark:border-amber-600 cursor-not-allowed"
+                        : "opacity-50 cursor-not-allowed"
+                    }
+                    title={hasReceipt ? "View payment receipt" : needsReceipt ? "Receipt required before approval" : "No receipt uploaded yet"}
+                    onClick={() => onViewReceipt(e)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    {hasReceipt ? "Receipt ✓" : needsReceipt ? "⚠ Receipt Missing" : "No Receipt"}
+                  </Button>
+                );
+              })()}
               {isActionableStatus && (
                 <>
                   <Button size="sm" variant="outline" onClick={() => onStartEditPrice(e)}>
@@ -230,6 +241,17 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                     <X className="h-4 w-4 mr-1" /> Reject
                   </Button>
                 </>
+              )}
+              {e.approval_status === "APPROVED" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-blue-400 text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-600 dark:hover:bg-blue-950/30"
+                  onClick={() => onSendClassLink(e)}
+                  title="Send class meeting link to this student"
+                >
+                  <Link className="h-4 w-4 mr-1" /> Send Class Link
+                </Button>
               )}
               {e.approval_status === "APPROVED" && (
                 <AlertDialog>

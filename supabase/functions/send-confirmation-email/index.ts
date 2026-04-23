@@ -14,7 +14,8 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3";
+  class_link_url?: string;
   rebook_url?: string;
   available_slots?: Array<{ day_of_week: number; start_time: string; timezone?: string }>;
   enrollment_id?: string;
@@ -762,6 +763,83 @@ function buildTrialFollowupDay3Email(p: EmailPayload) {
   };
 }
 
+function buildPaymentConfirmedEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const amountStr = p.currency === "EGP" ? `${p.amount?.toLocaleString()} EGP` : `$${p.amount}`;
+  const levelLabel = p.level ? p.level.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()) : "";
+
+  const rows: [string, string][] = [
+    [isAr ? "الخطة" : "Plan", isAr ? (p.plan_type === "group" ? "حصص جماعية" : "حصص خاصة") : `${p.plan_type === "group" ? "Group" : "Private"} Classes`],
+    [isAr ? "المدة" : "Duration", `${p.duration} ${isAr ? (p.duration === 1 ? "شهر" : "أشهر") : (p.duration === 1 ? "Month" : "Months")}`],
+    [isAr ? "الحصص" : "Sessions", `${p.sessions_total} ${isAr ? "حصة" : "classes"}`],
+    [isAr ? "المبلغ المدفوع" : "Amount Paid", amountStr],
+  ];
+  if (levelLabel) rows.push([isAr ? "المستوى" : "Level", levelLabel]);
+
+  if (isAr) {
+    return {
+      subject: "KLovers — تم استلام دفعتك! مقعدك محجوز ✅",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! ✅</h1>
+        <p>تم استلام دفعتك بنجاح وتأكيد حجز مقعدك.</p>
+        <p>نحن حالياً نقوم بتشكيل مجموعتك الدراسية بناءً على مستواك وجدولك الزمني.</p>
+        ${brandTable(rows)}
+        <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+          <p style="margin: 0; font-size: 14px;">⏳ <strong>الخطوة التالية:</strong> بمجرد تشكيل مجموعتك، ستتلقى بريداً إلكترونياً آخر يتضمن تفاصيل حصتك ورابط الانضمام.</p>
+        </div>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px;">لا يلزمك اتخاذ أي إجراء الآن. سنتواصل معك قريباً.</p>
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — Payment Received! Your Seat is Reserved ✅",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! ✅</h1>
+      <p>We've confirmed your payment and your seat is reserved.</p>
+      <p>We are currently forming your class group based on your level and availability.</p>
+      ${brandTable(rows)}
+      <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+        <p style="margin: 0; font-size: 14px;">⏳ <strong>What's next:</strong> Once your group is ready, you'll receive another email with your class details and meeting link.</p>
+      </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px;">No action is required from you right now. We'll be in touch soon.</p>
+    `, false),
+  };
+}
+
+function buildClassLinkEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const linkUrl = p.class_link_url || "#";
+
+  if (isAr) {
+    return {
+      subject: "KLovers — حصتك جاهزة! إليك رابط الانضمام 🎓",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">حصتك جاهزة يا ${p.name}! 🎓</h1>
+        <p>تم تشكيل مجموعتك الدراسية بالكامل وحصتك مجدولة ومستعدة للبدء.</p>
+        <div style="background: ${BRAND_GRAY}; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid ${BRAND_YELLOW}; text-align: center;">
+          <p style="margin: 0 0 12px; font-weight: bold; font-size: 15px;">رابط الانضمام لحصتك:</p>
+          ${brandButton("انضم للحصة الآن", linkUrl)}
+        </div>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px;">احتفظ بهذا الرابط — ستستخدمه للانضمام لجميع حصصك.</p>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px;">في حالة أي استفسار، تواصل معنا على واتساب.</p>
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — Your Class is Ready! Here's Your Meeting Link 🎓",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Your class is ready, ${p.name}! 🎓</h1>
+      <p>Your study group is fully formed and your class is scheduled and ready to start.</p>
+      <div style="background: ${BRAND_GRAY}; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid ${BRAND_YELLOW}; text-align: center;">
+        <p style="margin: 0 0 12px; font-weight: bold; font-size: 15px;">Your class meeting link:</p>
+        ${brandButton("Join Your Class", linkUrl)}
+      </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px;">Save this link — you'll use it to join all your classes.</p>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px;">Any questions? Message us on WhatsApp.</p>
+    `, false),
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -800,6 +878,12 @@ serve(async (req) => {
         break;
       case "pending_review":
         ({ subject, html } = buildPendingReviewEmail(payload));
+        break;
+      case "payment_confirmed":
+        ({ subject, html } = buildPaymentConfirmedEmail(payload));
+        break;
+      case "class_link":
+        ({ subject, html } = buildClassLinkEmail(payload));
         break;
       case "payment_method_reminder":
         ({ subject, html } = buildPaymentMethodReminderEmail(name, payload.enrollment_id!, language || "ar"));
