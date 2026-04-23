@@ -1,9 +1,9 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, DollarSign, Gift, Users, Star, Globe, MessageCircle } from "lucide-react";
+import { ArrowRight, Gift, Users, Star, Globe, MessageCircle, BookOpen } from "lucide-react";
+import { Link } from "react-router-dom";
 import heroPoster from "@/assets/hero-korean.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Link } from "react-router-dom";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 
@@ -30,9 +30,23 @@ const useCountUp = (target: number, duration = 1800) => {
   return { count, ref };
 };
 
+const nextClassDay = () => {
+  const days = [0, 3, 6]; // Sun, Wed, Sat
+  const today = new Date().getDay();
+  const names = ["Sunday", "Wednesday", "Saturday"];
+  const namesAr = ["الأحد", "الأربعاء", "السبت"];
+  for (let i = 1; i <= 7; i++) {
+    const d = (today + i) % 7;
+    const idx = days.indexOf(d);
+    if (idx !== -1) return { en: names[idx], ar: namesAr[idx] };
+  }
+  return { en: "Monday", ar: "الاثنين" };
+};
+
 const HeroSection = () => {
   const { t, language } = useLanguage();
   const isAr = language === "ar";
+  const nextDay = useMemo(() => nextClassDay(), []);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoReady, setVideoReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -135,6 +149,17 @@ const HeroSection = () => {
             </div>
           </div>
 
+          {/* Next-class urgency chip */}
+          <div className="inline-flex items-center gap-2 bg-black/40 border border-white/20 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-semibold text-white/90">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
+            </span>
+            {isAr
+              ? `الحصة التالية: ${nextDay.ar} — سجّل دلوقتي`
+              : `Next class: ${nextDay.en} — spots filling fast`}
+          </div>
+
           {/* Main headline */}
           <h1
             className="font-black text-white leading-[1.05] tracking-tighter w-full"
@@ -207,6 +232,16 @@ const HeroSection = () => {
             </Button>
           </div>
 
+          {/* Hangul sheet — reciprocity trigger */}
+          <Link
+            to="/hangul-starter"
+            className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors text-xs underline underline-offset-4 decoration-white/30 hover:decoration-white/60"
+            onClick={() => { try { logLeadEvent({ source_type: "free_resource", cta_label: "hero_hangul_sheet" }); } catch {} }}
+          >
+            <BookOpen className="h-3.5 w-3.5 shrink-0" />
+            {isAr ? "احصل على ورقة هانغول المجانية ←" : "Free Hangul starter sheet →"}
+          </Link>
+
         </div>
       </div>
 
@@ -216,9 +251,9 @@ const HeroSection = () => {
           <div className="w-full h-px bg-gradient-to-r from-transparent via-white/25 to-transparent mb-6" />
           <div className="grid grid-cols-3 gap-4 md:gap-8">
             {[
-              { icon: Users, ref: studentRef, display: `${studentCount.toLocaleString('en-US')}+`, label: "Students Taught" },
-              { icon: Star,  ref: ratingRef,  display: `${(ratingCount / 10).toFixed(1)} ★`, label: "Average Rating" },
-              { icon: Globe, ref: countryRef, display: "4–8", label: "Students Per Class" },
+              { icon: Users, ref: studentRef, display: `${studentCount.toLocaleString('en-US')}+`, label: isAr ? "طالب تعلّموا" : "Students Taught" },
+              { icon: Star,  ref: ratingRef,  display: `${(ratingCount / 10).toFixed(1)} ★`, label: isAr ? "متوسط التقييم" : "Average Rating" },
+              { icon: Globe, ref: countryRef, display: "4–8", label: isAr ? "طالب / حصة" : "Students Per Class" },
             ].map(({ icon: Icon, ref: itemRef, display, label }) => (
               <div key={label} className="flex flex-col items-center gap-1 text-center group">
                 <div className="flex items-center gap-1.5">

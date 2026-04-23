@@ -26,7 +26,7 @@ const CookieBanner = () => {
       role="region"
       aria-label={isAr ? "إشعار ملفات تعريف الارتباط" : "Cookie notice"}
       dir={isAr ? "rtl" : "ltr"}
-      className="fixed bottom-0 inset-x-0 z-[150] p-4 sm:p-6 pointer-events-none"
+      className="fixed top-0 inset-x-0 z-[150] p-3 sm:p-4 pointer-events-none"
     >
       <div className="max-w-2xl mx-auto bg-card border border-border rounded-2xl shadow-2xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 pointer-events-auto">
         <p className="text-sm text-muted-foreground flex-1 leading-relaxed">
