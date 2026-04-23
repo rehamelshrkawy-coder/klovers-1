@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Lock } from "lucide-react";
 
 /* ─── Brand tokens ─────────────────────────────── */
 const Y   = "#FFFF00";   // primary yellow

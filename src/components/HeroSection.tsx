@@ -188,7 +188,7 @@ const HeroSection = () => {
             {t("hero", "subtitle")}
           </p>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons — 2 max to eliminate choice paralysis */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center w-full sm:w-auto">
             <Button
               size="lg"
@@ -220,17 +220,12 @@ const HeroSection = () => {
                 {isAr ? "واتساب" : "WhatsApp Us"}
               </a>
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              asChild
-              className="gap-2.5 text-base font-bold px-10 bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/50 backdrop-blur-sm"
-            >
-              <Link to="/pricing">
-                {t("hero", "viewPricing")}
-              </Link>
-            </Button>
           </div>
+
+          {/* Micro trust line */}
+          <p className="text-white/60 text-xs" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.8)" }}>
+            {isAr ? "✓ بدون بطاقة بنكية · ✓ ٩٨٪ راضون · ✓ رد خلال دقائق" : "✓ No credit card · ✓ 98% satisfaction · ✓ Reply in minutes"}
+          </p>
 
           {/* Hangul sheet — reciprocity trigger */}
           <Link
@@ -253,7 +248,7 @@ const HeroSection = () => {
             {[
               { icon: Users, ref: studentRef, display: `${studentCount.toLocaleString('en-US')}+`, label: isAr ? "طالب تعلّموا" : "Students Taught" },
               { icon: Star,  ref: ratingRef,  display: `${(ratingCount / 10).toFixed(1)} ★`, label: isAr ? "متوسط التقييم" : "Average Rating" },
-              { icon: Globe, ref: countryRef, display: "4–8", label: isAr ? "طالب / حصة" : "Students Per Class" },
+              { icon: Globe, ref: countryRef, display: isAr ? "٦ أشهر" : "6 Months", label: isAr ? "للمحادثة" : "To Conversational" },
             ].map(({ icon: Icon, ref: itemRef, display, label }) => (
               <div key={label} className="flex flex-col items-center gap-1 text-center group">
                 <div className="flex items-center gap-1.5">

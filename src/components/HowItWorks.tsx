@@ -1,13 +1,15 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Video, Users, MessageCircle, TrendingUp, ArrowRight } from "lucide-react";
+import { Video, Users, MessageCircle, TrendingUp, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { logLeadEvent } from "@/lib/leadTracking";
 
 const stepIcons = [Video, Users, MessageCircle, TrendingUp];
 
 const HowItWorks = () => {
-  const { t, tArray } = useLanguage();
+  const { t, tArray, language } = useLanguage();
+  const isAr = language === "ar";
   const steps = tArray("howItWorks", "steps") as { title: string; description: string }[];
 
   return (
@@ -49,9 +51,39 @@ const HowItWorks = () => {
           })}
         </div>
 
+        {/* "What your first class looks like" — pedagogy + trust */}
+        <div className="max-w-2xl mx-auto mt-12 bg-background border border-border rounded-2xl p-6">
+          <p className="text-xs font-bold text-primary uppercase tracking-widest mb-4 text-center">
+            {isAr ? "ماذا يحدث في أول حصة" : "What your first class looks like"}
+          </p>
+          <ul className="space-y-2.5">
+            {(isAr ? [
+              "تقديم نفسك بالكورية — حتى لو مبتعرفش حرف واحد",
+              "تقرأ أول ١٠ أحرف هانغل وتعرف كيف تلفظها",
+              "محادثة قصيرة مع باقي الطلاب",
+              "المعلمة تحدد مستواك وتشرحلك الخطوة الجاية",
+            ] : [
+              "Introduce yourself in Korean — even if you know zero right now",
+              "Read your first 10 Hangul characters with correct pronunciation",
+              "Have a short live exchange with other students",
+              "Your teacher identifies your level and maps out your next steps",
+            ]).map((item) => (
+              <li key={item} className="flex items-start gap-3 text-sm text-muted-foreground">
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
         {/* CTA */}
-        <div className="text-center mt-10">
-          <Button size="lg" asChild className="gap-2 text-base font-bold h-12 px-8">
+        <div className="text-center mt-8">
+          <Button
+            size="lg"
+            asChild
+            className="gap-2 text-base font-bold h-12 px-8"
+            onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "how_it_works_cta" }); } catch {} }}
+          >
             <Link to="/free-trial">
               {t("howItWorks", "cta")}
               <ArrowRight className="h-5 w-5" />

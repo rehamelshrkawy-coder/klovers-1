@@ -20,8 +20,14 @@ const FinalCTA = lazy(() => import("@/components/FinalCTA"));
 const ReturningStudentOffer = lazy(() => import("@/components/ReturningStudentOffer"));
 
 const SectionFallback = () => (
-  <div className="py-20 flex items-center justify-center">
-    <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+  <div className="py-20 px-4">
+    <div className="max-w-4xl mx-auto space-y-4 animate-pulse">
+      <div className="h-8 bg-muted rounded-xl w-1/3 mx-auto" />
+      <div className="h-4 bg-muted rounded-lg w-1/2 mx-auto" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+        {[1, 2, 3].map(i => <div key={i} className="h-32 bg-muted rounded-2xl" />)}
+      </div>
+    </div>
   </div>
 );
 

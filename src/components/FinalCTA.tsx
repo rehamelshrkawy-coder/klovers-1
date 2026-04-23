@@ -4,12 +4,12 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
-import { trackAndOpenWhatsApp } from "@/lib/leadTracking";
+import { trackAndOpenWhatsApp, logLeadEvent } from "@/lib/leadTracking";
 
 const SOCIAL_PROOF = [
   { icon: Users, value: "500+", label: "Active Students" },
   { icon: Star,  value: "4.9★",   label: "Average Rating" },
-  { icon: Zap,   value: "4–8",    label: "Students Per Class" },
+  { icon: Zap,   value: "98%",    label: "Would Recommend" },
 ];
 
 // Floating Korean characters for visual texture
@@ -112,7 +112,7 @@ const FinalCTA = () => {
           {SOCIAL_PROOF.map(({ icon: Icon, value, label }, i) => (
             <div key={label} className="flex items-center gap-2 bg-primary-foreground/10 border border-primary-foreground/15 rounded-xl px-4 py-2.5">
               <Icon className="h-5 w-5 text-primary-foreground/70" />
-              <div className="text-left">
+              <div className="text-start">
                 <p className="font-bold text-primary-foreground text-sm leading-none">
                   {i === 0 ? `${count.toLocaleString()}+` : value}
                 </p>
@@ -128,7 +128,13 @@ const FinalCTA = () => {
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <Button size="lg" variant="secondary" asChild className="gap-2 h-13 px-8 text-base shadow-xl min-w-[200px] font-bold">
+          <Button
+            size="lg"
+            variant="secondary"
+            asChild
+            className="gap-2 h-13 px-8 text-base shadow-xl min-w-[200px] font-bold"
+            onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "final_cta_free_trial" }); } catch {} }}
+          >
             <Link to="/free-trial">
               {t("finalCta", "button")}
               <ArrowRight className="h-5 w-5" />
@@ -159,9 +165,29 @@ const FinalCTA = () => {
           </Button>
         </div>
 
-        <p className="text-primary-foreground/50 text-xs">
+        <p className="text-primary-foreground/50 text-xs mb-6">
           {isAr ? "لا بطاقة ائتمان · ٣٠ دقيقة · معلمة حقيقية · نرد خلال دقائق" : "No credit card · 30 minutes · Real teacher · We reply in minutes"}
         </p>
+
+        {/* Community proof */}
+        <p className="text-primary-foreground/50 text-xs mb-4">
+          {isAr
+            ? "🌍 انضم لأكثر من ٢٠٠٠ متعلم في مجتمعنا على تيليجرام وفيسبوك"
+            : "🌍 Join 2,000+ Korean learners in our Telegram & Facebook community"}
+        </p>
+
+        {/* Guarantee badge */}
+        <div className="inline-flex items-center gap-3 bg-primary-foreground/10 border border-primary-foreground/20 rounded-2xl px-5 py-3">
+          <span className="text-2xl" aria-hidden="true">🛡️</span>
+          <div className="text-start">
+            <p className="text-primary-foreground font-bold text-sm leading-tight">
+              {isAr ? "ضمان الرضا الكامل" : "Satisfaction Guarantee"}
+            </p>
+            <p className="text-primary-foreground/60 text-xs mt-0.5">
+              {isAr ? "إذا ما عجبتكش الحصة الأولى — هنرجعلك فلوسك أو نعيد الحجز." : "If your first class isn't great, we refund or rebook — no questions asked."}
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );
