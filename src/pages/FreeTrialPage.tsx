@@ -1,14 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useSEO } from "@/hooks/useSEO";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { logLeadEvent } from "@/lib/leadTracking";
-import { Gift, Users, Clock, Star, ArrowRight, Video, ClipboardList, Sparkles, CalendarDays, AlertCircle } from "lucide-react";
+import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
+import { WHATSAPP_BASE } from "@/lib/siteConfig";
+import { Gift, Users, Clock, Star, ArrowRight, Video, ClipboardList, Sparkles, CalendarDays, AlertCircle, CheckCircle2, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import TrialSlotPicker from "@/components/TrialSlotPicker";
 
 const Stars = ({ count = 5 }: { count?: number }) => (
   <div className="flex gap-0.5">
@@ -46,12 +50,14 @@ const FreeTrialPage = () => {
       name:  t("freeTrial.testimonial1Name"),
       role:  t("freeTrial.testimonial1Role"),
       initial: "S",
+      photo: "https://api.dicebear.com/9.x/micah/svg?seed=MagedAziz&backgroundColor=ffd700",
     },
     {
       quote: t("freeTrial.testimonial2Quote"),
       name:  t("freeTrial.testimonial2Name"),
       role:  t("freeTrial.testimonial2Role"),
       initial: "A",
+      photo: "https://api.dicebear.com/9.x/micah/svg?seed=AyayaSalah&backgroundColor=ffd700",
     },
   ];
 
@@ -84,6 +90,16 @@ const FreeTrialPage = () => {
   const [searchParams] = useSearchParams();
   const referredBy = searchParams.get("ref") || "";
 
+  // Guest inline booking state
+  const [guestMode, setGuestMode] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestNameError, setGuestNameError] = useState("");
+  const [guestEmailError, setGuestEmailError] = useState("");
+  const [guestLoading, setGuestLoading] = useState(false);
+  const [guestDone, setGuestDone] = useState(false);
+  const bookingRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
     if (referredBy) {
       try { localStorage.setItem("referrer_id", referredBy); } catch {}
@@ -95,13 +111,36 @@ const FreeTrialPage = () => {
     logLeadEvent({ source_type: "free_trial", cta_label: "landing_viewed" });
   }, []);
 
-  const handleBookCta = async () => {
+  const handleBookCta = () => {
     logLeadEvent({ source_type: "free_trial", cta_label: "free_trial_landing_primary" });
     if (loading) return;
     if (user) {
       navigate("/trial-booking");
     } else {
+      setGuestMode(true);
+      setTimeout(() => bookingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+    }
+  };
+
+  const handleGuestSlotPicked = async (dayOfWeek: number, startTime: string) => {
+    let valid = true;
+    if (!guestName.trim()) { setGuestNameError(t("freeTrial.guestNameRequired") || "Enter your name"); valid = false; }
+    if (!guestEmail.trim() || !guestEmail.includes("@")) { setGuestEmailError(t("freeTrial.guestEmailRequired") || "Enter a valid email"); valid = false; }
+    if (!valid) return;
+    setGuestLoading(true);
+    try {
+      logLeadEvent({ source_type: "free_trial", cta_label: "trial_booking_guest_confirm", metadata: { day_of_week: dayOfWeek, start_time: startTime } });
+      const referrerId = (() => { try { return localStorage.getItem("referrer_id") || undefined; } catch { return undefined; } })();
+      const { data, error } = await supabase.functions.invoke("book-trial", {
+        body: { name: guestName.trim(), email: guestEmail.trim(), day_of_week: dayOfWeek, start_time: startTime, authed: false, referrer_id: referrerId },
+      });
+      if (error || data?.error) throw new Error(error?.message || data?.error);
+      setGuestDone(true);
+    } catch {
+      // Graceful fallback: hand off to auth flow
       navigate(`/signup?redirect=${encodeURIComponent("/trial-booking")}`);
+    } finally {
+      setGuestLoading(false);
     }
   };
 
@@ -320,6 +359,98 @@ const FreeTrialPage = () => {
             </p>
           </div>
         </section>
+
+        {/* ── INLINE GUEST BOOKING ──────────────────────────── */}
+        {guestMode && (
+          <section ref={bookingRef} className="py-16 bg-primary/5 border-t-2 border-primary/20 scroll-mt-20">
+            <div className="container mx-auto px-4 max-w-lg">
+
+              {guestDone ? (
+                /* Success state */
+                <div className="text-center">
+                  <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle2 className="h-10 w-10 text-green-600" />
+                  </div>
+                  <h2 className="text-2xl font-black text-foreground mb-2">
+                    {t("trialBooking.successTitle") || "You're booked! 🎉"}
+                  </h2>
+                  <p className="text-muted-foreground mb-8 max-w-sm mx-auto text-sm">
+                    {t("trialBooking.successDesc") || "Check your email for confirmation. We'll send you the Zoom link before the class."}
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button
+                      asChild
+                      className="gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white border-0"
+                    >
+                      <a
+                        href={WHATSAPP_BASE}
+                        onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(WHATSAPP_BASE, { cta_label: "post_guest_booking_whatsapp" }); }}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        {t("trialBooking.whatsappPromptTitle") || "Say hi on WhatsApp"}
+                      </a>
+                    </Button>
+                    <Button variant="outline" onClick={() => navigate("/signup?redirect=/dashboard")} className="gap-2">
+                      {t("freeTrial.createAccount") || "Create your account"}
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                /* Booking form */
+                <div className="bg-background border border-border rounded-3xl p-8 shadow-xl">
+                  <h2 className="text-2xl font-black text-foreground mb-1">
+                    {t("trialBooking.pickTimeTitle") || "Pick your slot"}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    {t("freeTrial.guestFormSubtitle") || "No account needed — just your name and email."}
+                  </p>
+
+                  {/* Name + Email */}
+                  <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="guest-name">{t("freeTrial.guestName") || "Your name"}</Label>
+                      <Input
+                        id="guest-name"
+                        placeholder={t("freeTrial.guestNamePlaceholder") || "e.g. Sara"}
+                        value={guestName}
+                        onChange={(e) => { setGuestName(e.target.value); setGuestNameError(""); }}
+                        className={guestNameError ? "border-destructive" : ""}
+                      />
+                      {guestNameError && <p className="text-xs text-destructive">{guestNameError}</p>}
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="guest-email">{t("freeTrial.guestEmail") || "Your email"}</Label>
+                      <Input
+                        id="guest-email"
+                        type="email"
+                        placeholder="sara@example.com"
+                        value={guestEmail}
+                        onChange={(e) => { setGuestEmail(e.target.value); setGuestEmailError(""); }}
+                        className={guestEmailError ? "border-destructive" : ""}
+                      />
+                      {guestEmailError && <p className="text-xs text-destructive">{guestEmailError}</p>}
+                    </div>
+                  </div>
+
+                  <TrialSlotPicker onSelect={handleGuestSlotPicked} onBack={() => setGuestMode(false)} />
+
+                  {guestLoading && (
+                    <p className="text-sm text-muted-foreground text-center mt-4 animate-pulse">
+                      {t("trialBooking.bookingTrial") || "Booking your slot…"}
+                    </p>
+                  )}
+
+                  <p className="text-xs text-muted-foreground text-center mt-5">
+                    {t("freeTrial.noteSignedOut")}
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
       </main>
       <Footer />

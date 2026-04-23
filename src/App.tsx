@@ -11,6 +11,7 @@ import { attachSessionToUser } from "@/lib/attachSessionToUser";
 import { captureUtmFromUrl } from "@/lib/leadSession";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import WhatsAppButton from "./components/WhatsAppButton";
+import ExitIntentModal from "./components/ExitIntentModal";
 
 // Route guards — kept eager (tiny, needed immediately)
 import ProtectedRoute from "./components/admin/ProtectedRoute";
@@ -108,6 +109,7 @@ const App = () => (
         <Sonner position="bottom-center" />
         <AppInner />
         <WhatsAppButton />
+        <ExitIntentModal />
         <BrowserRouter>
           <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
