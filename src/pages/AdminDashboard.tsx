@@ -350,7 +350,7 @@ const AdminDashboard = () => {
         resubmitLink = `${window.location.origin}/resubmit-schedule?token=${token}`;
       }
       await handleEnrollmentAction(rejectTarget, "REJECTED");
-      await supabase.functions.invoke("send-confirmation-email", {
+      const { error: emailError } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
           template: "rejection",
           email: rejectTarget.profiles?.email,
@@ -361,7 +361,11 @@ const AdminDashboard = () => {
           resubmit_link: resubmitLink,
         },
       });
-      toast({ title: "Rejected & notified", description: `Email sent to ${rejectTarget.profiles?.email}` });
+      if (emailError) {
+        toast({ title: "Rejected", description: "Enrollment rejected, but the notification email failed to send. Check Resend logs.", variant: "destructive" });
+      } else {
+        toast({ title: "Rejected & notified", description: `Email sent to ${rejectTarget.profiles?.email}` });
+      }
       setRejectTarget(null);
     } catch {
       toast({ title: "Error", description: "Failed to reject or send email.", variant: "destructive" });
