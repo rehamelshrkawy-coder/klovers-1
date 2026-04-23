@@ -7,21 +7,29 @@ import { useSEO } from "@/hooks/useSEO";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { logLeadEvent } from "@/lib/leadTracking";
-import { Star, Users, Clock, ArrowRight, Gift, CalendarDays } from "lucide-react";
+import { Gift, Users, Clock, Star, ArrowRight, CalendarDays, Video, ClipboardList, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const FreeTrialPage = () => {
   const { t } = useLanguage();
+
   const PERKS = [
-    { icon: Gift, text: t("freeTrial.perkFree") },
+    { icon: Gift,  text: t("freeTrial.perkFree") },
     { icon: Users, text: t("freeTrial.perkLive") },
     { icon: Clock, text: t("freeTrial.perkDuration") },
-    { icon: Star, text: t("freeTrial.perkAssessment") },
+    { icon: Star,  text: t("freeTrial.perkAssessment") },
+  ];
+
+  const STEPS = [
+    { icon: Video,         num: "1", text: t("trialBooking.expectItem1") },
+    { icon: ClipboardList, num: "2", text: t("trialBooking.expectItem2") },
+    { icon: Sparkles,      num: "3", text: t("trialBooking.expectItem3") },
   ];
 
   const SLOT_HIGHLIGHTS = [
-    { day: t("freeTrial.dayWednesday"), time: "5:30 PM" },
+    { day: t("freeTrial.daySaturday"),  time: "4:00 PM" },
     { day: t("freeTrial.daySunday"),    time: "6:30 PM" },
+    { day: t("freeTrial.dayWednesday"), time: "5:30 PM" },
   ];
 
   useSEO({
@@ -39,17 +47,8 @@ const FreeTrialPage = () => {
       "@type": "Course",
       "name": "Free Trial Korean Class",
       "description": "30-minute live Korean class with a real teacher. Free, no credit card required.",
-      "provider": {
-        "@type": "Organization",
-        "name": "Klovers Korean Academy",
-        "url": "https://kloversegy.com",
-      },
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD",
-        "category": "Free Trial",
-      },
+      "provider": { "@type": "Organization", "name": "Klovers Korean Academy", "url": "https://kloversegy.com" },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "category": "Free Trial" },
       "inLanguage": "ko",
       "url": "https://kloversegy.com/free-trial",
     });
@@ -62,30 +61,19 @@ const FreeTrialPage = () => {
   const [searchParams] = useSearchParams();
   const referredBy = searchParams.get("ref") || "";
 
-  // Preserve the existing referral-tracking behaviour from the previous
-  // version of this page so referrer attribution keeps working.
   useEffect(() => {
     if (referredBy) {
       try { localStorage.setItem("referrer_id", referredBy); } catch {}
-      supabase.functions.invoke("track-referral-click", {
-        body: { referrerId: referredBy },
-      }).catch(() => {});
+      supabase.functions.invoke("track-referral-click", { body: { referrerId: referredBy } }).catch(() => {});
     }
   }, [referredBy]);
 
-  // Funnel step: landing page viewed. Lets us compute
-  // "landing_viewed → cta_clicked" abandonment rate.
   useEffect(() => {
     logLeadEvent({ source_type: "free_trial", cta_label: "landing_viewed" });
   }, []);
 
   const handleBookCta = async () => {
-    // Fire-and-forget lead event so we know which CTA brought them in.
-    logLeadEvent({
-      source_type: "free_trial",
-      cta_label: "free_trial_landing_primary",
-    });
-
+    logLeadEvent({ source_type: "free_trial", cta_label: "free_trial_landing_primary" });
     if (loading) return;
     if (user) {
       navigate("/trial-booking");
@@ -126,13 +114,37 @@ const FreeTrialPage = () => {
             </p>
 
             {/* Perks */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-12">
               {PERKS.map(({ icon: Icon, text }) => (
                 <div key={text} className="flex flex-col items-center gap-2 bg-card border border-border rounded-2xl p-4">
                   <div className="w-10 h-10 rounded-xl bg-primary border border-black/25 flex items-center justify-center">
                     <Icon className="h-5 w-5 text-primary-foreground" />
                   </div>
-                  <span className="text-xs font-semibold text-foreground text-center">{text}</span>
+                  <span className="text-xs font-semibold text-foreground text-center leading-snug">{text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* What to expect */}
+        <section className="py-14 bg-muted/30">
+          <div className="container mx-auto px-4 max-w-3xl">
+            <h2 className="text-2xl font-bold text-foreground text-center mb-10">
+              {t("freeTrial.whatToExpectTitle")}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {STEPS.map(({ icon: Icon, num, text }) => (
+                <div key={num} className="flex flex-col items-center text-center gap-3 bg-card border border-border rounded-2xl p-6">
+                  <div className="relative">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/15 flex items-center justify-center">
+                      <Icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <span className="absolute -top-2 -end-2 w-5 h-5 rounded-full bg-primary text-black text-[10px] font-black flex items-center justify-center">
+                      {num}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-foreground leading-snug">{text}</p>
                 </div>
               ))}
             </div>
@@ -140,22 +152,20 @@ const FreeTrialPage = () => {
         </section>
 
         {/* When do trials run */}
-        <section className="py-12 pb-20">
+        <section className="py-14 pb-20">
           <div className="container mx-auto px-4 max-w-2xl">
             <div className="bg-card border border-border rounded-3xl p-8 shadow-xl text-center">
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/15 mb-3">
                 <CalendarDays className="h-6 w-6 text-primary" />
               </div>
               <h2 className="text-2xl font-bold text-foreground mb-2">{t("freeTrial.slotsTitle")}</h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                {t("freeTrial.slotsSubtitle")}
-              </p>
+              <p className="text-sm text-muted-foreground mb-6">{t("freeTrial.slotsSubtitle")}</p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+              <div className="grid grid-cols-3 gap-3 mb-8">
                 {SLOT_HIGHLIGHTS.map((s) => (
                   <div key={s.day} className="rounded-2xl border border-border bg-background/60 p-4">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{s.day}</p>
-                    <p className="text-2xl font-black text-foreground mt-1">{s.time}</p>
+                    <p className="text-xl font-black text-foreground mt-1">{s.time}</p>
                   </div>
                 ))}
               </div>
@@ -163,7 +173,7 @@ const FreeTrialPage = () => {
               <Button
                 size="lg"
                 onClick={handleBookCta}
-                className="w-full sm:w-auto gap-2 text-base font-bold h-13 px-8"
+                className="w-full sm:w-auto gap-2 text-base font-bold h-14 px-8"
               >
                 {t("freeTrial.ctaSecondary")}
                 <ArrowRight className="h-5 w-5" />
