@@ -588,20 +588,21 @@ const AdminDashboard = () => {
 
     // Level and days are read-only from enrollment — no admin editing
 
-    const { error } = await supabase.from("enrollments").update(updates).eq("id", enrollment.id);
-    if (error) { toast({ title: "Error", description: "Failed to update enrollment.", variant: "destructive" }); return; }
-
     if (action === "APPROVED") {
-      const { error: creditError } = await supabase.rpc("add_credits", {
-        _user_id: enrollment.user_id,
-        _amount: enrollment.classes_included,
+      // Single atomic RPC: updates enrollment + adds credits in one transaction.
+      // If either step fails, both roll back — no half-approved state.
+      const { error: approveError } = await supabase.rpc("approve_enrollment", {
+        _enrollment_id: enrollment.id,
+        _admin_id: session.user.id,
+        _unit_price: updates.unit_price != null ? Number(updates.unit_price) : null,
       });
-      if (creditError) {
-        toast({ title: "Error", description: "Failed to add credits.", variant: "destructive" });
+      if (approveError) {
+        toast({ title: "Error", description: approveError.message || "Failed to approve enrollment.", variant: "destructive" });
         return;
       }
-
-      // Group enrollments: just approve — admin will match via Matcher tab
+    } else {
+      const { error } = await supabase.from("enrollments").update(updates).eq("id", enrollment.id);
+      if (error) { toast({ title: "Error", description: "Failed to update enrollment.", variant: "destructive" }); return; }
     }
 
     toast({ title: `Enrollment ${action.toLowerCase()}` });
@@ -611,6 +612,8 @@ const AdminDashboard = () => {
   const handleBulkApprove = async () => {
     if (selectedEnrollmentIds.size === 0) return;
     setBulkApproving(true);
+    const { data: { session: bulkSession } } = await supabase.auth.getSession();
+    if (!bulkSession) { setBulkApproving(false); return; }
     const ids = Array.from(selectedEnrollmentIds);
     let succeeded = 0;
     let failed = 0;
@@ -624,14 +627,12 @@ const AdminDashboard = () => {
       const hasReceipt = enrollment.receipt_url && enrollment.receipt_url.trim() !== "" && enrollment.receipt_url !== "manual";
       if (isManual && !hasReceipt) { failed++; continue; }
       try {
-        const { error } = await supabase.from("enrollments").update({
-          status: "APPROVED", approval_status: "APPROVED", reviewed_at: new Date().toISOString(),
-        }).eq("id", id);
-        if (error) { failed++; continue; }
-        const { error: creditError } = await supabase.rpc("add_credits", {
-          _user_id: enrollment.user_id, _amount: enrollment.classes_included,
+        const { error } = await supabase.rpc("approve_enrollment", {
+          _enrollment_id: id,
+          _admin_id: bulkSession.user.id,
+          _unit_price: null,
         });
-        if (creditError) { failed++; continue; }
+        if (error) { failed++; continue; }
         succeeded++;
       } catch { failed++; }
     }
