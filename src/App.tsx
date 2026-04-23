@@ -11,7 +11,6 @@ import { attachSessionToUser } from "@/lib/attachSessionToUser";
 import { captureUtmFromUrl } from "@/lib/leadSession";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import WhatsAppButton from "./components/WhatsAppButton";
-import ExitIntentModal from "./components/ExitIntentModal";
 import CookieBanner from "./components/CookieBanner";
 
 // Route guards — kept eager (tiny, needed immediately)
@@ -120,7 +119,6 @@ const App = () => (
           Skip to main content
         </a>
         <WhatsAppButton />
-        <ExitIntentModal />
         <CookieBanner />
         <BrowserRouter>
           <ErrorBoundary>
