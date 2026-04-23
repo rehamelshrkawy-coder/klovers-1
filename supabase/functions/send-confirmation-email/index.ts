@@ -860,6 +860,14 @@ serve(async (req) => {
       });
     }
 
+    // Validate required fields per template
+    if (template === "class_link" && (!payload.class_link_url || payload.class_link_url.trim() === "")) {
+      return new Response(JSON.stringify({ error: "class_link_url is required for the class_link template" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     let subject: string;
     let html: string;
 
