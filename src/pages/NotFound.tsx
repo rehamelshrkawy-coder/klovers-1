@@ -15,11 +15,11 @@ const NotFound = () => {
 
   const QUICK_LINKS = [
     { href: "/", label: isAr ? "الرئيسية" : "Home", icon: Home, desc: isAr ? "العودة للبداية" : "Back to the start" },
-    { href: "/games", label: isAr ? "ألعاب مجانية" : "Free Games", icon: Gamepad2, desc: isAr ? "العب بدون تسجيل" : "Play without logging in", badge: isAr ? "مجاني" : "Free" },
+    { href: "/free-trial", label: isAr ? "حصة مجانية" : "Free Trial", icon: BookOpen, desc: isAr ? "احجز حصة مجانية" : "Book a free class", badge: isAr ? "مجاني" : "Free" },
+    { href: "/games", label: isAr ? "ألعاب مجانية" : "Free Games", icon: Gamepad2, desc: isAr ? "العب بدون تسجيل" : "Play without logging in" },
     { href: "/placement-test", label: isAr ? "اختبار المستوى" : "Placement Test", icon: BookOpen, desc: isAr ? "اعرف مستواك" : "Find your level" },
     { href: "/pricing", label: isAr ? "الأسعار" : "Pricing", icon: FileText, desc: isAr ? "الخطط والأسعار" : "See plans & costs" },
     { href: "/faq", label: isAr ? "الأسئلة الشائعة" : "FAQ", icon: HelpCircle, desc: isAr ? "أسئلة شائعة" : "Common questions" },
-    { href: "/contact", label: isAr ? "تواصل معنا" : "Contact", icon: Phone, desc: isAr ? "تواصل معنا" : "Get in touch" },
   ];
 
   useEffect(() => {

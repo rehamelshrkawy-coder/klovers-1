@@ -24,7 +24,8 @@ const Stars = ({ count = 5 }: { count?: number }) => (
 );
 
 const FreeTrialPage = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isAr = language === "ar";
 
   const PERKS = [
     { icon: Gift,  text: t("freeTrial.perkFree") },
@@ -349,6 +350,12 @@ const FreeTrialPage = () => {
             <p className="text-xs text-muted-foreground text-center mt-3">
               {user ? t("freeTrial.noteSignedIn") : t("freeTrial.noteSignedOut")}
             </p>
+
+            {/* Trust guarantee */}
+            <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
+              <span className="text-green-600 font-bold">✓</span>
+              <span>{isAr ? "إذا ما عجبتكش الحصة الأولى — هنرجعلك فلوسك أو نعيد الحجز بدون أسئلة." : "If your first class isn't great, we'll refund or rebook — no questions asked."}</span>
+            </div>
           </div>
         </section>
 

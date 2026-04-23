@@ -12,6 +12,7 @@ import { captureUtmFromUrl } from "@/lib/leadSession";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import WhatsAppButton from "./components/WhatsAppButton";
 import ExitIntentModal from "./components/ExitIntentModal";
+import CookieBanner from "./components/CookieBanner";
 
 // Route guards — kept eager (tiny, needed immediately)
 import ProtectedRoute from "./components/admin/ProtectedRoute";
@@ -120,6 +121,7 @@ const App = () => (
         </a>
         <WhatsAppButton />
         <ExitIntentModal />
+        <CookieBanner />
         <BrowserRouter>
           <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
