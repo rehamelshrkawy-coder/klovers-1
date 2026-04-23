@@ -66,6 +66,7 @@ export interface Enrollment {
   forming_escalation_sent_at?: string | null;
   rejection_followup_sent_at?: string | null;
   pre_class_reminder_sent_at?: string | null;
+  class_feedback_sent_at?: string | null;
 }
 
 // ── Student overview ─────────────────────────────────────────────────────────

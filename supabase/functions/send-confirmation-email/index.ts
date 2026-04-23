@@ -14,7 +14,7 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback";
   class_link_url?: string;
   tx_ref?: string;
   payment_date?: string;
@@ -361,7 +361,8 @@ function buildApprovalEmail(p: EmailPayload) {
         <div style="margin: 24px 0; text-align: center;">
           ${brandButton("لوحة الطالب", "https://kloversegy.com/dashboard")}
         </div>
-        <p style="color: ${BRAND_MUTED}; font-size: 12px; margin-top: 20px; border-top: 1px solid #e0e0e0; padding-top: 16px;">🎁 <strong>بتحب KLovers؟</strong> ادعُ صديقاً وتحصلوا كلاكما على حصة مجانية. <a href="https://kloversegy.com/refer" style="color: ${BRAND_DARK}; font-weight: bold;">شارك رابطك ←</a></p>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px; text-align: center;">انضم إلى أكثر من 200 طالب عربي يتعلمون الكورية مع KLovers 🌟</p>
+        <p style="color: ${BRAND_MUTED}; font-size: 12px; margin-top: 12px; border-top: 1px solid #e0e0e0; padding-top: 16px;">🎁 <strong>بتحب KLovers؟</strong> ادعُ صديقاً وتحصلوا كلاكما على حصة مجانية. <a href="https://wa.me/201010003084?text=أهلاً%2C+بدي+أعرف+أكثر+عن+KLovers+الكورية" style="color: ${BRAND_DARK}; font-weight: bold;">شارك رابطك ←</a></p>
       `, true),
     };
   }
@@ -375,7 +376,8 @@ function buildApprovalEmail(p: EmailPayload) {
       <div style="margin: 24px 0; text-align: center;">
         ${brandButton("Go to Dashboard", "https://kloversegy.com/dashboard")}
       </div>
-      <p style="color: ${BRAND_MUTED}; font-size: 12px; margin-top: 20px; border-top: 1px solid #e0e0e0; padding-top: 16px;">🎁 <strong>Loving KLovers?</strong> Refer a friend and you both get a free class. <a href="https://kloversegy.com/refer" style="color: ${BRAND_DARK}; font-weight: bold;">Share your link →</a></p>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px; text-align: center;">Join 200+ Arabic speakers learning Korean with KLovers 🌟</p>
+      <p style="color: ${BRAND_MUTED}; font-size: 12px; margin-top: 12px; border-top: 1px solid #e0e0e0; padding-top: 16px;">🎁 <strong>Loving KLovers?</strong> Refer a friend and you both get a free class. <a href="https://wa.me/201010003084?text=Hi%2C+I%27d+love+to+learn+more+about+KLovers+Korean+classes" style="color: ${BRAND_DARK}; font-weight: bold;">Share your link →</a></p>
     `, false),
   };
 }
@@ -867,6 +869,7 @@ function buildPaymentConfirmedEmail(p: EmailPayload) {
         ${timelineAr}
         <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px;">احتفظ بهذا البريد الإلكتروني كإيصال للدفع.</p>
         <p style="color: ${BRAND_MUTED}; font-size: 13px;">لا يلزمك اتخاذ أي إجراء الآن. سنتواصل معك قريباً.</p>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; text-align: center; margin-top: 20px;">انضم إلى أكثر من 200 طالب عربي يتعلمون الكورية مع KLovers 🌟</p>
       `, true),
     };
   }
@@ -879,6 +882,7 @@ function buildPaymentConfirmedEmail(p: EmailPayload) {
       ${timelineEn}
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px;">Save this email as your payment receipt.</p>
       <p style="color: ${BRAND_MUTED}; font-size: 13px;">No action is required from you right now. We'll be in touch soon.</p>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; text-align: center; margin-top: 20px;">Join 200+ Arabic speakers learning Korean with KLovers 🌟</p>
     `, false),
   };
 }
@@ -902,6 +906,10 @@ function buildGroupFormingEmail(p: EmailPayload) {
         <div style="margin: 20px 0; text-align: center;">
           <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 واتساب</a>
         </div>
+        <div style="background: ${BRAND_GRAY}; border-radius: 6px; padding: 14px 18px; margin-top: 16px;">
+          <p style="margin: 0 0 6px; font-size: 13px; font-weight: bold; color: ${BRAND_DARK};">📚 ابدأ قبل ما تيجي الحصة الأولى</p>
+          <p style="margin: 0; font-size: 13px; color: ${BRAND_MUTED};">تعلم الأبجدية الكورية (هانغول) في 30 دقيقة — <a href="https://www.youtube.com/watch?v=s5aobqyEaMQ" style="color: ${BRAND_DARK}; font-weight: bold;">شاهد على يوتيوب ←</a></p>
+        </div>
       `, true),
     };
   }
@@ -918,6 +926,10 @@ function buildGroupFormingEmail(p: EmailPayload) {
       <p style="color: ${BRAND_MUTED}; font-size: 13px;">Any questions? Message us on WhatsApp.</p>
       <div style="margin: 20px 0; text-align: center;">
         <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 WhatsApp</a>
+      </div>
+      <div style="background: ${BRAND_GRAY}; border-radius: 6px; padding: 14px 18px; margin-top: 16px;">
+        <p style="margin: 0 0 6px; font-size: 13px; font-weight: bold; color: ${BRAND_DARK};">📚 Start before your first class</p>
+        <p style="margin: 0; font-size: 13px; color: ${BRAND_MUTED};">Learn the Korean alphabet (Hangul) in 30 minutes — <a href="https://www.youtube.com/watch?v=s5aobqyEaMQ" style="color: ${BRAND_DARK}; font-weight: bold;">Watch on YouTube →</a></p>
       </div>
     `, false),
   };
@@ -1130,6 +1142,56 @@ function buildPreClassReminderEmail(p: EmailPayload) {
   };
 }
 
+function buildClassFeedbackEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const waUrl = "https://wa.me/201010003084";
+
+  if (isAr) {
+    return {
+      subject: "KLovers — كيف كانت حصتك الأولى؟ 🌟",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! كيف كانت الحصة الأولى؟ 🌟</h1>
+        <p>نتمنى أن تكون حصتك الأولى قد أعجبتك!</p>
+        <p>رأيك يهمنا كثيراً — شاركنا تجربتك حتى نتمكن من تحسين تجربة كل الطلاب.</p>
+        <div style="background: ${BRAND_GRAY}; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+          <p style="margin: 0 0 12px; font-size: 15px; font-weight: bold; color: ${BRAND_DARK};">كيف تقيّم حصتك الأولى؟</p>
+          <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
+            <a href="${waUrl}?text=تقييمي+للحصة+الأولى%3A+ممتازة+⭐⭐⭐⭐⭐" style="display: inline-block; background: ${BRAND_DARK}; color: #fff; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-size: 14px; margin: 4px;">⭐⭐⭐⭐⭐ ممتازة</a>
+            <a href="${waUrl}?text=تقييمي+للحصة+الأولى%3A+جيدة+⭐⭐⭐⭐" style="display: inline-block; background: ${BRAND_DARK}; color: #fff; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-size: 14px; margin: 4px;">⭐⭐⭐⭐ جيدة</a>
+            <a href="${waUrl}?text=تقييمي+للحصة+الأولى%3A+تحتاج+تحسين" style="display: inline-block; background: #e0e0e0; color: ${BRAND_DARK}; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-size: 14px; margin: 4px;">تحتاج تحسين</a>
+          </div>
+        </div>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px;">أو تكلم معنا مباشرة على واتساب — أي سؤال أو ملاحظة نحن هنا.</p>
+        <div style="margin: 20px 0; text-align: center;">
+          <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 واتساب</a>
+        </div>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; text-align: center; margin-top: 20px;">شكراً لانضمامك لعائلة KLovers — رحلتك الكورية بدأت للتو! 🇰🇷</p>
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — How was your first class? 🌟",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! How was your first class? 🌟</h1>
+      <p>We hope your first class was amazing!</p>
+      <p>Your feedback means everything to us — it helps us improve the experience for every student.</p>
+      <div style="background: ${BRAND_GRAY}; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+        <p style="margin: 0 0 12px; font-size: 15px; font-weight: bold; color: ${BRAND_DARK};">How would you rate your first class?</p>
+        <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
+          <a href="${waUrl}?text=My+first+class+rating%3A+Excellent+%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90" style="display: inline-block; background: ${BRAND_DARK}; color: #fff; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-size: 14px; margin: 4px;">⭐⭐⭐⭐⭐ Excellent</a>
+          <a href="${waUrl}?text=My+first+class+rating%3A+Good+%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90" style="display: inline-block; background: ${BRAND_DARK}; color: #fff; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-size: 14px; margin: 4px;">⭐⭐⭐⭐ Good</a>
+          <a href="${waUrl}?text=My+first+class+rating%3A+Needs+improvement" style="display: inline-block; background: #e0e0e0; color: ${BRAND_DARK}; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-size: 14px; margin: 4px;">Needs improvement</a>
+        </div>
+      </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px;">Or message us directly on WhatsApp — any questions or feedback, we're here.</p>
+      <div style="margin: 20px 0; text-align: center;">
+        <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 WhatsApp</a>
+      </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; text-align: center; margin-top: 20px;">Thank you for joining the KLovers family — your Korean journey has just begun! 🇰🇷</p>
+    `, false),
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -1225,6 +1287,9 @@ serve(async (req) => {
         break;
       case "pre_class_reminder":
         ({ subject, html } = buildPreClassReminderEmail(payload));
+        break;
+      case "class_feedback":
+        ({ subject, html } = buildClassFeedbackEmail(payload));
         break;
       case "enrollment":
       default:
