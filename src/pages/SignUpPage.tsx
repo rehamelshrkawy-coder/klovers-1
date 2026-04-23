@@ -134,7 +134,7 @@ const SignUpPage = () => {
         <div className="flex items-center gap-3 flex-wrap justify-center text-sm text-muted-foreground">
           <span className="flex items-center gap-1.5 font-medium text-foreground">{isAr ? "⭐ تقييم 4.9" : "⭐ 4.9 rated"}</span>
           <span className="text-border">·</span>
-          <span>{isAr ? "👥 +1,000 طالب" : "👥 1,000+ students"}</span>
+          <span>{isAr ? "👥 +500 طالب" : "👥 500+ students"}</span>
           <span className="text-border">·</span>
           <span>{isAr ? "🌍 +15 دولة" : "🌍 15+ countries"}</span>
           <span className="text-border">·</span>
@@ -143,6 +143,12 @@ const SignUpPage = () => {
 
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
+            {redirectTo === "/trial-booking" && (
+              <div className="bg-primary/10 border border-primary/30 rounded-xl px-4 py-3 mb-3 text-sm text-foreground">
+                <p className="font-black text-base mb-0.5">{isAr ? "🎁 خطوة واحدة لحصتك المجانية" : "🎁 One step from your free class"}</p>
+                <p className="text-muted-foreground text-xs">{isAr ? "أنشئ حسابًا مجانيًا في 30 ثانية، ثم اختر موعدك." : "Create a free account in 30 seconds, then pick your slot."}</p>
+              </div>
+            )}
             <CardTitle className="text-2xl">{t("auth.createAccount") || "Create Account"}</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
               {t("auth.signUpSubtitle") || "Join K-Lovers and start learning Korean today"}
@@ -180,19 +186,21 @@ const SignUpPage = () => {
                 required
                 minLength={6}
               />
-              <Select value={level} onValueChange={setLevel}>
-                <SelectTrigger>
-                  <SelectValue placeholder={isAr ? "مستوى اللغة الكورية (اختياري)" : "Korean level (optional)"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="not_sure">{isAr ? "لست متأكدًا" : "Not sure yet"}</SelectItem>
-                  {LEVEL_SELECT_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {redirectTo !== "/trial-booking" && (
+                <Select value={level} onValueChange={setLevel}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={isAr ? "مستوى اللغة الكورية (اختياري)" : "Korean level (optional)"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="not_sure">{isAr ? "لست متأكدًا" : "Not sure yet"}</SelectItem>
+                    {LEVEL_SELECT_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (t("auth.creatingAccount") || "Creating account...") : (t("auth.signUp") || "Sign Up")}
               </Button>

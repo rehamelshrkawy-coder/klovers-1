@@ -52,7 +52,7 @@ const HowItWorks = () => {
         {/* CTA */}
         <div className="text-center mt-10">
           <Button size="lg" asChild className="gap-2 text-base font-bold h-12 px-8">
-            <Link to="/enroll-now">
+            <Link to="/free-trial">
               {t("howItWorks", "cta")}
               <ArrowRight className="h-5 w-5" />
             </Link>

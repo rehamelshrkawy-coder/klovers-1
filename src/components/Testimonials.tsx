@@ -12,7 +12,7 @@ const AVATAR_COLORS = [
 ];
 
 const STATS = [
-  { value: "1,000+", label: "Students Taught" },
+  { value: "500+", label: "Students Taught" },
   { value: "4.9 ★", label: "Average Rating" },
   { value: "15+", label: "Countries" },
   { value: "98%", label: "Would Recommend" },

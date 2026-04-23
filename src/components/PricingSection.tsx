@@ -94,8 +94,8 @@ type ClassType = "group" | "private";
 
 const PricingSection = () => {
   const navigate = useNavigate();
-  const [selectedCountry, setSelectedCountry] = useState<string>("");
-  const [activeTier, setActiveTier] = useState<TierKey | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string>("Egypt");
+  const [activeTier, setActiveTier] = useState<TierKey | null>("local");
   const [classType, setClassType] = useState<ClassType>("group");
   const { t } = useLanguage();
 
@@ -419,12 +419,12 @@ const PricingSection = () => {
           <div className="flex flex-col items-center gap-1">
             <span className="text-2xl">⭐</span>
             <p className="text-sm font-semibold text-foreground">4.9 / 5.0 Rating</p>
-            <p className="text-xs text-muted-foreground">From 100% Facebook recommendations</p>
+            <p className="text-xs text-muted-foreground">From 200+ verified student reviews</p>
           </div>
           <div className="flex flex-col items-center gap-1">
             <span className="text-2xl">🇰🇷</span>
-            <p className="text-sm font-semibold text-foreground">Native-Level Teacher</p>
-            <p className="text-xs text-muted-foreground">Certified & 5+ years experience</p>
+            <p className="text-sm font-semibold text-foreground">Teaches in Arabic</p>
+            <p className="text-xs text-muted-foreground">Certified Korean teacher · 5+ years</p>
           </div>
           <div className="flex flex-col items-center gap-1">
             <span className="text-2xl">🔒</span>

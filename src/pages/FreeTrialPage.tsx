@@ -146,33 +146,41 @@ const FreeTrialPage = () => {
                 </div>
 
                 {/* CTA */}
-                <div className="flex flex-col sm:flex-row items-center md:items-start gap-4 justify-center md:justify-start">
-                  <Button
-                    size="lg"
-                    onClick={handleBookCta}
-                    className="gap-2 text-base font-bold h-14 px-8 shadow-xl hover:scale-[1.02] transition-transform"
-                  >
-                    {t("freeTrial.cta")}
-                    <ArrowRight className="h-5 w-5" />
-                  </Button>
+                <div className="flex flex-col items-center md:items-start gap-3 justify-center md:justify-start">
+                  {!user && (
+                    <p className="text-xs text-muted-foreground text-center md:text-start">
+                      {t("freeTrial.noteSignedOut")}
+                    </p>
+                  )}
+                  <div className="flex flex-col sm:flex-row items-center md:items-start gap-4">
+                    <Button
+                      size="lg"
+                      onClick={handleBookCta}
+                      className="gap-2 text-base font-bold h-14 px-8 shadow-xl hover:scale-[1.02] transition-transform"
+                    >
+                      {t("freeTrial.cta")}
+                      <ArrowRight className="h-5 w-5" />
+                    </Button>
 
-                  {/* Inline social proof */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex -space-x-2">
-                      {["S","M","H","Y","A"].map((l) => (
-                        <div key={l} className="w-8 h-8 rounded-full bg-foreground border-2 border-background flex items-center justify-center text-[10px] font-black text-background">{l}</div>
-                      ))}
-                    </div>
-                    <div className="text-start">
-                      <p className="text-sm font-black text-foreground leading-tight">{t("freeTrial.socialCount")}</p>
-                      <p className="text-xs text-muted-foreground leading-tight">{t("freeTrial.socialCountText")}</p>
+                    {/* Inline social proof */}
+                    <div className="flex items-center gap-2">
+                      <div className="flex -space-x-2">
+                        {["S","M","H","Y","A"].map((l) => (
+                          <div key={l} className="w-8 h-8 rounded-full bg-foreground border-2 border-background flex items-center justify-center text-[10px] font-black text-background">{l}</div>
+                        ))}
+                      </div>
+                      <div className="text-start">
+                        <p className="text-sm font-black text-foreground leading-tight">{t("freeTrial.socialCount")}</p>
+                        <p className="text-xs text-muted-foreground leading-tight">{t("freeTrial.socialCountText")}</p>
+                      </div>
                     </div>
                   </div>
+                  {user && (
+                    <p className="text-xs text-muted-foreground text-center md:text-start">
+                      {t("freeTrial.noteSignedIn")}
+                    </p>
+                  )}
                 </div>
-
-                <p className="text-xs text-muted-foreground mt-3 text-center md:text-start">
-                  {user ? t("freeTrial.noteSignedIn") : t("freeTrial.noteSignedOut")}
-                </p>
 
                 {/* Perks chips */}
                 <div className="flex flex-wrap gap-2 mt-8 justify-center md:justify-start">

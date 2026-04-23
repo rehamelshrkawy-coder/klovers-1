@@ -834,7 +834,7 @@ const StudentDashboard = () => {
                         <span key={i} className="w-7 h-7 rounded-full bg-muted border-2 border-background flex items-center justify-center text-sm">{flag}</span>
                       ))}
                     </div>
-                    <span>Join <strong className="text-foreground">1,000+</strong> students from Egypt &amp; the Arab world</span>
+                    <span>Join <strong className="text-foreground">500+</strong> students from Egypt &amp; the Arab world</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
                     {[

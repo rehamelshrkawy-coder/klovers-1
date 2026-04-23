@@ -1091,7 +1091,7 @@ const KEY_METRICS: { label: string; korean: string; english: string }[] = [
   { label: "Klivvr Daily Interactions", korean: "하루 50~100건 고객 상호작용", english: "50-100+ daily customer interactions" },
   { label: "International Experience", korean: "13년 이상의 국제 경험", english: "13+ years international experience" },
   { label: "Languages", korean: "6개 언어 구사", english: "Fluent in 6 languages" },
-  { label: "Klovers Community", korean: "15개국 1,000명 이상 학생", english: "1,000+ students across 15+ countries" },
+  { label: "Klovers Community", korean: "15개국 500명 이상 학생", english: "500+ students across 15+ countries" },
   { label: "Klovers Duration", korean: "13년간 운영", english: "Running for 13 years" },
   { label: "Team Productivity", korean: "팀 생산성 20% 향상", english: "Improved team productivity by 20%" },
   { label: "System Onboarding", korean: "1~2주 내 새 시스템 숙련", english: "Proficient in new systems within 1-2 weeks" },

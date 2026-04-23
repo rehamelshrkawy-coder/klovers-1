@@ -1013,7 +1013,7 @@ const PlacementTestPage = () => {
                     </button>
                   </div>
                   <p className="text-[10px] text-muted-foreground text-center">
-                    {isAr ? "⭐️ +١٠٠٠ طالب مصري · استرداد كامل بعد أول حصة مدفوعة" : "⭐️ 1,000+ Egyptian students · full refund after first paid class"}
+                    {isAr ? "⭐️ +500 طالب مصري · استرداد كامل بعد أول حصة مدفوعة" : "⭐️ 500+ Egyptian students · full refund after first paid class"}
                   </p>
                 </CardContent>
               </Card>
@@ -1155,7 +1155,7 @@ const PlacementTestPage = () => {
                   <div className="text-amber-500 tracking-widest text-sm">★★★★★</div>
                   <p className="text-foreground/80 italic leading-relaxed">"{(isAr ? SOCIAL_PROOF_AR : SOCIAL_PROOF)[result.levelKey].quote}"</p>
                   <p className="text-muted-foreground font-medium">— {(isAr ? SOCIAL_PROOF_AR : SOCIAL_PROOF)[result.levelKey].author}</p>
-                  <p className="text-muted-foreground">{isAr ? "أكثر من 500 طالب مصري مسجل في 2025" : "500+ Egyptian students enrolled in 2025"}</p>
+                  <p className="text-muted-foreground">{isAr ? "أكثر من 500 طالب مصري مسجل" : "500+ Egyptian students enrolled"}</p>
                 </div>
               )}
               <p className="text-sm font-semibold text-foreground text-center">{isAr ? "مستعد لبدء التعلّم؟" : "Ready to start learning?"}</p>
@@ -1188,7 +1188,7 @@ const PlacementTestPage = () => {
               </div>
               <div className="grid grid-cols-3 gap-2 pt-1">
                 {[
-                  { icon: <Users className="h-3.5 w-3.5" />, label: isAr ? "+1,000 طالب" : "1,000+ students" },
+                  { icon: <Users className="h-3.5 w-3.5" />, label: isAr ? "+500 طالب" : "500+ students" },
                   { icon: <BookOpen className="h-3.5 w-3.5" />, label: isAr ? "مستويات A1–C2" : "A1–C2 levels" },
                   { icon: <Gamepad2 className="h-3.5 w-3.5" />, label: isAr ? "13 لعبة مجانية" : "13 free games" },
                 ].map(({ icon, label }) => (

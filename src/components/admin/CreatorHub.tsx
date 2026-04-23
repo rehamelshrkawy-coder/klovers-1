@@ -47,7 +47,7 @@ const PREMIUM_POSTS: { mainText: string; subtitle: string; extraText: string; st
   { mainText: "START SPEAKING\nKOREAN\nNOT JUST\nSTUDYING IT.", subtitle: "Live classes that get you talking from day one.", extraText: "#LearnKorean #Klovers #SpeakKorean", style: "klovers_bold" },
   { mainText: "사랑", subtitle: "sa-rang\nLove — The most searched Korean word worldwide", extraText: "#KoreanWord #Klovers #WOTD", style: "klovers_tip" },
   { mainText: "WHY K-DRAMA FANS\nLEARN KOREAN\nFASTER THAN ANYONE", subtitle: "Passion is the best teacher. We just give it structure.", extraText: "#KDrama #LearnKorean #Klovers", style: "klovers_varsity" },
-  { mainText: "1,000+", subtitle: "Students Taught\nFrom 15+ countries — all learning Korean the right way with live classes.", extraText: "#Klovers #KoreanAcademy", style: "klovers_stats" },
+  { mainText: "500+", subtitle: "Students Taught\nFrom 15+ countries — all learning Korean the right way with live classes.", extraText: "#Klovers #KoreanAcademy", style: "klovers_stats" },
   { mainText: "STOP MEMORIZING.\nSTART SPEAKING.", subtitle: "The #1 mistake beginners make is studying grammar without ever opening their mouth. Our live classes fix that.", extraText: "#KoreanTip #Klovers #LearnKorean", style: "klovers_tip" },
   { mainText: "\"I went from zero to ordering in Korean at a restaurant in Seoul — in 3 months.\"", subtitle: "— Sara, Egypt\nKlovers Academy", extraText: "#StudentSuccess #Klovers", style: "klovers_quote" },
   { mainText: "YOUR FAVORITE\nK-DRAMA\nIS YOUR BEST\nTEXTBOOK.", subtitle: "We teach you how to actually learn from what you watch.", extraText: "#KDrama #KPop #LearnKorean #Klovers", style: "klovers_bold" },

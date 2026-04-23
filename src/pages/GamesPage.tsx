@@ -153,7 +153,7 @@ const GamesPage = () => {
               <a href="/login">{isAr ? "تسجيل الدخول" : "Log In"}</a>
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">{isAr ? "بدون بطاقة ائتمان · انضم أكثر من 1,000 طالب" : "No credit card needed · 1,000+ students already joined"}</p>
+          <p className="text-xs text-muted-foreground">{isAr ? "بدون بطاقة ائتمان · انضم أكثر من 500 طالب" : "No credit card needed · 500+ students already joined"}</p>
         </div>
       );
     }
