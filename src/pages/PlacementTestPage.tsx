@@ -190,6 +190,18 @@ const PlacementTestPage = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [phase, setPhase] = useState<"test" | "review" | "result" | "speaking_test" | "listening_test" | "reading_test">("test");
   const [page, setPage] = useState(0);
+
+  // Instrumentation for the mid-quiz drop cliff. Data showed ~93%
+  // abandonment between start and result. Fire an event on first mount
+  // and on each band transition so we can see where the cliff is.
+  useEffect(() => {
+    logLeadEvent({ source_type: "placement_test", cta_label: "test_started" });
+  }, []);
+  useEffect(() => {
+    if (phase === "test") {
+      logLeadEvent({ source_type: "placement_test", cta_label: `band_${page + 1}_viewed`, metadata: { page } });
+    }
+  }, [page, phase]);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [skipped, setSkipped] = useState<Set<number>>(new Set());
   const [focusedQId, setFocusedQId] = useState<number | null>(null);
