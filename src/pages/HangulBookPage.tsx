@@ -968,6 +968,207 @@ function SyllableAr() {
   );
 }
 
+/* ── Batchim (Single) AR ── */
+function BatchimAr() {
+  const FINAL7 = [
+    { sound:"ك", chars:["ㄱ","ㄲ","ㅋ"], ex:[{k:"국",r:"غوك",m:"حساء"},{k:"부엌",r:"بو-أوك",m:"مطبخ"}] },
+    { sound:"ن", chars:["ㄴ"],           ex:[{k:"눈",r:"نون",m:"عين/ثلج"},{k:"돈",r:"دون",m:"مال"}] },
+    { sound:"ت", chars:["ㄷ","ㅅ","ㅆ","ㅈ","ㅊ","ㅌ","ㅎ"], ex:[{k:"옷",r:"أوت",m:"ملابس"},{k:"낮",r:"نات",m:"نهار"}] },
+    { sound:"ل/ر", chars:["ㄹ"],         ex:[{k:"달",r:"دال",m:"قمر"},{k:"말",r:"مال",m:"لغة/فرس"}] },
+    { sound:"م",  chars:["ㅁ"],          ex:[{k:"봄",r:"بوم",m:"ربيع"},{k:"꿈",r:"كوم",m:"حلم"}] },
+    { sound:"ب",  chars:["ㅂ","ㅍ"],     ex:[{k:"밥",r:"باب",m:"أرز"},{k:"잎",r:"إيب",m:"ورقة"}] },
+    { sound:"نغ", chars:["ㅇ"],          ex:[{k:"강",r:"غانغ",m:"نهر"},{k:"영",r:"يونغ",m:"روح/صفر"}] },
+  ];
+  return (
+    <Page dir="rtl">
+      <SHead title="الباتشيم (받침) — الحرف الساكن الأخير" subtitle="المقطع الكوري قد ينتهي بحرف ساكن تحت الكتلة" />
+
+      {/* What is batchim */}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
+        <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>ما هو الباتشيم؟</div>
+          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.9 }}>
+            الباتشيم هو الحرف الساكن الذي يجلس <strong style={{color:Y}}>أسفل</strong> الكتلة المقطعية.
+            ليس كل مقطع يحتاجه — لكنه ضروري في آلاف الكلمات.
+          </div>
+          <div style={{ display:"flex", gap:"10px", justifyContent:"center", marginTop:"10px", direction:"ltr" }}>
+            {[
+              {top:"ㅎ", mid:"ㅏ", bot:null, label:"하 (ha)", note:"بدون باتشيم"},
+              {top:"ㅎ", mid:"ㅏ", bot:"ㄴ", label:"한 (han)", note:"مع باتشيم ㄴ"},
+            ].map((b,i)=>(
+              <div key={i} style={{ textAlign:"center" }}>
+                <div style={{ background: i===1?Y:YL, borderRadius:"10px", padding:"10px 14px", border:`2px solid ${Y}`, display:"inline-flex", flexDirection:"column", alignItems:"center", width:"60px" }}>
+                  <div style={{ fontSize:"11px", color:i===1?BK:"#666" }}>{b.top}</div>
+                  <div style={{ fontSize:"11px", color:i===1?BK:"#666" }}>{b.mid}</div>
+                  {b.bot && <div style={{ fontSize:"11px", color:BK, fontWeight:900, borderTop:"1px solid rgba(0,0,0,0.2)", marginTop:"3px", paddingTop:"3px", width:"100%", textAlign:"center" }}>{b.bot}</div>}
+                </div>
+                <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginTop:"5px" }}>{b.label}</div>
+                <div style={{ fontSize:"8px", color:"#777", direction:"rtl" }}>{b.note}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>القاعدة الذهبية 🥇</div>
+          <div style={{ fontSize:"10px", color:BK2, lineHeight:1.9 }}>
+            رغم وجود أكثر من ١٤ حرفاً ساكناً، لا يوجد في اللغة الكورية سوى <strong>٧ أصوات نهائية فقط</strong> يمكن نطقها في نهاية المقطع. كل الحروف الأخرى تُحوَّل إلى أحد هذه الأصوات السبعة.
+          </div>
+          <div style={{ background:BK, borderRadius:"8px", padding:"8px", marginTop:"8px", textAlign:"center" }}>
+            <div style={{ display:"flex", gap:"6px", justifyContent:"center", flexWrap:"wrap" }}>
+              {["ك","ن","ت","ل","م","ب","نغ"].map(s=>(
+                <div key={s} style={{ background:Y, color:BK, fontWeight:900, fontSize:"14px", width:"32px", height:"32px", borderRadius:"8px", display:"flex", alignItems:"center", justifyContent:"center" }}>{s}</div>
+              ))}
+            </div>
+            <div style={{ fontSize:"9px", color:"#aaa", marginTop:"5px" }}>الأصوات النهائية السبعة</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 7 final sounds table */}
+      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>جدول الأصوات النهائية السبعة</div>
+      <div style={{ display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" }}>
+        {FINAL7.map((row,i)=>(
+          <div key={i} style={{ display:"grid", gridTemplateColumns:"40px 1fr 1fr", gap:"6px", alignItems:"center", background:i%2===0?"#f9f9f9":"#fff", borderRadius:"8px", padding:"6px 10px", border:`1px solid ${Y}44` }}>
+            <div style={{ background:BK, color:Y, fontWeight:900, fontSize:"16px", textAlign:"center", borderRadius:"6px", padding:"4px", direction:"ltr" }}>{row.sound}</div>
+            <div style={{ display:"flex", gap:"5px", flexWrap:"wrap" }}>
+              {row.chars.map(ch=>(
+                <span key={ch} style={{ background:Y, color:BK, fontSize:"15px", fontWeight:900, padding:"2px 7px", borderRadius:"6px", direction:"ltr" }}>{ch}</span>
+              ))}
+            </div>
+            <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
+              {row.ex.map(e=>(
+                <span key={e.k} style={{ background:BK2, color:"#ddd", fontSize:"9px", padding:"2px 5px", borderRadius:"4px", direction:"rtl" }}>
+                  <span style={{color:Y,fontWeight:800}}>{e.k}</span> {e.r} — {e.m}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Linking rule */}
+      <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"12px", alignItems:"flex-start" }}>
+        <KoreanLanternIcon size={42} color={Y} />
+        <div>
+          <div style={{ fontSize:"12px", fontWeight:800, color:Y, marginBottom:"5px" }}>قاعدة الربط (연음법칙 يون-إيم)</div>
+          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.9, marginBottom:"6px" }}>
+            إذا جاء بعد الباتشيم مقطع يبدأ بـ <strong style={{color:Y}}>ㅇ</strong> الصامت، ينتقل الباتشيم إلى ذلك المقطع ويُنطق فيه.
+          </div>
+          <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
+            {[
+              {w:"먹어요",before:"موك-أو-يو ❌",after:"مو-غو-يو ✅",m:"آكل"},
+              {w:"한국어",before:"هان-غوك-أو ❌",after:"هان-غو-غو ✅",m:"كورية"},
+              {w:"없어요",before:"أوبس-أو-يو ❌",after:"أوب-سو-يو ✅",m:"لا يوجد"},
+            ].map(e=>(
+              <div key={e.w} style={{ background:"#1a1a1a", borderRadius:"8px", padding:"8px 10px", direction:"ltr" }}>
+                <div style={{ fontSize:"16px", color:Y, fontWeight:900 }}>{e.w}</div>
+                <div style={{ fontSize:"8px", color:"#666", marginTop:"2px" }}>{e.before}</div>
+                <div style={{ fontSize:"9px", color:"#4ade80", fontWeight:700 }}>{e.after}</div>
+                <div style={{ fontSize:"8px", color:"#888", direction:"rtl" }}>{e.m}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+/* ── Double Batchim AR ── */
+function DoubleBatchimAr() {
+  const GYEOP = [
+    { chars:"ㄳ", read:"ㄱ", ex:"넋", rom:"نوك", m:"روح/أثر" },
+    { chars:"ㄵ", read:"ㄴ", ex:"앉다", rom:"أن-تا", m:"يجلس" },
+    { chars:"ㄺ", read:"ㄱ", ex:"닭", rom:"داك", m:"دجاجة" },
+    { chars:"ㄻ", read:"ㅁ", ex:"삶", rom:"سام", m:"حياة" },
+    { chars:"ㄼ", read:"ㄹ", ex:"밟다", rom:"بال-تا", m:"يدوس" },
+    { chars:"ㄾ", read:"ㄹ", ex:"핥다", rom:"هال-تا", m:"يلعق" },
+    { chars:"ㅀ", read:"ㄹ", ex:"싫다", rom:"سيل-تا", m:"يكره" },
+    { chars:"ㅄ", read:"ㅂ", ex:"없다", rom:"أوب-تا", m:"غير موجود" },
+  ];
+  return (
+    <Page dir="rtl">
+      <SHead title="الباتشيم المزدوج (겹받침)" subtitle="حرفان ساكنان في الأسفل — اقرأ حرفاً واحداً فقط!" />
+
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
+        <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>ما هو الباتشيم المزدوج؟</div>
+          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.9 }}>
+            بعض المقاطع تحمل <strong style={{color:Y}}>حرفين ساكنين معاً</strong> في موضع الباتشيم. عند النطق، تُنطق الأقل شيوعاً (عادةً الأولى) وتصمت الأخرى. حفظ هذا الجدول يُتقن نطقك فوراً!
+          </div>
+          {/* Visual diagram */}
+          <div style={{ marginTop:"10px", direction:"ltr", display:"flex", justifyContent:"center" }}>
+            <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"inline-flex", flexDirection:"column", alignItems:"center", border:`2px solid ${BK}` }}>
+              <div style={{ display:"flex", gap:"2px" }}>
+                <span style={{ fontSize:"13px", color:BK }}>ㅇ</span>
+                <span style={{ fontSize:"13px", color:BK }}>ㅏ</span>
+              </div>
+              <div style={{ display:"flex", gap:"2px", borderTop:"1px solid rgba(0,0,0,0.3)", marginTop:"3px", paddingTop:"3px" }}>
+                <span style={{ fontSize:"13px", fontWeight:900, color:"#0047AB" }}>ㄹ</span>
+                <span style={{ fontSize:"13px", fontWeight:900, color:"#C8102E" }}>ㄱ</span>
+              </div>
+            </div>
+          </div>
+          <div style={{ textAlign:"center", fontSize:"9px", color:"#aaa", marginTop:"5px" }}>닭 = داك (الدجاجة)</div>
+        </div>
+
+        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>القاعدة الكبرى للربط 🔗</div>
+          <div style={{ fontSize:"10px", color:BK2, lineHeight:1.9, marginBottom:"8px" }}>
+            إذا جاء بعد الباتشيم المزدوج مقطع يبدأ بـ <strong>ㅇ</strong> الصامت، يتحرك الحرف <strong style={{color:"#C8102E"}}>الأيمن (الثاني)</strong> إلى المقطع التالي!
+          </div>
+          <div style={{ display:"flex", flexDirection:"column", gap:"5px" }}>
+            {[
+              {w:"닭이",r:"달기",m:"الدجاجة (مفعول به)"},
+              {w:"없어요",r:"업써요",m:"لا يوجد (جملة)"},
+              {w:"앉아요",r:"안자요",m:"يجلس (مؤدب)"},
+            ].map(e=>(
+              <div key={e.w} style={{ background:BK, borderRadius:"6px", padding:"6px 10px", display:"flex", justifyContent:"space-between", alignItems:"center", direction:"ltr" }}>
+                <span style={{ fontSize:"16px", color:Y, fontWeight:900 }}>{e.w}</span>
+                <span style={{ fontSize:"11px", color:"#4ade80", fontWeight:700 }}>→ [{e.r}]</span>
+                <span style={{ fontSize:"9px", color:"#888", direction:"rtl" }}>{e.m}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>جدول أشهر الباتشيمات المزدوجة</div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"6px", marginBottom:"10px" }}>
+        {GYEOP.map((g,i)=>(
+          <div key={i} style={{
+            background: i%2===0 ? BK : BK2,
+            borderRadius:"10px", padding:"10px 8px",
+            border:`2px solid ${Y}44`,
+            textAlign:"center",
+          }}>
+            <div style={{ fontSize:"22px", color:Y, fontWeight:900, direction:"ltr", letterSpacing:"2px" }}>{g.chars}</div>
+            <div style={{ fontSize:"9px", color:"#aaa", marginTop:"2px" }}>تُنطق كـ</div>
+            <div style={{ background:Y, color:BK, fontWeight:900, fontSize:"18px", borderRadius:"6px", padding:"2px 8px", margin:"4px auto", display:"inline-block", direction:"ltr" }}>{g.read}</div>
+            <div style={{ borderTop:`1px solid ${Y}33`, marginTop:"6px", paddingTop:"6px" }}>
+              <div style={{ fontSize:"18px", color:Y, fontWeight:900, direction:"ltr" }}>{g.ex}</div>
+              <div style={{ fontSize:"9px", color:"#aaa" }}>{g.rom}</div>
+              <div style={{ fontSize:"9px", color:"#777" }}>{g.m}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
+        <MugunghwaIcon size={36} color={BK} />
+        <div>
+          <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>نصيحة الخبراء</div>
+          <div style={{ fontSize:"10px", color:BK2, lineHeight:1.7 }}>
+            لا تحفظ كل هذا فوراً! ابدأ بـ <strong>ㄺ (닭)، ㅄ (없다)، ㄻ (삶)</strong> — هذه الثلاثة تكفي لمستوى المبتدئين. ستتعلم الباقي تلقائياً من خلال القراءة.
+          </div>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
 function KdramaAr() {
   return (
     <Page dir="rtl">
@@ -1553,6 +1754,200 @@ function SyllableEn() {
   );
 }
 
+/* ── Batchim (Single) EN ── */
+function BatchimEn() {
+  const FINAL7 = [
+    { sound:"k",  chars:["ㄱ","ㄲ","ㅋ"], ex:[{k:"국",r:"guk",m:"soup"},{k:"부엌",r:"bu-eok",m:"kitchen"}] },
+    { sound:"n",  chars:["ㄴ"],           ex:[{k:"눈",r:"nun",m:"eye/snow"},{k:"돈",r:"don",m:"money"}] },
+    { sound:"t",  chars:["ㄷ","ㅅ","ㅆ","ㅈ","ㅊ","ㅌ","ㅎ"], ex:[{k:"옷",r:"ot",m:"clothes"},{k:"낮",r:"nat",m:"daytime"}] },
+    { sound:"l",  chars:["ㄹ"],          ex:[{k:"달",r:"dal",m:"moon"},{k:"말",r:"mal",m:"language/horse"}] },
+    { sound:"m",  chars:["ㅁ"],          ex:[{k:"봄",r:"bom",m:"spring"},{k:"꿈",r:"kkum",m:"dream"}] },
+    { sound:"p",  chars:["ㅂ","ㅍ"],     ex:[{k:"밥",r:"bap",m:"rice"},{k:"잎",r:"ip",m:"leaf"}] },
+    { sound:"ng", chars:["ㅇ"],          ex:[{k:"강",r:"gang",m:"river"},{k:"영",r:"yeong",m:"spirit/zero"}] },
+  ];
+  return (
+    <Page dir="ltr">
+      <SHead title="Batchim (받침) — The Final Consonant" subtitle="A syllable block can end with a consonant sitting below" />
+
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
+        <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>What is Batchim?</div>
+          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.9 }}>
+            Batchim is the consonant that sits <strong style={{color:Y}}>underneath</strong> the syllable block. Not every syllable has one — but it appears in thousands of Korean words.
+          </div>
+          <div style={{ display:"flex", gap:"10px", justifyContent:"center", marginTop:"10px" }}>
+            {[
+              {top:"ㅎ", mid:"ㅏ", bot:null, label:"하 (ha)", note:"No batchim"},
+              {top:"ㅎ", mid:"ㅏ", bot:"ㄴ", label:"한 (han)", note:"Batchim = ㄴ"},
+            ].map((b,i)=>(
+              <div key={i} style={{ textAlign:"center" }}>
+                <div style={{ background: i===1?Y:YL, borderRadius:"10px", padding:"10px 14px", border:`2px solid ${Y}`, display:"inline-flex", flexDirection:"column", alignItems:"center", width:"60px" }}>
+                  <div style={{ fontSize:"11px", color:i===1?BK:"#666" }}>{b.top}</div>
+                  <div style={{ fontSize:"11px", color:i===1?BK:"#666" }}>{b.mid}</div>
+                  {b.bot && <div style={{ fontSize:"11px", color:BK, fontWeight:900, borderTop:"1px solid rgba(0,0,0,0.2)", marginTop:"3px", paddingTop:"3px", width:"100%", textAlign:"center" }}>{b.bot}</div>}
+                </div>
+                <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginTop:"5px" }}>{b.label}</div>
+                <div style={{ fontSize:"8px", color:"#777" }}>{b.note}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>The Golden Rule 🥇</div>
+          <div style={{ fontSize:"10px", color:BK2, lineHeight:1.9 }}>
+            Even though there are 14+ consonants, only <strong>7 final sounds</strong> can be pronounced in batchim position. Every other consonant reduces to one of these seven.
+          </div>
+          <div style={{ background:BK, borderRadius:"8px", padding:"8px", marginTop:"8px", textAlign:"center" }}>
+            <div style={{ display:"flex", gap:"6px", justifyContent:"center", flexWrap:"wrap" }}>
+              {["k","n","t","l","m","p","ng"].map(s=>(
+                <div key={s} style={{ background:Y, color:BK, fontWeight:900, fontSize:"13px", padding:"4px 8px", borderRadius:"8px" }}>{s}</div>
+              ))}
+            </div>
+            <div style={{ fontSize:"9px", color:"#aaa", marginTop:"5px" }}>The 7 final sounds</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>The 7 Final Sound Groups</div>
+      <div style={{ display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" }}>
+        {FINAL7.map((row,i)=>(
+          <div key={i} style={{ display:"grid", gridTemplateColumns:"36px 1fr 1fr", gap:"6px", alignItems:"center", background:i%2===0?"#f9f9f9":"#fff", borderRadius:"8px", padding:"6px 10px", border:`1px solid ${Y}44` }}>
+            <div style={{ background:BK, color:Y, fontWeight:900, fontSize:"14px", textAlign:"center", borderRadius:"6px", padding:"4px" }}>{row.sound}</div>
+            <div style={{ display:"flex", gap:"5px", flexWrap:"wrap" }}>
+              {row.chars.map(ch=>(
+                <span key={ch} style={{ background:Y, color:BK, fontSize:"15px", fontWeight:900, padding:"2px 7px", borderRadius:"6px" }}>{ch}</span>
+              ))}
+            </div>
+            <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
+              {row.ex.map(e=>(
+                <span key={e.k} style={{ background:BK2, color:"#ddd", fontSize:"9px", padding:"2px 5px", borderRadius:"4px" }}>
+                  <span style={{color:Y,fontWeight:800}}>{e.k}</span> [{e.r}] {e.m}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"12px", alignItems:"flex-start" }}>
+        <KoreanLanternIcon size={42} color={Y} />
+        <div>
+          <div style={{ fontSize:"12px", fontWeight:800, color:Y, marginBottom:"5px" }}>Linking Rule — 연음법칙 (Yeon-eum)</div>
+          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.9, marginBottom:"6px" }}>
+            When batchim is followed by a syllable starting with <strong style={{color:Y}}>ㅇ</strong> (silent), the batchim <strong style={{color:Y}}>moves</strong> to that next syllable and is pronounced there.
+          </div>
+          <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
+            {[
+              {w:"먹어요",wrong:"meok-eo-yo ❌",right:"meo-geo-yo ✅",m:"I eat"},
+              {w:"한국어",wrong:"han-guk-eo ❌",right:"han-gu-geo ✅",m:"Korean language"},
+              {w:"없어요",wrong:"eops-eo-yo ❌",right:"eop-seo-yo ✅",m:"There isn't"},
+            ].map(e=>(
+              <div key={e.w} style={{ background:"#1a1a1a", borderRadius:"8px", padding:"8px 10px" }}>
+                <div style={{ fontSize:"16px", color:Y, fontWeight:900 }}>{e.w}</div>
+                <div style={{ fontSize:"8px", color:"#666", marginTop:"2px" }}>{e.wrong}</div>
+                <div style={{ fontSize:"9px", color:"#4ade80", fontWeight:700 }}>{e.right}</div>
+                <div style={{ fontSize:"8px", color:"#888" }}>{e.m}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+/* ── Double Batchim EN ── */
+function DoubleBatchimEn() {
+  const GYEOP = [
+    { chars:"ㄳ", read:"ㄱ", ex:"넋", rom:"neok", m:"soul/trace" },
+    { chars:"ㄵ", read:"ㄴ", ex:"앉다", rom:"an-da", m:"to sit" },
+    { chars:"ㄺ", read:"ㄱ", ex:"닭", rom:"dak", m:"chicken" },
+    { chars:"ㄻ", read:"ㅁ", ex:"삶", rom:"sam", m:"life" },
+    { chars:"ㄼ", read:"ㄹ", ex:"밟다", rom:"bal-da", m:"to step on" },
+    { chars:"ㄾ", read:"ㄹ", ex:"핥다", rom:"hal-da", m:"to lick" },
+    { chars:"ㅀ", read:"ㄹ", ex:"싫다", rom:"sil-ta", m:"to dislike" },
+    { chars:"ㅄ", read:"ㅂ", ex:"없다", rom:"eop-da", m:"to not exist" },
+  ];
+  return (
+    <Page dir="ltr">
+      <SHead title="Double Batchim — 겹받침 (Gyeop-batchim)" subtitle="Two consonants at the bottom — only one is pronounced!" />
+
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
+        <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>What is Gyeop-batchim?</div>
+          <div style={{ fontSize:"10px", color:"#ccc", lineHeight:1.9 }}>
+            Some syllable blocks hold <strong style={{color:Y}}>two consonants together</strong> in the batchim position. When speaking, usually the <strong style={{color:Y}}>left (first)</strong> one is pronounced and the second is silent.
+          </div>
+          <div style={{ marginTop:"10px", display:"flex", justifyContent:"center" }}>
+            <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"inline-flex", flexDirection:"column", alignItems:"center", border:`2px solid ${BK}` }}>
+              <div style={{ display:"flex", gap:"2px" }}>
+                <span style={{ fontSize:"13px", color:BK }}>ㄷ</span>
+                <span style={{ fontSize:"13px", color:BK }}>ㅏ</span>
+              </div>
+              <div style={{ display:"flex", gap:"2px", borderTop:"1px solid rgba(0,0,0,0.3)", marginTop:"3px", paddingTop:"3px" }}>
+                <span style={{ fontSize:"13px", fontWeight:900, color:"#0047AB" }}>ㄹ</span>
+                <span style={{ fontSize:"13px", fontWeight:900, color:"#C8102E" }}>ㄱ</span>
+              </div>
+            </div>
+          </div>
+          <div style={{ textAlign:"center", fontSize:"9px", color:"#aaa", marginTop:"5px" }}>닭 = dak (chicken) — ㄱ sounds, ㄹ is silent</div>
+        </div>
+
+        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>Linking Rule for Double Batchim 🔗</div>
+          <div style={{ fontSize:"10px", color:BK2, lineHeight:1.9, marginBottom:"8px" }}>
+            When followed by a syllable starting with <strong>ㅇ</strong>, the <strong style={{color:"#C8102E"}}>right (second)</strong> consonant moves to the next syllable!
+          </div>
+          <div style={{ display:"flex", flexDirection:"column", gap:"5px" }}>
+            {[
+              {w:"닭이",r:"[dal-gi]",m:"chicken (object)"},
+              {w:"없어요",r:"[eop-seo-yo]",m:"there isn't (polite)"},
+              {w:"앉아요",r:"[an-ja-yo]",m:"sits (polite)"},
+            ].map(e=>(
+              <div key={e.w} style={{ background:BK, borderRadius:"6px", padding:"6px 10px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                <span style={{ fontSize:"16px", color:Y, fontWeight:900 }}>{e.w}</span>
+                <span style={{ fontSize:"11px", color:"#4ade80", fontWeight:700 }}>{e.r}</span>
+                <span style={{ fontSize:"9px", color:"#888" }}>{e.m}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>Most Common Double Batchim Pairs</div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"6px", marginBottom:"10px" }}>
+        {GYEOP.map((g,i)=>(
+          <div key={i} style={{
+            background: i%2===0 ? BK : BK2,
+            borderRadius:"10px", padding:"10px 8px",
+            border:`2px solid ${Y}44`, textAlign:"center",
+          }}>
+            <div style={{ fontSize:"22px", color:Y, fontWeight:900, letterSpacing:"2px" }}>{g.chars}</div>
+            <div style={{ fontSize:"9px", color:"#aaa", marginTop:"2px" }}>sounds like</div>
+            <div style={{ background:Y, color:BK, fontWeight:900, fontSize:"18px", borderRadius:"6px", padding:"2px 8px", margin:"4px auto", display:"inline-block" }}>{g.read}</div>
+            <div style={{ borderTop:`1px solid ${Y}33`, marginTop:"6px", paddingTop:"6px" }}>
+              <div style={{ fontSize:"18px", color:Y, fontWeight:900 }}>{g.ex}</div>
+              <div style={{ fontSize:"9px", color:"#aaa" }}>[{g.rom}]</div>
+              <div style={{ fontSize:"9px", color:"#777" }}>{g.m}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
+        <MugunghwaIcon size={36} color={BK} />
+        <div>
+          <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>Expert Tip</div>
+          <div style={{ fontSize:"10px", color:BK2, lineHeight:1.7 }}>
+            Don't memorize all of these at once! Start with <strong>ㄺ (닭), ㅄ (없다), ㄻ (삶)</strong> — these three cover 80% of double batchim you'll meet at beginner level. The rest will come naturally through reading.
+          </div>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
 function KdramaEn() {
   return (
     <Page dir="ltr">
@@ -1779,6 +2174,8 @@ export default function HangulBookPage() {
             <ConsonantsAr slice={[7,14]} page={2} />
             <VowelsAr />
             <SyllableAr />
+            <BatchimAr />
+            <DoubleBatchimAr />
             <KdramaAr />
             <PracticeAr />
             <AnswerAr />
@@ -1795,6 +2192,8 @@ export default function HangulBookPage() {
             <ConsonantsEn slice={[7,14]} page={2} />
             <VowelsEn />
             <SyllableEn />
+            <BatchimEn />
+            <DoubleBatchimEn />
             <KdramaEn />
             <PracticeEn />
             <AnswerEn />
