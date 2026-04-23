@@ -7,6 +7,26 @@
 /** Default page size for admin tables. Keeps row height × count ≈ one screen. */
 export const ADMIN_PAGE_SIZE = 25;
 
+// ── Business rule thresholds ─────────────────────────────────────────────────
+
+/** Sessions remaining at or below this count triggers "at-risk" UI warning. */
+export const AT_RISK_SESSION_THRESHOLD = 3;
+
+/** sessions_remaining value at which a student is considered LOCKED (matches DB view logic). */
+export const LOCKED_SESSION_THRESHOLD = -3;
+
+/** Maximum unit price (per-session) an admin can set on an enrollment. */
+export const MAX_UNIT_PRICE = 10_000;
+
+/** Referral conversion bonus per enrolled friend (percentage). */
+export const REFERRAL_CONVERSION_BONUS_PCT = 5;
+
+/** Referral click-only bonus per visitor who didn't enroll (percentage). */
+export const REFERRAL_CLICK_BONUS_PCT = 2;
+
+/** Maximum referral bonus any single referrer can earn (percentage). */
+export const REFERRAL_MAX_BONUS_PCT = 15;
+
 // ── Time formatting ──────────────────────────────────────────────────────────
 
 /** Convert "HH:MM" (24h) to "H:MM AM/PM". Replaces 6+ identical formatTime copies. */

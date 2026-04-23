@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Clock, DollarSign, ChevronDown, ChevronUp, MessageCircle } from "lucide-react";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
+import { AT_RISK_SESSION_THRESHOLD } from "@/lib/admin-utils";
 import type { OverviewRow } from "@/types/admin";
 
 interface Props {
@@ -21,7 +22,7 @@ const StudentHealthPanel = ({ overviewRows }: Props) => {
   );
 
   const atRisk = useMemo(
-    () => activeRows.filter(r => r.sessions_remaining <= 3 && r.sessions_remaining > 0),
+    () => activeRows.filter(r => r.sessions_remaining <= AT_RISK_SESSION_THRESHOLD && r.sessions_remaining > 0),
     [activeRows]
   );
 
@@ -48,7 +49,7 @@ const StudentHealthPanel = ({ overviewRows }: Props) => {
       badgeClass: "bg-red-100 text-red-700 border-red-200",
       count: atRisk.length,
       label: "At-Risk Students",
-      sublabel: "≤3 sessions remaining",
+      sublabel: `≤${AT_RISK_SESSION_THRESHOLD} sessions remaining`,
       rows: atRisk,
     },
     {
