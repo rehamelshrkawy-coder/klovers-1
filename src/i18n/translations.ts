@@ -31,7 +31,7 @@ export const translations = {
     teacher: {
       title: "Meet Our Teaching Team",
       name: "Reham Elshrkawy",
-      bio1: "KLovers is led by Reham Elshrkawy, a certified Korean language instructor who teaches entirely in Arabic — so you truly understand, not just memorize. She has guided 500+ students from zero to confident speakers.",
+      bio1: "KLovers is led by Reham Elshrkawy, a certified Korean language instructor dedicated to making Korean truly click — not just memorized. She has guided 500+ students from zero to confident speakers.",
       bio2: "With a structured and interactive approach, Reham focuses on helping students build real speaking confidence step by step.",
       bio3: "Alongside Reham, KLovers works with a carefully selected team of qualified Korean language instructors who follow the same teaching standards — structured lessons, interactive methods, and real-life communication focus.",
       bio4: "Together, the KLovers teaching team ensures every student receives professional guidance and a supportive learning environment.",
@@ -44,9 +44,9 @@ export const translations = {
     },
     howItWorks: {
       title: "You'll Be Speaking in Your First Class",
-      subtitle: "Not memorizing. Not watching. Actually speaking — explained in Arabic so it clicks from minute one.",
+      subtitle: "Not memorizing. Not watching. Actually speaking — explained clearly so it clicks from minute one.",
       steps: [
-        { title: "Taught in Arabic", description: "Your teacher explains Korean in Arabic — so you truly understand, not just memorize sounds." },
+        { title: "Clear Explanations", description: "Your teacher breaks down Korean in a way that makes it truly click — not just memorized sounds." },
         { title: "Max 8 Students", description: "Small enough that you speak every session. No hiding in the back row." },
         { title: "Instant Feedback", description: "Your teacher corrects your pronunciation live and sends you personalised exercises after class." },
         { title: "TOPIK-Tracked Progress", description: "A1 → C2 roadmap. You always know exactly where you are and what's next." },
@@ -79,7 +79,7 @@ export const translations = {
     },
     finalCta: {
       title: "One Free Class. That's All We Ask.",
-      subtitle: "30 minutes with a real teacher — explained in Arabic. No credit card, no commitment. Just show up and see if Korean clicks for you.",
+      subtitle: "30 minutes with a real teacher. No credit card, no commitment. Just show up and see if Korean clicks for you.",
       button: "Book My Free Korean Class",
     },
     returningStudents: {
@@ -261,7 +261,7 @@ export const translations = {
       title: "About K-Lovers",
       story: {
         title: "Reham's Story",
-        content: "K-Lovers was founded by Reham, a passionate Korean language educator who discovered her love for Korean through K-Drama and K-Pop. After years of studying and teaching Korean, she created K-Lovers to make Korean language education accessible, structured, and enjoyable for Arabic-speaking students worldwide. What started as small tutoring sessions has grown into a thriving community of 500+ students across the Middle East and Southeast Asia.",
+        content: "K-Lovers was founded by Reham, a passionate Korean language educator who discovered her love for Korean through K-Drama and K-Pop. After years of studying and teaching Korean, she created K-Lovers to make Korean language education accessible, structured, and enjoyable for students worldwide. What started as small tutoring sessions has grown into a thriving community of 500+ students across 15+ countries.",
       },
       philosophy: {
         title: "Teaching Philosophy",
@@ -272,7 +272,7 @@ export const translations = {
         items: [
           "12+ years of Korean language teaching experience (2012 – Present)",
           "500+ students taught across 15+ countries",
-          "Specialized in teaching Arabic speakers",
+          "Specialized in making Korean accessible to all backgrounds",
           "TOPIK preparation expert with high student pass rates",
           "Curriculum designed for all levels from Hangul to Advanced",
           "Live interactive teaching methodology",
