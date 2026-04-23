@@ -26,7 +26,7 @@ const FreeTrialPage = () => {
 
   useSEO({
     title: "Book Your Free Korean Class | Klovers Academy",
-    description: "Try a live Korean class for free. No credit card. Real teacher. 45 minutes. Join 1,000+ students learning Korean the right way.",
+    description: "Try a live Korean class for free. No credit card. Real teacher. 30 minutes. Join 1,000+ students learning Korean the right way.",
     canonical: "https://kloversegy.com/free-trial",
   });
 
@@ -38,7 +38,7 @@ const FreeTrialPage = () => {
       "@context": "https://schema.org",
       "@type": "Course",
       "name": "Free Trial Korean Class",
-      "description": "45-minute live Korean class with a real teacher. Free, no credit card required.",
+      "description": "30-minute live Korean class with a real teacher. Free, no credit card required.",
       "provider": {
         "@type": "Organization",
         "name": "Klovers Korean Academy",
