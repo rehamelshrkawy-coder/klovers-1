@@ -23,6 +23,7 @@ interface EmailPayload {
   slot_timezone?: string;
   first_class_date?: string;
   alert_items?: Array<{ name: string; email: string; days_waiting: number }>;
+  unsubscribe_token?: string;
   rebook_url?: string;
   available_slots?: Array<{ day_of_week: number; start_time: string; timezone?: string }>;
   enrollment_id?: string;
@@ -60,6 +61,16 @@ const BRAND_TEXT = "#333333";
 const BRAND_MUTED = "#666666";
 const LOGO_URL = "https://kloversegy.com/klovers-logo.jpg";
 const SITE_URL = "https://kloversegy.com";
+
+const FUNCTION_BASE = "https://ewtdgpbybkceokfohhyg.supabase.co/functions/v1";
+
+function unsubscribeFooter(token: string | undefined, isAr: boolean): string {
+  if (!token) return "";
+  const url = `${FUNCTION_BASE}/unsubscribe-email?token=${token}&lang=${isAr ? "ar" : "en"}`;
+  return isAr
+    ? `<p style="text-align:center;margin-top:24px;font-size:11px;color:#999">لا تريد استلام هذه الرسائل؟ <a href="${url}" style="color:#999">إلغاء الاشتراك</a></p>`
+    : `<p style="text-align:center;margin-top:24px;font-size:11px;color:#999">Don't want these emails? <a href="${url}" style="color:#999">Unsubscribe</a></p>`;
+}
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -132,14 +143,47 @@ function brandTable(rows: [string, string][]) {
   </table>`;
 }
 
-async function sendEmail(to: string, subject: string, html: string) {
+function generateICS(opts: {
+  summary: string;
+  description: string;
+  dtstart: string;
+  durationMinutes: number;
+  url?: string;
+}): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const start = new Date(opts.dtstart);
+  const end = new Date(start.getTime() + opts.durationMinutes * 60000);
+  const fmt = (d: Date) =>
+    `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`;
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//KLovers//Korean Class//EN",
+    "BEGIN:VEVENT",
+    `UID:klovers-${start.getTime()}@kloversegy.com`,
+    `DTSTART:${fmt(start)}`,
+    `DTEND:${fmt(end)}`,
+    `SUMMARY:${opts.summary}`,
+    `DESCRIPTION:${opts.description.replace(/\n/g, "\\n")}`,
+    opts.url ? `URL:${opts.url}` : "",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].filter(Boolean).join("\r\n");
+}
+
+async function sendEmail(
+  to: string, subject: string, html: string,
+  attachments?: Array<{ filename: string; content: string; content_type?: string }>
+) {
+  const body: Record<string, unknown> = { from: FROM_EMAIL, to: [to], subject, html };
+  if (attachments?.length) body.attachments = attachments;
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${RESEND_API_KEY}`,
     },
-    body: JSON.stringify({ from: FROM_EMAIL, to: [to], subject, html }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
@@ -910,6 +954,7 @@ function buildGroupFormingEmail(p: EmailPayload) {
           <p style="margin: 0 0 6px; font-size: 13px; font-weight: bold; color: ${BRAND_DARK};">📚 ابدأ قبل ما تيجي الحصة الأولى</p>
           <p style="margin: 0; font-size: 13px; color: ${BRAND_MUTED};">تعلم الأبجدية الكورية (هانغول) في 30 دقيقة — <a href="https://www.youtube.com/watch?v=s5aobqyEaMQ" style="color: ${BRAND_DARK}; font-weight: bold;">شاهد على يوتيوب ←</a></p>
         </div>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -931,6 +976,7 @@ function buildGroupFormingEmail(p: EmailPayload) {
         <p style="margin: 0 0 6px; font-size: 13px; font-weight: bold; color: ${BRAND_DARK};">📚 Start before your first class</p>
         <p style="margin: 0; font-size: 13px; color: ${BRAND_MUTED};">Learn the Korean alphabet (Hangul) in 30 minutes — <a href="https://www.youtube.com/watch?v=s5aobqyEaMQ" style="color: ${BRAND_DARK}; font-weight: bold;">Watch on YouTube →</a></p>
       </div>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -953,6 +999,7 @@ function buildReceiptNudgeEmail(p: EmailPayload) {
           ${brandButton("رفع الإيصال الآن", dashboardUrl)}
         </div>
         <p style="color: ${BRAND_MUTED}; font-size: 13px;">إذا قمت بالدفع بالفعل، تأكد من رفع صورة واضحة للإيصال.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -969,6 +1016,7 @@ function buildReceiptNudgeEmail(p: EmailPayload) {
         ${brandButton("Upload Receipt Now", dashboardUrl)}
       </div>
       <p style="color: ${BRAND_MUTED}; font-size: 13px;">If you've already paid, make sure to upload a clear photo of your receipt.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -977,6 +1025,25 @@ function buildClassLinkEmail(p: EmailPayload) {
   const isAr = p.language === "ar";
   const linkUrl = p.class_link_url || "#";
   const tz = (p.slot_timezone || "Africa/Cairo").replace(/_/g, " ");
+
+  // ICS calendar invite — only when first_class_date is known
+  let icsAttachment: { filename: string; content: string; content_type: string } | undefined;
+  if (p.first_class_date) {
+    try {
+      const icsText = generateICS({
+        summary: "Korean Class — KLovers",
+        description: `Join your KLovers Korean class here: ${linkUrl}`,
+        dtstart: p.first_class_date,
+        durationMinutes: 90,
+        url: linkUrl,
+      });
+      icsAttachment = {
+        filename: "korean-class.ics",
+        content: btoa(unescape(encodeURIComponent(icsText))),
+        content_type: "text/calendar",
+      };
+    } catch { /* skip if date parse fails */ }
+  }
 
   const scheduleBlock = p.slot_day
     ? `<div style="background: ${BRAND_GRAY}; padding: 12px 16px; border-radius: 6px; margin: 12px 0;">
@@ -1002,8 +1069,10 @@ function buildClassLinkEmail(p: EmailPayload) {
           ${brandButton("انضم للحصة الآن", linkUrl)}
         </div>
         <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px;">احتفظ بهذا الرابط — ستستخدمه للانضمام لجميع حصصك.</p>
+        ${icsAttachment ? `<p style="color: ${BRAND_MUTED}; font-size: 13px;">📅 تم إرفاق دعوة التقويم بهذا البريد — افتحها لإضافة الحصة لتقويمك.</p>` : ""}
         <p style="color: ${BRAND_MUTED}; font-size: 13px;">في حالة أي استفسار، تواصل معنا على واتساب.</p>
       `, true),
+      icsAttachment,
     };
   }
   return {
@@ -1017,8 +1086,10 @@ function buildClassLinkEmail(p: EmailPayload) {
         ${brandButton("Join Your Class", linkUrl)}
       </div>
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px;">Save this link — you'll use it to join all your classes.</p>
+      ${icsAttachment ? `<p style="color: ${BRAND_MUTED}; font-size: 13px;">📅 A calendar invite is attached — open it to add your class to your calendar.</p>` : ""}
       <p style="color: ${BRAND_MUTED}; font-size: 13px;">Any questions? Message us on WhatsApp.</p>
     `, false),
+    icsAttachment,
   };
 }
 
@@ -1039,6 +1110,7 @@ function buildGroupFormingEscalationEmail(p: EmailPayload) {
         <div style="margin: 20px 0; text-align: center;">
           <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 واتساب</a>
         </div>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -1055,6 +1127,7 @@ function buildGroupFormingEscalationEmail(p: EmailPayload) {
       <div style="margin: 20px 0; text-align: center;">
         <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 WhatsApp</a>
       </div>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -1076,6 +1149,7 @@ function buildRejectionFollowupEmail(p: EmailPayload) {
           ${brandButton("اختر موعدك الآن", enrollUrl)}
         </div>
         <p style="color: ${BRAND_MUTED}; font-size: 13px;">هذه آخر رسالة متابعة — بعدها القرار بيدك دائماً.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -1092,6 +1166,7 @@ function buildRejectionFollowupEmail(p: EmailPayload) {
         ${brandButton("Pick Your Time Now", enrollUrl)}
       </div>
       <p style="color: ${BRAND_MUTED}; font-size: 13px;">This is our last follow-up — the door is always open for you.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -1118,6 +1193,7 @@ function buildPreClassReminderEmail(p: EmailPayload) {
         <div style="margin: 20px 0; text-align: center;">
           <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 واتساب</a>
         </div>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -1138,6 +1214,7 @@ function buildPreClassReminderEmail(p: EmailPayload) {
       <div style="margin: 20px 0; text-align: center;">
         <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 WhatsApp</a>
       </div>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -1166,6 +1243,7 @@ function buildClassFeedbackEmail(p: EmailPayload) {
           <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 واتساب</a>
         </div>
         <p style="color: ${BRAND_MUTED}; font-size: 13px; text-align: center; margin-top: 20px;">شكراً لانضمامك لعائلة KLovers — رحلتك الكورية بدأت للتو! 🇰🇷</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -1188,6 +1266,7 @@ function buildClassFeedbackEmail(p: EmailPayload) {
         <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 WhatsApp</a>
       </div>
       <p style="color: ${BRAND_MUTED}; font-size: 13px; text-align: center; margin-top: 20px;">Thank you for joining the KLovers family — your Korean journey has just begun! 🇰🇷</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -1229,6 +1308,7 @@ serve(async (req) => {
 
     let subject: string;
     let html: string;
+    let emailAttachments: Array<{ filename: string; content: string; content_type?: string }> | undefined;
 
     switch (template) {
       case "welcome":
@@ -1249,9 +1329,13 @@ serve(async (req) => {
       case "payment_confirmed":
         ({ subject, html } = buildPaymentConfirmedEmail(payload));
         break;
-      case "class_link":
-        ({ subject, html } = buildClassLinkEmail(payload));
+      case "class_link": {
+        const classLinkResult = buildClassLinkEmail(payload);
+        subject = classLinkResult.subject;
+        html = classLinkResult.html;
+        if (classLinkResult.icsAttachment) emailAttachments = [classLinkResult.icsAttachment];
         break;
+      }
       case "payment_method_reminder":
         ({ subject, html } = buildPaymentMethodReminderEmail(name, payload.enrollment_id!, language || "ar"));
         break;
@@ -1297,7 +1381,7 @@ serve(async (req) => {
         break;
     }
 
-    const result = await sendEmail(email, subject, html);
+    const result = await sendEmail(email, subject, html, emailAttachments);
     console.log(`Email sent to ${email} (${template || "enrollment"}):`, result);
     await logEmail({ template: template || "enrollment", toEmail: email, toName: name, status: "sent", resendId: result.id });
 

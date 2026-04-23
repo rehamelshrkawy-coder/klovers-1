@@ -1,4 +1,5 @@
-import { memo } from "react";
+import { memo, useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { AlertCircle, Check, Eye, Link, Mail, Pencil, Trash2, Undo2, X } from "lucide-react";
+import { AlertCircle, Check, ChevronDown, ChevronUp, Eye, Link, Mail, Pencil, Trash2, Undo2, X } from "lucide-react";
 import type { Enrollment } from "@/types/admin";
 import { formatMoney } from "@/lib/format";
 
@@ -113,6 +114,36 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
     e.currency === "EGP" &&
     !e.payment_method &&
     (e.approval_status === "PENDING_PAYMENT" || e.approval_status === "UNDER_REVIEW");
+
+  // Email history panel
+  type EmailLog = { id: string; template: string; status: string; created_at: string; error?: string | null };
+  const [logsOpen, setLogsOpen] = useState(false);
+  const [logs, setLogs] = useState<EmailLog[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+
+  const toggleLogs = useCallback(async () => {
+    if (!logsOpen && logs.length === 0) {
+      setLogsLoading(true);
+      const email = e.profiles?.email;
+      if (email) {
+        const { data } = await supabase
+          .from("email_logs")
+          .select("id, template, status, created_at, error")
+          .eq("to_email", email)
+          .order("created_at", { ascending: false })
+          .limit(20);
+        setLogs((data as EmailLog[]) ?? []);
+      }
+      setLogsLoading(false);
+    }
+    setLogsOpen(o => !o);
+  }, [logsOpen, logs.length, e.profiles?.email]);
+
+  const statusColor = (s: string) => {
+    if (s === "delivered") return "text-green-600";
+    if (s === "failed" || s === "bounced" || s === "complained") return "text-red-600";
+    return "text-muted-foreground";
+  };
 
   return (
     <Card className={isSelected ? "ring-2 ring-primary/50 animate-flash-bg" : ""}>
@@ -374,6 +405,30 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
             </div>
           </div>
         </div>
+      <div className="border-t border-border pt-2 mt-2">
+        <button
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          onClick={toggleLogs}
+        >
+          <Mail className="h-3 w-3" />
+          Email history
+          {logsOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+        </button>
+        {logsOpen && (
+          <div className="mt-2 space-y-1">
+            {logsLoading && <p className="text-xs text-muted-foreground">Loading…</p>}
+            {!logsLoading && logs.length === 0 && <p className="text-xs text-muted-foreground italic">No logs found.</p>}
+            {logs.map(log => (
+              <div key={log.id} className="flex items-center gap-2 text-xs">
+                <span className="text-muted-foreground w-36 shrink-0">{new Date(log.created_at).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                <span className="font-mono text-foreground">{log.template}</span>
+                <span className={statusColor(log.status)}>{log.status}</span>
+                {log.error && <span className="text-red-500 truncate max-w-[160px]" title={log.error}>{log.error}</span>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       </CardContent>
     </Card>
   );
