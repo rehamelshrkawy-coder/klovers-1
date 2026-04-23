@@ -14,8 +14,10 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "group_forming" | "receipt_nudge";
   class_link_url?: string;
+  tx_ref?: string;
+  payment_date?: string;
   rebook_url?: string;
   available_slots?: Array<{ day_of_week: number; start_time: string; timezone?: string }>;
   enrollment_id?: string;
@@ -775,6 +777,46 @@ function buildPaymentConfirmedEmail(p: EmailPayload) {
     [isAr ? "المبلغ المدفوع" : "Amount Paid", amountStr],
   ];
   if (levelLabel) rows.push([isAr ? "المستوى" : "Level", levelLabel]);
+  if (p.tx_ref) rows.push([isAr ? "رقم المرجع" : "Reference #", p.tx_ref]);
+  if (p.payment_date) rows.push([isAr ? "تاريخ الدفع" : "Payment Date", p.payment_date]);
+
+  const timelineEn = `
+    <div style="margin: 20px 0;">
+      <p style="font-weight: bold; margin: 0 0 14px; color: ${BRAND_DARK}; font-size: 15px;">What happens next:</p>
+      <div style="border-left: 3px solid ${BRAND_YELLOW}; padding-left: 16px;">
+        <div style="margin-bottom: 14px;">
+          <p style="margin: 0; font-weight: bold; color: ${BRAND_DARK};">✅ Payment received</p>
+          <p style="margin: 3px 0 0; color: ${BRAND_MUTED}; font-size: 13px;">Your seat is reserved — we've got you.</p>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <p style="margin: 0; font-weight: bold; color: ${BRAND_DARK};">⏳ Group forming — 2–5 business days</p>
+          <p style="margin: 3px 0 0; color: ${BRAND_MUTED}; font-size: 13px;">We'll match you with the right group and schedule.</p>
+        </div>
+        <div>
+          <p style="margin: 0; font-weight: bold; color: ${BRAND_DARK};">📧 Class link sent to you</p>
+          <p style="margin: 3px 0 0; color: ${BRAND_MUTED}; font-size: 13px;">You'll get an email with your meeting link before the first class.</p>
+        </div>
+      </div>
+    </div>`;
+
+  const timelineAr = `
+    <div style="margin: 20px 0;">
+      <p style="font-weight: bold; margin: 0 0 14px; color: ${BRAND_DARK}; font-size: 15px;">ما الذي سيحدث بعد ذلك:</p>
+      <div style="border-right: 3px solid ${BRAND_YELLOW}; padding-right: 16px;">
+        <div style="margin-bottom: 14px;">
+          <p style="margin: 0; font-weight: bold; color: ${BRAND_DARK};">✅ تم استلام الدفع</p>
+          <p style="margin: 3px 0 0; color: ${BRAND_MUTED}; font-size: 13px;">مقعدك محجوز — نحن معك.</p>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <p style="margin: 0; font-weight: bold; color: ${BRAND_DARK};">⏳ تشكيل المجموعة — من 2 إلى 5 أيام عمل</p>
+          <p style="margin: 3px 0 0; color: ${BRAND_MUTED}; font-size: 13px;">سنقوم بمطابقتك مع المجموعة المناسبة والجدول الزمني.</p>
+        </div>
+        <div>
+          <p style="margin: 0; font-weight: bold; color: ${BRAND_DARK};">📧 إرسال رابط الحصة</p>
+          <p style="margin: 3px 0 0; color: ${BRAND_MUTED}; font-size: 13px;">ستتلقى بريداً إلكترونياً يتضمن رابط الاجتماع قبل الحصة الأولى.</p>
+        </div>
+      </div>
+    </div>`;
 
   if (isAr) {
     return {
@@ -782,11 +824,9 @@ function buildPaymentConfirmedEmail(p: EmailPayload) {
       html: brandWrapper(`
         <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! ✅</h1>
         <p>تم استلام دفعتك بنجاح وتأكيد حجز مقعدك.</p>
-        <p>نحن حالياً نقوم بتشكيل مجموعتك الدراسية بناءً على مستواك وجدولك الزمني.</p>
         ${brandTable(rows)}
-        <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
-          <p style="margin: 0; font-size: 14px;">⏳ <strong>الخطوة التالية:</strong> بمجرد تشكيل مجموعتك، ستتلقى بريداً إلكترونياً آخر يتضمن تفاصيل حصتك ورابط الانضمام.</p>
-        </div>
+        ${timelineAr}
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px;">احتفظ بهذا البريد الإلكتروني كإيصال للدفع.</p>
         <p style="color: ${BRAND_MUTED}; font-size: 13px;">لا يلزمك اتخاذ أي إجراء الآن. سنتواصل معك قريباً.</p>
       `, true),
     };
@@ -796,12 +836,88 @@ function buildPaymentConfirmedEmail(p: EmailPayload) {
     html: brandWrapper(`
       <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! ✅</h1>
       <p>We've confirmed your payment and your seat is reserved.</p>
-      <p>We are currently forming your class group based on your level and availability.</p>
       ${brandTable(rows)}
-      <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
-        <p style="margin: 0; font-size: 14px;">⏳ <strong>What's next:</strong> Once your group is ready, you'll receive another email with your class details and meeting link.</p>
-      </div>
+      ${timelineEn}
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 16px;">Save this email as your payment receipt.</p>
       <p style="color: ${BRAND_MUTED}; font-size: 13px;">No action is required from you right now. We'll be in touch soon.</p>
+    `, false),
+  };
+}
+
+function buildGroupFormingEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const waUrl = "https://wa.me/201010003084";
+
+  if (isAr) {
+    return {
+      subject: "KLovers — مجموعتك في طريقها إليك! ⏳",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! 👋</h1>
+        <p>أردنا فقط التأكد من أن كل شيء على ما يرام.</p>
+        <p>لا يزال فريقنا يعمل على تشكيل مجموعتك الدراسية — نحرص على إيجاد أفضل جدول ومعلم مناسب لك.</p>
+        <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+          <p style="margin: 0; font-size: 14px;">📧 بمجرد تجهيز مجموعتك، ستتلقى بريداً إلكترونياً فوراً يتضمن رابط الانضمام.</p>
+        </div>
+        <p>شكراً لصبرك — نقدّره كثيراً!</p>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px;">عندك أسئلة؟ تواصل معنا عبر واتساب.</p>
+        <div style="margin: 20px 0; text-align: center;">
+          <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 واتساب</a>
+        </div>
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — Your group is almost ready! ⏳",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 👋</h1>
+      <p>Just a quick update from the team.</p>
+      <p>We're still putting together your class group — making sure you get the best schedule and the right teacher match.</p>
+      <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+        <p style="margin: 0; font-size: 14px;">📧 Once your group is ready, you'll receive an email immediately with your class meeting link.</p>
+      </div>
+      <p>Thank you for your patience — we really appreciate it!</p>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px;">Any questions? Message us on WhatsApp.</p>
+      <div style="margin: 20px 0; text-align: center;">
+        <a href="${waUrl}" style="display: inline-block; background: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">💬 WhatsApp</a>
+      </div>
+    `, false),
+  };
+}
+
+function buildReceiptNudgeEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const dashboardUrl = "https://kloversegy.com/dashboard";
+
+  if (isAr) {
+    return {
+      subject: "KLovers — مطلوب: رفع إيصال الدفع لتفعيل حسابك ⚠️",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! ⚠️</h1>
+        <p>لاحظنا أن تسجيلك لا يزال معلقاً لأننا لم نتلقَّ إيصال الدفع بعد.</p>
+        <div style="background: #fffbeb; border: 1px solid #f59e0b; border-radius: 8px; padding: 14px 18px; margin: 16px 0;">
+          <p style="margin: 0; color: #92400e; font-size: 13px;"><strong>المطلوب:</strong> قم برفع إيصال التحويل البنكي أو Vodafone Cash أو InstaPay من خلال لوحة التحكم الخاصة بك.</p>
+        </div>
+        <p>بمجرد التحقق من الدفع، سيتم قبول تسجيلك وتفعيل حسابك.</p>
+        <div style="margin: 24px 0; text-align: center;">
+          ${brandButton("رفع الإيصال الآن", dashboardUrl)}
+        </div>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px;">إذا قمت بالدفع بالفعل، تأكد من رفع صورة واضحة للإيصال.</p>
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — Action Required: Upload your payment receipt ⚠️",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! ⚠️</h1>
+      <p>Your enrollment is still pending because we haven't received your payment receipt yet.</p>
+      <div style="background: #fffbeb; border: 1px solid #f59e0b; border-radius: 8px; padding: 14px 18px; margin: 16px 0;">
+        <p style="margin: 0; color: #92400e; font-size: 13px;"><strong>Action needed:</strong> Upload your bank transfer, Vodafone Cash, or InstaPay receipt from your dashboard.</p>
+      </div>
+      <p>Once your payment is verified, your enrollment will be approved and your account activated.</p>
+      <div style="margin: 24px 0; text-align: center;">
+        ${brandButton("Upload Receipt Now", dashboardUrl)}
+      </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px;">If you've already paid, make sure to upload a clear photo of your receipt.</p>
     `, false),
   };
 }
@@ -919,6 +1035,12 @@ serve(async (req) => {
         break;
       case "trial_followup_day3":
         ({ subject, html } = buildTrialFollowupDay3Email(payload));
+        break;
+      case "group_forming":
+        ({ subject, html } = buildGroupFormingEmail(payload));
+        break;
+      case "receipt_nudge":
+        ({ subject, html } = buildReceiptNudgeEmail(payload));
         break;
       case "enrollment":
       default:

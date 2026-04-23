@@ -95,6 +95,11 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
       ? "Run the Matcher tab to assign this student to a class slot first."
       : undefined;
 
+  const waitingDays =
+    !e.matched_at && e.payment_status === "PAID" && e.payment_email_sent_at
+      ? Math.floor((Date.now() - new Date(e.payment_email_sent_at).getTime()) / 86400000)
+      : 0;
+
   const egyptMissingPaymentMethod =
     e.currency === "EGP" &&
     !e.payment_method &&
@@ -119,6 +124,11 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                 {e.negative_since && (
                   <Badge variant="destructive" className="text-[10px] h-5 px-1.5 shrink-0">
                     Overdue {overdueDays}d
+                  </Badge>
+                )}
+                {waitingDays > 0 && (
+                  <Badge variant="outline" className="text-[10px] h-5 px-1.5 shrink-0 border-amber-400 text-amber-700 bg-amber-50 dark:text-amber-400 dark:border-amber-600 dark:bg-amber-950/20">
+                    Waiting {waitingDays}d
                   </Badge>
                 )}
               </div>
