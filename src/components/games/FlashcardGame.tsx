@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RotateCcw, Trophy, Sparkles, RotateCw, CheckCircle2, XCircle } from "lucide-react";
+import Korean from "@/components/Korean";
 import { useGameData, GameVocabItem } from "@/hooks/useGameData";
 
 interface FlashCard { korean: string; romanization: string; meaning: string; }
@@ -101,7 +102,7 @@ const FlashcardGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
             {!flipped ? (
               <>
                 <p className="text-xs text-muted-foreground uppercase tracking-wide">Korean</p>
-                <p className="text-5xl font-bold text-foreground">{card.korean}</p>
+                <Korean className="text-5xl font-bold text-foreground block">{card.korean}</Korean>
                 <p className="text-muted-foreground text-sm mt-2 flex items-center gap-1"><RotateCw className="h-3 w-3" /> Tap to reveal</p>
               </>
             ) : (

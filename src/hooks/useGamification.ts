@@ -158,15 +158,18 @@ export function useGamification() {
     const oldLeague = getLeague(progress.totalXp);
     const oldBadges = new Set(progress.badges);
 
-    await supabase.from("student_xp").insert({
-      user_id: userId,
-      lesson_id: lessonId || null,
-      activity_type: activityType,
-      xp_earned: xp,
-    });
+    // Run XP insert and streak update in parallel — both are independent writes
+    await Promise.all([
+      supabase.from("student_xp").insert({
+        user_id: userId,
+        lesson_id: lessonId || null,
+        activity_type: activityType,
+        xp_earned: xp,
+      }),
+      updateStreak(userId),
+    ]);
 
-    await updateStreak(userId);
-
+    // Single consolidated re-fetch after both writes complete
     const newProgress = await fetchProgress();
     if (newProgress) {
       const newLeague = getLeague(newProgress.totalXp);
@@ -242,11 +245,13 @@ export function useGamification() {
       reading_done: "reading",
       writing_done: "writing",
     };
-    await awardXp(lessonId, activityMap[section]);
-
-    await checkBadges();
-    await fetchProgress();
-  }, [userId, awardXp, fetchProgress]);
+    // Run XP award and badge check in parallel — both are independent
+    await Promise.all([
+      awardXp(lessonId, activityMap[section]),
+      checkBadges(),
+    ]);
+    // awardXp already calls fetchProgress internally; no extra re-fetch needed
+  }, [userId, awardXp, checkBadges, fetchProgress]);
 
   const checkBadges = useCallback(async () => {
     if (!userId) return;

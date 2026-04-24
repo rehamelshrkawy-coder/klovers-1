@@ -63,10 +63,21 @@ const LeagueUsersPanel = lazy(() => import("@/components/admin/LeagueUsersPanel"
 const LeadFunnelPanel = lazy(() => import("@/components/admin/LeadFunnelPanel"));
 
 const TabLoader = () => (
-  <div className="flex items-center justify-center py-20">
-    <div className="w-7 h-7 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+  <div role="status" aria-label="Loading content" className="flex items-center justify-center py-20">
+    <div className="w-7 h-7 border-4 border-primary border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+    <span className="sr-only">Loading…</span>
   </div>
 );
+
+// Human-readable explanations for every derived student status
+const STATUS_TOOLTIPS: Record<string, string> = {
+  LEAD:      "Registered profile but no paid enrollment yet — needs follow-up",
+  ACTIVE:    "Currently enrolled with sessions remaining",
+  COMPLETED: "All package sessions used — ready to renew",
+  LOCKED:    "Account on hold — contact student to resolve",
+  PENDING:   "Enrollment submitted, awaiting admin review",
+  REJECTED:  "Enrollment was declined",
+};
 
 // Lead, Enrollment, AttendanceReq, OverviewRow — imported from @/types/admin
 
@@ -81,14 +92,18 @@ class TabErrorBoundary extends Component<
   static getDerivedStateFromError(error: Error) { return { error: true, errorMsg: error?.message || "Unknown error" }; }
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error(`[TabErrorBoundary] ${this.props.name} crashed:`, error, errorInfo);
+    // Strip absolute file paths from stack traces before remote logging to avoid
+    // leaking build-machine paths or internal module structure.
+    const sanitizeStack = (s: string | undefined) =>
+      s?.replace(/\(.*?\)/g, "(...)").replace(/at \/[^\s]+/g, "at [path]").slice(0, 4000) ?? null;
     // Best-effort remote log. Table is created on demand — if it doesn't
     // exist in this env, silently skip so the fallback UI still renders.
     try {
       void supabase.from("admin_error_log" as never).insert({
         tab: this.props.name,
         message: error?.message?.slice(0, 500) ?? "Unknown error",
-        stack: error?.stack?.slice(0, 4000) ?? null,
-        component_stack: errorInfo?.componentStack?.slice(0, 4000) ?? null,
+        stack: sanitizeStack(error?.stack),
+        component_stack: sanitizeStack(errorInfo?.componentStack),
         user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
         url: typeof window !== "undefined" ? window.location.href.slice(0, 500) : null,
       } as never).then(({ error: insertErr }) => {
@@ -174,17 +189,24 @@ const AdminDashboard = () => {
   useEffect(() => {
     try { localStorage.setItem("admin:studentCols", JSON.stringify(Array.from(visibleStudentCols))); } catch { /* ignore */ }
   }, [visibleStudentCols]);
+  // Screen-reader announcement when a column is toggled
+  const [colAnnouncement, setColAnnouncement] = useState("");
   const toggleStudentCol = useCallback((c: StudentCol) => {
     setVisibleStudentCols(prev => {
       const next = new Set(prev);
-      if (next.has(c)) next.delete(c); else next.add(c);
+      const wasVisible = next.has(c);
+      if (wasVisible) next.delete(c); else next.add(c);
+      setColAnnouncement(`${STUDENT_COL_LABELS[c]} column ${wasVisible ? "hidden" : "shown"}`);
       return next;
     });
   }, []);
 
-  // Hero "Insights" collapsed by default — restore last choice from localStorage
+  // Hero "Insights" open by default — restore last explicit choice from localStorage
   const [insightsOpen, setInsightsOpen] = useState<boolean>(() => {
-    try { return localStorage.getItem("admin:insightsOpen") === "1"; } catch { return false; }
+    try {
+      const stored = localStorage.getItem("admin:insightsOpen");
+      return stored === null ? true : stored === "1"; // first visit → open
+    } catch { return true; }
   });
   useEffect(() => {
     try { localStorage.setItem("admin:insightsOpen", insightsOpen ? "1" : "0"); } catch { /* ignore */ }
@@ -332,6 +354,12 @@ const AdminDashboard = () => {
   // invalidateAll() triggers targeted cache refresh instead of re-fetching everything.
 
   const handleDeleteStudent = async (userId: string) => {
+    // Fire-and-forget audit log — does not block deletion if table doesn't exist yet
+    void supabase.from("admin_audit_log" as never).insert({
+      action: "delete_student",
+      target_user_id: userId,
+      performed_at: new Date().toISOString(),
+    } as never);
     const { error } = await supabase.from("profiles").delete().eq("user_id", userId);
     if (error) { toast({ title: "Error", description: "Failed to delete student.", variant: "destructive" }); return; }
     queryClient.invalidateQueries({ queryKey: ["admin", "student-overview"] });
@@ -407,6 +435,17 @@ const AdminDashboard = () => {
     setReceiptModal({ url, isPdf, studentName });
     setReceiptModalLoading(false);
   }, []);
+
+  // Timezones used by Arabic-speaking countries (Egypt, Gulf, Levant, North Africa)
+  const ARABIC_TIMEZONES = new Set([
+    "Africa/Cairo", "Africa/Tripoli", "Africa/Tunis", "Africa/Algiers", "Africa/Casablanca",
+    "Africa/Khartoum", "Africa/Mogadishu", "Africa/Djibouti", "Africa/Asmara",
+    "Asia/Riyadh", "Asia/Dubai", "Asia/Kuwait", "Asia/Bahrain", "Asia/Qatar",
+    "Asia/Muscat", "Asia/Aden", "Asia/Amman", "Asia/Baghdad", "Asia/Beirut",
+    "Asia/Damascus", "Asia/Gaza", "Asia/Hebron", "Asia/Jerusalem",
+  ]);
+  const getEmailLanguage = (timezone: string) =>
+    ARABIC_TIMEZONES.has(timezone) ? "ar" : timezone ? "en" : "ar";
 
   // Request schedule resubmission — inserts a token row and copies link.
   const handleRequestResubmission = useCallback(async (e: Enrollment) => {
@@ -522,9 +561,7 @@ const AdminDashboard = () => {
           if (profiles) {
             for (const p of profiles) {
               if (p.email && p.name) {
-                const tz = p.timezone || "";
-                const lang = tz.startsWith("Asia/") || tz.startsWith("Europe/") || tz.startsWith("America/") ? "en" : "ar";
-                recipients.push({ email: p.email, name: p.name, language: lang });
+                recipients.push({ email: p.email, name: p.name, language: getEmailLanguage(p.timezone || "") });
               }
             }
           }
@@ -544,9 +581,7 @@ const AdminDashboard = () => {
         setIsSendingClassLink(false);
         return;
       }
-      const tz = classLinkTarget.timezone || "";
-      const lang = tz.startsWith("Asia/") || tz.startsWith("Europe/") || tz.startsWith("America/") ? "en" : "ar";
-      recipients.push({ email, name, language: lang });
+      recipients.push({ email, name, language: getEmailLanguage(classLinkTarget.timezone || "") });
     }
 
     let sent = 0;
@@ -680,32 +715,32 @@ const AdminDashboard = () => {
     const { data: { session: bulkSession } } = await supabase.auth.getSession();
     if (!bulkSession) { setBulkApproving(false); return; }
     const ids = Array.from(selectedEnrollmentIds);
-    let succeeded = 0;
-    let failed = 0;
-    for (const id of ids) {
-      const enrollment = enrollments.find(e => e.id === id);
-      if (!enrollment) continue;
-      // Skip enrollments not yet placed by the matcher
-      if (!enrollment.matched_at) { failed++; continue; }
-      // Skip manual-payment enrollments missing a receipt
-      const isManual = enrollment.payment_provider === "egypt_manual" || enrollment.payment_provider === "manual";
-      const hasReceipt = enrollment.receipt_url && enrollment.receipt_url.trim() !== "" && enrollment.receipt_url !== "manual";
-      if (isManual && !hasReceipt) { failed++; continue; }
-      try {
+
+    // Run all RPCs in parallel — dramatically faster than sequential for large selections
+    const results = await Promise.allSettled(
+      ids.map(async (id) => {
+        const enrollment = enrollments.find(e => e.id === id);
+        if (!enrollment) throw new Error("not_found");
+        if (!enrollment.matched_at) throw new Error("not_matched");
+        const isManual = enrollment.payment_provider === "egypt_manual" || enrollment.payment_provider === "manual";
+        const hasReceipt = enrollment.receipt_url && enrollment.receipt_url.trim() !== "" && enrollment.receipt_url !== "manual";
+        if (isManual && !hasReceipt) throw new Error("no_receipt");
         const { error } = await supabase.rpc("approve_enrollment", {
           _enrollment_id: id,
           _admin_id: bulkSession.user.id,
           _unit_price: null,
         });
-        if (error) { failed++; continue; }
-        succeeded++;
-      } catch { failed++; }
-    }
+        if (error) throw error;
+      })
+    );
+
+    const succeeded = results.filter(r => r.status === "fulfilled").length;
+    const failed = results.filter(r => r.status === "rejected").length;
     setBulkApproving(false);
     setSelectedEnrollmentIds(new Set());
     toast({
       title: `Bulk approve complete`,
-      description: `${succeeded} approved${failed > 0 ? `, ${failed} failed` : ""}`,
+      description: `${succeeded} approved${failed > 0 ? `, ${failed} skipped (not matched or missing receipt)` : ""}`,
       variant: failed > 0 ? "destructive" : "default",
     });
     invalidateAll();
@@ -889,6 +924,8 @@ const AdminDashboard = () => {
 
   return (
     <TooltipProvider>
+      {/* Screen-reader live region for column toggle announcements */}
+      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">{colAnnouncement}</div>
       <div id="main-content" className="min-h-screen bg-muted/30">
         {/* Header */}
         <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border/60 shadow-sm">
@@ -905,14 +942,33 @@ const AdminDashboard = () => {
             </div>
             <div className="flex items-center gap-1.5 md:gap-2">
               <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2" aria-label="Refresh dashboard data">
-                <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+                <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} aria-hidden="true" />
                 <span className="hidden sm:inline">{refreshing ? "Refreshing…" : "Refresh"}</span>
               </Button>
+              {/* Keyboard shortcut reference */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Keyboard shortcuts reference"
+                    className="hidden sm:flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background text-xs font-bold text-muted-foreground hover:bg-muted transition-colors"
+                  >
+                    ?
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs space-y-1 p-3 max-w-[200px]">
+                  <p className="font-semibold text-foreground mb-1.5">Keyboard shortcuts</p>
+                  <p><kbd className="font-mono bg-muted px-1 rounded">Alt+1</kbd> → Operations</p>
+                  <p><kbd className="font-mono bg-muted px-1 rounded">Alt+2</kbd> → Learning</p>
+                  <p><kbd className="font-mono bg-muted px-1 rounded">Alt+3</kbd> → Content</p>
+                  <p><kbd className="font-mono bg-muted px-1 rounded">Alt+4</kbd> → Config</p>
+                </TooltipContent>
+              </Tooltip>
               <Button variant="outline" size="sm" onClick={() => navigate("/admin/marketing")} className="gap-2" aria-label="Open marketing dashboard">
-                <Sparkles className="h-4 w-4" /> <span className="hidden sm:inline">Marketing</span>
+                <Sparkles className="h-4 w-4" aria-hidden="true" /> <span className="hidden sm:inline">Marketing</span>
               </Button>
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2" aria-label="Log out">
-                <LogOut className="h-4 w-4" /> <span className="hidden sm:inline">Logout</span>
+                <LogOut className="h-4 w-4" aria-hidden="true" /> <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
@@ -1432,6 +1488,7 @@ const AdminDashboard = () => {
                             <TableHead className="py-3 px-3 font-semibold">Level</TableHead>
                           )}
                           <TableHead
+                            aria-sort={studentSort.col === "sessions_remaining" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                             className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary"
                             onClick={() => setStudentSort(s => ({ col: "sessions_remaining", dir: s.col === "sessions_remaining" && s.dir === "asc" ? "desc" : "asc" }))}
                           >
@@ -1439,6 +1496,7 @@ const AdminDashboard = () => {
                           </TableHead>
                           {visibleStudentCols.has("attendance") && (
                             <TableHead
+                              aria-sort={studentSort.col === "attendance_pct" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                               className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary"
                               onClick={() => setStudentSort(s => ({ col: "attendance_pct", dir: s.col === "attendance_pct" && s.dir === "asc" ? "desc" : "asc" }))}
                             >
@@ -1447,12 +1505,14 @@ const AdminDashboard = () => {
                           )}
                           <TableHead className="py-3 px-3 font-semibold text-center">Negative</TableHead>
                           <TableHead
+                            aria-sort={studentSort.col === "amount_due" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                             className="py-3 px-3 font-semibold text-right cursor-pointer select-none hover:text-primary"
                             onClick={() => setStudentSort(s => ({ col: "amount_due", dir: s.col === "amount_due" && s.dir === "asc" ? "desc" : "asc" }))}
                           >
                             Amount Due {studentSort.col === "amount_due" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
                           </TableHead>
                           <TableHead
+                            aria-sort={studentSort.col === "remaining_balance" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                             className="py-3 px-3 font-semibold text-right cursor-pointer select-none hover:text-primary"
                             onClick={() => setStudentSort(s => ({ col: "remaining_balance", dir: s.col === "remaining_balance" && s.dir === "asc" ? "desc" : "asc" }))}
                           >
@@ -1464,6 +1524,7 @@ const AdminDashboard = () => {
                           )}
                           {visibleStudentCols.has("joined") && (
                             <TableHead
+                              aria-sort={studentSort.col === "joined_at" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                               className="py-3 px-3 font-semibold cursor-pointer select-none hover:text-primary"
                               onClick={() => setStudentSort(s => ({ col: "joined_at", dir: s.col === "joined_at" && s.dir === "asc" ? "desc" : "asc" }))}
                             >
@@ -1556,7 +1617,14 @@ const AdminDashboard = () => {
                               ) : "—"}
                             </TableCell>
                             <TableCell className="py-3 px-3">
-                              <Badge variant={getDerivedStatusBadgeVariant(u.derived_status)} className="text-xs">{u.derived_status}</Badge>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge variant={getDerivedStatusBadgeVariant(u.derived_status)} className="text-xs cursor-help">{u.derived_status}</Badge>
+                                </TooltipTrigger>
+                                <TooltipContent side="left" className="max-w-xs text-xs">
+                                  {STATUS_TOOLTIPS[u.derived_status] ?? u.derived_status}
+                                </TooltipContent>
+                              </Tooltip>
                             </TableCell>
                             {visibleStudentCols.has("source") && (
                               <TableCell className="py-3 px-3" onClick={(e) => e.stopPropagation()}>

@@ -3600,6 +3600,18 @@ const LESSONS = [
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  // Guard: require a server-side secret to prevent accidental public invocations.
+  // Set SEED_SECRET in Supabase Function secrets; pass as Authorization: Bearer <secret>.
+  const seedSecret = Deno.env.get("SEED_SECRET");
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  if (!seedSecret || token !== seedSecret) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,

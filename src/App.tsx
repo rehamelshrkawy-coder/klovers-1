@@ -90,6 +90,14 @@ const AppInner = () => {
         attachSessionToUser();
       }
     });
+
+    // Register service worker for offline support / PWA
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {
+        // SW registration failure is non-fatal; app still works online
+      });
+    }
+
     return () => subscription.unsubscribe();
   }, []);
 
@@ -98,8 +106,9 @@ const AppInner = () => {
 
 // Minimal full-screen spinner shown while a lazy chunk loads
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+  <div role="status" aria-label="Loading page" className="min-h-screen flex items-center justify-center">
+    <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+    <span className="sr-only">Loading…</span>
   </div>
 );
 

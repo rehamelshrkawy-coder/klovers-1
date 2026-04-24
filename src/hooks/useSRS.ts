@@ -1,6 +1,16 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { calculateSM2 } from "@/lib/sm2";
+
+// Re-export so callers that previously imported from useSRS still work
+export { calculateSM2 } from "@/lib/sm2";
+
+// vocabulary_review_history is not yet in the auto-generated Supabase types file.
+// Confining the cast to one named alias keeps all four query sites type-safe
+// relative to each other while documenting why the escape hatch exists.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const srsDb = supabase as any;
 
 export interface SRSCard {
   id: number;
@@ -23,51 +33,7 @@ interface SRSState {
 }
 
 /**
- * SM-2 Spaced Repetition Algorithm
- * Used by Anki and SuperMemo - industry standard for language learning
- *
- * Based on: https://en.wikipedia.org/wiki/Spaced_repetition#SM-2
- */
-function calculateSM2(
-  quality: number, // 0-5: 0=complete blackout, 5=perfect response
-  previousDifficulty: number,
-  previousInterval: number
-): { newDifficulty: number; newInterval: number } {
-  // Clamp quality to 0-5
-  const q = Math.max(0, Math.min(5, quality));
-
-  // Calculate new difficulty factor
-  let newDifficulty =
-    previousDifficulty +
-    (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
-
-  // Clamp difficulty to minimum of 1.3
-  newDifficulty = Math.max(1.3, newDifficulty);
-
-  // Calculate new interval
-  let newInterval: number;
-  if (q < 3) {
-    // Failed review: restart from 1 day
-    newInterval = 1;
-  } else if (previousInterval === 0) {
-    // First review: 1 day
-    newInterval = 1;
-  } else if (previousInterval === 1) {
-    // Second review: 3 days
-    newInterval = 3;
-  } else {
-    // Subsequent reviews: multiply by difficulty factor
-    newInterval = Math.round(previousInterval * newDifficulty);
-  }
-
-  return {
-    newDifficulty: parseFloat(newDifficulty.toFixed(2)),
-    newInterval,
-  };
-}
-
-/**
- * Calculate next review date
+ * Calculate next review date from an interval in days.
  */
 function getNextReviewDate(intervalDays: number): Date {
   const date = new Date();
@@ -76,7 +42,7 @@ function getNextReviewDate(intervalDays: number): Date {
 }
 
 /**
- * Hook for managing spaced repetition reviews
+ * Hook for managing spaced repetition reviews (SM-2 algorithm).
  */
 export function useSRS(): SRSState & {
   recordReview: (vocabId: number, quality: number) => Promise<void>;
@@ -105,7 +71,7 @@ export function useSRS(): SRSState & {
     try {
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await srsDb
         .from("vocabulary_review_history")
         .select(
           `
@@ -160,7 +126,7 @@ export function useSRS(): SRSState & {
   // Fetch on mount and when user changes
   useEffect(() => {
     fetchDueCards();
-  }, [user?.id]);
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Record a review with quality rating (0-5)
   const recordReview = async (vocabId: number, quality: number) => {
@@ -168,11 +134,9 @@ export function useSRS(): SRSState & {
 
     try {
       // Get current review record
-      const { data: review, error: fetchError } = await (supabase as any)
+      const { data: review, error: fetchError } = await srsDb
         .from("vocabulary_review_history")
-        .select(
-          "id, difficulty_factor, interval_days, review_count, next_review_date"
-        )
+        .select("id, difficulty_factor, interval_days, review_count, next_review_date")
         .eq("user_id", user.id)
         .eq("lesson_vocabulary_id", vocabId)
         .single();
@@ -193,7 +157,7 @@ export function useSRS(): SRSState & {
       const nextReviewDate = getNextReviewDate(newInterval);
 
       // Update review record
-      const { error: updateError } = await (supabase as any)
+      const { error: updateError } = await srsDb
         .from("vocabulary_review_history")
         .update({
           difficulty_factor: newDifficulty,
@@ -232,7 +196,7 @@ export function useSRS(): SRSState & {
       }));
 
       // Use upsert to avoid duplicates
-      const { error } = await (supabase as any)
+      const { error } = await srsDb
         .from("vocabulary_review_history")
         .upsert(recordsToInsert, {
           onConflict: "user_id,lesson_vocabulary_id",

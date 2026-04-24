@@ -50,7 +50,7 @@ const StreakCalendar = lazy(() =>
 const DailyBonusCard = lazy(() =>
   import("@/components/DailyBonusCard").then(m => ({ default: m.DailyBonusCard }))
 );
-import { AlertCircle, CheckCircle2, AlertTriangle, Package, CalendarCheck, Users, CreditCard, BookOpen, GraduationCap, RotateCcw, ChevronDown, Gamepad2, Trophy, Zap, Pencil, Check, X, FlameIcon, Download, Copy, Gift, FileText, Award } from "lucide-react";
+import { AlertCircle, CheckCircle2, AlertTriangle, Package, CalendarCheck, Users, CreditCard, BookOpen, GraduationCap, RotateCcw, ChevronDown, Gamepad2, Trophy, Zap, Pencil, Check, X, FlameIcon, Download, Copy, Gift, FileText, Award, ArrowRight, PlayCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast, useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -90,6 +90,62 @@ interface PlacementTestResult {
   created_at: string;
 }
 
+// ─── XP goal scales with student level ───────────────────────────────────────
+const WEEKLY_GOALS: Record<string, number> = {
+  A0: 100, A1: 150, A2: 200, B1: 300, B2: 400, C1: 500, C2: 600,
+};
+const getWeeklyGoal = (level: string) =>
+  WEEKLY_GOALS[(level || "").toUpperCase()] ?? 200;
+
+// ─── Vocabulary pools by level tier ──────────────────────────────────────────
+const VOCAB_BY_TIER = {
+  beginner: [
+    { ko: "안녕하세요", rom: "annyeonghaseyo", en: "Hello / Good day", emoji: "👋", img: imgTemple },
+    { ko: "감사합니다", rom: "gamsahamnida", en: "Thank you", emoji: "🙏", img: imgTea },
+    { ko: "사랑해요", rom: "saranghaeyo", en: "I love you", emoji: "❤️", img: imgHanbok },
+    { ko: "화이팅", rom: "hwaiting", en: "Fighting! / You can do it!", emoji: "💪", img: imgKpop },
+    { ko: "맛있어요", rom: "massisseoyo", en: "It's delicious", emoji: "😋", img: imgBBQ },
+    { ko: "하나", rom: "hana", en: "One (native Korean)", emoji: "☝️", img: imgMarket },
+    { ko: "물", rom: "mul", en: "Water", emoji: "💧", img: imgJeju },
+  ],
+  elementary: [
+    { ko: "공부하다", rom: "gongbuhada", en: "To study", emoji: "📚", img: imgMarket },
+    { ko: "천천히", rom: "cheoncheonhi", en: "Slowly", emoji: "🐢", img: imgJeju },
+    { ko: "가족", rom: "gajok", en: "Family", emoji: "👨‍👩‍👧", img: imgTemple },
+    { ko: "음식", rom: "eumsik", en: "Food", emoji: "🍱", img: imgBBQ },
+    { ko: "친구", rom: "chingu", en: "Friend", emoji: "🤝", img: imgNightMarket },
+    { ko: "학교", rom: "hakgyo", en: "School", emoji: "🏫", img: imgMarket },
+    { ko: "시장", rom: "sijang", en: "Market", emoji: "🛒", img: imgMarket },
+  ],
+  intermediate: [
+    { ko: "그리워요", rom: "geuriwoyo", en: "I miss (someone/something)", emoji: "🥺", img: imgHanbok },
+    { ko: "괜찮아요", rom: "gwaenchanayo", en: "It's okay / I'm fine", emoji: "😌", img: imgTemple },
+    { ko: "어떻게", rom: "eotteoke", en: "How / In what way", emoji: "🤔", img: imgNightMarket },
+    { ko: "노력하다", rom: "noryeokhada", en: "To make an effort", emoji: "💼", img: imgKpop },
+    { ko: "취미", rom: "chwimi", en: "Hobby", emoji: "🎨", img: imgJeju },
+    { ko: "경험", rom: "gyeongheom", en: "Experience", emoji: "🌟", img: imgMarket },
+    { ko: "여행", rom: "yeohaeng", en: "Travel", emoji: "✈️", img: imgJeju },
+  ],
+  advanced: [
+    { ko: "성취감", rom: "seongtwiigam", en: "Sense of achievement", emoji: "🏆", img: imgKpop },
+    { ko: "눈치", rom: "nunchi", en: "Social awareness / Reading the room", emoji: "👁️", img: imgTemple },
+    { ko: "한풀이", rom: "hanpuri", en: "Releasing pent-up emotion", emoji: "😮‍💨", img: imgHanbok },
+    { ko: "정", rom: "jeong", en: "Deep emotional bond", emoji: "💞", img: imgTea },
+    { ko: "눈물겹다", rom: "nunmulgyeopda", en: "Touching / Tear-jerking", emoji: "😢", img: imgNightMarket },
+    { ko: "여운", rom: "yeoun", en: "Lingering feeling after an experience", emoji: "🌊", img: imgJeju },
+    { ko: "애틋하다", rom: "aeteuthada", en: "Bittersweet longing / Tender feeling", emoji: "🌸", img: imgHanbok },
+  ],
+};
+
+const getLevelTier = (level: string): keyof typeof VOCAB_BY_TIER => {
+  const l = (level || "").toUpperCase();
+  if (l.startsWith("C")) return "advanced";
+  if (l === "B2" || l === "B1") return "intermediate";
+  if (l === "A2") return "elementary";
+  return "beginner";
+};
+
+// ─── Attendance history collapsible ──────────────────────────────────────────
 const AttendanceHistoryCard = ({ dates }: { dates: AttendanceDate[] }) => {
   const [open, setOpen] = useState(false);
   return (
@@ -99,10 +155,13 @@ const AttendanceHistoryCard = ({ dates }: { dates: AttendanceDate[] }) => {
           <CardHeader className="pb-3 cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg">
             <CardTitle className="text-lg flex items-center justify-between">
               <span className="flex items-center gap-2">
-                <CalendarCheck className="h-5 w-5" />
+                <CalendarCheck className="h-5 w-5" aria-hidden="true" />
                 Attendance History ({dates.length} sessions)
               </span>
-              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                aria-hidden="true"
+              />
             </CardTitle>
           </CardHeader>
         </CollapsibleTrigger>
@@ -113,7 +172,7 @@ const AttendanceHistoryCard = ({ dates }: { dates: AttendanceDate[] }) => {
                 <div key={`${d.date}-${i}`} className="flex items-center justify-between p-2 rounded-lg border border-border">
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground w-5 text-right">{i + 1}.</span>
-                    <CalendarCheck className="h-4 w-4 text-amber-600" />
+                    <CalendarCheck className="h-4 w-4 text-amber-600" aria-hidden="true" />
                     <span className="text-sm font-medium text-foreground">
                       {new Date(d.date + "T00:00:00").toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })}
                     </span>
@@ -128,6 +187,7 @@ const AttendanceHistoryCard = ({ dates }: { dates: AttendanceDate[] }) => {
   );
 };
 
+// ─── Profile card (avatar + name editor + journey stepper) ───────────────────
 const ProfileCard = ({
   userId, avatarUrl, displayName, enrollmentCount, journeyStage,
   onAvatarUploaded, onNameUpdated,
@@ -175,19 +235,20 @@ const ProfileCard = ({
                   onChange={(e) => setNameValue(e.target.value)}
                   autoFocus
                   onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
+                  aria-label="Edit your name"
                 />
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSaveName} disabled={saving}>
-                  <Check className="h-4 w-4" />
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSaveName} disabled={saving} aria-label="Save name">
+                  <Check className="h-4 w-4" aria-hidden="true" />
                 </Button>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setEditingName(false); setNameValue(displayName); }}>
-                  <X className="h-4 w-4" />
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setEditingName(false); setNameValue(displayName); }} aria-label="Cancel editing">
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <p className="font-semibold text-foreground text-lg">{displayName}</p>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setNameValue(displayName); setEditingName(true); }}>
-                  <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setNameValue(displayName); setEditingName(true); }} aria-label="Edit name">
+                  <Pencil className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
                 </Button>
               </div>
             )}
@@ -200,6 +261,59 @@ const ProfileCard = ({
   );
 };
 
+// ─── Korean level card — shared between enrolled and unenrolled views ─────────
+const KoreanLevelCard = ({
+  profileLevel,
+  placementTest,
+  onRetake,
+}: {
+  profileLevel: string;
+  placementTest: PlacementTestResult | null;
+  onRetake: () => void;
+}) => (
+  <Card>
+    <CardHeader className="pb-3">
+      <CardTitle className="text-lg flex items-center gap-2">
+        <GraduationCap className="h-5 w-5" aria-hidden="true" /> Korean Level
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      {profileLevel ? (
+        <div className="flex items-center justify-between">
+          <div>
+            <Badge className="text-sm px-3 py-1">{getLevelByKey(profileLevel)?.shortLabel || profileLevel}</Badge>
+            {placementTest && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Score: {placementTest.score}/40 — {new Date(placementTest.created_at).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+          <Button variant="outline" size="sm" onClick={onRetake} aria-label="Retake placement test">
+            <RotateCcw className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" /> Retake
+          </Button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">Take the placement test to find your level</p>
+          <Button size="sm" onClick={onRetake} aria-label="Take Korean placement test">
+            <GraduationCap className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" /> Take Test
+          </Button>
+        </div>
+      )}
+    </CardContent>
+  </Card>
+);
+
+// ─── Tab config ───────────────────────────────────────────────────────────────
+const TABS = [
+  { key: "today",    label: "Today",    emoji: "⚡" },
+  { key: "progress", label: "Progress", emoji: "📊" },
+  { key: "classes",  label: "Classes",  emoji: "🎓" },
+  { key: "more",     label: "More",     emoji: "👤" },
+] as const;
+type TabKey = typeof TABS[number]["key"];
+
+// ─── Main dashboard ───────────────────────────────────────────────────────────
 const StudentDashboard = () => {
   useSEO({ title: "My Dashboard", description: "Track your Korean learning progress, schedule, and achievements on Klovers.", canonical: "https://kloversegy.com/dashboard" });
   const { t } = useLanguage();
@@ -223,6 +337,7 @@ const StudentDashboard = () => {
   const [weeklyXp, setWeeklyXp] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
   const [pendingEnrollments, setPendingEnrollments] = useState<{ id: string; plan_type: string; approval_status: string }[]>([]);
+  const [activeTab, setActiveTab] = useState<TabKey>("today");
   const vocabStorageKey = `vocab_xp_${new Date().toISOString().split("T")[0]}`;
   const [vocabClaimed, setVocabClaimed] = useState(() => !!localStorage.getItem(`vocab_xp_${new Date().toISOString().split("T")[0]}`));
   const navigate = useNavigate();
@@ -265,147 +380,130 @@ const StudentDashboard = () => {
     if (gateLoading || resetBlocked) return;
     const load = async () => {
       try {
-      setFetchError(null);
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate("/login"); return; }
-      setUserId(session.user.id);
+        setFetchError(null);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { navigate("/login"); return; }
+        setUserId(session.user.id);
 
-      // Referral count
-      const { count: refCount } = await supabase
-        .from("referral_conversions")
-        .select("*", { count: "exact", head: true })
-        .eq("referrer_user_id", session.user.id)
-        .eq("xp_awarded", true);
-      setReferralCount(refCount || 0);
+        // Referral count
+        const { count: refCount } = await supabase
+          .from("referral_conversions")
+          .select("*", { count: "exact", head: true })
+          .eq("referrer_user_id", session.user.id)
+          .eq("xp_awarded", true);
+        setReferralCount(refCount || 0);
 
-      // Pending enrollments
-      const { data: pendingEnrollData } = await supabase
-        .from("enrollments")
-        .select("id, plan_type, approval_status")
-        .eq("user_id", session.user.id)
-        .in("approval_status", ["PENDING_PAYMENT", "UNDER_REVIEW", "PENDING"]);
-      setPendingEnrollments(pendingEnrollData || []);
-
-      // Weekly XP: from Monday 00:00 local time
-      const now = new Date();
-      const monday = new Date(now);
-      monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-      monday.setHours(0, 0, 0, 0);
-      const { data: weeklyXpData } = await supabase
-        .from("student_xp")
-        .select("xp_earned")
-        .eq("user_id", session.user.id)
-        .gte("created_at", monday.toISOString());
-      setWeeklyXp((weeklyXpData || []).reduce((s: number, r: any) => s + (r.xp_earned || 0), 0));
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("avatar_url, name, level, country")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-      if (profile) {
-        setAvatarUrl(profile.avatar_url || "");
-        setUserName(profile.name || "");
-        setProfileLevel(profile.level || "");
-      }
-
-      // Fetch latest placement test result
-      const { data: ptData } = await supabase
-        .from("placement_tests")
-        .select("score, level, created_at")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (ptData) {
-        setPlacementTest(ptData as PlacementTestResult);
-      }
-
-      const { data: enrollmentData } = await supabase
-        .from("enrollments")
-        .select("id, plan_type, duration, sessions_total, sessions_remaining, unit_price, amount, currency, created_at, preferred_days, timezone, level")
-        .eq("user_id", session.user.id)
-        .eq("approval_status", "APPROVED")
-        .eq("payment_status", "PAID")
-        .order("created_at", { ascending: false });
-
-      if (enrollmentData && enrollmentData.length > 0) {
-        setEnrollments(enrollmentData as EnrollmentRecord[]);
-        const latestEnroll = enrollmentData[0];
-        setLatestEnrollmentId(latestEnroll.id);
-
-        // Auto-sync: fill profile gaps from enrollment data
-        const p = profile;
-        const autoUpdates: Record<string, string> = {};
-        if ((!p?.level || !p.level.trim()) && latestEnroll.level && latestEnroll.level.trim()) {
-          autoUpdates.level = latestEnroll.level.trim();
-        }
-        if ((!p?.name || !p.name.trim()) && session.user.user_metadata?.name) {
-          autoUpdates.name = session.user.user_metadata.name;
-        }
-        if (Object.keys(autoUpdates).length > 0) {
-          await supabase.from("profiles").update(autoUpdates).eq("user_id", session.user.id);
-          if (autoUpdates.name) setUserName(autoUpdates.name);
-        }
-
-        const effectiveLevel = autoUpdates.level || p?.level || "";
-        const effectiveName = autoUpdates.name || p?.name || "";
-
-        const items: ChecklistItem[] = [
-          { key: "Full name", label: "Full name", completed: !!(effectiveName && effectiveName.trim() !== "") },
-          { key: "Korean level", label: "Korean level", completed: !!(effectiveLevel && effectiveLevel.trim() !== "") },
-          { key: "Country", label: "Country", completed: !!(p?.country && p.country.trim() !== "") },
-          { key: "Preferred class days", label: "Preferred class days", completed: !!(latestEnroll.preferred_days && latestEnroll.preferred_days.length > 0) },
-          { key: "Timezone", label: "Timezone", completed: !!(latestEnroll.timezone && latestEnroll.timezone.trim() !== "") },
-        ];
-        setChecklistItems(items);
-
-        // Fetch all attendance dates from all sources
-        const latestId = latestEnroll.id;
-        const [adminRes, pkgRes, selfRes] = await Promise.all([
-          supabase
-            .from("admin_attendance_log")
-            .select("session_date")
-            .eq("enrollment_id", latestId),
-          supabase
-            .from("pkg_attendance")
-            .select("session_id, pkg_group_sessions(session_date)")
-            .eq("user_id", session.user.id)
-            .eq("admin_approved", true),
-          supabase
-            .from("attendance_requests")
-            .select("request_date")
-            .eq("enrollment_id", latestId)
-            .eq("status", "APPROVED"),
-        ]);
-
-        const dates: AttendanceDate[] = [
-          ...(adminRes.data || []).map(r => ({ date: r.session_date, source: "Admin" as const })),
-          ...(pkgRes.data || []).flatMap(r => {
-            const sessions = r.pkg_group_sessions as { session_date: string } | null;
-            return sessions?.session_date ? [{ date: sessions.session_date, source: "Group" as const }] : [];
-          }),
-          ...(selfRes.data || []).map(r => ({ date: r.request_date, source: "Self" as const })),
-        ].sort((a, b) => a.date.localeCompare(b.date));
-        setAttendanceDates(dates);
-
-        // Fetch group membership
-        const { data: groupData } = await supabase
-          .from("pkg_group_members")
-          .select("group_id, pkg_groups(name)")
+        // Pending enrollments
+        const { data: pendingEnrollData } = await supabase
+          .from("enrollments")
+          .select("id, plan_type, approval_status")
           .eq("user_id", session.user.id)
-          .eq("member_status", "active")
-          .limit(1);
-        if (groupData && groupData.length > 0) {
-          const grp = groupData[0].pkg_groups as { name: string } | null;
-          setGroupName(grp?.name || null);
-        }
-      } else {
-        setHasNoData(true);
-      }
+          .in("approval_status", ["PENDING_PAYMENT", "UNDER_REVIEW", "PENDING"]);
+        setPendingEnrollments(pendingEnrollData || []);
 
-      setLoading(false);
-      if (!isOnboardingDone()) setShowWelcome(true);
+        // Weekly XP: from Monday 00:00 local time
+        const now = new Date();
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        monday.setHours(0, 0, 0, 0);
+        const { data: weeklyXpData } = await supabase
+          .from("student_xp")
+          .select("xp_earned")
+          .eq("user_id", session.user.id)
+          .gte("created_at", monday.toISOString());
+        setWeeklyXp((weeklyXpData || []).reduce((s: number, r: any) => s + (r.xp_earned || 0), 0));
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("avatar_url, name, level, country")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+        if (profile) {
+          setAvatarUrl(profile.avatar_url || "");
+          setUserName(profile.name || "");
+          setProfileLevel(profile.level || "");
+        }
+
+        const { data: ptData } = await supabase
+          .from("placement_tests")
+          .select("score, level, created_at")
+          .eq("user_id", session.user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (ptData) setPlacementTest(ptData as PlacementTestResult);
+
+        const { data: enrollmentData } = await supabase
+          .from("enrollments")
+          .select("id, plan_type, duration, sessions_total, sessions_remaining, unit_price, amount, currency, created_at, preferred_days, timezone, level")
+          .eq("user_id", session.user.id)
+          .eq("approval_status", "APPROVED")
+          .eq("payment_status", "PAID")
+          .order("created_at", { ascending: false });
+
+        if (enrollmentData && enrollmentData.length > 0) {
+          setEnrollments(enrollmentData as EnrollmentRecord[]);
+          const latestEnroll = enrollmentData[0];
+          setLatestEnrollmentId(latestEnroll.id);
+
+          const p = profile;
+          const autoUpdates: Record<string, string> = {};
+          if ((!p?.level || !p.level.trim()) && latestEnroll.level && latestEnroll.level.trim()) {
+            autoUpdates.level = latestEnroll.level.trim();
+          }
+          if ((!p?.name || !p.name.trim()) && session.user.user_metadata?.name) {
+            autoUpdates.name = session.user.user_metadata.name;
+          }
+          if (Object.keys(autoUpdates).length > 0) {
+            await supabase.from("profiles").update(autoUpdates).eq("user_id", session.user.id);
+            if (autoUpdates.name) setUserName(autoUpdates.name);
+          }
+
+          const effectiveLevel = autoUpdates.level || p?.level || "";
+          const effectiveName = autoUpdates.name || p?.name || "";
+
+          const items: ChecklistItem[] = [
+            { key: "Full name", label: "Full name", completed: !!(effectiveName && effectiveName.trim() !== "") },
+            { key: "Korean level", label: "Korean level", completed: !!(effectiveLevel && effectiveLevel.trim() !== "") },
+            { key: "Country", label: "Country", completed: !!(p?.country && p.country.trim() !== "") },
+            { key: "Preferred class days", label: "Preferred class days", completed: !!(latestEnroll.preferred_days && latestEnroll.preferred_days.length > 0) },
+            { key: "Timezone", label: "Timezone", completed: !!(latestEnroll.timezone && latestEnroll.timezone.trim() !== "") },
+          ];
+          setChecklistItems(items);
+
+          const latestId = latestEnroll.id;
+          const [adminRes, pkgRes, selfRes] = await Promise.all([
+            supabase.from("admin_attendance_log").select("session_date").eq("enrollment_id", latestId),
+            supabase.from("pkg_attendance").select("session_id, pkg_group_sessions(session_date)").eq("user_id", session.user.id).eq("admin_approved", true),
+            supabase.from("attendance_requests").select("request_date").eq("enrollment_id", latestId).eq("status", "APPROVED"),
+          ]);
+
+          const dates: AttendanceDate[] = [
+            ...(adminRes.data || []).map(r => ({ date: r.session_date, source: "Admin" as const })),
+            ...(pkgRes.data || []).flatMap(r => {
+              const sessions = r.pkg_group_sessions as { session_date: string } | null;
+              return sessions?.session_date ? [{ date: sessions.session_date, source: "Group" as const }] : [];
+            }),
+            ...(selfRes.data || []).map(r => ({ date: r.request_date, source: "Self" as const })),
+          ].sort((a, b) => a.date.localeCompare(b.date));
+          setAttendanceDates(dates);
+
+          const { data: groupData } = await supabase
+            .from("pkg_group_members")
+            .select("group_id, pkg_groups(name)")
+            .eq("user_id", session.user.id)
+            .eq("member_status", "active")
+            .limit(1);
+          if (groupData && groupData.length > 0) {
+            const grp = groupData[0].pkg_groups as { name: string } | null;
+            setGroupName(grp?.name || null);
+          }
+        } else {
+          setHasNoData(true);
+        }
+
+        setLoading(false);
+        if (!isOnboardingDone()) setShowWelcome(true);
       } catch (err) {
         setFetchError(err instanceof Error ? err.message : t("dashboardPage.loadFailed"));
         setLoading(false);
@@ -421,8 +519,32 @@ const StudentDashboard = () => {
     if (key === "Full name") setUserName(_value);
   };
 
-  // ── Hooks that must live before any early return ──────────────────────────
   const lessonsCompleted = Object.values(gamification.lessonProgress).filter((p) => p.chapter_completed).length;
+
+  // Derive the next lesson to continue: first in-progress, else first unstarted
+  const continueLessonId = useMemo(() => {
+    const inProgress = Object.entries(gamification.lessonProgress)
+      .filter(([, p]) => !p.chapter_completed)
+      .sort(([a], [b]) => Number(a) - Number(b));
+    if (inProgress.length > 0) return Number(inProgress[0][0]);
+    const done = Object.keys(gamification.lessonProgress).map(Number);
+    if (done.length === 0) return 1;
+    return Math.min(Math.max(...done) + 1, 45);
+  }, [gamification.lessonProgress]);
+
+  // Which section to resume within that lesson
+  const continueSection = useMemo(() => {
+    const p = gamification.lessonProgress[continueLessonId];
+    if (!p) return null;
+    if (!p.vocab_done) return "vocab";
+    if (!p.grammar_done) return "grammar";
+    if (!p.dialogue_done) return "dialogue";
+    if (!p.exercises_done) return "exercises";
+    if (!p.reading_done) return "reading";
+    return null;
+  }, [gamification.lessonProgress, continueLessonId]);
+
+  const hasLessonProgress = Object.keys(gamification.lessonProgress).length > 0;
 
   // Level-up flash: detect league change since last session
   const [showLevelUpFlash, setShowLevelUpFlash] = useState(false);
@@ -438,7 +560,6 @@ const StudentDashboard = () => {
     sessionStorage.setItem("kl_last_league", league.key);
   }, [league]);
 
-  // Animated count-up for numeric stats
   const xpCountUp = useCountUp(gamification.totalXp, 1200);
   const streakCountUp = useCountUp(gamification.streak.current_streak, 800);
 
@@ -455,7 +576,6 @@ const StudentDashboard = () => {
     { label: "Games", desc: "20 fun games", emoji: "🎮", path: "/games", bg: "bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-green-500/25" },
     { label: "Vocab Review", desc: "Spaced repetition", emoji: "🧠", path: "/review", bg: "bg-gradient-to-br from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700 shadow-violet-500/25" },
   ], []);
-  // ─────────────────────────────────────────────────────────────────────────
 
   if (gateLoading || resetBlocked || loading) {
     return (
@@ -500,9 +620,6 @@ const StudentDashboard = () => {
   }
 
   const displayName = userName || "Student";
-  const hasBlockers = checklistItems.some(
-    (i) => !i.completed && (i.key === "Preferred class days" || i.key === "Korean level")
-  );
   const journeyStage = enrollments.length > 0 ? 2 : 1;
 
   const greeting = (() => {
@@ -548,12 +665,176 @@ const StudentDashboard = () => {
     URL.revokeObjectURL(url);
   };
 
+  // ── Level-based daily vocabulary ────────────────────────────────────────────
+  const tier = getLevelTier(profileLevel);
+  const VOCAB = VOCAB_BY_TIER[tier];
+  const todayVocab = VOCAB[new Date().getDay() % VOCAB.length];
+
+  // ── Dynamic weekly goal based on student level ───────────────────────────
+  const WEEKLY_GOAL = getWeeklyGoal(profileLevel);
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Shared "Today" zone sections (used in both enrolled + unenrolled views)
+  // ─────────────────────────────────────────────────────────────────────────
+  const TodayZone = () => (
+    <div className="bg-muted/25 border border-border/40 rounded-2xl p-4 space-y-3">
+      <div className="flex items-center gap-2 px-1">
+        <h2 className="text-sm font-bold text-foreground">Today</h2>
+        <span className="text-xs text-muted-foreground">{todayStr}</span>
+      </div>
+
+      {/* Continue Learning CTA — only shown if any lesson work started */}
+      {(hasLessonProgress || true) && (
+        <button
+          onClick={() => navigate("/textbook")}
+          aria-label={`Continue learning — lesson ${continueLessonId}${continueSection ? `, ${continueSection} section` : ""}`}
+          className="w-full flex items-center gap-3 bg-gradient-to-r from-primary/90 to-primary rounded-xl px-4 py-3 text-left hover:from-primary hover:to-primary/90 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 group"
+        >
+          <div className="h-9 w-9 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+            <PlayCircle className="h-5 w-5 text-white" aria-hidden="true" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-white/70 uppercase tracking-wide">Continue Learning</p>
+            <p className="text-sm font-bold text-white leading-tight">
+              {lessonsCompleted === 0
+                ? "Start Lesson 1 — Introduction to Hangul"
+                : `Lesson ${continueLessonId}${continueSection ? ` · ${continueSection.replace("_done", "")}` : " · Review"}`}
+            </p>
+          </div>
+          <ArrowRight className="h-4 w-4 text-white/70 shrink-0 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
+        </button>
+      )}
+
+      {/* Vocab of the day — level-personalised photo background */}
+      {(() => {
+        const today = todayVocab;
+        const handleVocabClaim = async () => {
+          if (vocabClaimed) return;
+          await awardGameXp("vocab_daily", 5, 1);
+          localStorage.setItem(vocabStorageKey, "1");
+          setVocabClaimed(true);
+          toast({ title: t("dashboardPage.xpBonus"), description: t("dashboardPage.vocabBonus") });
+        };
+        return (
+          <div className="relative overflow-hidden rounded-xl h-28">
+            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${today.img})` }} role="presentation" aria-hidden="true" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/15" aria-hidden="true" />
+            <div className="relative h-full flex items-center gap-4 px-5">
+              <div className="text-3xl drop-shadow" aria-hidden="true">{today.emoji}</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">
+                  Word of the day · {getLevelByKey(profileLevel)?.shortLabel || tier}
+                </p>
+                <p className="text-2xl md:text-3xl font-bold text-white leading-tight tracking-tight" lang="ko">{today.ko}</p>
+                <p className="text-xs text-white/70">{today.rom} · {today.en}</p>
+              </div>
+              <Button
+                size="sm"
+                disabled={vocabClaimed}
+                onClick={handleVocabClaim}
+                aria-label={vocabClaimed ? "Daily XP already claimed" : "Claim 5 XP for today's word"}
+                className={`shrink-0 ${vocabClaimed ? "bg-white/20 text-white/60 hover:bg-white/20" : "bg-white text-black hover:bg-white/90"}`}
+                variant={vocabClaimed ? "outline" : "default"}
+              >
+                {vocabClaimed ? "✓ +5 XP" : "Claim +5 XP"}
+              </Button>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Daily Bonus */}
+      <Suspense fallback={<div className="h-20 bg-background/60 rounded-xl animate-pulse" aria-hidden="true" />}>
+        <DailyBonusCard />
+      </Suspense>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2" role="list" aria-label="Quick learning actions">
+        {quickActions.map(({ label, desc, emoji, path, bg }) => (
+          <button
+            key={label}
+            role="listitem"
+            onClick={() => navigate(path)}
+            aria-label={`${label}: ${desc}`}
+            className={`group rounded-xl p-3 text-left shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 ${bg}`}
+          >
+            <div className="text-xl mb-1" aria-hidden="true">{emoji}</div>
+            <p className="font-semibold text-white text-sm">{label}</p>
+            <p className="text-white/75 text-[11px]">{desc}</p>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const KoreaGallery = () => {
+    const SCENES = [
+      { img: imgJeju,        ko: "제주도",   en: "Jeju Island",       caption: "Volcanic paradise" },
+      { img: imgBBQ,         ko: "삼겹살",   en: "Korean BBQ",         caption: "Grilled pork belly" },
+      { img: imgTemple,      ko: "사찰",     en: "Buddhist Temple",    caption: "Mountain temples" },
+      { img: imgHanbok,      ko: "한복",     en: "Traditional Hanbok", caption: "Centuries of fashion" },
+      { img: imgKpop,        ko: "케이팝",   en: "K-Pop Concert",      caption: "Global music wave" },
+      { img: imgNightMarket, ko: "야시장",   en: "Night Market",       caption: "Street food & vibes" },
+      { img: imgTea,         ko: "차 문화",  en: "Tea Culture",        caption: "Calm & tradition" },
+      { img: imgMarket,      ko: "전통시장", en: "Traditional Market", caption: "Colors & local life" },
+    ];
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">🇰🇷 Discover Korea</h2>
+        </div>
+        <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-none" role="list" aria-label="Korean culture gallery">
+          {SCENES.map(({ img, ko, en, caption }) => (
+            <div key={ko} role="listitem" className="relative flex-none w-36 h-44 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:scale-[1.03] transition-all duration-300">
+              <img src={img} alt="" role="presentation" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" aria-hidden="true" />
+              <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                <p className="text-white font-bold text-base leading-tight" lang="ko">{ko}</p>
+                <p className="text-white/75 text-[10px] leading-tight">{en}</p>
+                <p className="text-white/50 text-[9px] mt-0.5">{caption}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const ReferralStrip = () => {
+    if (!userId) return null;
+    const refLink = `https://kloversegy.com/free-trial?ref=${userId}`;
+    return (
+      <div className="flex items-center gap-3 bg-violet-50/80 dark:bg-violet-950/20 border border-violet-200/50 dark:border-violet-800/40 rounded-xl px-4 py-2.5">
+        <Gift className="h-4 w-4 text-violet-500 shrink-0" aria-hidden="true" />
+        <span className="flex-1 text-sm text-muted-foreground min-w-0 truncate">
+          <strong className="text-foreground">Refer a friend</strong> · earn 150 XP
+          {referralCount > 0 && <> · <span className="text-violet-600 font-medium">{referralCount} joined</span></>}
+        </span>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => { navigator.clipboard.writeText(refLink); toast({ title: "Link copied! 🎁" }); }}
+          aria-label="Copy referral link to clipboard"
+          className="shrink-0 gap-1 border-violet-300 text-violet-700 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 h-7 text-xs px-2"
+        >
+          <Copy className="h-3 w-3" aria-hidden="true" /> Copy
+        </Button>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-muted/20">
+      {/* Level-up flash — announced to screen readers */}
       {showLevelUpFlash && (
-        <div className="fixed inset-0 z-50 pointer-events-none animate-level-up-flash flex items-center justify-center bg-amber-400/30">
+        <div
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+          className="fixed inset-0 z-50 pointer-events-none animate-level-up-flash flex items-center justify-center bg-amber-400/30"
+        >
           <div className="animate-scale-in text-center">
-            <p className="text-5xl mb-2">{league?.emoji}</p>
+            <p className="text-5xl mb-2" aria-hidden="true">{league?.emoji}</p>
             <p className="text-2xl font-black text-foreground text-outlined-lg">Level Up!</p>
             <p className="text-lg font-bold text-foreground">{league?.name}</p>
           </div>
@@ -564,10 +845,13 @@ const StudentDashboard = () => {
       <main id="main-content" className="pt-24 pb-16 px-4">
         <div className="max-w-5xl mx-auto space-y-5">
 
-          {/* ── Hero greeting ── */}
+          {/* ── Hero greeting (always visible above tabs) ── */}
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/15 px-5 py-5">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl shrink-0 select-none ring-2 ring-primary/30">
+              <div
+                className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl shrink-0 select-none ring-2 ring-primary/30"
+                aria-hidden="true"
+              >
                 {displayName?.[0]?.toUpperCase() ?? "K"}
               </div>
               <div className="flex-1 min-w-0">
@@ -577,14 +861,20 @@ const StudentDashboard = () => {
                   <p className="text-xs text-muted-foreground mt-0.5">{league.emoji} {league.name} · {gamification.totalXp.toLocaleString()} XP</p>
                 )}
               </div>
-              <Button variant="outline" size="sm" onClick={handleExportProgress} className="gap-1.5 shrink-0 bg-background/80">
-                <Download className="h-3.5 w-3.5" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportProgress}
+                aria-label="Export your progress as a text file"
+                className="gap-1.5 shrink-0 bg-background/80"
+              >
+                <Download className="h-3.5 w-3.5" aria-hidden="true" />
                 <span className="hidden sm:inline">Export</span>
               </Button>
             </div>
           </div>
 
-          {/* ── Compact alerts (only rendered when active) ── */}
+          {/* ── Compact alerts (always visible above tabs) ── */}
           {(() => {
             const alerts: React.ReactNode[] = [];
             const streak = gamification.streak.current_streak;
@@ -592,8 +882,8 @@ const StudentDashboard = () => {
             const lastActive = gamification.streak.last_activity_date?.slice(0, 10);
             if (streak >= 1 && lastActive !== todayDate) {
               alerts.push(
-                <div key="streak" className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-800/60 rounded-xl px-3 py-2 text-sm">
-                  <span className="animate-bounce text-base">🔥</span>
+                <div key="streak" role="status" aria-live="polite" className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-800/60 rounded-xl px-3 py-2 text-sm">
+                  <span className="animate-bounce text-base" aria-hidden="true">🔥</span>
                   <span className="flex-1 font-medium text-orange-800 dark:text-orange-300">Keep your <strong>{streak}-day streak</strong> alive!</span>
                   <Button size="sm" variant="ghost" className="h-7 text-xs text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 shrink-0 px-2" onClick={() => navigate("/games")}>Play →</Button>
                 </div>
@@ -603,8 +893,8 @@ const StudentDashboard = () => {
               const remaining = enrollments[0].sessions_total - attendanceDates.length;
               if (remaining <= 2) {
                 alerts.push(
-                  <div key="sessions" className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-800/60 rounded-xl px-3 py-2 text-sm">
-                    <span className="text-base">📦</span>
+                  <div key="sessions" role="status" aria-live="polite" className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-800/60 rounded-xl px-3 py-2 text-sm">
+                    <span className="text-base" aria-hidden="true">📦</span>
                     <span className="flex-1 font-medium text-blue-900 dark:text-blue-300">{remaining <= 0 ? "Package finished" : `Only ${remaining} session${remaining === 1 ? "" : "s"} left`}</span>
                     <Button size="sm" className="h-7 text-xs bg-blue-600 hover:bg-blue-700 text-white shrink-0 px-2" onClick={() => navigate("/enroll-now")}>Renew →</Button>
                   </div>
@@ -615,7 +905,7 @@ const StudentDashboard = () => {
               const label = pe.approval_status === "PENDING_PAYMENT" ? "Awaiting payment" : pe.approval_status === "UNDER_REVIEW" ? "Under review" : "Pending";
               alerts.push(
                 <div key={pe.id} className="flex items-center gap-2 bg-muted/50 border border-border rounded-xl px-3 py-2 text-sm">
-                  <AlertCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <AlertCircle className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden="true" />
                   <span className="flex-1 text-muted-foreground capitalize">{pe.plan_type} enrollment — <strong>{label}</strong></span>
                 </div>
               );
@@ -626,7 +916,7 @@ const StudentDashboard = () => {
               if (done < total) {
                 alerts.push(
                   <div key="profile" className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 rounded-xl px-3 py-2 text-sm">
-                    <span className="text-base">⚠️</span>
+                    <span className="text-base" aria-hidden="true">⚠️</span>
                     <span className="flex-1 font-medium text-amber-800 dark:text-amber-300">Profile {Math.round((done / total) * 100)}% complete</span>
                     <Button size="sm" variant="ghost" className="h-7 text-xs text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 shrink-0 px-2" onClick={() => navigate("/dashboard?complete=name")}>Fix →</Button>
                   </div>
@@ -634,12 +924,12 @@ const StudentDashboard = () => {
               }
             }
             if (alerts.length === 0) return null;
-            return <div className="space-y-1.5">{alerts}</div>;
+            return <div className="space-y-1.5" role="region" aria-label="Important notifications">{alerts}</div>;
           })()}
 
-          {/* ── Stats row + Weekly Goal side-by-side ── */}
+          {/* ── Stats row + Weekly Goal (always visible above tabs) ── */}
           <div className="grid lg:grid-cols-5 gap-4">
-            <div className="lg:col-span-3 grid grid-cols-2 gap-3">
+            <div className="lg:col-span-3 grid grid-cols-2 gap-3" role="list" aria-label="Learning statistics">
               {quickStats.map(({ label, rawValue, sub, icon: Icon, color }, idx) => {
                 let displayValue: string;
                 if (label === "Total XP") displayValue = xpCountUp.toLocaleString();
@@ -648,9 +938,14 @@ const StudentDashboard = () => {
                 else displayValue = league?.name ?? "Beginner";
                 const isXP = label === "Total XP";
                 return (
-                  <Card key={label} className={`border-border/60 ${isXP ? "bg-gradient-to-br from-yellow-50/60 to-transparent dark:from-yellow-950/20 border-yellow-200/60 dark:border-yellow-800/40" : ""}`}>
+                  <Card
+                    key={label}
+                    role="listitem"
+                    aria-label={`${label}: ${displayValue}${sub ? `, ${sub}` : ""}`}
+                    className={`border-border/60 ${isXP ? "bg-gradient-to-br from-yellow-50/60 to-transparent dark:from-yellow-950/20 border-yellow-200/60 dark:border-yellow-800/40" : ""}`}
+                  >
                     <CardContent className="pt-4 pb-3">
-                      <div className={`h-8 w-8 rounded-lg flex items-center justify-center mb-2 ${color}`}>
+                      <div className={`h-8 w-8 rounded-lg flex items-center justify-center mb-2 ${color}`} aria-hidden="true">
                         {label === "League" && league?.emoji
                           ? <span className="text-base leading-none">{league.emoji}</span>
                           : <Icon className="h-3.5 w-3.5" />}
@@ -665,19 +960,18 @@ const StudentDashboard = () => {
             </div>
             <div className="lg:col-span-2 flex flex-col gap-3">
               {(() => {
-                const WEEKLY_GOAL = 300;
                 const pct = Math.min(100, Math.round((weeklyXp / WEEKLY_GOAL) * 100));
                 const msg = pct >= 100 ? "🎉 Goal crushed!" : pct >= 60 ? "Almost there!" : pct >= 30 ? "Good start!" : "Start earning XP";
                 return (
-                  <div className="flex-1 bg-card border border-border/60 rounded-2xl px-4 py-4 flex flex-col justify-between gap-2">
+                  <div className="flex-1 bg-card border border-border/60 rounded-2xl px-4 py-4 flex flex-col justify-between gap-2" aria-label={`Weekly XP goal: ${weeklyXp} of ${WEEKLY_GOAL} XP, ${pct}% complete`}>
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-semibold text-foreground">Weekly XP</span>
                       <div className="flex items-center gap-1.5">
                         <span className="text-muted-foreground text-xs">{weeklyXp}/{WEEKLY_GOAL}</span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${pct >= 100 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-primary/10 text-primary"}`}>{pct}%</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${pct >= 100 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-primary/10 text-primary"}`} aria-hidden="true">{pct}%</span>
                       </div>
                     </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="h-2 bg-muted rounded-full overflow-hidden" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={`${pct}% of weekly XP goal`}>
                       <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-700" style={{ width: `${pct}%` }} />
                     </div>
                     <p className="text-xs text-muted-foreground">{msg}</p>
@@ -687,461 +981,421 @@ const StudentDashboard = () => {
               <a
                 href={`https://wa.me/601121777560?text=${encodeURIComponent("Hi! I'd like to book my next Korean class.")}`}
                 onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(`https://wa.me/601121777560?text=${encodeURIComponent("Hi! I'd like to book my next Korean class.")}`, { cta_label: "dashboard_book" }); }}
-                target="_blank" rel="noopener noreferrer"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Book a class via WhatsApp"
                 className="flex items-center gap-2.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 text-[#1a9e4f] dark:text-[#4ade80] rounded-xl px-3.5 py-2.5 transition-all text-sm font-medium"
               >
-                <span className="text-base">📅</span>
+                <span className="text-base" aria-hidden="true">📅</span>
                 <span>Book a Class</span>
-                <span className="text-xs opacity-60 ml-auto">WhatsApp →</span>
+                <span className="text-xs opacity-60 ml-auto" aria-hidden="true">WhatsApp →</span>
               </a>
             </div>
           </div>
 
-          {/* ── TODAY zone — vocab + bonus + actions grouped ── */}
-          <div className="bg-muted/25 border border-border/40 rounded-2xl p-4 space-y-3">
-            <div className="flex items-center gap-2 px-1">
-              <h2 className="text-sm font-bold text-foreground">Today</h2>
-              <span className="text-xs text-muted-foreground">{todayStr}</span>
-            </div>
-
-            {/* Vocab of the day — photo background */}
-            {(() => {
-              const VOCAB = [
-                { ko: "안녕하세요", rom: "annyeonghaseyo", en: "Hello / Good day", emoji: "👋", img: imgTemple },
-                { ko: "감사합니다", rom: "gamsahamnida", en: "Thank you", emoji: "🙏", img: imgTea },
-                { ko: "사랑해요", rom: "saranghaeyo", en: "I love you", emoji: "❤️", img: imgHanbok },
-                { ko: "공부하다", rom: "gongbuhada", en: "To study", emoji: "📚", img: imgMarket },
-                { ko: "맛있어요", rom: "massisseoyo", en: "It's delicious", emoji: "😋", img: imgBBQ },
-                { ko: "화이팅", rom: "hwaiting", en: "Fighting! / You can do it!", emoji: "💪", img: imgKpop },
-                { ko: "천천히", rom: "cheoncheonhi", en: "Slowly", emoji: "🐢", img: imgJeju },
-              ];
-              const today = VOCAB[new Date().getDay() % VOCAB.length];
-              const handleVocabClaim = async () => {
-                if (vocabClaimed) return;
-                await awardGameXp("vocab_daily", 5, 1);
-                localStorage.setItem(vocabStorageKey, "1");
-                setVocabClaimed(true);
-                toast({ title: t("dashboardPage.xpBonus"), description: t("dashboardPage.vocabBonus") });
-              };
-              return (
-                <div className="relative overflow-hidden rounded-xl h-28">
-                  <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${today.img})` }} />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/15" />
-                  <div className="relative h-full flex items-center gap-4 px-5">
-                    <div className="text-3xl drop-shadow">{today.emoji}</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/50">Word of the day</p>
-                      <p className="text-2xl md:text-3xl font-bold text-white leading-tight tracking-tight">{today.ko}</p>
-                      <p className="text-xs text-white/70">{today.rom} · {today.en}</p>
-                    </div>
-                    <Button size="sm" disabled={vocabClaimed} onClick={handleVocabClaim}
-                      className={`shrink-0 ${vocabClaimed ? "bg-white/20 text-white/60 hover:bg-white/20" : "bg-white text-black hover:bg-white/90"}`}
-                      variant={vocabClaimed ? "outline" : "default"}>
-                      {vocabClaimed ? "✓ +5 XP" : "Claim +5 XP"}
-                    </Button>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Daily Bonus */}
-            <Suspense fallback={<div className="h-20 bg-background/60 rounded-xl animate-pulse" />}>
-              <DailyBonusCard />
-            </Suspense>
-
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {quickActions.map(({ label, desc, emoji, path, bg }) => (
-                <button key={label} onClick={() => navigate(path)} aria-label={`${label}: ${desc}`}
-                  className={`group rounded-xl p-3 text-left shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 ${bg}`}>
-                  <div className="text-xl mb-1">{emoji}</div>
-                  <p className="font-semibold text-white text-sm">{label}</p>
-                  <p className="text-white/75 text-[11px]">{desc}</p>
-                </button>
-              ))}
-            </div>
+          {/* ── Tab navigation ── */}
+          <div
+            className="flex gap-1 bg-muted/50 rounded-xl p-1 sticky top-[72px] z-10 backdrop-blur-sm border border-border/30"
+            role="tablist"
+            aria-label="Dashboard sections"
+          >
+            {TABS.map(tab => (
+              <button
+                key={tab.key}
+                role="tab"
+                aria-selected={activeTab === tab.key}
+                aria-controls={`tabpanel-${tab.key}`}
+                id={`tab-${tab.key}`}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg py-2 px-2 text-sm font-medium transition-all ${
+                  activeTab === tab.key
+                    ? "bg-background shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span aria-hidden="true">{tab.emoji}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            ))}
           </div>
 
-          {/* ── Discover Korea Gallery ── */}
-          {(() => {
-            const SCENES = [
-              { img: imgJeju,        ko: "제주도",   en: "Jeju Island",       caption: "Volcanic paradise" },
-              { img: imgBBQ,         ko: "삼겹살",   en: "Korean BBQ",         caption: "Grilled pork belly" },
-              { img: imgTemple,      ko: "사찰",     en: "Buddhist Temple",    caption: "Mountain temples" },
-              { img: imgHanbok,      ko: "한복",     en: "Traditional Hanbok", caption: "Centuries of fashion" },
-              { img: imgKpop,        ko: "케이팝",   en: "K-Pop Concert",      caption: "Global music wave" },
-              { img: imgNightMarket, ko: "야시장",   en: "Night Market",       caption: "Street food & vibes" },
-              { img: imgTea,         ko: "차 문화",  en: "Tea Culture",        caption: "Calm & tradition" },
-              { img: imgMarket,      ko: "전통시장", en: "Traditional Market", caption: "Colors & local life" },
-            ];
-            return (
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">🇰🇷 Discover Korea</h2>
-                </div>
-                <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-none">
-                  {SCENES.map(({ img, ko, en, caption }) => (
-                    <div key={ko} className="relative flex-none w-36 h-44 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:scale-[1.03] transition-all duration-300">
-                      <img src={img} alt={en} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                        <p className="text-white font-bold text-base leading-tight">{ko}</p>
-                        <p className="text-white/75 text-[10px] leading-tight">{en}</p>
-                        <p className="text-white/50 text-[9px] mt-0.5">{caption}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* ── Refer a Friend — slim strip ── */}
-          {userId && (() => {
-            const refLink = `https://kloversegy.com/free-trial?ref=${userId}`;
-            return (
-              <div className="flex items-center gap-3 bg-violet-50/80 dark:bg-violet-950/20 border border-violet-200/50 dark:border-violet-800/40 rounded-xl px-4 py-2.5">
-                <Gift className="h-4 w-4 text-violet-500 shrink-0" />
-                <span className="flex-1 text-sm text-muted-foreground min-w-0 truncate">
-                  <strong className="text-foreground">Refer a friend</strong> · earn 150 XP
-                  {referralCount > 0 && <> · <span className="text-violet-600 font-medium">{referralCount} joined</span></>}
-                </span>
-                <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(refLink); toast({ title: "Link copied! 🎁" }); }}
-                  className="shrink-0 gap-1 border-violet-300 text-violet-700 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 h-7 text-xs px-2">
-                  <Copy className="h-3 w-3" /> Copy
-                </Button>
-              </div>
-            );
-          })()}
-
-          {hasNoData ? (
-            /* ── No-enrollment state: show learning features + enroll CTA ── */
-            <div className="space-y-6">
-              <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-transparent ring-1 ring-black/10">
-                <CardContent className="pt-6 pb-6 space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0 border border-black/10">
-                      <GraduationCap className="h-6 w-6 text-amber-600" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-foreground">Start Your Korean Journey</h2>
-                      <p className="text-sm text-muted-foreground mt-1">Join live classes with expert teachers, track your progress, and connect with other K-drama fans learning Korean.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="flex -space-x-1">
-                      {["🇪🇬","🇸🇦","🇦🇪","🇯🇴"].map((flag, i) => (
-                        <span key={i} className="w-7 h-7 rounded-full bg-muted border-2 border-background flex items-center justify-center text-sm">{flag}</span>
-                      ))}
-                    </div>
-                    <span>Join <strong className="text-foreground">500+</strong> students from Egypt &amp; the Arab world</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
-                    {[
-                      { emoji: "🎓", text: "Live group & private classes" },
-                      { emoji: "📊", text: "Progress tracking & analytics" },
-                      { emoji: "🏆", text: "XP, badges & leaderboards" },
-                    ].map(({ emoji, text }) => (
-                      <div key={text} className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-2 border border-border">
-                        <span>{emoji}</span>
-                        <span className="text-muted-foreground">{text}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button onClick={() => navigate("/enroll-now")} size="lg" className="flex-1">Enroll Now</Button>
-                    <Button variant="outline" size="lg" onClick={() => navigate("/free-trial")} className="flex-1">Book a Free Trial</Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Still show level test for unenrolled */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <GraduationCap className="h-5 w-5" /> Korean Level
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {profileLevel ? (
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Badge className="text-sm px-3 py-1">{getLevelByKey(profileLevel)?.shortLabel || profileLevel}</Badge>
-                        {placementTest && (
-                          <p className="text-xs text-muted-foreground mt-1">Score: {placementTest.score}/40 — {new Date(placementTest.created_at).toLocaleDateString()}</p>
-                        )}
-                      </div>
-                      <Button variant="outline" size="sm" onClick={() => navigate("/placement-test")}>
-                        <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Retake
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">Find your Korean level</p>
-                      <Button size="sm" onClick={() => navigate("/placement-test")}>
-                        <GraduationCap className="h-3.5 w-3.5 mr-1.5" /> Take Test
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Still show gamification for unenrolled learners */}
-              <Suspense fallback={<div className="h-40 bg-muted/30 rounded-2xl animate-pulse" />}>
-              <div className="grid md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2"><Trophy className="h-5 w-5" /> My League</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <LeagueProgressBar totalXp={gamification.totalXp} />
-                    {gamLoading ? (
-                      <BadgeGrid earnedBadges={[]} loading />
-                    ) : gamification.badges.length > 0 ? (
-                      <div>
-                        <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Earned Badges ({gamification.badges.length})</p>
-                        <BadgeGrid earnedBadges={gamification.badges} />
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">Complete lessons and games to earn badges.</p>
-                    )}
-                  </CardContent>
-                </Card>
-                <AchievementMilestoneCard />
-              </div>
-              <StreakCalendar />
-              <LeaderboardCard />
-              </Suspense>
-            </div>
-          ) : (
-            <>
-              {/* ── Two-column layout: Profile + League ── */}
-              <div className="grid md:grid-cols-2 gap-4">
-                {/* Profile Card */}
-                <ProfileCard
-                  userId={userId}
-                  avatarUrl={avatarUrl}
-                  displayName={displayName}
-                  enrollmentCount={enrollments.length}
-                  journeyStage={journeyStage}
-                  onAvatarUploaded={(url) => setAvatarUrl(url)}
-                  onNameUpdated={(name) => setUserName(name)}
-                />
-
-                {/* League & XP */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Trophy className="h-5 w-5" /> My League
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <LeagueProgressBar totalXp={gamification.totalXp} />
-                    {gamLoading ? (
-                      <BadgeGrid earnedBadges={[]} loading />
-                    ) : gamification.badges.length > 0 ? (
-                      <div>
-                        <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Earned Badges ({gamification.badges.length})</p>
-                        <BadgeGrid earnedBadges={gamification.badges} />
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">Complete lessons and games to earn badges.</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* ── Korean Level + Registration Checklist (two-col) ── */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <GraduationCap className="h-5 w-5" /> Korean Level
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {profileLevel ? (
-                      <div className="flex items-center justify-between">
+          {/* ══════════════════════ TODAY TAB ══════════════════════ */}
+          {activeTab === "today" && (
+            <div
+              id="tabpanel-today"
+              role="tabpanel"
+              aria-labelledby="tab-today"
+              className="space-y-4 outline-none"
+              tabIndex={0}
+            >
+              {hasNoData ? (
+                <>
+                  {/* Unenrolled: enroll CTA */}
+                  <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-transparent ring-1 ring-black/10">
+                    <CardContent className="pt-6 pb-6 space-y-4">
+                      <div className="flex items-start gap-4">
+                        <div className="h-12 w-12 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0 border border-black/10">
+                          <GraduationCap className="h-6 w-6 text-amber-600" aria-hidden="true" />
+                        </div>
                         <div>
-                          <Badge className="text-sm px-3 py-1">{getLevelByKey(profileLevel)?.shortLabel || profileLevel}</Badge>
-                          {placementTest && (
-                            <p className="text-xs text-muted-foreground mt-1">Score: {placementTest.score}/40 — {new Date(placementTest.created_at).toLocaleDateString()}</p>
-                          )}
+                          <h2 className="text-lg font-bold text-foreground">Start Your Korean Journey</h2>
+                          <p className="text-sm text-muted-foreground mt-1">Join live classes with expert teachers, track your progress, and connect with other K-drama fans learning Korean.</p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => navigate("/placement-test")}>
-                          <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Retake
-                        </Button>
                       </div>
-                    ) : (
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">Take the placement test to find your level</p>
-                        <Button size="sm" onClick={() => navigate("/placement-test")}>
-                          <GraduationCap className="h-3.5 w-3.5 mr-1.5" /> Take Test
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Package summary card (most recent) */}
-                {enrollments[0] && (() => {
-                  const enrollment = enrollments[0];
-                  const totalUsed = attendanceDates.length;
-                  const remaining = enrollment.sessions_total - totalUsed;
-                  const extra = remaining < 0 ? Math.abs(remaining) : 0;
-                  const due = Math.round(extra * enrollment.unit_price);
-                  const curr = enrollment.currency === "EGP" ? "LE" : "$";
-                  return (
-                    <Card className={remaining <= 0 && totalUsed > 0 ? "border-green-500 border-2" : ""}>
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <Package className="h-4 w-4" />
-                            <span className="capitalize">{enrollment.plan_type}</span> — {enrollment.duration}mo
-                          </CardTitle>
-                          <Badge variant={remaining >= 0 ? "default" : "destructive"}>
-                            {remaining >= 0 ? `${remaining} left` : `${extra} extra`}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                          {[
-                            { label: "Package", val: enrollment.sessions_total, red: false },
-                            { label: "Used", val: totalUsed, red: false },
-                            { label: remaining >= 0 ? "Remaining" : "Extra", val: remaining >= 0 ? remaining : extra, red: remaining < 0 },
-                            { label: "Due", val: `${curr}${due.toLocaleString()}`, red: due > 0 },
-                          ].map(({ label, val, red }) => (
-                            <div key={label} className={`rounded-lg p-3 text-center border ${red ? "bg-destructive/10 border-destructive/30" : "bg-muted/50 border-border"}`}>
-                              <span className="text-[10px] text-muted-foreground block">{label}</span>
-                              <p className={`text-lg font-bold ${red ? "text-destructive" : "text-foreground"}`}>{val}</p>
-                            </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="flex -space-x-1" aria-hidden="true">
+                          {["🇪🇬","🇸🇦","🇦🇪","🇯🇴"].map((flag, i) => (
+                            <span key={i} className="w-7 h-7 rounded-full bg-muted border-2 border-background flex items-center justify-center text-sm">{flag}</span>
                           ))}
                         </div>
-                        <div>
-                          <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                            <span>Sessions used</span>
-                            <span>{Math.min(totalUsed, enrollment.sessions_total)}/{enrollment.sessions_total}</span>
-                          </div>
-                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all duration-500 ${remaining < 0 ? "bg-destructive" : remaining <= 2 ? "bg-amber-500" : "bg-amber-400"}`}
-                              style={{ width: `${Math.min(100, (totalUsed / enrollment.sessions_total) * 100)}%` }}
-                            />
-                          </div>
-                        </div>
-                        {due > 0 && (
-                          <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/5 rounded-lg p-2">
-                            <AlertTriangle className="h-4 w-4 shrink-0" />
-                            <span><strong>{extra}</strong> extra sessions — Due: <strong>{curr}{due.toLocaleString()}</strong></span>
-                          </div>
-                        )}
-                        {groupName && (
-                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                            <Users className="h-3.5 w-3.5" />
-                            <span>Group: <strong className="text-foreground">{groupName}</strong></span>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })()}
-              </div>
-
-              {/* ── Registration Checklist ── */}
-              <RegistrationChecklist userId={userId} enrollmentId={latestEnrollmentId} items={checklistItems} onItemCompleted={handleItemCompleted} autoFocusField={autoFocusField} />
-
-              {/* ── Achievements + Goals (two-col) ── */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <AchievementMilestoneCard />
-                <LearningGoalsCard />
-              </div>
-
-              {/* ── Analytics (full width) ── */}
-              <div>
-                <h3 className="text-lg font-bold text-foreground mb-4">Your Learning Analytics</h3>
-                <AnalyticsSection />
-              </div>
-
-              {/* ── Streak Calendar (full width) ── */}
-              <StreakCalendar />
-
-              {/* ── Leaderboard (full width) ── */}
-              <LeaderboardCard />
-
-              {/* ── Attendance & Admin (bottom section) ── */}
-              <StudentAttendanceRequest userId={userId} />
-
-              {/* Additional packages (if > 1) */}
-              {enrollments.slice(1).map((enrollment) => {
-                const totalUsed = enrollment.sessions_total - enrollment.sessions_remaining;
-                const remaining = enrollment.sessions_total - totalUsed;
-                const extra = remaining < 0 ? Math.abs(remaining) : 0;
-                const due = Math.round(extra * enrollment.unit_price);
-                const curr = enrollment.currency === "EGP" ? "LE" : "$";
-                return (
-                  <Card key={enrollment.id}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base flex items-center gap-2">
-                          <Package className="h-4 w-4" />
-                          <span className="capitalize">{enrollment.plan_type}</span> — {enrollment.duration}mo
-                          <Badge variant="outline" className="ml-1 text-xs">Older</Badge>
-                        </CardTitle>
-                        <Badge variant={remaining >= 0 ? "secondary" : "destructive"}>
-                          {remaining >= 0 ? `${remaining} left` : `${extra} extra`}
-                        </Badge>
+                        <span>Join <strong className="text-foreground">500+</strong> students from Egypt &amp; the Arab world</span>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
                         {[
-                          { label: "Package", val: enrollment.sessions_total },
-                          { label: "Used", val: totalUsed },
-                          { label: remaining >= 0 ? "Remaining" : "Extra", val: remaining >= 0 ? remaining : extra },
-                          { label: "Due", val: `${curr}${due.toLocaleString()}` },
-                        ].map(({ label, val }) => (
-                          <div key={label} className="rounded-lg bg-muted/50 border border-border p-2 text-center">
-                            <span className="text-[10px] text-muted-foreground block">{label}</span>
-                            <p className="text-base font-bold text-foreground">{val}</p>
+                          { emoji: "🎓", text: "Live group & private classes" },
+                          { emoji: "📊", text: "Progress tracking & analytics" },
+                          { emoji: "🏆", text: "XP, badges & leaderboards" },
+                        ].map(({ emoji, text }) => (
+                          <div key={text} className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-2 border border-border">
+                            <span aria-hidden="true">{emoji}</span>
+                            <span className="text-muted-foreground">{text}</span>
                           </div>
                         ))}
                       </div>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Button onClick={() => navigate("/enroll-now")} size="lg" className="flex-1">Enroll Now</Button>
+                        <Button variant="outline" size="lg" onClick={() => navigate("/free-trial")} className="flex-1">Book a Free Trial</Button>
+                      </div>
                     </CardContent>
                   </Card>
-                );
-              })}
+                  <TodayZone />
+                  <KoreaGallery />
+                  <ReferralStrip />
+                </>
+              ) : (
+                <>
+                  <TodayZone />
+                  <KoreaGallery />
+                  <ReferralStrip />
+                </>
+              )}
+            </div>
+          )}
 
-              {attendanceDates.length > 0 && <AttendanceHistoryCard dates={attendanceDates} />}
-              <MyTrialClassCard />
-              <UpcomingSessionsCard />
-              <StudentGroupAttendance />
+          {/* ══════════════════════ PROGRESS TAB ══════════════════════ */}
+          {activeTab === "progress" && (
+            <div
+              id="tabpanel-progress"
+              role="tabpanel"
+              aria-labelledby="tab-progress"
+              className="space-y-4 outline-none"
+              tabIndex={0}
+            >
+              <Suspense fallback={<div className="h-40 bg-muted/30 rounded-2xl animate-pulse" aria-hidden="true" />}>
+                {/* Profile + League */}
+                {!hasNoData && (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <ProfileCard
+                      userId={userId}
+                      avatarUrl={avatarUrl}
+                      displayName={displayName}
+                      enrollmentCount={enrollments.length}
+                      journeyStage={journeyStage}
+                      onAvatarUploaded={(url) => setAvatarUrl(url)}
+                      onNameUpdated={(name) => setUserName(name)}
+                    />
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Trophy className="h-5 w-5" aria-hidden="true" /> My League
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <LeagueProgressBar totalXp={gamification.totalXp} />
+                        {gamLoading ? (
+                          <BadgeGrid earnedBadges={[]} loading />
+                        ) : gamification.badges.length > 0 ? (
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Earned Badges ({gamification.badges.length})</p>
+                            <BadgeGrid earnedBadges={gamification.badges} />
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Complete lessons and games to earn badges.</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
 
-              {/* ── Progress Report + Certificate ── */}
+                {/* For unenrolled: league only */}
+                {hasNoData && (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Trophy className="h-5 w-5" aria-hidden="true" /> My League
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <LeagueProgressBar totalXp={gamification.totalXp} />
+                        {gamLoading ? (
+                          <BadgeGrid earnedBadges={[]} loading />
+                        ) : gamification.badges.length > 0 ? (
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Earned Badges ({gamification.badges.length})</p>
+                            <BadgeGrid earnedBadges={gamification.badges} />
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Complete lessons and games to earn badges.</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                    <AchievementMilestoneCard />
+                  </div>
+                )}
+
+                {/* Achievements + Goals */}
+                {!hasNoData && (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <AchievementMilestoneCard />
+                    <LearningGoalsCard />
+                  </div>
+                )}
+
+                {/* Analytics */}
+                {!hasNoData && (
+                  <div>
+                    <h3 className="text-lg font-bold text-foreground mb-4">Your Learning Analytics</h3>
+                    <AnalyticsSection />
+                  </div>
+                )}
+
+                <StreakCalendar />
+                <LeaderboardCard />
+              </Suspense>
+            </div>
+          )}
+
+          {/* ══════════════════════ CLASSES TAB ══════════════════════ */}
+          {activeTab === "classes" && (
+            <div
+              id="tabpanel-classes"
+              role="tabpanel"
+              aria-labelledby="tab-classes"
+              className="space-y-4 outline-none"
+              tabIndex={0}
+            >
+              {hasNoData ? (
+                <Card className="border-dashed">
+                  <CardContent className="pt-8 pb-8 text-center space-y-3">
+                    <GraduationCap className="h-10 w-10 mx-auto text-muted-foreground" aria-hidden="true" />
+                    <p className="font-semibold text-foreground">No classes yet</p>
+                    <p className="text-sm text-muted-foreground">Enroll in a package to access your class schedule, group, and attendance records.</p>
+                    <div className="flex flex-col sm:flex-row gap-2 justify-center mt-2">
+                      <Button onClick={() => navigate("/enroll-now")}>Enroll Now</Button>
+                      <Button variant="outline" onClick={() => navigate("/free-trial")}>Book a Free Trial</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  {/* Korean Level + Package summary */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <KoreanLevelCard
+                      profileLevel={profileLevel}
+                      placementTest={placementTest}
+                      onRetake={() => navigate("/placement-test")}
+                    />
+                    {enrollments[0] && (() => {
+                      const enrollment = enrollments[0];
+                      // Use actual attendance count from fetched records for the primary package
+                      const totalUsed = attendanceDates.length;
+                      const remaining = enrollment.sessions_total - totalUsed;
+                      const extra = remaining < 0 ? Math.abs(remaining) : 0;
+                      const due = Math.round(extra * enrollment.unit_price);
+                      const curr = enrollment.currency === "EGP" ? "LE" : "$";
+                      return (
+                        <Card className={remaining <= 0 && totalUsed > 0 ? "border-green-500 border-2" : ""}>
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <Package className="h-4 w-4" aria-hidden="true" />
+                                <span className="capitalize">{enrollment.plan_type}</span> — {enrollment.duration}mo
+                              </CardTitle>
+                              <Badge variant={remaining >= 0 ? "default" : "destructive"}>
+                                {remaining >= 0 ? `${remaining} left` : `${extra} extra`}
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              {[
+                                { label: "Package", val: enrollment.sessions_total, red: false },
+                                { label: "Used", val: totalUsed, red: false },
+                                { label: remaining >= 0 ? "Remaining" : "Extra", val: remaining >= 0 ? remaining : extra, red: remaining < 0 },
+                                { label: "Due", val: `${curr}${due.toLocaleString()}`, red: due > 0 },
+                              ].map(({ label, val, red }) => (
+                                <div key={label} className={`rounded-lg p-3 text-center border ${red ? "bg-destructive/10 border-destructive/30" : "bg-muted/50 border-border"}`}>
+                                  <span className="text-[10px] text-muted-foreground block">{label}</span>
+                                  <p className={`text-lg font-bold ${red ? "text-destructive" : "text-foreground"}`}>{val}</p>
+                                </div>
+                              ))}
+                            </div>
+                            <div>
+                              <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                                <span>Sessions used</span>
+                                <span>{Math.min(totalUsed, enrollment.sessions_total)}/{enrollment.sessions_total}</span>
+                              </div>
+                              <div className="h-1.5 bg-muted rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.min(totalUsed, enrollment.sessions_total)} aria-valuemax={enrollment.sessions_total} aria-label="Sessions used">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-500 ${remaining < 0 ? "bg-destructive" : remaining <= 2 ? "bg-amber-500" : "bg-amber-400"}`}
+                                  style={{ width: `${Math.min(100, (totalUsed / enrollment.sessions_total) * 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                            {due > 0 && (
+                              <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/5 rounded-lg p-2">
+                                <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                                <span><strong>{extra}</strong> extra sessions — Due: <strong>{curr}{due.toLocaleString()}</strong></span>
+                              </div>
+                            )}
+                            {groupName && (
+                              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                                <span>Group: <strong className="text-foreground">{groupName}</strong></span>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Registration Checklist */}
+                  <RegistrationChecklist userId={userId} enrollmentId={latestEnrollmentId} items={checklistItems} onItemCompleted={handleItemCompleted} autoFocusField={autoFocusField} />
+
+                  {/* Sessions & Attendance */}
+                  <StudentAttendanceRequest userId={userId} />
+                  <UpcomingSessionsCard />
+                  <StudentGroupAttendance />
+                  <MyTrialClassCard />
+
+                  {/* Older packages — use stored counter (attendance not fetched for these) */}
+                  {enrollments.slice(1).map((enrollment) => {
+                    const totalUsed = enrollment.sessions_total - enrollment.sessions_remaining;
+                    const remaining = enrollment.sessions_remaining;
+                    const extra = remaining < 0 ? Math.abs(remaining) : 0;
+                    const due = Math.round((extra > 0 ? extra : 0) * enrollment.unit_price);
+                    const curr = enrollment.currency === "EGP" ? "LE" : "$";
+                    return (
+                      <Card key={enrollment.id}>
+                        <CardHeader className="pb-3">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-base flex items-center gap-2">
+                              <Package className="h-4 w-4" aria-hidden="true" />
+                              <span className="capitalize">{enrollment.plan_type}</span> — {enrollment.duration}mo
+                              <Badge variant="outline" className="ml-1 text-xs">Older</Badge>
+                            </CardTitle>
+                            <Badge variant={remaining >= 0 ? "secondary" : "destructive"}>
+                              {remaining >= 0 ? `${remaining} left` : `${extra} extra`}
+                            </Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {[
+                              { label: "Package", val: enrollment.sessions_total },
+                              { label: "Used", val: totalUsed },
+                              { label: remaining >= 0 ? "Remaining" : "Extra", val: remaining >= 0 ? remaining : extra },
+                              { label: "Due", val: `${curr}${due.toLocaleString()}` },
+                            ].map(({ label, val }) => (
+                              <div key={label} className="rounded-lg bg-muted/50 border border-border p-2 text-center">
+                                <span className="text-[10px] text-muted-foreground block">{label}</span>
+                                <p className="text-base font-bold text-foreground">{val}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+
+                  {attendanceDates.length > 0 && <AttendanceHistoryCard dates={attendanceDates} />}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ══════════════════════ MORE TAB ══════════════════════ */}
+          {activeTab === "more" && (
+            <div
+              id="tabpanel-more"
+              role="tabpanel"
+              aria-labelledby="tab-more"
+              className="space-y-4 outline-none"
+              tabIndex={0}
+            >
+              {/* Korean level for unenrolled */}
+              {hasNoData && (
+                <KoreanLevelCard
+                  profileLevel={profileLevel}
+                  placementTest={placementTest}
+                  onRetake={() => navigate("/placement-test")}
+                />
+              )}
+
+              {/* Progress Report + Certificate */}
               <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => window.open(`/progress-report?uid=${userId}`, '_blank')}
+                  onClick={() => window.open(`/progress-report?uid=${userId}`, "_blank")}
+                  aria-label="View and download your progress report PDF"
                   className="flex flex-col items-center gap-2 bg-card border border-border rounded-2xl p-4 hover:border-amber-300 hover:bg-amber-50 transition-all text-center"
                 >
                   <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center border border-black/10">
-                    <FileText className="h-5 w-5 text-amber-600" />
+                    <FileText className="h-5 w-5 text-amber-600" aria-hidden="true" />
                   </div>
                   <span className="text-sm font-semibold text-foreground">Progress Report</span>
                   <span className="text-xs text-muted-foreground">Download PDF</span>
                 </button>
                 <button
-                  onClick={() => window.open(`/certificate?uid=${userId}&level=${encodeURIComponent(profileLevel || 'A0')}`, '_blank')}
+                  onClick={() => window.open(`/certificate?uid=${userId}&level=${encodeURIComponent(profileLevel || "A0")}`, "_blank")}
+                  aria-label="View and download your completion certificate"
                   className="flex flex-col items-center gap-2 bg-card border border-border rounded-2xl p-4 hover:border-amber-300 hover:bg-amber-50 transition-all text-center"
                 >
                   <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center border border-black/10">
-                    <Award className="h-5 w-5 text-amber-600" />
+                    <Award className="h-5 w-5 text-amber-600" aria-hidden="true" />
                   </div>
                   <span className="text-sm font-semibold text-foreground">Certificate</span>
                   <span className="text-xs text-muted-foreground">Download PNG</span>
                 </button>
               </div>
-            </>
+
+              {/* Quick links */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Quick Links</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: "Schedule", emoji: "📅", path: "/dashboard/schedule" },
+                    { label: "Placement Test", emoji: "🎓", path: "/placement-test" },
+                    { label: "Enrollment Status", emoji: "📋", path: "/enrollment-status" },
+                    { label: "Profile Settings", emoji: "⚙️", path: "/profile" },
+                  ].map(({ label, emoji, path }) => (
+                    <button
+                      key={label}
+                      onClick={() => navigate(path)}
+                      aria-label={`Go to ${label}`}
+                      className="flex items-center gap-2 p-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 text-left transition-colors text-sm font-medium text-foreground"
+                    >
+                      <span aria-hidden="true">{emoji}</span> {label}
+                    </button>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
           )}
+
         </div>
       </main>
       <Footer />

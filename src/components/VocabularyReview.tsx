@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Volume2 } from "lucide-react";
 import { SRSCard } from "@/hooks/useSRS";
+import Korean from "@/components/Korean";
 
 interface VocabularyReviewProps {
   cards: SRSCard[];
@@ -126,7 +127,7 @@ export function VocabularyReview({
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">KOREAN</p>
-                <p className="text-5xl font-bold mb-4">{currentCard.korean}</p>
+                <Korean className="text-5xl font-bold mb-4 block">{currentCard.korean}</Korean>
                 <p className="text-lg text-muted-foreground">
                   {currentCard.romanization}
                 </p>
