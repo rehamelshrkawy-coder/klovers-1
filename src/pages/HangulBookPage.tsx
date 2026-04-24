@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock } from "lucide-react";
+import kloversMascot from "@/assets/klovers-mascot.png";
 
 /* ─── Brand tokens ─────────────────────────────── */
 const Y   = "#FFFF00";   // primary yellow
@@ -184,7 +185,7 @@ function CharacterIllustration({ h = 100, radius = 0, label = "" }: { h?: number
       position: "relative",
     }}>
       <img
-        src="/klovers-characters.png"
+        src={kloversMascot}
         alt="Klovers characters"
         style={{
           height: "100%",
