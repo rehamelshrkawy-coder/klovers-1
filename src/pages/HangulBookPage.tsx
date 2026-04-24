@@ -171,439 +171,44 @@ function BarcodeIcon() {
   );
 }
 
-function SeoulSkylineSVG({ h = 100, radius = 0 }: { h?: number; radius?: number }) {
+function CharacterIllustration({ h = 100, radius = 0, label = "" }: { h?: number; radius?: number; label?: string }) {
   return (
-    <svg viewBox="0 0 800 220" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#050508" />
-          <stop offset="100%" stopColor="#0d0d00" />
-        </linearGradient>
-      </defs>
-      <rect width="800" height="220" fill="url(#skyGrad)" />
-      {/* Stars */}
-      {[40,95,160,230,290,360,430,510,580,640,700,755].map((x,i)=>(
-        <circle key={i} cx={x} cy={8+((i*17)%22)} r={i%3===0?1.2:0.8} fill="#ffff00" opacity={0.5+(i%3)*0.15} />
-      ))}
-      {/* Moon crescent */}
-      <circle cx={720} cy={28} r={12} fill="none" stroke="#ffff00" strokeWidth="1.5" opacity="0.7" />
-      <circle cx={727} cy={25} r={10} fill="#050508" />
-      {/* Mountain */}
-      <path d="M310 195 Q360 118 400 112 Q440 118 490 195Z" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.5" opacity="0.8" />
-      {/* N Seoul Tower base */}
-      <rect x="396" y="155" width="8" height="40" fill="none" stroke="#ffff00" strokeWidth="1.5" />
-      {/* Tower middle taper */}
-      <path d="M394 135 L396 155 L404 155 L406 135Z" fill="none" stroke="#ffff00" strokeWidth="1.5" />
-      {/* Tower observation ring */}
-      <ellipse cx="400" cy="128" rx="10" ry="5" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.5" />
-      <rect x="398" y="115" width="4" height="13" fill="none" stroke="#ffff00" strokeWidth="1" />
-      {/* Tower spire */}
-      <line x1="400" y1="94" x2="400" y2="115" stroke="#ffff00" strokeWidth="1.5" />
-      <circle cx="400" cy="91" r="3" fill="#ffff00" opacity="0.9" />
-      {/* Buildings LEFT — varying heights */}
-      {[
-        {x:30, y:145, w:38, h2:75},{x:75, y:130, w:32, h2:90},{x:112, y:150, w:28, h2:70},
-        {x:145, y:120, w:42, h2:100},{x:193, y:138, w:30, h2:82},{x:228, y:155, w:26, h2:65},
-        {x:258, y:142, w:36, h2:78},
-      ].map((b,i)=>(
-        <g key={i}>
-          <rect x={b.x} y={b.y} width={b.w} height={b.h2} fill="#050508" stroke="#ffff00" strokeWidth="1" opacity={0.55+i*0.03} />
-          {/* windows */}
-          {[0,1,2].map(row=>[0,1].map(col=>(
-            <rect key={`${row}-${col}`} x={b.x+5+col*12} y={b.y+8+row*18} width={7} height={9} fill="#ffff00" opacity={Math.random()>0.4?0.35:0.08} />
-          )))}
-        </g>
-      ))}
-      {/* Buildings RIGHT */}
-      {[
-        {x:510, y:148, w:30, h2:72},{x:546, y:128, w:38, h2:92},{x:590, y:142, w:28, h2:78},
-        {x:623, y:118, w:44, h2:102},{x:673, y:135, w:32, h2:85},{x:710, y:152, w:26, h2:68},
-        {x:740, y:140, w:36, h2:80},
-      ].map((b,i)=>(
-        <g key={i}>
-          <rect x={b.x} y={b.y} width={b.w} height={b.h2} fill="#050508" stroke="#ffff00" strokeWidth="1" opacity={0.55+i*0.03} />
-          {[0,1,2].map(row=>[0,1].map(col=>(
-            <rect key={`${row}-${col}`} x={b.x+5+col*12} y={b.y+8+row*18} width={7} height={9} fill="#ffff00" opacity={Math.random()>0.4?0.35:0.08} />
-          )))}
-        </g>
-      ))}
-      {/* Han River */}
-      <path d="M0 200 Q100 194 200 198 Q350 202 400 200 Q500 198 650 202 Q720 204 800 200 L800 220 L0 220Z" fill="#080814" stroke="#ffff00" strokeWidth="0.8" opacity="0.5" />
-      {/* River reflections */}
-      {[100,280,400,520,680].map((rx,i)=>(
-        <line key={i} x1={rx-20} y1={206+i%3} x2={rx+20} y2={206+i%3} stroke="#ffff00" strokeWidth="0.5" opacity="0.25" />
-      ))}
-    </svg>
-  );
-}
-
-function PalaceSVG({ h = 100, radius = 0 }: { h?: number; radius?: number }) {
-  return (
-    <svg viewBox="0 0 800 220" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
-      <rect width="800" height="220" fill="#050508" />
-      {/* Sky stars */}
-      {[50,130,220,340,460,570,660,740].map((x,i)=>(
-        <circle key={i} cx={x} cy={12+i*4%20} r={0.9} fill="#ffff00" opacity={0.45} />
-      ))}
-      {/* Stone platform (월대) */}
-      <rect x="80" y="175" width="640" height="18" fill="#111100" stroke="#ffff00" strokeWidth="1.2" />
-      <rect x="100" y="168" width="600" height="10" fill="#0a0a00" stroke="#ffff00" strokeWidth="1" />
-      {/* Stone steps */}
-      <rect x="340" y="155" width="120" height="14" fill="#0d0d00" stroke="#ffff00" strokeWidth="1" />
-      <rect x="355" y="147" width="90" height="10" fill="#080800" stroke="#ffff00" strokeWidth="0.8" />
-      {/* Main hall body */}
-      <rect x="130" y="110" width="540" height="70" fill="#080808" stroke="#ffff00" strokeWidth="1.5" />
-      {/* Columns — 9 pillars */}
-      {[145,205,265,325,385,445,505,565,625].map((cx,i)=>(
-        <rect key={i} x={cx} y="112" width="10" height="68" fill="#050508" stroke="#ffff00" strokeWidth="1" />
-      ))}
-      {/* Frieze / decorative band */}
-      <rect x="130" y="108" width="540" height="14" fill="#0d0d00" stroke="#ffff00" strokeWidth="1" />
-      {/* Dancheong pattern on frieze (simplified) */}
-      {[140,175,210,245,280,315,350,385,420,455,490,525,560,595,630].map((fx,i)=>(
-        <rect key={i} x={fx} y="110" width="22" height="10" fill="none" stroke="#ffff00" strokeWidth="0.5" opacity="0.4" />
-      ))}
-      {/* Lower hip-and-gable roof (팔작지붕) */}
-      {/* Main roof curve */}
-      <path d="M80 115 Q160 60 400 45 Q640 60 720 115Z" fill="#050508" stroke="#ffff00" strokeWidth="2" />
-      {/* Roof edge upturned corners */}
-      <path d="M80 115 Q50 118 30 108" fill="none" stroke="#ffff00" strokeWidth="1.5" />
-      <path d="M720 115 Q750 118 770 108" fill="none" stroke="#ffff00" strokeWidth="1.5" />
-      {/* Roof ridge ornaments */}
-      <path d="M100 112 Q400 98 700 112" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.5" />
-      {/* Ridge end tiles (취두) */}
-      <path d="M80 115 L60 105 L75 102 L80 115Z" fill="#ffff00" opacity="0.7" />
-      <path d="M720 115 L740 105 L725 102 L720 115Z" fill="#ffff00" opacity="0.7" />
-      {/* Upper smaller roof */}
-      <path d="M180 85 Q400 55 620 85Z" fill="#050508" stroke="#ffff00" strokeWidth="1.5" />
-      <path d="M160 83 Q140 86 120 78" fill="none" stroke="#ffff00" strokeWidth="1.2" />
-      <path d="M640 83 Q660 86 680 78" fill="none" stroke="#ffff00" strokeWidth="1.2" />
-      {/* Roof tiles hint (horizontal lines) */}
-      {[70,80,92,106].map((ry,i)=>(
-        <path key={i} d={`M${160-i*15} ${ry} Q400 ${ry-12} ${640+i*15} ${ry}`} fill="none" stroke="#ffff00" strokeWidth="0.5" opacity="0.3" />
-      ))}
-      {/* Center roof finial */}
-      <line x1="400" y1="38" x2="400" y2="50" stroke="#ffff00" strokeWidth="2" />
-      <circle cx="400" cy="36" r="4" fill="#ffff00" opacity="0.8" />
-      {/* Lanterns hanging */}
-      {[250,400,550].map((lx,i)=>(
-        <g key={i}>
-          <line x1={lx} y1="112" x2={lx} y2="125" stroke="#ffff00" strokeWidth="0.8" opacity="0.6" />
-          <ellipse cx={lx} cy="130" rx="8" ry="11" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.6" />
-          <line x1={lx} y1="141" x2={lx} y2="147" stroke="#ffff00" strokeWidth="0.8" opacity="0.6" />
-        </g>
-      ))}
-      {/* Ground / courtyard */}
-      <rect x="0" y="193" width="800" height="27" fill="#030303" />
-      {/* Courtyard stones */}
-      {[120,200,280,360,440,520,600,680].map((sx,i)=>(
-        <rect key={i} x={sx} y="196" width="60" height="8" fill="none" stroke="#ffff00" strokeWidth="0.4" opacity="0.2" />
-      ))}
-    </svg>
-  );
-}
-
-function PalaceGateSVG({ h = 110, radius = 0 }: { h?: number; radius?: number }) {
-  return (
-    <svg viewBox="0 0 800 240" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
-      <rect width="800" height="240" fill="#050508" />
-      {/* Sky */}
-      {[60,150,260,380,500,620,720].map((x,i)=>(
-        <circle key={i} cx={x} cy={15+i*5%18} r={1} fill="#ffff00" opacity={0.4} />
-      ))}
-      {/* Stone base wall */}
-      <rect x="50" y="155" width="700" height="80" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.5" />
-      {/* Stone texture lines */}
-      {[165,175,185,195,205,215,225].map((ry,i)=>(
-        <line key={i} x1="50" y1={ry} x2="750" y2={ry} stroke="#ffff00" strokeWidth="0.4" opacity="0.2" />
-      ))}
-      {/* Vertical stone joints */}
-      {[100,150,200,250,300,350,450,500,550,600,650,700].map((sx,i)=>(
-        <line key={i} x1={sx} y1="155" x2={sx} y2="235" stroke="#ffff00" strokeWidth="0.4" opacity="0.15" />
-      ))}
-      {/* THREE ARCHED GATEWAYS */}
-      {/* Left arch */}
-      <path d="M175 235 L175 180 Q175 155 210 155 Q245 155 245 180 L245 235Z" fill="#000" stroke="#ffff00" strokeWidth="1.5" />
-      {/* Center arch (larger) */}
-      <path d="M310 235 L310 170 Q310 140 400 140 Q490 140 490 170 L490 235Z" fill="#000" stroke="#ffff00" strokeWidth="2" />
-      {/* Right arch */}
-      <path d="M555 235 L555 180 Q555 155 590 155 Q625 155 625 180 L625 235Z" fill="#000" stroke="#ffff00" strokeWidth="1.5" />
-      {/* Gate tower body */}
-      <rect x="120" y="95" width="560" height="65" fill="#080808" stroke="#ffff00" strokeWidth="1.5" />
-      {/* Tower columns */}
-      {[135,205,275,345,415,485,555,625].map((cx,i)=>(
-        <rect key={i} x={cx} y="97" width="8" height="63" fill="#050508" stroke="#ffff00" strokeWidth="0.8" />
-      ))}
-      {/* Frieze */}
-      <rect x="120" y="92" width="560" height="12" fill="#0d0d00" stroke="#ffff00" strokeWidth="1" />
-      {/* Main gate roof */}
-      <path d="M90 98 Q200 55 400 42 Q600 55 710 98Z" fill="#050508" stroke="#ffff00" strokeWidth="2" />
-      {/* Upturned corners */}
-      <path d="M90 98 Q65 102 42 90" fill="none" stroke="#ffff00" strokeWidth="1.5" />
-      <path d="M710 98 Q735 102 758 90" fill="none" stroke="#ffff00" strokeWidth="1.5" />
-      {/* Roof ridge */}
-      <path d="M110 95 Q400 82 690 95" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.5" />
-      {/* Roof tile lines */}
-      {[60,72,84,96].map((ry,i)=>(
-        <path key={i} d={`M${170-i*20} ${ry} Q400 ${ry-15} ${630+i*20} ${ry}`} fill="none" stroke="#ffff00" strokeWidth="0.5" opacity="0.25" />
-      ))}
-      {/* Finial */}
-      <line x1="400" y1="34" x2="400" y2="44" stroke="#ffff00" strokeWidth="2" />
-      <circle cx="400" cy="32" r="4" fill="#ffff00" opacity="0.85" />
-      {/* Small side roofs on flanking walls */}
-      <path d="M50 155 Q100 140 160 145" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.5" />
-      <path d="M640 145 Q700 140 750 155" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.5" />
-      {/* Ground */}
-      <rect x="0" y="235" width="800" height="5" fill="#ffff00" opacity="0.15" />
-    </svg>
-  );
-}
-
-function SeoulStreetSVG({ h = 75, radius = 0 }: { h?: number; radius?: number }) {
-  return (
-    <svg viewBox="0 0 800 200" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
-      <rect width="800" height="200" fill="#050508" />
-      {/* Perspective street lines */}
-      <path d="M0 200 L400 90 L800 200Z" fill="#080808" stroke="#ffff00" strokeWidth="0.5" opacity="0.3" />
-      <line x1="0" y1="200" x2="400" y2="90" stroke="#ffff00" strokeWidth="0.8" opacity="0.2" />
-      <line x1="800" y1="200" x2="400" y2="90" stroke="#ffff00" strokeWidth="0.8" opacity="0.2" />
-      {/* Left buildings */}
-      <rect x="0" y="40" width="160" height="160" fill="#080808" stroke="#ffff00" strokeWidth="1" opacity="0.7" />
-      <rect x="165" y="60" width="120" height="140" fill="#080808" stroke="#ffff00" strokeWidth="1" opacity="0.6" />
-      {/* Right buildings */}
-      <rect x="640" y="40" width="160" height="160" fill="#080808" stroke="#ffff00" strokeWidth="1" opacity="0.7" />
-      <rect x="515" y="60" width="120" height="140" fill="#080808" stroke="#ffff00" strokeWidth="1" opacity="0.6" />
-      {/* Left neon signs */}
-      <rect x="10" y="55" width="80" height="22" rx="3" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.5" />
-      <text x="50" y="71" textAnchor="middle" fontSize="13" fontWeight="bold" fill="#ffff00" opacity="0.9">한국</text>
-      <rect x="10" y="85" width="60" height="18" rx="3" fill="#0a0a00" stroke="#ffff00" strokeWidth="1" opacity="0.7" />
-      <text x="40" y="98" textAnchor="middle" fontSize="11" fill="#ffff00" opacity="0.7">커피</text>
-      <rect x="170" y="70" width="90" height="20" rx="3" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.2" />
-      <text x="215" y="84" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#ffff00" opacity="0.85">서울</text>
-      <rect x="175" y="98" width="70" height="16" rx="3" fill="#0a0a00" stroke="#ffff00" strokeWidth="1" opacity="0.6" />
-      <text x="210" y="110" textAnchor="middle" fontSize="10" fill="#ffff00" opacity="0.6">치킨</text>
-      {/* Right neon signs */}
-      <rect x="710" y="55" width="80" height="22" rx="3" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.5" />
-      <text x="750" y="71" textAnchor="middle" fontSize="13" fontWeight="bold" fill="#ffff00" opacity="0.9">노래방</text>
-      <rect x="720" y="85" width="60" height="18" rx="3" fill="#0a0a00" stroke="#ffff00" strokeWidth="1" opacity="0.7" />
-      <text x="750" y="98" textAnchor="middle" fontSize="11" fill="#ffff00" opacity="0.7">분식</text>
-      <rect x="520" y="70" width="90" height="20" rx="3" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.2" />
-      <text x="565" y="84" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#ffff00" opacity="0.85">편의점</text>
-      {/* Street lamp posts */}
-      <line x1="280" y1="200" x2="290" y2="100" stroke="#ffff00" strokeWidth="1.5" opacity="0.5" />
-      <path d="M290 100 Q300 90 315 92" fill="none" stroke="#ffff00" strokeWidth="1.5" opacity="0.5" />
-      <circle cx="315" cy="92" r="4" fill="#ffff00" opacity="0.7" />
-      <line x1="520" y1="200" x2="510" y2="100" stroke="#ffff00" strokeWidth="1.5" opacity="0.5" />
-      <path d="M510 100 Q500 90 485 92" fill="none" stroke="#ffff00" strokeWidth="1.5" opacity="0.5" />
-      <circle cx="485" cy="92" r="4" fill="#ffff00" opacity="0.7" />
-      {/* People silhouettes */}
-      {[320,380,420,450].map((px,i)=>(
-        <g key={i}>
-          <circle cx={px} cy={145+i*5} r={5+i} fill="#ffff00" opacity="0.25" />
-          <rect x={px-4} y={150+i*5} width={8} height={18+i*2} rx="2" fill="#ffff00" opacity="0.2" />
-        </g>
-      ))}
-      {/* Ground reflection */}
-      <rect x="0" y="185" width="800" height="15" fill="#0a0a00" />
-      <path d="M320 186 L340 186" stroke="#ffff00" strokeWidth="0.5" opacity="0.3" />
-      <path d="M460 186 L480 186" stroke="#ffff00" strokeWidth="0.5" opacity="0.3" />
-    </svg>
-  );
-}
-
-function KpopConcertSVG({ h = 75, radius = 0 }: { h?: number; radius?: number }) {
-  return (
-    <svg viewBox="0 0 800 200" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
-      <rect width="800" height="200" fill="#050508" />
-      {/* Stage back wall */}
-      <rect x="150" y="60" width="500" height="80" fill="#080808" stroke="#ffff00" strokeWidth="1" opacity="0.6" />
-      {/* Stage arch */}
-      <path d="M150 60 Q400 20 650 60" fill="none" stroke="#ffff00" strokeWidth="2.5" />
-      {/* Stage lights — spotlights from above */}
-      {[200,290,400,510,600].map((lx,i)=>(
-        <g key={i}>
-          <path d={`M${lx} 20 L${lx-30+i*5} 140 L${lx+30-i*5} 140Z`} fill="#ffff00" opacity="0.04" />
-          <line x1={lx} y1="18" x2={lx} y2="22" stroke="#ffff00" strokeWidth="3" opacity="0.8" />
-        </g>
-      ))}
-      {/* Performers on stage (3 silhouettes) */}
-      {[320,400,480].map((px,i)=>(
-        <g key={i}>
-          <circle cx={px} cy={108} r={8} fill="#ffff00" opacity="0.6" />
-          <path d={`M${px} 116 L${px-12} 140 L${px+12} 140Z`} fill="#ffff00" opacity="0.5" />
-          {/* Arms raised */}
-          <line x1={px-12} y1="122" x2={px-22} y2="110" stroke="#ffff00" strokeWidth="2" opacity="0.5" />
-          <line x1={px+12} y1="122" x2={px+22} y2="110" stroke="#ffff00" strokeWidth="2" opacity="0.5" />
-        </g>
-      ))}
-      {/* Stage floor */}
-      <rect x="150" y="138" width="500" height="8" fill="#0d0d00" stroke="#ffff00" strokeWidth="1" />
-      {/* Crowd — silhouette heads */}
-      {Array.from({length:40},((_,i)=>{
-        const cx = 20+i*19+((i%3)*5);
-        const cy = 165+((i%4)*6);
-        return <g key={i}>
-          <circle cx={cx} cy={cy} r={7+i%3} fill="#ffff00" opacity={0.15+i%3*0.05} />
-          <rect x={cx-6} y={cy+7} width={12} height={18} rx="2" fill="#ffff00" opacity={0.1} />
-          {/* Lightstick raised */}
-          <line x1={cx+3} y1={cy-8} x2={cx+3} y2={cy-22} stroke="#ffff00" strokeWidth="1.5" opacity="0.5" />
-          <ellipse cx={cx+3} cy={cy-25} rx={3} ry={5} fill="#ffff00" opacity="0.7" />
-        </g>;
-      }))}
-      {/* Screen / LED backdrop on stage */}
-      <rect x="200" y="65" width="400" height="50" fill="#0a0a00" stroke="#ffff00" strokeWidth="0.8" opacity="0.5" />
-      <text x="400" y="96" textAnchor="middle" fontSize="28" fontWeight="900" fill="#ffff00" opacity="0.3">한글</text>
-      {/* Confetti dots */}
-      {[100,200,300,500,650,700].map((cx,i)=>(
-        <circle key={i} cx={cx} cy={20+i*10%40} r={2} fill="#ffff00" opacity="0.4" />
-      ))}
-    </svg>
-  );
-}
-
-function KimchiSVG({ h = 65, radius = 0 }: { h?: number; radius?: number }) {
-  return (
-    <svg viewBox="0 0 800 200" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
-      <rect width="800" height="200" fill="#050508" />
-      {/* Ceramic pot */}
-      <ellipse cx="400" cy="80" rx="200" ry="40" fill="#0a0a00" stroke="#ffff00" strokeWidth="2" />
-      <path d="M200 80 Q180 170 210 185 Q400 200 590 185 Q620 170 600 80" fill="#080808" stroke="#ffff00" strokeWidth="2" />
-      {/* Pot rim decoration */}
-      <ellipse cx="400" cy="80" rx="200" ry="40" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.4" />
-      {/* Kimchi inside — cabbage layers */}
-      <path d="M230 88 Q280 70 320 82 Q350 90 310 98 Q270 104 230 88Z" fill="none" stroke="#ffff00" strokeWidth="1.2" opacity="0.8" />
-      <path d="M280 78 Q340 58 400 72 Q440 82 390 92 Q330 100 280 78Z" fill="none" stroke="#ffff00" strokeWidth="1.2" opacity="0.85" />
-      <path d="M350 72 Q410 52 470 68 Q510 80 460 90 Q400 100 350 72Z" fill="none" stroke="#ffff00" strokeWidth="1.2" opacity="0.8" />
-      <path d="M420 78 Q470 60 520 76 Q550 88 510 96 Q460 104 420 78Z" fill="none" stroke="#ffff00" strokeWidth="1.2" opacity="0.75" />
-      <path d="M480 88 Q520 72 560 85 Q575 95 540 102 Q500 108 480 88Z" fill="none" stroke="#ffff00" strokeWidth="1.2" opacity="0.7" />
-      {/* Kimchi juices */}
-      {[300,380,450].map((lx,i)=>(
-        <path key={i} d={`M${lx} 95 Q${lx+15} 110 ${lx+5} 130`} fill="none" stroke="#ffff00" strokeWidth="0.8" opacity="0.3" />
-      ))}
-      {/* Chopsticks */}
-      <line x1="620" y1="40" x2="550" y2="160" stroke="#ffff00" strokeWidth="3" opacity="0.7" strokeLinecap="round" />
-      <line x1="660" y1="38" x2="575" y2="158" stroke="#ffff00" strokeWidth="3" opacity="0.7" strokeLinecap="round" />
-      {/* Side decoration — sesame seeds */}
-      {[240,265,290,315,340].map((sx,i)=>(
-        <circle key={i} cx={sx} cy={96+i*3} r={1.5} fill="#ffff00" opacity="0.5" />
-      ))}
-      {/* Label */}
-      <text x="130" y="175" fontSize="18" fontWeight="900" fill="#ffff00" opacity="0.6">김치</text>
-      <text x="130" y="192" fontSize="11" fill="#ffff00" opacity="0.35">Kimchi</text>
-    </svg>
-  );
-}
-
-function HanokRoofsSVG({ h = 110, radius = 0 }: { h?: number; radius?: number }) {
-  return (
-    <svg viewBox="0 0 800 240" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
-      <rect width="800" height="240" fill="#050508" />
-      {/* Sky / stars */}
-      {[60,140,230,350,470,580,680,750].map((x,i)=>(
-        <circle key={i} cx={x} cy={10+i*4%16} r={0.9} fill="#ffff00" opacity={0.4} />
-      ))}
-      {/* Moon */}
-      <circle cx="700" cy="35" r="18" fill="none" stroke="#ffff00" strokeWidth="1.5" opacity="0.6" />
-      <circle cx="708" cy="31" r="15" fill="#050508" />
-      {/* Background mountain ridge */}
-      <path d="M0 140 Q100 80 200 95 Q300 110 400 70 Q500 30 600 55 Q700 80 800 60 L800 240 L0 240Z" fill="#070707" stroke="#ffff00" strokeWidth="0.8" opacity="0.3" />
-      {/* Hanok roofs — back row (smaller, higher) */}
-      {[
-        {cx:100, cy:155, span:110},
-        {cx:240, cy:148, span:130},
-        {cx:390, cy:152, span:120},
-        {cx:535, cy:148, span:130},
-        {cx:680, cy:155, span:110},
-      ].map((r,i)=>(
-        <g key={i}>
-          {/* Roof curve */}
-          <path d={`M${r.cx-r.span/2} ${r.cy} Q${r.cx} ${r.cy-35} ${r.cx+r.span/2} ${r.cy}`} fill="#060606" stroke="#ffff00" strokeWidth="1.2" opacity="0.6" />
-          {/* Upturned eave ends */}
-          <path d={`M${r.cx-r.span/2} ${r.cy} Q${r.cx-r.span/2-12} ${r.cy+8} ${r.cx-r.span/2-18} ${r.cy+4}`} fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.5" />
-          <path d={`M${r.cx+r.span/2} ${r.cy} Q${r.cx+r.span/2+12} ${r.cy+8} ${r.cx+r.span/2+18} ${r.cy+4}`} fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.5" />
-          {/* Tile ridge */}
-          <path d={`M${r.cx-r.span/2+10} ${r.cy-2} Q${r.cx} ${r.cy-38} ${r.cx+r.span/2-10} ${r.cy-2}`} fill="none" stroke="#ffff00" strokeWidth="0.6" opacity="0.3" />
-          {/* Wall below roof */}
-          <rect x={r.cx-r.span/2+10} y={r.cy} width={r.span-20} height={35} fill="#050508" stroke="#ffff00" strokeWidth="0.8" opacity="0.4" />
-        </g>
-      ))}
-      {/* Hanok roofs — front row (larger, lower) */}
-      {[
-        {cx:50, cy:195, span:130},
-        {cx:205, cy:188, span:150},
-        {cx:370, cy:192, span:140},
-        {cx:530, cy:188, span:150},
-        {cx:690, cy:195, span:130},
-      ].map((r,i)=>(
-        <g key={i}>
-          <path d={`M${r.cx-r.span/2} ${r.cy} Q${r.cx} ${r.cy-45} ${r.cx+r.span/2} ${r.cy}`} fill="#070707" stroke="#ffff00" strokeWidth="1.8" opacity="0.85" />
-          <path d={`M${r.cx-r.span/2} ${r.cy} Q${r.cx-r.span/2-15} ${r.cy+10} ${r.cx-r.span/2-22} ${r.cy+5}`} fill="none" stroke="#ffff00" strokeWidth="1.5" opacity="0.75" />
-          <path d={`M${r.cx+r.span/2} ${r.cy} Q${r.cx+r.span/2+15} ${r.cy+10} ${r.cx+r.span/2+22} ${r.cy+5}`} fill="none" stroke="#ffff00" strokeWidth="1.5" opacity="0.75" />
-          {/* Tile lines */}
-          {[0,1,2].map(tl=>(
-            <path key={tl} d={`M${r.cx-r.span/2+tl*15} ${r.cy-tl*5} Q${r.cx} ${r.cy-45+tl*5} ${r.cx+r.span/2-tl*15} ${r.cy-tl*5}`} fill="none" stroke="#ffff00" strokeWidth="0.4" opacity="0.2" />
-          ))}
-          {/* Ridge ornament */}
-          <circle cx={r.cx} cy={r.cy-47} r={3} fill="#ffff00" opacity="0.6" />
-          {/* Wall */}
-          <rect x={r.cx-r.span/2+15} y={r.cy} width={r.span-30} height={45} fill="#040404" stroke="#ffff00" strokeWidth="1" opacity="0.5" />
-          {/* Door */}
-          <rect x={r.cx-10} y={r.cy+20} width={20} height={25} rx="2" fill="none" stroke="#ffff00" strokeWidth="0.8" opacity="0.4" />
-          {/* Window lattice */}
-          <rect x={r.cx-r.span/2+25} y={r.cy+15} width={18} height={18} fill="none" stroke="#ffff00" strokeWidth="0.6" opacity="0.3" />
-          <line x1={r.cx-r.span/2+34} y1={r.cy+15} x2={r.cx-r.span/2+34} y2={r.cy+33} stroke="#ffff00" strokeWidth="0.4" opacity="0.25" />
-          <line x1={r.cx-r.span/2+25} y1={r.cy+24} x2={r.cx-r.span/2+43} y2={r.cy+24} stroke="#ffff00" strokeWidth="0.4" opacity="0.25" />
-        </g>
-      ))}
-      {/* Ground */}
-      <rect x="0" y="235" width="800" height="5" fill="#ffff00" opacity="0.1" />
-    </svg>
-  );
-}
-
-function KoreanFoodSVG({ h = 65, radius = 0 }: { h?: number; radius?: number }) {
-  return (
-    <svg viewBox="0 0 800 200" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
-      <rect width="800" height="200" fill="#050508" />
-      {/* Main bibimbap bowl (top-down view) */}
-      <circle cx="400" cy="105" r="85" fill="#080808" stroke="#ffff00" strokeWidth="2.5" />
-      <circle cx="400" cy="105" r="72" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.4" />
-      {/* Bowl sections — ingredients */}
-      {/* Rice base */}
-      <circle cx="400" cy="105" r="30" fill="#0d0d00" stroke="#ffff00" strokeWidth="0.8" opacity="0.5" />
-      {/* Spinach */}
-      <path d="M400 105 L400 37 A68 68 0 0 1 459 73Z" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.6" />
-      {/* Bean sprouts */}
-      <path d="M400 105 L459 73 A68 68 0 0 1 468 140Z" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.5" />
-      {/* Carrot */}
-      <path d="M400 105 L468 140 A68 68 0 0 1 400 173Z" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.6" />
-      {/* Zucchini */}
-      <path d="M400 105 L400 173 A68 68 0 0 1 332 140Z" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.5" />
-      {/* Beef */}
-      <path d="M400 105 L332 140 A68 68 0 0 1 341 73Z" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.6" />
-      {/* Mushroom */}
-      <path d="M400 105 L341 73 A68 68 0 0 1 400 37Z" fill="none" stroke="#ffff00" strokeWidth="1" opacity="0.5" />
-      {/* Egg on top (center) */}
-      <circle cx="400" cy="105" r="18" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.5" />
-      <circle cx="400" cy="105" r="8" fill="#ffff00" opacity="0.5" />
-      {/* Sesame seeds */}
-      {[370,390,410,430,380,420].map((sx,i)=>(
-        <circle key={i} cx={sx} cy={68+i*8} r={1.5} fill="#ffff00" opacity="0.4" />
-      ))}
-      {/* Spoon */}
-      <path d="M550 40 Q560 60 550 80 Q540 95 545 105 L555 170" fill="none" stroke="#ffff00" strokeWidth="3" strokeLinecap="round" opacity="0.7" />
-      <ellipse cx="552" cy="72" rx="14" ry="20" fill="none" stroke="#ffff00" strokeWidth="2" opacity="0.6" />
-      {/* Chopsticks */}
-      <line x1="620" y1="30" x2="580" y2="175" stroke="#ffff00" strokeWidth="2.5" opacity="0.65" strokeLinecap="round" />
-      <line x1="655" y1="30" x2="605" y2="175" stroke="#ffff00" strokeWidth="2.5" opacity="0.65" strokeLinecap="round" />
-      {/* Side dishes (small bowls) */}
-      <ellipse cx="160" cy="105" rx="60" ry="35" fill="#080808" stroke="#ffff00" strokeWidth="1.5" opacity="0.7" />
-      <text x="160" y="112" textAnchor="middle" fontSize="14" fill="#ffff00" opacity="0.5">반찬</text>
-      <ellipse cx="640" cy="105" rx="60" ry="35" fill="#080808" stroke="#ffff00" strokeWidth="1.5" opacity="0.7" />
-      <text x="640" y="112" textAnchor="middle" fontSize="14" fill="#ffff00" opacity="0.5">국</text>
-      {/* Labels */}
-      <text x="400" y="185" textAnchor="middle" fontSize="14" fontWeight="900" fill="#ffff00" opacity="0.5">비빔밥</text>
-    </svg>
+    <div style={{
+      height: `${h}px`,
+      borderRadius: `${radius}px`,
+      overflow: "hidden",
+      background: "#f5f0e8",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+    }}>
+      <img
+        src="/klovers-characters.png"
+        alt="Klovers characters"
+        style={{
+          height: "100%",
+          width: "100%",
+          objectFit: "contain",
+          objectPosition: "center bottom",
+          display: "block",
+        }}
+      />
+      {label && (
+        <div style={{
+          position: "absolute",
+          bottom: "6px",
+          left: 0,
+          right: 0,
+          textAlign: "center",
+          fontSize: "9px",
+          fontWeight: 700,
+          color: "#111",
+          letterSpacing: "2px",
+          opacity: 0.6,
+        }}>{label}</div>
+      )}
+    </div>
   );
 }
 
@@ -995,7 +600,7 @@ function HistoryAr() {
 
       {/* Photo header */}
       <div style={{ marginBottom:"10px", borderRadius:"10px", overflow:"hidden" }}>
-        <PalaceGateSVG h={110} radius={10} />
+        <CharacterIllustration h={110} radius={10} />
       </div>
       <DancheongBorder />
 
@@ -1045,7 +650,7 @@ function SejongAr() {
       <div style={{ background:BK, borderRadius:"14px", padding:"16px", marginBottom:"12px", display:"grid", gridTemplateColumns:"120px 1fr", gap:"14px" }}>
         {/* Portrait — real palace photo */}
         <div style={{ borderRadius:"10px", overflow:"hidden", border:`3px solid ${Y}`, display:"flex", flexDirection:"column", minHeight:"130px" }}>
-          <PalaceSVG h={100} radius={0} />
+          <CharacterIllustration h={100} radius={0} />
           <div style={{ background:"#1a1a00", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"6px", flex:1 }}>
             <div style={{ fontSize:"18px", fontWeight:900, color:Y, direction:"ltr" }}>세종대왕</div>
             <div style={{ fontSize:"11px", color:"#888", marginTop:"1px" }}>سيجونغ الكبير</div>
@@ -1120,7 +725,7 @@ function CultureAr() {
 
         {/* K-Drama */}
         <div style={{ background:BK, borderRadius:"12px", overflow:"hidden" }}>
-          <SeoulStreetSVG h={75} radius={0} />
+          <CharacterIllustration h={75} radius={0} />
           <div style={{ padding:"10px" }}>
             <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>المسلسلات الكورية (K-Drama)</div>
             <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.7 }}>
@@ -1136,7 +741,7 @@ function CultureAr() {
 
         {/* K-Pop */}
         <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
-          <KpopConcertSVG h={75} radius={0} />
+          <CharacterIllustration h={75} radius={0} />
           <div style={{ padding:"10px" }}>
             <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>موسيقى البوب الكوري (K-Pop)</div>
             <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.7 }}>
@@ -1152,7 +757,7 @@ function CultureAr() {
 
         {/* Food */}
         <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
-          <KimchiSVG h={65} radius={0} />
+          <CharacterIllustration h={65} radius={0} />
           <div style={{ padding:"10px" }}>
           <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"4px" }}>المطبخ الكوري</div>
           <div style={{ fontSize:"11px", color:"#555", lineHeight:1.8 }}>
@@ -1338,7 +943,7 @@ function CoverAr() {
 
         {/* Full-bleed cinematic photo */}
         <div style={{ width:"100%", position:"relative", marginBottom:"0" }}>
-          <SeoulSkylineSVG h={100} radius={0} />
+          <CharacterIllustration h={100} radius={0} />
         </div>
 
         {/* Dancheong colour band bottom */}
@@ -2106,7 +1711,7 @@ function HistoryEn() {
 
       {/* Photo header */}
       <div style={{ marginBottom:"10px", borderRadius:"10px", overflow:"hidden" }}>
-        <HanokRoofsSVG h={110} radius={10} />
+        <CharacterIllustration h={110} radius={10} />
       </div>
       <DancheongBorder />
 
@@ -2151,7 +1756,7 @@ function SejongEn() {
 
       <div style={{ background:BK, borderRadius:"14px", padding:"16px", marginBottom:"12px", display:"grid", gridTemplateColumns:"120px 1fr", gap:"14px" }}>
         <div style={{ borderRadius:"10px", overflow:"hidden", border:`3px solid ${Y}`, display:"flex", flexDirection:"column", minHeight:"130px" }}>
-          <PalaceSVG h={100} radius={0} />
+          <CharacterIllustration h={100} radius={0} />
           <div style={{ background:"#1a1a00", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"6px", flex:1 }}>
             <div style={{ fontSize:"18px", fontWeight:900, color:Y }}>세종대왕</div>
             <div style={{ fontSize:"11px", color:"#888", marginTop:"1px" }}>Sejong the Great</div>
@@ -2221,7 +1826,7 @@ function CultureEn() {
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
         <div style={{ background:BK, borderRadius:"12px", overflow:"hidden" }}>
-          <SeoulStreetSVG h={75} radius={0} />
+          <CharacterIllustration h={75} radius={0} />
           <div style={{ padding:"10px" }}>
             <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>K-Drama</div>
             <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.7 }}>
@@ -2236,7 +1841,7 @@ function CultureEn() {
         </div>
 
         <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
-          <KpopConcertSVG h={75} radius={0} />
+          <CharacterIllustration h={75} radius={0} />
           <div style={{ padding:"10px" }}>
             <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>K-Pop</div>
             <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.7 }}>
@@ -2251,7 +1856,7 @@ function CultureEn() {
         </div>
 
         <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
-          <KoreanFoodSVG h={65} radius={0} />
+          <CharacterIllustration h={65} radius={0} />
           <div style={{ padding:"10px" }}>
           <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"4px" }}>Korean Food</div>
           <div style={{ fontSize:"11px", color:"#555", lineHeight:1.7 }}>
@@ -2434,7 +2039,7 @@ function CoverEn() {
 
         {/* Full-bleed cinematic photo */}
         <div style={{ width:"100%", position:"relative" }}>
-          <PalaceSVG h={100} radius={0} />
+          <CharacterIllustration h={100} radius={0} />
         </div>
 
         {/* Dancheong colour band bottom */}
