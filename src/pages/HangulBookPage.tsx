@@ -406,8 +406,8 @@ function Page({ children, dir = "ltr" }: { children: React.ReactNode; dir?: "ltr
       <div style={{ position:"absolute", top:0, left:0, right:0, height:"9px", background:Y }} />
       {/* black bottom stripe */}
       <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"6px", background:BK }} />
-      {/* yellow side bar */}
-      <div style={{ position:"absolute", top:"9px", bottom:"6px", left:0, width:"5px", background:Y }} />
+      {/* yellow side bar — right edge for RTL, left edge for LTR */}
+      <div style={{ position:"absolute", top:"9px", bottom:"6px", [dir === "rtl" ? "right" : "left"]:0, width:"5px", background:Y }} />
 
       <div style={{ marginTop:"8mm" }}>{children}</div>
     </div>
@@ -612,7 +612,7 @@ function HistoryAr() {
           { era:"١٤٤٣ م 🌟", icon:"👑", title:"ثورة الملك سيجونغ", body:"أدرك الملك سيجونغ أن هذا ظلم بيّن. قال: «كيف يمكن لشعب أن يحكم نفسه إذا لم يستطع القراءة؟» فأسس مجمعاً من ثمانية علماء نوابغ في «قاعة الحكماء» (집현전) وعملوا سنوات في سرية تامة لاختراع أبجدية جديدة تناسب الأصوات الكورية تماماً." },
           { era:"١٤٤٦ م", icon:"📚", title:"إعلان هونمينجونغأوم", body:"أُعلن عن الأبجدية الجديدة تحت اسم «훈민정음» (هونمينجونغأوم) بمعنى «الأصوات الصحيحة لتعليم الشعب». واجه الملك معارضة شديدة من الطبقة الحاكمة التي أرادت الإبقاء على امتيازاتها — لكنه أصرّ. واليوم يُحتفل بيوم الهانغول كل عام في التاسع من أكتوبر." },
         ].map((item, i) => (
-          <div key={i} style={{ display:"flex", gap:"12px", marginBottom:"10px", alignItems:"flex-start", flexDirection:"row-reverse" }}>
+          <div key={i} style={{ display:"flex", gap:"12px", marginBottom:"10px", alignItems:"flex-start" }}>
             <div style={{ width:"36px", height:"36px", background:Y, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px", flexShrink:0, zIndex:1 }}>{item.icon}</div>
             <div style={{ flex:1, background: i===2?"#111":"#f9f9f9", border:`2px solid ${i===2?Y:"#e5e5e5"}`, borderRadius:"10px", padding:"10px 12px" }}>
               <div style={{ fontSize:"11px", fontWeight:700, color:i===2?Y:"#888", marginBottom:"2px" }}>{item.era}</div>
