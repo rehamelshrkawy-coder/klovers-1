@@ -2742,9 +2742,9 @@ export default function HangulBookPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { navigate("/login", { replace: true }); return; }
 
-      // Admin-only preview — only admin_users may access this page
+      // Admin-only preview — only users with role=admin may access this page
       const { data: adminRow } = await supabase
-        .from("admin_users").select("user_id").eq("user_id", user.id).maybeSingle();
+        .from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
       if (!cancelled) setAccess(adminRow ? "granted" : "denied");
     })();
     return () => { cancelled = true; };
