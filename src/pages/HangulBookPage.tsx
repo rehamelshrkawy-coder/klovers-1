@@ -2742,21 +2742,10 @@ export default function HangulBookPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { navigate("/login", { replace: true }); return; }
 
-      // Admin bypass
+      // Admin-only preview — only admin_users may access this page
       const { data: adminRow } = await supabase
         .from("admin_users").select("user_id").eq("user_id", user.id).maybeSingle();
-      if (adminRow) { if (!cancelled) setAccess("granted"); return; }
-
-      // Student: must have an assignment with available_from ≤ now
-      const { data: assignment } = await supabase
-        .from("book_assignments")
-        .select("available_from")
-        .eq("user_id", user.id)
-        .eq("book_id", "hangul-1")
-        .lte("available_from", new Date().toISOString())
-        .maybeSingle();
-
-      if (!cancelled) setAccess(assignment ? "granted" : "denied");
+      if (!cancelled) setAccess(adminRow ? "granted" : "denied");
     })();
     return () => { cancelled = true; };
   }, []);
