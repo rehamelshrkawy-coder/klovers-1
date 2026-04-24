@@ -7,6 +7,12 @@ interface SEOProps {
   ogImage?: string;
   type?: "website" | "article";
   noindex?: boolean;
+  /**
+   * Pass an Arabic-language URL when this page has an Arabic equivalent.
+   * Emits hreflang="ar" + hreflang="x-default" link tags for Google.
+   * If omitted, no hreflang tags are emitted (correct for pages with no AR pair).
+   */
+  hreflangAr?: string;
 }
 
 const BASE_URL = "https://kloversegy.com";
@@ -22,6 +28,7 @@ export const useSEO = ({
   ogImage = DEFAULT_IMAGE,
   type = "website",
   noindex = false,
+  hreflangAr,
 }: SEOProps) => {
   useEffect(() => {
     const fullTitle = `${title} | Klovers`;
@@ -72,10 +79,27 @@ export const useSEO = ({
     // og:url always matches canonical
     setMeta('meta[property="og:url"]', "content", canonicalHref);
 
+    // hreflang — emit only when an Arabic pair URL is provided
+    const hreflangEls: HTMLLinkElement[] = [];
+    if (hreflangAr) {
+      const createHreflang = (lang: string, href: string) => {
+        const el = document.createElement("link");
+        el.rel = "alternate";
+        el.setAttribute("hreflang", lang);
+        el.href = href;
+        document.head.appendChild(el);
+        hreflangEls.push(el);
+      };
+      createHreflang("en", canonicalHref);
+      createHreflang("ar", hreflangAr);
+      createHreflang("x-default", canonicalHref);
+    }
+
     // Cleanup: restore defaults on unmount
     return () => {
       document.title = SITE_NAME;
       setMeta('meta[name="description"]', "content", DEFAULT_DESC);
+      hreflangEls.forEach(el => el.remove());
     };
-  }, [title, description, canonical, ogImage, type]);
+  }, [title, description, canonical, ogImage, type, hreflangAr]);
 };
