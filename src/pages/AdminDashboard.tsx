@@ -61,6 +61,7 @@ const ImageAuditPanel = lazy(() => import("@/components/admin/ImageAuditPanel"))
 const LeadsPanel = lazy(() => import("@/components/admin/LeadsPanel").catch(() => import("@/components/admin/LeadsPanel")));
 const LeagueUsersPanel = lazy(() => import("@/components/admin/LeagueUsersPanel"));
 const LeadFunnelPanel = lazy(() => import("@/components/admin/LeadFunnelPanel"));
+const BookAssignmentManager = lazy(() => import("@/components/admin/BookAssignmentManager"));
 
 const TabLoader = () => (
   <div role="status" aria-label="Loading content" className="flex items-center justify-center py-20">
@@ -893,7 +894,7 @@ const AdminDashboard = () => {
 
   const TAB_GROUPS: { id: string; label: string; icon: typeof Users; tabs: string[] }[] = [
     { id: "ops",     label: "Operations", icon: BarChart3, tabs: ["students", "enrollments", "leads", "trials", "lead-funnel", "manage", "sales", "promos"] },
-    { id: "learn",   label: "Learning",   icon: Users,     tabs: ["group-attendance", "group-matcher", "placement-tests", "session-attendance", "preferences", "league-users"] },
+    { id: "learn",   label: "Learning",   icon: Users,     tabs: ["group-attendance", "group-matcher", "placement-tests", "session-attendance", "preferences", "league-users", "books"] },
     { id: "content", label: "Content",    icon: Sparkles,  tabs: ["blog", "seo-orchestration", "image-audit", "campaigns"] },
     { id: "config",  label: "Config",     icon: Settings,  tabs: ["notifications", "scheduling", "availability", "settings"] },
   ];
@@ -1285,6 +1286,11 @@ const AdminDashboard = () => {
                 {inActiveGroup("league-users") && (
                   <TabsTrigger value="league-users" className={TAB_CLS}>
                     <Trophy className="h-3.5 w-3.5" /> Leagues
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("books") && (
+                  <TabsTrigger value="books" className={TAB_CLS}>
+                    <BookOpen className="h-3.5 w-3.5" /> Books
                   </TabsTrigger>
                 )}
                 {inActiveGroup("blog") && (
@@ -2189,6 +2195,15 @@ const AdminDashboard = () => {
               <TabErrorBoundary name="League Users">
                 <Suspense fallback={<TabLoader />}>
                   <LeagueUsersPanel />
+                </Suspense>
+              </TabErrorBoundary>
+            </TabsContent>
+
+            {/* BOOKS TAB */}
+            <TabsContent value="books">
+              <TabErrorBoundary name="Books">
+                <Suspense fallback={<TabLoader />}>
+                  <BookAssignmentManager />
                 </Suspense>
               </TabErrorBoundary>
             </TabsContent>
