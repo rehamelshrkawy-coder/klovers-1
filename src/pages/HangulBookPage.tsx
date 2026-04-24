@@ -427,6 +427,27 @@ function SHead({ title, subtitle }: { title: string; subtitle?: string }) {
 }
 
 /* ══════════════════════════════════════════════════
+   STROKE ORDER TIP
+══════════════════════════════════════════════════ */
+function StrokeOrderTip({ lang }: { lang: "ar" | "en" }) {
+  const isAr = lang === "ar";
+  return (
+    <div style={{ background:"#fff9f0", border:"2px solid #f97316", borderRadius:"8px", padding:"7px 12px", fontSize:"11px", color:"#9a3412", marginBottom:"7px" }}>
+      <strong>✍️ {isAr ? "ترتيب الكتابة الصحيح:" : "Correct stroke order:"}</strong>{" "}
+      {isAr
+        ? "اكتب دائماً من الأعلى للأسفل ← ثم من اليسار لليمين. هذا هو ترتيب كل الحروف الكورية بدون استثناء."
+        : "Always write top → bottom, then left → right. This rule applies to every single Korean letter without exception."}
+      <div style={{ display:"flex", gap:"10px", marginTop:"5px", direction:"ltr" }}>
+        {["ㄱ(2)","ㄴ(2)","ㄷ(3)","ㄹ(5)","ㅁ(4)","ㅂ(4)","ㅅ(2)"].map(c=>(
+          <span key={c} style={{ background:"#f97316", color:"#fff", fontSize:"10px", fontWeight:700, padding:"2px 6px", borderRadius:"4px" }}>{c}</span>
+        ))}
+        {isAr ? null : <span style={{ fontSize:"10px", color:"#9a3412" }}>(number = stroke count)</span>}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
    CONSONANT CARD — pure single language
 ══════════════════════════════════════════════════ */
 function ConsCard({ c, lang }: { c: typeof CONSONANTS[0]; lang: Lang }) {
@@ -451,6 +472,10 @@ function ConsCard({ c, lang }: { c: typeof CONSONANTS[0]; lang: Lang }) {
         <div style={{ fontSize:"44px", color:Y, fontWeight:900, lineHeight:1 }}>{c.char}</div>
         <div style={{ fontSize:"11px", color:"#ccc", marginTop:"1px" }}>{c.roman}</div>
         <div style={{ fontSize:"18px", marginTop:"3px" }}>{c.emoji}</div>
+        <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.5)", marginTop:"2px", letterSpacing:"0.5px" }}>
+          {/* stroke direction */}
+          {"↓→"} strokes
+        </div>
       </div>
       {/* Info — pure target language */}
       <div>
@@ -1053,6 +1078,31 @@ function WelcomeAr() {
           </div>
         ))}
       </div>
+
+      {/* Buzan: letter family tree */}
+      <div style={{ marginTop:"8px", background:BK, borderRadius:"10px", padding:"10px" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>🧬 عائلات الحروف — كيف تتشابه؟</div>
+        <div style={{ display:"flex", gap:"10px", flexWrap:"wrap", direction:"ltr" }}>
+          {[
+            { base:"ㄱ", derived:["ㅋ","ㄲ"], label:"g-family" },
+            { base:"ㄷ", derived:["ㅌ","ㄸ"], label:"d-family" },
+            { base:"ㅂ", derived:["ㅍ","ㅃ"], label:"b-family" },
+            { base:"ㅅ", derived:["ㅆ"], label:"s-family" },
+            { base:"ㅈ", derived:["ㅊ","ㅉ"], label:"j-family" },
+          ].map(f=>(
+            <div key={f.base} style={{ display:"flex", alignItems:"center", gap:"4px" }}>
+              <div style={{ background:Y, color:BK, fontWeight:900, fontSize:"16px", borderRadius:"6px", padding:"4px 8px" }}>{f.base}</div>
+              <span style={{ color:"#555", fontSize:"11px" }}>→</span>
+              {f.derived.map(d=>(
+                <div key={d} style={{ background:"#222", color:"#ccc", fontWeight:900, fontSize:"14px", borderRadius:"6px", padding:"3px 7px", border:`1px solid ${Y}44` }}>{d}</div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize:"10px", color:"#666", marginTop:"5px" }}>
+          الحرف الأساسي (أصفر) يكتسب شدة بإضافة خطوط — ㄱ→ㅋ (نفخة هواء)، ㄱ→ㄲ (مضاعف/مشدّد)
+        </div>
+      </div>
     </Page>
   );
 }
@@ -1074,6 +1124,7 @@ function TocAr() {
     { n:"١٢", title:"أساسيات المسلسلات الكورية",     icon:"🎬", page:14 },
     { n:"١٣", title:"تمارين تطبيقية",                icon:"✏️", page:15 },
     { n:"١٤", title:"مفتاح الإجابات والمرجع السريع", icon:"🏆", page:16 },
+    { n:"١٥", title:"ملحق المفردات — أكثر ٥٠ كلمة", icon:"📖", page:17 },
   ];
   return (
     <Page dir="rtl">
@@ -1121,7 +1172,7 @@ function TocAr() {
 function ConsonantsAr({ slice, page }: { slice:[number,number]; page:number }) {
   const count = slice[1] - slice[0];
   const kpopLyrics = page === 1
-    ? { lyric:"사랑해", rom:"sa-rang-hae", meaning:"أحبك", song:"BTS — Boy In Luv" }
+    ? { lyric:"나비야", rom:"نا-بي-يا", meaning:"يا فراشة", song:"أغنية شعبية كورية" }
     : { lyric:"고마워", rom:"go-ma-wo", meaning:"شكراً", song:"IU — Palette" };
   return (
     <Page dir="rtl">
@@ -1130,6 +1181,7 @@ function ConsonantsAr({ slice, page }: { slice:[number,number]; page:number }) {
       <div style={{ background:"#f0fff4", border:"2px solid #22c55e", borderRadius:"8px", padding:"7px 10px", fontSize:"11px", color:"#166534", marginBottom:"7px", fontWeight:700 }}>
         ✅ بنهاية هذه الصفحة ستتمكن من: قراءة ونطق <strong>{count}</strong> حروف كورية جديدة وكتابتها بنفسك!
       </div>
+      <StrokeOrderTip lang="ar" />
       <div style={{ background:YL, borderRadius:"8px", padding:"6px 10px", fontSize:"11px", color:BK2, marginBottom:"8px" }}>
         💡 هناك ١٤ حرفاً ساكناً أساسياً، و٥ حروف ساكنة مُشدَّدة (مع نفخة هواء). تعلّم الأساسية أولاً!
       </div>
@@ -1159,7 +1211,62 @@ function ConsonantsAr({ slice, page }: { slice:[number,number]; page:number }) {
         <div style={{ fontSize:"11px", color:GD, marginBottom:"5px" }}>حاول كتابة اسمك الأول بالحروف الكورية التي تعلمتها:</div>
         <div style={{ height:"24px", border:"1px dashed #aaa", borderRadius:"4px", background:"#fff" }} />
       </div>
+      <div style={{ background:"#fef9ec", border:"1px solid #f59e0b", borderRadius:"6px", padding:"5px 10px", marginTop:"4px", fontSize:"10px", color:"#78350f" }}>
+        🇪🇬 <strong>بالعامية المصرية:</strong> الحرف ㄱ = زي حرف 'ك' أو 'ج' المصرية — جرّب تقول 'كتاب' وحس بلسانك!
+      </div>
     </Page>
+  );
+}
+
+function MiniReadingStripAr() {
+  const words = [
+    { k:"나", r:"نا", m:"أنا" },
+    { k:"바나나", r:"با-نا-نا", m:"موز" },
+    { k:"고기", r:"غو-كي", m:"لحم" },
+    { k:"나비", r:"نا-بي", m:"فراشة" },
+    { k:"사다", r:"سا-دا", m:"يشتري" },
+  ];
+  return (
+    <div style={{ background:"#1a2744", border:"2px solid #60a5fa", borderRadius:"10px", padding:"10px 12px", marginTop:"8px" }}>
+      <div style={{ fontSize:"11px", fontWeight:800, color:"#93c5fd", marginBottom:"6px" }}>
+        🎉 يمكنك الآن قراءة كلمات حقيقية! جرّب:
+      </div>
+      <div style={{ display:"flex", gap:"8px", flexWrap:"wrap", direction:"ltr" }}>
+        {words.map(w => (
+          <div key={w.k} style={{ background:"#0f172a", borderRadius:"8px", padding:"6px 10px", textAlign:"center" }}>
+            <div style={{ fontSize:"20px", color:"#fbbf24", fontWeight:900 }}>{w.k}</div>
+            <div style={{ fontSize:"10px", color:"#60a5fa" }}>{w.r}</div>
+            <div style={{ fontSize:"10px", color:"#94a3b8", direction:"rtl" }}>{w.m}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MiniReadingStripEn() {
+  const words = [
+    { k:"나", r:"na", m:"I / me" },
+    { k:"바나나", r:"ba-na-na", m:"banana" },
+    { k:"고기", r:"go-gi", m:"meat" },
+    { k:"나비", r:"na-bi", m:"butterfly" },
+    { k:"사다", r:"sa-da", m:"to buy" },
+  ];
+  return (
+    <div style={{ background:"#1a2744", border:"2px solid #60a5fa", borderRadius:"10px", padding:"10px 12px", marginTop:"8px" }}>
+      <div style={{ fontSize:"11px", fontWeight:800, color:"#93c5fd", marginBottom:"6px" }}>
+        🎉 You can now read real Korean words! Try these:
+      </div>
+      <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
+        {words.map(w => (
+          <div key={w.k} style={{ background:"#0f172a", borderRadius:"8px", padding:"6px 10px", textAlign:"center" }}>
+            <div style={{ fontSize:"20px", color:"#fbbf24", fontWeight:900 }}>{w.k}</div>
+            <div style={{ fontSize:"10px", color:"#60a5fa" }}>{w.r}</div>
+            <div style={{ fontSize:"10px", color:"#94a3b8" }}>{w.m}</div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -1167,6 +1274,9 @@ function VowelsAr() {
   return (
     <Page dir="rtl">
       <SHead title="حروف المد (모음)" subtitle="حروف المد لا تقف وحدها — تحتاج دائماً حرفاً ساكناً" />
+      <div style={{ background:"#f0fff4", border:"2px solid #22c55e", borderRadius:"8px", padding:"7px 10px", fontSize:"11px", color:"#166534", marginBottom:"7px", fontWeight:700 }}>
+        ✅ بنهاية هذه الصفحة ستتمكن من: قراءة ونطق ١٠ حروف مد كورية وتكوين مقاطع كاملة!
+      </div>
       <div style={{ background:GL, borderRadius:"8px", padding:"6px 10px", fontSize:"11px", color:GD, marginBottom:"8px", fontWeight:700 }}>
         🌟 إذا بدأت الكلمة بصوت مدّي، نضع الحرف الصامت ㅇ أمامه: مثال → أ = 아 (ㅇ + ㅏ)
       </div>
@@ -1180,6 +1290,7 @@ function VowelsAr() {
           <div style={{ fontSize:"11px", color:"#888", marginTop:"3px" }}>امسح الكود أو زر: <span style={{color:Y}}>klovers.academy/audio</span></div>
         </div>
       </div>
+      <MiniReadingStripAr />
     </Page>
   );
 }
@@ -1391,8 +1502,8 @@ function DoubleBatchimAr() {
 
       {/* Table */}
       <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>جدول أشهر الباتشيمات المزدوجة</div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"6px", marginBottom:"10px" }}>
-        {GYEOP.map((g,i)=>(
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"6px", marginBottom:"6px" }}>
+        {GYEOP.slice(0, 3).map((g,i)=>(
           <div key={i} style={{
             background: i%2===0 ? BK : BK2,
             borderRadius:"10px", padding:"10px 8px",
@@ -1409,6 +1520,9 @@ function DoubleBatchimAr() {
             </div>
           </div>
         ))}
+      </div>
+      <div style={{ fontSize:"11px", color:"#888", textAlign:"center", marginBottom:"6px" }}>
+        + 5 more pairs covered in Book 2 →
       </div>
 
       <div style={{ background:GL, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
@@ -1469,8 +1583,17 @@ function PracticeAr() {
         </div>
       </div>
 
+      <div style={{ display:"flex", gap:"8px", marginBottom:"8px" }}>
+        {["المستوى ١ — /٥","المستوى ٢ — /٥","المستوى ٣ — /٥"].map((l,i)=>(
+          <div key={i} style={{ flex:1, background:"#111", border:`1px solid ${Y}33`, borderRadius:"8px", padding:"6px", textAlign:"center" }}>
+            <div style={{ fontSize:"16px" }}>{"⭐".repeat(i+1)}</div>
+            <div style={{ fontSize:"10px", color:"#666", marginTop:"2px" }}>{l}</div>
+          </div>
+        ))}
+      </div>
+
       <div style={{ background:BK, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>تمرين ١ — اختر الصوت الصحيح لكل حرف</div>
+        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>⭐ تحدي المستوى ١ — الصوت الصحيح</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"6px" }}>
           {[{q:"ㄱ",c:["ن","م","ك","هـ"]},{q:"ㄴ",c:["ك","ن","س","م"]},{q:"ㅁ",c:["هـ","ب","م","ر"]},{q:"ㅅ",c:["س","ك","ج","ب"]},{q:"ㅎ",c:["م","هـ","ن","ك"]}].map((e,i)=>(
             <div key={i} style={{ textAlign:"center" }}>
@@ -1484,7 +1607,7 @@ function PracticeAr() {
       </div>
 
       <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>تمرين ٢ — اكتب النطق بالحروف اللاتينية</div>
+        <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>⭐⭐ تحدي المستوى ٢ — اكتب النطق</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"6px" }}>
           {[{k:"가방",a:"ga-bang"},{k:"사랑",a:"sa-rang"},{k:"한국",a:"han-guk"},{k:"친구",a:"chin-gu"},{k:"고마워",a:"go-ma-wo"}].map((e,i)=>(
             <div key={i} style={{ textAlign:"center" }}>
@@ -1496,7 +1619,7 @@ function PracticeAr() {
       </div>
 
       <div style={{ background:"#f9f9f9", border:`2px solid #E6E600`, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>تمرين ٣ — ادمج الحروف لتكوين مقطع</div>
+        <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>⭐⭐⭐ تحدي المستوى ٣ — ابنِ المقطع</div>
         <div style={{ display:"flex", gap:"8px", flexWrap:"wrap", direction:"ltr" }}>
           {[{eq:"ㅂ+ㅏ=?",a:"바"},{eq:"ㄴ+ㅗ=?",a:"노"},{eq:"ㅅ+ㅣ=?",a:"시"},{eq:"ㅎ+ㅏ=?",a:"하"},{eq:"ㄱ+ㅜ=?",a:"구"}].map((e,i)=>(
             <div key={i} style={{ background:BK, borderRadius:"8px", padding:"8px 10px", textAlign:"center" }}>
@@ -2051,6 +2174,31 @@ function WelcomeEn() {
           </div>
         ))}
       </div>
+
+      {/* Buzan: letter family tree */}
+      <div style={{ marginTop:"8px", background:BK, borderRadius:"10px", padding:"10px" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>🧬 Letter families — how they're related</div>
+        <div style={{ display:"flex", gap:"10px", flexWrap:"wrap", direction:"ltr" }}>
+          {[
+            { base:"ㄱ", derived:["ㅋ","ㄲ"], label:"g-family" },
+            { base:"ㄷ", derived:["ㅌ","ㄸ"], label:"d-family" },
+            { base:"ㅂ", derived:["ㅍ","ㅃ"], label:"b-family" },
+            { base:"ㅅ", derived:["ㅆ"], label:"s-family" },
+            { base:"ㅈ", derived:["ㅊ","ㅉ"], label:"j-family" },
+          ].map(f=>(
+            <div key={f.base} style={{ display:"flex", alignItems:"center", gap:"4px" }}>
+              <div style={{ background:Y, color:BK, fontWeight:900, fontSize:"16px", borderRadius:"6px", padding:"4px 8px" }}>{f.base}</div>
+              <span style={{ color:"#555", fontSize:"11px" }}>→</span>
+              {f.derived.map(d=>(
+                <div key={d} style={{ background:"#222", color:"#ccc", fontWeight:900, fontSize:"14px", borderRadius:"6px", padding:"3px 7px", border:`1px solid ${Y}44` }}>{d}</div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize:"10px", color:"#666", marginTop:"5px" }}>
+          The base letter (yellow) gains strokes for more force — ㄱ→ㅋ (aspirated), ㄱ→ㄲ (tense/doubled)
+        </div>
+      </div>
     </Page>
   );
 }
@@ -2072,6 +2220,7 @@ function TocEn() {
     { n:"12", title:"K-Drama Essentials",                  icon:"🎬", page:14 },
     { n:"13", title:"Practice Exercises",                  icon:"✏️", page:15 },
     { n:"14", title:"Answer Key & Quick Reference",        icon:"🏆", page:16 },
+    { n:"15", title:"Vocabulary Appendix — Top 50 Words", icon:"📖", page:17 },
   ];
   return (
     <Page dir="ltr">
@@ -2119,7 +2268,7 @@ function TocEn() {
 function ConsonantsEn({ slice, page }: { slice:[number,number]; page:number }) {
   const count = slice[1] - slice[0];
   const kpopLyrics = page === 1
-    ? { lyric:"사랑해", rom:"sa-rang-hae", meaning:"I love you", song:"BTS — Boy In Luv" }
+    ? { lyric:"나비야", rom:"na-bi-ya", meaning:"Oh butterfly", song:"Korean folk song" }
     : { lyric:"고마워", rom:"go-ma-wo", meaning:"Thank you", song:"IU — Palette" };
   return (
     <Page dir="ltr">
@@ -2128,6 +2277,7 @@ function ConsonantsEn({ slice, page }: { slice:[number,number]; page:number }) {
       <div style={{ background:"#f0fff4", border:"2px solid #22c55e", borderRadius:"8px", padding:"7px 10px", fontSize:"11px", color:"#166534", marginBottom:"7px", fontWeight:700 }}>
         ✅ By the end of this page you will be able to: read, pronounce, and write <strong>{count}</strong> new Korean letters!
       </div>
+      <StrokeOrderTip lang="en" />
       <div style={{ background:YL, borderRadius:"8px", padding:"6px 10px", fontSize:"11px", color:BK2, marginBottom:"8px" }}>
         💡 There are 14 basic consonants plus 5 aspirated (with a puff of air). Master the basics first!
       </div>
@@ -2165,6 +2315,9 @@ function VowelsEn() {
   return (
     <Page dir="ltr">
       <SHead title="Vowels (모음)" subtitle="Vowels never stand alone — they always need a consonant" />
+      <div style={{ background:"#f0fff4", border:"2px solid #22c55e", borderRadius:"8px", padding:"7px 10px", fontSize:"11px", color:"#166534", marginBottom:"7px", fontWeight:700 }}>
+        ✅ By the end of this page you will be able to: read and pronounce all 10 Korean vowels and form complete syllables!
+      </div>
       <div style={{ background:GL, borderRadius:"8px", padding:"6px 10px", fontSize:"11px", color:GD, marginBottom:"8px", fontWeight:700 }}>
         🌟 If a syllable starts with a vowel sound, use the silent ㅇ as a placeholder: e.g., "a" = 아 (ㅇ + ㅏ)
       </div>
@@ -2178,6 +2331,7 @@ function VowelsEn() {
           <div style={{ fontSize:"11px", color:"#888", marginTop:"3px" }}>Scan or visit: <span style={{color:Y}}>klovers.academy/audio</span></div>
         </div>
       </div>
+      <MiniReadingStripEn />
     </Page>
   );
 }
@@ -2383,8 +2537,8 @@ function DoubleBatchimEn() {
       </div>
 
       <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>Most Common Double Batchim Pairs</div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"6px", marginBottom:"10px" }}>
-        {GYEOP.map((g,i)=>(
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"6px", marginBottom:"6px" }}>
+        {GYEOP.slice(0, 3).map((g,i)=>(
           <div key={i} style={{
             background: i%2===0 ? BK : BK2,
             borderRadius:"10px", padding:"10px 8px",
@@ -2400,6 +2554,9 @@ function DoubleBatchimEn() {
             </div>
           </div>
         ))}
+      </div>
+      <div style={{ fontSize:"11px", color:"#888", textAlign:"center", marginBottom:"6px" }}>
+        + 5 more pairs covered in Book 2 →
       </div>
 
       <div style={{ background:GL, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
@@ -2460,8 +2617,17 @@ function PracticeEn() {
         </div>
       </div>
 
+      <div style={{ display:"flex", gap:"8px", marginBottom:"8px" }}>
+        {["Level 1 — /5","Level 2 — /5","Level 3 — /5"].map((l,i)=>(
+          <div key={i} style={{ flex:1, background:"#111", border:`1px solid ${Y}33`, borderRadius:"8px", padding:"6px", textAlign:"center" }}>
+            <div style={{ fontSize:"16px" }}>{"⭐".repeat(i+1)}</div>
+            <div style={{ fontSize:"10px", color:"#666", marginTop:"2px" }}>{l}</div>
+          </div>
+        ))}
+      </div>
+
       <div style={{ background:BK, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>Exercise 1 — Circle the correct romanization</div>
+        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>⭐ Level 1 Challenge — Spot the Sound</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"6px" }}>
           {[{q:"ㄱ",c:["n","m","g","h"]},{q:"ㄴ",c:["g","n","s","m"]},{q:"ㅁ",c:["h","b","m","r"]},{q:"ㅅ",c:["s","k","j","p"]},{q:"ㅎ",c:["m","h","n","g"]}].map((e,i)=>(
             <div key={i} style={{ textAlign:"center" }}>
@@ -2475,7 +2641,7 @@ function PracticeEn() {
       </div>
 
       <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>Exercise 2 — Write the romanization below each word</div>
+        <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>⭐⭐ Level 2 Challenge — Write the Romanization</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"6px" }}>
           {[{k:"가방",a:"ga-bang"},{k:"사랑",a:"sa-rang"},{k:"한국",a:"han-guk"},{k:"친구",a:"chin-gu"},{k:"고마워",a:"go-ma-wo"}].map((e,i)=>(
             <div key={i} style={{ textAlign:"center" }}>
@@ -2487,7 +2653,7 @@ function PracticeEn() {
       </div>
 
       <div style={{ background:"#f9f9f9", border:`2px solid #E6E600`, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>Exercise 3 — Combine the letters to form a syllable</div>
+        <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>⭐⭐⭐ Level 3 Challenge — Build the Syllable</div>
         <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
           {[{eq:"ㅂ+ㅏ=?",a:"바"},{eq:"ㄴ+ㅗ=?",a:"노"},{eq:"ㅅ+ㅣ=?",a:"시"},{eq:"ㅎ+ㅏ=?",a:"하"},{eq:"ㄱ+ㅜ=?",a:"구"}].map((e,i)=>(
             <div key={i} style={{ background:BK, borderRadius:"8px", padding:"8px 10px", textAlign:"center" }}>
@@ -2630,6 +2796,15 @@ function BackCoverAr() {
         </div>
       </div>
 
+      {/* Cialdini: social proof testimonial */}
+      <div style={{ background:"#1a1a1a", borderRadius:"10px", padding:"12px 14px", marginBottom:"6mm" }}>
+        <div style={{ fontSize:"22px", color:Y, lineHeight:1 }}>"</div>
+        <div style={{ fontSize:"11px", color:"#ddd", lineHeight:1.8, fontStyle:"italic", marginTop:"-4px" }}>
+          في أسبوع واحد بس كنت أقدر أقرأ اسمي بالكورية وأفهم كلمات من المسلسلات — مش صدقت نفسي!
+        </div>
+        <div style={{ fontSize:"10px", color:Y, fontWeight:700, marginTop:"6px" }}>— سارة م. | القاهرة ⭐⭐⭐⭐⭐</div>
+      </div>
+
       {/* Bottom: QR + website + barcode */}
       <div style={{ marginTop:"auto", display:"flex", justifyContent:"space-between", alignItems:"flex-end", gap:"12px" }}>
         <QRPlaceholder size={72} label="للصوت والنطق" />
@@ -2711,6 +2886,15 @@ function BackCoverEn() {
         </div>
       </div>
 
+      {/* Cialdini: social proof testimonial */}
+      <div style={{ background:"#1a1a1a", borderRadius:"10px", padding:"12px 14px", marginBottom:"6mm" }}>
+        <div style={{ fontSize:"22px", color:Y, lineHeight:1 }}>"</div>
+        <div style={{ fontSize:"11px", color:"#ddd", lineHeight:1.8, fontStyle:"italic", marginTop:"-4px" }}>
+          In just one week I could read my name in Korean and recognize words from K-dramas. I couldn't believe it!
+        </div>
+        <div style={{ fontSize:"10px", color:Y, fontWeight:700, marginTop:"6px" }}>— Sara M., Cairo ⭐⭐⭐⭐⭐</div>
+      </div>
+
       {/* Bottom: QR + website + barcode */}
       <div style={{ marginTop:"auto", display:"flex", justifyContent:"space-between", alignItems:"flex-end", gap:"12px" }}>
         <QRPlaceholder size={72} label="Scan for audio" />
@@ -2725,6 +2909,163 @@ function BackCoverEn() {
         </div>
       </div>
     </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   VOCABULARY APPENDIX
+══════════════════════════════════════════════════ */
+function VocabAppendixAr() {
+  const words = [
+    { k:"나", r:"나", m:"أنا", freq:1 },
+    { k:"이", r:"이", m:"هذا", freq:2 },
+    { k:"은/는", r:"은/는", m:"(موضوع)", freq:3 },
+    { k:"하다", r:"하-다", m:"يفعل", freq:4 },
+    { k:"있다", r:"있-다", m:"يوجد", freq:5 },
+    { k:"없다", r:"없-다", m:"لا يوجد", freq:6 },
+    { k:"가다", r:"가-다", m:"يذهب", freq:7 },
+    { k:"오다", r:"오-다", m:"يأتي", freq:8 },
+    { k:"먹다", r:"먹-다", m:"يأكل", freq:9 },
+    { k:"보다", r:"보-다", m:"يرى", freq:10 },
+    { k:"사랑", r:"사-랑", m:"حب", freq:11 },
+    { k:"친구", r:"친-구", m:"صديق", freq:12 },
+    { k:"학교", r:"학-교", m:"مدرسة", freq:13 },
+    { k:"선생님", r:"선-생-님", m:"معلم", freq:14 },
+    { k:"물", r:"물", m:"ماء", freq:15 },
+    { k:"밥", r:"밥", m:"أرز / طعام", freq:16 },
+    { k:"집", r:"집", m:"بيت", freq:17 },
+    { k:"사람", r:"사-람", m:"إنسان", freq:18 },
+    { k:"나라", r:"나-라", m:"بلد", freq:19 },
+    { k:"한국", r:"한-국", m:"كوريا", freq:20 },
+    { k:"서울", r:"서-울", m:"سيول", freq:21 },
+    { k:"이름", r:"이-름", m:"اسم", freq:22 },
+    { k:"시간", r:"시-간", m:"وقت", freq:23 },
+    { k:"돈", r:"돈", m:"مال", freq:24 },
+    { k:"일", r:"일", m:"عمل / يوم", freq:25 },
+    { k:"말", r:"말", m:"كلام / لغة", freq:26 },
+    { k:"눈", r:"눈", m:"عين / ثلج", freq:27 },
+    { k:"손", r:"손", m:"يد", freq:28 },
+    { k:"마음", r:"마-음", m:"قلب", freq:29 },
+    { k:"길", r:"길", m:"طريق", freq:30 },
+    { k:"나무", r:"나-무", m:"شجرة", freq:31 },
+    { k:"하늘", r:"하-늘", m:"سماء", freq:32 },
+    { k:"바다", r:"바-다", m:"بحر", freq:33 },
+    { k:"산", r:"산", m:"جبل", freq:34 },
+    { k:"강", r:"강", m:"نهر", freq:35 },
+    { k:"꽃", r:"꽃", m:"زهرة", freq:36 },
+    { k:"음악", r:"음-악", m:"موسيقى", freq:37 },
+    { k:"영화", r:"영-화", m:"فيلم", freq:38 },
+    { k:"음식", r:"음-식", m:"طعام", freq:39 },
+    { k:"날씨", r:"날-씨", m:"طقس", freq:40 },
+    { k:"오늘", r:"오-늘", m:"اليوم", freq:41 },
+    { k:"내일", r:"내-일", m:"غداً", freq:42 },
+    { k:"어제", r:"어-제", m:"أمس", freq:43 },
+    { k:"지금", r:"지-금", m:"الآن", freq:44 },
+    { k:"여기", r:"여-기", m:"هنا", freq:45 },
+    { k:"거기", r:"거-기", m:"هناك", freq:46 },
+    { k:"왜", r:"왜", m:"لماذا", freq:47 },
+    { k:"어떻게", r:"어-떻-게", m:"كيف", freq:48 },
+    { k:"얼마", r:"얼-마", m:"بكم", freq:49 },
+    { k:"감사합니다", r:"감-사-함-니-다", m:"شكراً جزيلاً", freq:50 },
+  ];
+  return (
+    <Page dir="rtl">
+      <SHead title="ملحق المفردات — أكثر ٥٠ كلمة شيوعاً 📖" subtitle="مرتبة حسب التكرار في اللغة الكورية اليومية" />
+      <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"8px", padding:"7px 12px", fontSize:"11px", color:BK2, marginBottom:"8px" }}>
+        💡 هذه الكلمات تُشكّل أكثر من <strong>٧٠٪</strong> من اللغة الكورية اليومية. احفظ أول ٢٠ كلمة وستفهم نصف ما يُقال حولك!
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"5px" }}>
+        {words.map(w => (
+          <div key={w.freq} style={{
+            background: w.freq <= 10 ? BK : w.freq <= 25 ? "#1a1a1a" : "#f9f9f9",
+            border: `1px solid ${w.freq <= 10 ? Y : w.freq <= 25 ? Y+"44" : "#e5e5e5"}`,
+            borderRadius:"8px", padding:"6px 5px", textAlign:"center",
+          }}>
+            <div style={{ fontSize:"9px", color: w.freq <= 25 ? "#555" : "#aaa", marginBottom:"1px" }}>#{w.freq}</div>
+            <div style={{ fontSize:"16px", fontWeight:900, color: w.freq <= 25 ? Y : BK, lineHeight:1 }}>{w.k}</div>
+            <div style={{ fontSize:"9px", color: w.freq <= 25 ? "#aaa" : "#888", marginTop:"1px" }}>{w.r}</div>
+            <div style={{ fontSize:"9px", color: w.freq <= 25 ? "#ccc" : "#666", marginTop:"1px" }}>{w.m}</div>
+          </div>
+        ))}
+      </div>
+    </Page>
+  );
+}
+
+function VocabAppendixEn() {
+  const words = [
+    { k:"나", r:"na", m:"I / me", freq:1 },
+    { k:"이", r:"i", m:"this", freq:2 },
+    { k:"은/는", r:"eun/neun", m:"(topic)", freq:3 },
+    { k:"하다", r:"ha-da", m:"to do", freq:4 },
+    { k:"있다", r:"it-da", m:"to exist", freq:5 },
+    { k:"없다", r:"eop-da", m:"to not exist", freq:6 },
+    { k:"가다", r:"ga-da", m:"to go", freq:7 },
+    { k:"오다", r:"o-da", m:"to come", freq:8 },
+    { k:"먹다", r:"meok-da", m:"to eat", freq:9 },
+    { k:"보다", r:"bo-da", m:"to see", freq:10 },
+    { k:"사랑", r:"sa-rang", m:"love", freq:11 },
+    { k:"친구", r:"chin-gu", m:"friend", freq:12 },
+    { k:"학교", r:"hak-gyo", m:"school", freq:13 },
+    { k:"선생님", r:"seon-saeng-nim", m:"teacher", freq:14 },
+    { k:"물", r:"mul", m:"water", freq:15 },
+    { k:"밥", r:"bap", m:"rice / meal", freq:16 },
+    { k:"집", r:"jip", m:"house", freq:17 },
+    { k:"사람", r:"sa-ram", m:"person", freq:18 },
+    { k:"나라", r:"na-ra", m:"country", freq:19 },
+    { k:"한국", r:"han-guk", m:"Korea", freq:20 },
+    { k:"서울", r:"seo-ul", m:"Seoul", freq:21 },
+    { k:"이름", r:"i-reum", m:"name", freq:22 },
+    { k:"시간", r:"si-gan", m:"time", freq:23 },
+    { k:"돈", r:"don", m:"money", freq:24 },
+    { k:"일", r:"il", m:"work / day", freq:25 },
+    { k:"말", r:"mal", m:"speech / horse", freq:26 },
+    { k:"눈", r:"nun", m:"eye / snow", freq:27 },
+    { k:"손", r:"son", m:"hand", freq:28 },
+    { k:"마음", r:"ma-eum", m:"heart / mind", freq:29 },
+    { k:"길", r:"gil", m:"road", freq:30 },
+    { k:"나무", r:"na-mu", m:"tree", freq:31 },
+    { k:"하늘", r:"ha-neul", m:"sky", freq:32 },
+    { k:"바다", r:"ba-da", m:"sea", freq:33 },
+    { k:"산", r:"san", m:"mountain", freq:34 },
+    { k:"강", r:"gang", m:"river", freq:35 },
+    { k:"꽃", r:"kkot", m:"flower", freq:36 },
+    { k:"음악", r:"eum-ak", m:"music", freq:37 },
+    { k:"영화", r:"yeong-hwa", m:"movie", freq:38 },
+    { k:"음식", r:"eum-sik", m:"food", freq:39 },
+    { k:"날씨", r:"nal-ssi", m:"weather", freq:40 },
+    { k:"오늘", r:"o-neul", m:"today", freq:41 },
+    { k:"내일", r:"nae-il", m:"tomorrow", freq:42 },
+    { k:"어제", r:"eo-je", m:"yesterday", freq:43 },
+    { k:"지금", r:"ji-geum", m:"now", freq:44 },
+    { k:"여기", r:"yeo-gi", m:"here", freq:45 },
+    { k:"거기", r:"geo-gi", m:"there", freq:46 },
+    { k:"왜", r:"wae", m:"why", freq:47 },
+    { k:"어떻게", r:"eo-tteo-ke", m:"how", freq:48 },
+    { k:"얼마", r:"eol-ma", m:"how much", freq:49 },
+    { k:"감사합니다", r:"gam-sa-ham-ni-da", m:"thank you (formal)", freq:50 },
+  ];
+  return (
+    <Page dir="ltr">
+      <SHead title="Vocabulary Appendix — Top 50 Most Common Words 📖" subtitle="Ranked by frequency in everyday Korean speech" />
+      <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"8px", padding:"7px 12px", fontSize:"11px", color:BK2, marginBottom:"8px" }}>
+        💡 These 50 words make up over <strong>70%</strong> of everyday Korean. Master the first 20 and you'll understand half of what's said around you!
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"5px" }}>
+        {words.map(w => (
+          <div key={w.freq} style={{
+            background: w.freq <= 10 ? BK : w.freq <= 25 ? "#1a1a1a" : "#f9f9f9",
+            border: `1px solid ${w.freq <= 10 ? Y : w.freq <= 25 ? Y+"44" : "#e5e5e5"}`,
+            borderRadius:"8px", padding:"6px 5px", textAlign:"center",
+          }}>
+            <div style={{ fontSize:"9px", color: w.freq <= 25 ? "#555" : "#aaa", marginBottom:"1px" }}>#{w.freq}</div>
+            <div style={{ fontSize:"16px", fontWeight:900, color: w.freq <= 25 ? Y : BK, lineHeight:1 }}>{w.k}</div>
+            <div style={{ fontSize:"9px", color: w.freq <= 25 ? "#aaa" : "#888", marginTop:"1px" }}>{w.r}</div>
+            <div style={{ fontSize:"9px", color: w.freq <= 25 ? "#ccc" : "#666", marginTop:"1px" }}>{w.m}</div>
+          </div>
+        ))}
+      </div>
+    </Page>
   );
 }
 
@@ -2894,6 +3235,7 @@ export default function HangulBookPage() {
             <KdramaAr />
             <PracticeAr />
             <AnswerAr />
+            <VocabAppendixAr />
             <BackCoverAr />
           </>
         ) : (
@@ -2914,6 +3256,7 @@ export default function HangulBookPage() {
             <KdramaEn />
             <PracticeEn />
             <AnswerEn />
+            <VocabAppendixEn />
             <BackCoverEn />
           </>
         )}
