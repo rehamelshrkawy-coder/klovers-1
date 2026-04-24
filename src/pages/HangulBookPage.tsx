@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock } from "lucide-react";
-import kloversMascot from "@/assets/klovers-mascot.png";
 
 /* ─── Brand tokens ─────────────────────────────── */
 const Y   = "#FFFF00";   // primary yellow
@@ -172,44 +171,462 @@ function BarcodeIcon() {
   );
 }
 
-function CharacterIllustration({ h = 100, radius = 0, label = "" }: { h?: number; radius?: number; label?: string }) {
+/* ══════════════════════════════════════════════════════
+   KLOVERS CHARACTER SCENES
+   Junho = boy (teal hanbok, fox basket)
+   Miya  = girl (cream/burgundy hanbok, brown satchel)
+   Fox   = Gumiho (orange, in Junho's basket)
+════════════════════════════════════════════════════════ */
+
+/* ── Scene: Cover — "Welcome to Hangul!" ── */
+function SceneCover({ h = 100, radius = 0 }: { h?: number; radius?: number }) {
   return (
-    <div style={{
-      height: `${h}px`,
-      borderRadius: `${radius}px`,
-      overflow: "hidden",
-      background: "#f5f0e8",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      position: "relative",
-    }}>
-      <img
-        src={kloversMascot}
-        alt="Klovers characters"
-        style={{
-          height: "100%",
-          width: "100%",
-          objectFit: "contain",
-          objectPosition: "center bottom",
-          display: "block",
-        }}
-      />
-      {label && (
-        <div style={{
-          position: "absolute",
-          bottom: "6px",
-          left: 0,
-          right: 0,
-          textAlign: "center",
-          fontSize: "9px",
-          fontWeight: 700,
-          color: "#111",
-          letterSpacing: "2px",
-          opacity: 0.6,
-        }}>{label}</div>
-      )}
-    </div>
+    <svg viewBox="0 0 800 220" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="cvGlow" cx="50%" cy="65%" r="50%">
+          <stop offset="0%" stopColor="#ffff00" stopOpacity="0.22"/>
+          <stop offset="100%" stopColor="#ffff00" stopOpacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="800" height="220" fill="#080808"/>
+      <ellipse cx="400" cy="155" rx="310" ry="120" fill="url(#cvGlow)"/>
+      {/* Floating Hangul */}
+      {[["ㄱ",80,42,30,0.65],["ㄴ",150,88,22,0.45],["ㅂ",58,148,26,0.55],["ㄷ",138,188,20,0.4],
+        ["ㅅ",720,38,30,0.65],["ㅇ",662,82,22,0.45],["ㅈ",742,152,26,0.55],["ㅎ",668,190,20,0.4],
+        ["ㅏ",375,22,22,0.5],["ㅣ",428,19,22,0.5],["ㅗ",352,206,18,0.4],["ㅜ",448,209,18,0.4]
+      ].map(([ch,x,y,sz,op],i)=>(
+        <text key={i} x={x as number} y={y as number} fontSize={sz as number} fontWeight="900" fill="#ffff00" opacity={op as number} textAnchor="middle">{ch}</text>
+      ))}
+      {/* Sparkles */}
+      {[[190,52],[612,48],[198,178],[602,182],[400,32]].map(([sx,sy],i)=>(
+        <g key={i}>
+          <circle cx={sx} cy={sy} r="3.5" fill="#ffff00" opacity="0.8"/>
+          <line x1={sx-9} y1={sy} x2={sx+9} y2={sy} stroke="#ffff00" strokeWidth="1.2" opacity="0.5"/>
+          <line x1={sx} y1={sy-9} x2={sx} y2={sy+9} stroke="#ffff00" strokeWidth="1.2" opacity="0.5"/>
+        </g>
+      ))}
+      {/* ── JUNHO ── */}
+      <ellipse cx="272" cy="214" rx="42" ry="8" fill="#ffff00" opacity="0.09"/>
+      <path d="M249 158 L244 212 L262 212 L266 176 L271 176 L275 212 L293 212 L288 158Z" fill="#4a5580"/>
+      <ellipse cx="252" cy="213" rx="12" ry="5" fill="#2a2015"/>
+      <ellipse cx="282" cy="213" rx="12" ry="5" fill="#2a2015"/>
+      <path d="M241 88 L235 162 L308 162 L302 88Z" fill="#20B2AA"/>
+      <rect x="235" y="143" width="73" height="11" rx="4" fill="#8B1010"/>
+      <path d="M266 88 L257 112" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+      <path d="M266 88 L275 112" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+      <path d="M235 100 L213 142 L223 148 L243 108Z" fill="#1a9090"/>
+      <ellipse cx="216" cy="145" rx="8" ry="8" fill="#f5c5a3"/>
+      <path d="M302 100 L320 132 L330 128 L312 98Z" fill="#1a9090"/>
+      <path d="M318 126 Q338 116 358 126 Q362 150 338 160 Q314 150 318 126Z" fill="#8B6408"/>
+      <path d="M316 128 Q338 120 360 128" fill="none" stroke="#5a3800" strokeWidth="2.5"/>
+      <circle cx="338" cy="138" r="15" fill="#D2691E"/>
+      <path d="M327 127 L322 115 L331 124Z" fill="#D2691E"/>
+      <path d="M349 127 L354 115 L344 124Z" fill="#D2691E"/>
+      <ellipse cx="338" cy="143" rx="9" ry="7" fill="#f0b090"/>
+      <circle cx="333" cy="137" r="3" fill="#111"/>
+      <circle cx="343" cy="137" r="3" fill="#111"/>
+      <circle cx="334" cy="136" r="1.2" fill="#fff"/>
+      <circle cx="344" cy="136" r="1.2" fill="#fff"/>
+      <circle cx="338" cy="141" r="2" fill="#8B0000"/>
+      <path d="M334 144 Q338 148 342 144" fill="none" stroke="#8B0000" strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="260" y="73" width="13" height="18" rx="5" fill="#f5c5a3"/>
+      <ellipse cx="266" cy="54" rx="32" ry="34" fill="#f5c5a3"/>
+      <path d="M236 44 Q238 16 266 14 Q294 16 296 44 Q289 30 266 28 Q243 30 236 44Z" fill="#1a1a1a"/>
+      <path d="M236 44 Q230 56 233 67" fill="none" stroke="#1a1a1a" strokeWidth="9" strokeLinecap="round"/>
+      <path d="M296 44 Q302 56 299 67" fill="none" stroke="#1a1a1a" strokeWidth="9" strokeLinecap="round"/>
+      <path d="M253 51 Q257 56 261 51" fill="none" stroke="#5a3010" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M271 51 Q275 56 279 51" fill="none" stroke="#5a3010" strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="246" cy="62" r="9" fill="#ffb3a7" opacity="0.42"/>
+      <circle cx="286" cy="62" r="9" fill="#ffb3a7" opacity="0.42"/>
+      <ellipse cx="266" cy="66" rx="3" ry="2" fill="#e8a080" opacity="0.5"/>
+      {/* ── MIYA ── */}
+      <ellipse cx="530" cy="215" rx="38" ry="7" fill="#ffff00" opacity="0.09"/>
+      <path d="M505 118 Q499 185 513 215 L548 215 Q562 185 556 118Z" fill="#7B1A3A"/>
+      <path d="M501 195 Q530 200 559 195" fill="none" stroke="#a03060" strokeWidth="2" opacity="0.55"/>
+      <path d="M505 85 L501 122 L560 122 L556 85Z" fill="#fff8f0"/>
+      <path d="M530 85 L521 105" stroke="#20B2AA" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
+      <path d="M530 85 L539 105" stroke="#20B2AA" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
+      <path d="M519 107 L526 116 L530 112 L534 116 L541 107 L535 113 L530 110 L525 113Z" fill="#C8102E"/>
+      <path d="M501 94 L481 130 L491 136 L509 104Z" fill="#fff0e8"/>
+      <ellipse cx="484" cy="133" rx="8" ry="8" fill="#f5c5a3"/>
+      <path d="M556 94 L568 122 L560 128 L550 104Z" fill="#fff0e8"/>
+      <rect x="562" y="116" width="32" height="26" rx="5" fill="#8B5e0a"/>
+      <rect x="565" y="119" width="26" height="20" rx="3" fill="#a07015"/>
+      <rect x="572" y="127" width="12" height="6" rx="3" fill="#5a3500"/>
+      <ellipse cx="514" cy="216" rx="11" ry="5" fill="#2a2015"/>
+      <ellipse cx="546" cy="216" rx="11" ry="5" fill="#2a2015"/>
+      <rect x="523" y="70" width="14" height="18" rx="5" fill="#f5c5a3"/>
+      <ellipse cx="530" cy="52" rx="29" ry="31" fill="#f5c5a3"/>
+      <path d="M503 44 Q505 20 530 18 Q555 20 557 44 Q549 32 530 30 Q511 32 503 44Z" fill="#1a1a1a"/>
+      <circle cx="530" cy="20" r="13" fill="#1a1a1a"/>
+      <line x1="519" y1="16" x2="536" y2="14" stroke="#C8102E" strokeWidth="3.5" strokeLinecap="round"/>
+      <circle cx="519" cy="16" r="5" fill="#C8102E"/>
+      <path d="M503 44 Q497 58 500 70" fill="none" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round"/>
+      <path d="M557 44 Q563 58 560 70" fill="none" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round"/>
+      <path d="M518 50 Q522 55 526 50" fill="none" stroke="#5a3010" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M534 50 Q538 55 542 50" fill="none" stroke="#5a3010" strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="512" cy="61" r="8" fill="#ffb3a7" opacity="0.48"/>
+      <circle cx="548" cy="61" r="8" fill="#ffb3a7" opacity="0.48"/>
+      <ellipse cx="530" cy="65" rx="3" ry="2" fill="#e8a080" opacity="0.5"/>
+    </svg>
+  );
+}
+
+/* ── Scene: Classroom — "Let's Study Hangul!" ── */
+function SceneClassroom({ h = 110, radius = 0 }: { h?: number; radius?: number }) {
+  return (
+    <svg viewBox="0 0 800 240" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
+      <rect width="800" height="240" fill="#080808"/>
+      {/* Warm room glow */}
+      <ellipse cx="400" cy="180" rx="350" ry="100" fill="#ffff00" opacity="0.06"/>
+      {/* Floor */}
+      <rect x="0" y="200" width="800" height="40" fill="#1a1000"/>
+      {/* Low Korean desk */}
+      <rect x="180" y="180" width="440" height="22" rx="6" fill="#6B3A1F"/>
+      <rect x="200" y="200" width="12" height="20" rx="3" fill="#4a2810"/>
+      <rect x="590" y="200" width="12" height="20" rx="3" fill="#4a2810"/>
+      {/* Scroll/book on desk */}
+      <rect x="340" y="162" width="120" height="20" rx="4" fill="#f5e6c0"/>
+      <text x="400" y="176" textAnchor="middle" fontSize="14" fontWeight="900" fill="#111">ㄱ ㄴ ㄷ ㄹ</text>
+      {/* Ink pot */}
+      <ellipse cx="490" cy="175" rx="16" ry="10" fill="#222"/>
+      <rect x="478" y="165" width="24" height="12" rx="4" fill="#333"/>
+      {/* Brush */}
+      <line x1="502" y1="162" x2="510" y2="145" stroke="#8B6914" strokeWidth="3" strokeLinecap="round"/>
+      <path d="M502 162 L506 170 L498 170Z" fill="#1a1a1a"/>
+      {/* Fox sitting on desk */}
+      <circle cx="310" cy="170" r="14" fill="#D2691E"/>
+      <path d="M300 160 L295 148 L305 158Z" fill="#D2691E"/>
+      <path d="M320 160 L325 148 L315 158Z" fill="#D2691E"/>
+      <ellipse cx="310" cy="175" rx="8" ry="6" fill="#f0b090"/>
+      <circle cx="306" cy="168" r="2.5" fill="#111"/>
+      <circle cx="314" cy="168" r="2.5" fill="#111"/>
+      <circle cx="307" cy="167" r="1" fill="#fff"/>
+      <circle cx="315" cy="167" r="1" fill="#fff"/>
+      <path d="M307 173 Q310 176 313 173" fill="none" stroke="#8B0000" strokeWidth="1.5" strokeLinecap="round"/>
+      {/* ── JUNHO seated left ── */}
+      <path d="M220 148 L218 185 L242 185 L240 148Z" fill="#4a5580"/>
+      <path d="M218 95 L214 155 L272 155 L268 95Z" fill="#20B2AA"/>
+      <rect x="214" y="138" width="58" height="9" rx="3" fill="#8B1010"/>
+      <path d="M240 95 L233 114" stroke="#fff" strokeWidth="3" strokeLinecap="round" fill="none"/>
+      <path d="M240 95 L247 114" stroke="#fff" strokeWidth="3" strokeLinecap="round" fill="none"/>
+      {/* Arm pointing at scroll */}
+      <path d="M268 105 L340 168 L346 162 L272 100Z" fill="#1a9090"/>
+      <ellipse cx="343" cy="165" rx="7" ry="7" fill="#f5c5a3"/>
+      {/* Left arm folded */}
+      <path d="M214 108 L200 130 L208 136 L222 115Z" fill="#1a9090"/>
+      <ellipse cx="203" cy="133" rx="7" ry="7" fill="#f5c5a3"/>
+      <rect x="234" y="78" width="12" height="18" rx="5" fill="#f5c5a3"/>
+      <ellipse cx="240" cy="60" rx="30" ry="32" fill="#f5c5a3"/>
+      <path d="M212 50 Q214 24 240 22 Q266 24 268 50 Q261 38 240 36 Q219 38 212 50Z" fill="#1a1a1a"/>
+      <path d="M212 50 Q207 61 210 70" fill="none" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round"/>
+      <path d="M268 50 Q273 61 270 70" fill="none" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round"/>
+      {/* Excited expression — eyebrows up */}
+      <path d="M228 45 Q233 41 238 44" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M242 44 Q247 41 252 45" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M228 52 Q232 57 236 52" fill="none" stroke="#5a3010" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M244 52 Q248 57 252 52" fill="none" stroke="#5a3010" strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="222" cy="63" r="8" fill="#ffb3a7" opacity="0.42"/>
+      <circle cx="258" cy="63" r="8" fill="#ffb3a7" opacity="0.42"/>
+      {/* ── MIYA seated right ── */}
+      <path d="M510 115 Q505 185 518 200 L548 200 Q561 185 556 115Z" fill="#7B1A3A"/>
+      <path d="M510 88 L507 120 L558 120 L555 88Z" fill="#fff8f0"/>
+      <path d="M533 88 L525 106" stroke="#20B2AA" strokeWidth="4" strokeLinecap="round" fill="none"/>
+      <path d="M533 88 L541 106" stroke="#20B2AA" strokeWidth="4" strokeLinecap="round" fill="none"/>
+      <path d="M521 108 L527 116 L533 112 L537 116 L542 108 L537 113 L533 110 L527 113Z" fill="#C8102E"/>
+      {/* Arm writing */}
+      <path d="M507 98 L490 128 L498 134 L514 106Z" fill="#fff0e8"/>
+      <ellipse cx="492" cy="131" rx="7" ry="7" fill="#f5c5a3"/>
+      {/* Right arm holding brush */}
+      <path d="M555 98 L570 120 L562 126 L552 105Z" fill="#fff0e8"/>
+      <line x1="568" y1="118" x2="578" y2="102" stroke="#8B6914" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M568 118 L572 125 L564 125Z" fill="#1a1a1a"/>
+      <rect x="526" y="72" width="14" height="17" rx="5" fill="#f5c5a3"/>
+      <ellipse cx="533" cy="53" rx="28" ry="30" fill="#f5c5a3"/>
+      <path d="M507 45 Q508 22 533 20 Q558 22 559 45 Q551 34 533 32 Q515 34 507 45Z" fill="#1a1a1a"/>
+      <circle cx="533" cy="22" r="12" fill="#1a1a1a"/>
+      <line x1="522" y1="18" x2="539" y2="16" stroke="#C8102E" strokeWidth="3.5" strokeLinecap="round"/>
+      <circle cx="522" cy="18" r="5" fill="#C8102E"/>
+      <path d="M507 45 Q501 57 504 68" fill="none" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round"/>
+      <path d="M559 45 Q565 57 562 68" fill="none" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round"/>
+      {/* Concentrated expression */}
+      <path d="M520 46 Q524 42 528 45" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M538 45 Q542 42 546 46" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M521 53 Q525 58 529 53" fill="none" stroke="#5a3010" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M537 53 Q541 58 545 53" fill="none" stroke="#5a3010" strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="515" cy="63" r="7" fill="#ffb3a7" opacity="0.45"/>
+      <circle cx="551" cy="63" r="7" fill="#ffb3a7" opacity="0.45"/>
+      {/* Speech bubble */}
+      <rect x="600" y="30" width="170" height="60" rx="14" fill="#ffff00"/>
+      <path d="M615 90 L605 108 L630 90Z" fill="#ffff00"/>
+      <text x="685" y="58" textAnchor="middle" fontSize="22" fontWeight="900" fill="#111">가나다</text>
+      <text x="685" y="80" textAnchor="middle" fontSize="16" fontWeight="700" fill="#333">라마바사</text>
+    </svg>
+  );
+}
+
+/* ── Scene: Street — "Reading Seoul Signs!" ── */
+function SceneStreet({ h = 75, radius = 0 }: { h?: number; radius?: number }) {
+  return (
+    <svg viewBox="0 0 800 200" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
+      <rect width="800" height="200" fill="#080808"/>
+      {/* Buildings */}
+      <rect x="0"   y="40"  width="180" height="160" fill="#0d0d0d" stroke="#ffff00" strokeWidth="0.8" opacity="0.6"/>
+      <rect x="185" y="65"  width="130" height="135" fill="#0d0d0d" stroke="#ffff00" strokeWidth="0.8" opacity="0.5"/>
+      <rect x="490" y="60"  width="130" height="140" fill="#0d0d0d" stroke="#ffff00" strokeWidth="0.8" opacity="0.5"/>
+      <rect x="625" y="38"  width="175" height="162" fill="#0d0d0d" stroke="#ffff00" strokeWidth="0.8" opacity="0.6"/>
+      {/* Neon signs */}
+      <rect x="15"  y="52"  width="90" height="26" rx="4" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.8"/>
+      <text x="60"  y="70"  textAnchor="middle" fontSize="15" fontWeight="900" fill="#ffff00">한글</text>
+      <rect x="15"  y="86"  width="70" height="20" rx="4" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.2" opacity="0.7"/>
+      <text x="50"  y="100" textAnchor="middle" fontSize="12" fontWeight="700" fill="#ffff00" opacity="0.8">서울</text>
+      <rect x="195" y="75"  width="100" height="24" rx="4" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.5"/>
+      <text x="245" y="92"  textAnchor="middle" fontSize="14" fontWeight="900" fill="#ffff00">노래방</text>
+      <rect x="638" y="50"  width="90" height="26" rx="4" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.8"/>
+      <text x="683" y="68"  textAnchor="middle" fontSize="15" fontWeight="900" fill="#ffff00">편의점</text>
+      <rect x="500" y="70"  width="100" height="24" rx="4" fill="#0a0a00" stroke="#ffff00" strokeWidth="1.5"/>
+      <text x="550" y="87"  textAnchor="middle" fontSize="14" fontWeight="900" fill="#ffff00">치킨</text>
+      {/* Ground */}
+      <rect x="0" y="188" width="800" height="12" fill="#111100"/>
+      {/* ── JUNHO (small, h≈75) ── */}
+      <ellipse cx="330" cy="194" rx="26" ry="6" fill="#ffff00" opacity="0.08"/>
+      <path d="M320 158 L317 192 L328 192 L330 170 L333 170 L335 192 L343 192 L340 158Z" fill="#4a5580"/>
+      <path d="M316 112 L312 162 L348 162 L344 112Z" fill="#20B2AA"/>
+      <rect x="312" y="147" width="36" height="8" rx="3" fill="#8B1010"/>
+      <path d="M330 112 L325 126" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      <path d="M330 112 L335 126" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      {/* Pointing arm */}
+      <path d="M312 120 L280 95 L276 101 L310 127Z" fill="#1a9090"/>
+      <ellipse cx="277" cy="98" rx="6" ry="6" fill="#f5c5a3"/>
+      <path d="M348 120 L368 138 L374 132 L352 116Z" fill="#1a9090"/>
+      {/* Mini fox basket */}
+      <path d="M366 136 Q376 130 386 136 Q388 148 376 153 Q364 148 366 136Z" fill="#8B6408"/>
+      <circle cx="376" cy="140" r="9" fill="#D2691E"/>
+      <circle cx="374" cy="138" r="2" fill="#111"/>
+      <circle cx="379" cy="138" r="2" fill="#111"/>
+      <rect x="324" y="98" width="8" height="15" rx="4" fill="#f5c5a3"/>
+      <ellipse cx="328" cy="88" rx="20" ry="21" fill="#f5c5a3"/>
+      <path d="M309 80 Q311 62 328 60 Q345 62 347 80 Q342 72 328 70 Q314 72 309 80Z" fill="#1a1a1a"/>
+      <path d="M309 80 Q305 88 307 94" fill="none" stroke="#1a1a1a" strokeWidth="6" strokeLinecap="round"/>
+      <path d="M347 80 Q351 88 349 94" fill="none" stroke="#1a1a1a" strokeWidth="6" strokeLinecap="round"/>
+      <path d="M319 86 Q322 90 325 86" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M331 86 Q334 90 337 86" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="303" cy="94" r="6" fill="#ffb3a7" opacity="0.4"/>
+      <circle cx="353" cy="94" r="6" fill="#ffb3a7" opacity="0.4"/>
+      {/* ── MIYA (small) ── */}
+      <ellipse cx="455" cy="195" rx="24" ry="6" fill="#ffff00" opacity="0.08"/>
+      <path d="M436 142 Q432 185 440 196 L468 196 Q476 185 472 142Z" fill="#7B1A3A"/>
+      <path d="M436 112 L433 146 L476 146 L473 112Z" fill="#fff8f0"/>
+      <path d="M454 112 L447 128" stroke="#20B2AA" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+      <path d="M454 112 L461 128" stroke="#20B2AA" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+      {/* Arm pointing up at sign */}
+      <path d="M433 120 L418 92 L412 96 L428 124Z" fill="#fff0e8"/>
+      <ellipse cx="414" cy="94" rx="6" ry="6" fill="#f5c5a3"/>
+      <path d="M473 120 L486 138 L480 143 L468 127Z" fill="#fff0e8"/>
+      <rect x="448" y="96" width="8" height="16" rx="4" fill="#f5c5a3"/>
+      <ellipse cx="452" cy="80" rx="18" ry="20" fill="#f5c5a3"/>
+      <path d="M435 73 Q436 56 452 54 Q468 56 469 73 Q463 64 452 62 Q441 64 435 73Z" fill="#1a1a1a"/>
+      <circle cx="452" cy="56" r="10" fill="#1a1a1a"/>
+      <circle cx="445" cy="52" r="4" fill="#C8102E"/>
+      <path d="M435 73 Q430 82 432 89" fill="none" stroke="#1a1a1a" strokeWidth="6" strokeLinecap="round"/>
+      <path d="M469 73 Q474 82 472 89" fill="none" stroke="#1a1a1a" strokeWidth="6" strokeLinecap="round"/>
+      <path d="M442 78 Q445 82 448 78" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M456 78 Q459 82 462 78" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="430" cy="86" r="6" fill="#ffb3a7" opacity="0.4"/>
+      <circle cx="474" cy="86" r="6" fill="#ffb3a7" opacity="0.4"/>
+    </svg>
+  );
+}
+
+/* ── Scene: Concert — "K-Pop Night!" ── */
+function SceneConcert({ h = 75, radius = 0 }: { h?: number; radius?: number }) {
+  return (
+    <svg viewBox="0 0 800 200" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
+      <rect width="800" height="200" fill="#080808"/>
+      {/* Stage arch */}
+      <path d="M120 65 Q400 10 680 65" fill="none" stroke="#ffff00" strokeWidth="3"/>
+      <rect x="120" y="65" width="560" height="80" fill="#0d0d00" stroke="#ffff00" strokeWidth="1"/>
+      {/* Spotlights */}
+      {[[180,0,220,145],[320,0,380,145],[480,0,420,145],[620,0,580,145]].map(([x1,y1,x2,y2],i)=>(
+        <path key={i} d={`M${x1} ${y1} L${x2-25} ${y2} L${x2+25} ${y2}Z`} fill="#ffff00" opacity="0.04"/>
+      ))}
+      {[180,320,480,620].map((lx,i)=>(
+        <circle key={i} cx={lx} cy={i%2===0?3:8} r="6" fill="#ffff00" opacity="0.8"/>
+      ))}
+      {/* Performers on stage */}
+      {[280,400,520].map((px,i)=>(
+        <g key={i}>
+          <ellipse cx={px} cy={90} rx={i===1?10:8} ry={i===1?10:8} fill="#f5c5a3"/>
+          <path d={`M${px-12} ${95} L${px-10} ${125} L${px+10} ${125} L${px+12} ${95}Z`} fill={i===1?"#C8102E":i===0?"#20B2AA":"#7B1A3A"}/>
+          <line x1={px-12} y1={100} x2={px-22} y2={82} stroke={i===1?"#C8102E":i===0?"#20B2AA":"#7B1A3A"} strokeWidth="4" strokeLinecap="round"/>
+          <line x1={px+12} y1={100} x2={px+22} y2={82} stroke={i===1?"#C8102E":i===0?"#20B2AA":"#7B1A3A"} strokeWidth="4" strokeLinecap="round"/>
+        </g>
+      ))}
+      {/* Stage floor */}
+      <rect x="120" y="143" width="560" height="10" fill="#1a1a00" stroke="#ffff00" strokeWidth="1"/>
+      {/* LED screen */}
+      <rect x="160" y="70" width="480" height="45" fill="#111100" stroke="#ffff00" strokeWidth="0.8" opacity="0.5"/>
+      <text x="400" y="98" textAnchor="middle" fontSize="26" fontWeight="900" fill="#ffff00" opacity="0.35">한글</text>
+      {/* Crowd */}
+      <rect x="0" y="153" width="800" height="47" fill="#050508"/>
+      {/* ── JUNHO in crowd ── */}
+      <ellipse cx="300" cy="172" rx="20" ry="20" fill="#f5c5a3"/>
+      <path d="M282 162 Q284 148 300 146 Q316 148 318 162 Q313 154 300 152 Q287 154 282 162Z" fill="#1a1a1a"/>
+      <path d="M292 170 Q296 174 300 170" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M307 170 Q304 174 300 170" fill="none" stroke="#5a3010" strokeWidth="0" strokeLinecap="round"/>
+      <circle cx="293" cy="170" r="2.5" fill="#5a3010"/>
+      <circle cx="307" cy="170" r="2.5" fill="#5a3010"/>
+      <path d="M280 188 L284 195 L316 195 L320 188Z" fill="#20B2AA"/>
+      {/* Lightstick Junho */}
+      <line x1="298" y1="153" x2="290" y2="128" stroke="#ffff00" strokeWidth="2.5" strokeLinecap="round"/>
+      <ellipse cx="289" cy="124" rx="5" ry="9" fill="#ffff00" opacity="0.9"/>
+      <ellipse cx="289" cy="124" rx="8" ry="14" fill="#ffff00" opacity="0.25"/>
+      {/* ── MIYA in crowd ── */}
+      <ellipse cx="500" cy="170" rx="18" ry="18" fill="#f5c5a3"/>
+      <path d="M484 162 Q485 148 500 146 Q515 148 516 162 Q511 154 500 152 Q489 154 484 162Z" fill="#1a1a1a"/>
+      <circle cx="500" cy="148" r="10" fill="#1a1a1a"/>
+      <circle cx="493" cy="144" r="4" fill="#C8102E"/>
+      <circle cx="494" cy="169" r="2.5" fill="#5a3010"/>
+      <circle cx="506" cy="169" r="2.5" fill="#5a3010"/>
+      <path d="M483 187 L486 195 L514 195 L517 187Z" fill="#7B1A3A"/>
+      {/* Lightstick Miya — held high */}
+      <line x1="502" y1="152" x2="515" y2="118" stroke="#ffff00" strokeWidth="2.5" strokeLinecap="round"/>
+      <ellipse cx="516" cy="114" rx="5" ry="9" fill="#ffff00" opacity="0.9"/>
+      <ellipse cx="516" cy="114" rx="9" ry="15" fill="#ffff00" opacity="0.25"/>
+      {/* Other crowd people */}
+      {[[150,175],[200,178],[400,176],[450,174],[600,175],[650,178],[730,174]].map(([cx,cy],i)=>(
+        <g key={i}>
+          <ellipse cx={cx} cy={cy} rx={14} ry={14} fill="#ffff00" opacity="0.12"/>
+          <line x1={cx} y1={cy-14} x2={cx+(i%2===0?-5:5)} y2={cy-30} stroke="#ffff00" strokeWidth="1.5" opacity="0.4"/>
+          <ellipse cx={cx+(i%2===0?-5:5)} cy={cy-34} rx={3} ry={5} fill="#ffff00" opacity="0.5"/>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+/* ── Scene: Teacher — "Meet Junho & Miya!" ── */
+function SceneTeacher({ h = 100, radius = 0 }: { h?: number; radius?: number }) {
+  return (
+    <svg viewBox="0 0 400 220" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="220" fill="#0d0d00"/>
+      <ellipse cx="200" cy="160" rx="180" ry="80" fill="#ffff00" opacity="0.07"/>
+      {/* Letter board */}
+      <rect x="230" y="40" width="130" height="90" rx="8" fill="#1a1a00" stroke="#ffff00" strokeWidth="2"/>
+      <text x="295" y="88" textAnchor="middle" fontSize="48" fontWeight="900" fill="#ffff00">가</text>
+      <text x="295" y="118" textAnchor="middle" fontSize="14" fontWeight="700" fill="#ffff00" opacity="0.7">ga</text>
+      {/* Pointing stick */}
+      <line x1="205" y1="105" x2="240" y2="88" stroke="#8B6914" strokeWidth="3" strokeLinecap="round"/>
+      {/* ── JUNHO ── */}
+      <ellipse cx="148" cy="214" rx="38" ry="7" fill="#ffff00" opacity="0.08"/>
+      <path d="M130 156 L126 212 L142 212 L145 172 L150 172 L153 212 L166 212 L162 156Z" fill="#4a5580"/>
+      <ellipse cx="130" cy="213" rx="11" ry="5" fill="#2a2015"/>
+      <ellipse cx="158" cy="213" rx="11" ry="5" fill="#2a2015"/>
+      <path d="M124 90 L119 160 L178 160 L173 90Z" fill="#20B2AA"/>
+      <rect x="119" y="142" width="59" height="10" rx="3" fill="#8B1010"/>
+      <path d="M148 90 L141 110" stroke="#fff" strokeWidth="3" strokeLinecap="round" fill="none"/>
+      <path d="M148 90 L155 110" stroke="#fff" strokeWidth="3" strokeLinecap="round" fill="none"/>
+      {/* Arm pointing */}
+      <path d="M173 100 L208 108 L206 115 L170 107Z" fill="#1a9090"/>
+      <ellipse cx="210" cy="111" rx="7" ry="7" fill="#f5c5a3"/>
+      {/* Other arm + basket */}
+      <path d="M119 102 L100 130 L108 136 L126 110Z" fill="#1a9090"/>
+      <path d="M98 128 Q110 120 122 128 Q124 146 110 152 Q96 146 98 128Z" fill="#8B6408"/>
+      <circle cx="110" cy="136" r="11" fill="#D2691E"/>
+      <path d="M103 128 L99 118 L107 126Z" fill="#D2691E"/>
+      <path d="M117 128 L121 118 L113 126Z" fill="#D2691E"/>
+      <ellipse cx="110" cy="141" rx="7" ry="5" fill="#f0b090"/>
+      <circle cx="107" cy="135" r="2" fill="#111"/>
+      <circle cx="113" cy="135" r="2" fill="#111"/>
+      <circle cx="108" cy="134" r="0.9" fill="#fff"/>
+      <circle cx="114" cy="134" r="0.9" fill="#fff"/>
+      <path d="M107 140 Q110 143 113 140" fill="none" stroke="#8B0000" strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="142" y="73" width="12" height="18" rx="5" fill="#f5c5a3"/>
+      <ellipse cx="148" cy="56" rx="28" ry="30" fill="#f5c5a3"/>
+      <path d="M122 47 Q124 22 148 20 Q172 22 174 47 Q168 36 148 34 Q128 36 122 47Z" fill="#1a1a1a"/>
+      <path d="M122 47 Q117 58 120 67" fill="none" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round"/>
+      <path d="M174 47 Q179 58 176 67" fill="none" stroke="#1a1a1a" strokeWidth="8" strokeLinecap="round"/>
+      {/* Smile */}
+      <path d="M136 53 Q140 58 144 53" fill="none" stroke="#5a3010" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M152 53 Q156 58 160 53" fill="none" stroke="#5a3010" strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="127" cy="63" r="8" fill="#ffb3a7" opacity="0.42"/>
+      <circle cx="169" cy="63" r="8" fill="#ffb3a7" opacity="0.42"/>
+    </svg>
+  );
+}
+
+/* ── Scene: Food — "Mashita! (Delicious!)" ── */
+function SceneFood({ h = 65, radius = 0 }: { h?: number; radius?: number }) {
+  return (
+    <svg viewBox="0 0 800 180" style={{ width:"100%", height:`${h}px`, display:"block", borderRadius:`${radius}px` }} xmlns="http://www.w3.org/2000/svg">
+      <rect width="800" height="180" fill="#080808"/>
+      <ellipse cx="400" cy="140" rx="300" ry="70" fill="#ffff00" opacity="0.06"/>
+      {/* Table */}
+      <rect x="180" y="128" width="440" height="16" rx="6" fill="#6B3A1F"/>
+      <rect x="200" y="142" width="10" height="28" rx="3" fill="#4a2810"/>
+      <rect x="590" y="142" width="10" height="28" rx="3" fill="#4a2810"/>
+      {/* Food on table */}
+      {/* Bibimbap bowl */}
+      <ellipse cx="400" cy="128" rx="40" ry="15" fill="#333"/>
+      <ellipse cx="400" cy="124" rx="36" ry="12" fill="#555"/>
+      <circle cx="400" cy="122" r="8" fill="#ffff00" opacity="0.5"/>
+      <text x="400" y="175" textAnchor="middle" fontSize="11" fontWeight="700" fill="#ffff00" opacity="0.5">맛있어!</text>
+      {/* Kimchi */}
+      <ellipse cx="315" cy="130" rx="24" ry="10" fill="#8B1010"/>
+      <ellipse cx="315" cy="127" rx="20" ry="8" fill="#aa2020"/>
+      {/* Soup */}
+      <ellipse cx="485" cy="130" rx="24" ry="10" fill="#333"/>
+      <ellipse cx="485" cy="127" rx="20" ry="8" fill="#8B4513" opacity="0.8"/>
+      {/* Chopsticks */}
+      <line x1="350" y1="110" x2="360" y2="128" stroke="#8B6914" strokeWidth="2.5" strokeLinecap="round"/>
+      <line x1="356" y1="108" x2="365" y2="126" stroke="#8B6914" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* ── JUNHO (small seated) ── */}
+      <ellipse cx="255" cy="175" rx="30" ry="7" fill="#ffff00" opacity="0.07"/>
+      <path d="M240 118 L236 165 L252 165 L254 145 L258 145 L260 165 L272 165 L268 118Z" fill="#20B2AA"/>
+      <rect x="236" y="148" width="36" height="8" rx="3" fill="#8B1010"/>
+      <path d="M254 118 L249 130" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      <path d="M254 118 L259 130" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      {/* Arm with chopsticks */}
+      <path d="M272 125 L295 118 L293 112 L268 120Z" fill="#1a9090"/>
+      <ellipse cx="297" cy="115" rx="6" ry="6" fill="#f5c5a3"/>
+      <line x1="295" y1="112" x2="306" y2="128" stroke="#8B6914" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="300" y1="110" x2="310" y2="127" stroke="#8B6914" strokeWidth="2" strokeLinecap="round"/>
+      <rect x="248" y="104" width="9" height="14" rx="4" fill="#f5c5a3"/>
+      <ellipse cx="252" cy="94" rx="20" ry="21" fill="#f5c5a3"/>
+      <path d="M234 86 Q236 70 252 68 Q268 70 270 86 Q265 78 252 76 Q239 78 234 86Z" fill="#1a1a1a"/>
+      <path d="M234 86 Q230 94 232 101" fill="none" stroke="#1a1a1a" strokeWidth="6" strokeLinecap="round"/>
+      <path d="M270 86 Q274 94 272 101" fill="none" stroke="#1a1a1a" strokeWidth="6" strokeLinecap="round"/>
+      <path d="M243 92 Q246 96 249 92" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M255 92 Q258 96 261 92" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="228" cy="99" r="6" fill="#ffb3a7" opacity="0.4"/>
+      <circle cx="276" cy="99" r="6" fill="#ffb3a7" opacity="0.4"/>
+      {/* ── MIYA (small seated) ── */}
+      <ellipse cx="545" cy="175" rx="28" ry="7" fill="#ffff00" opacity="0.07"/>
+      <path d="M525 120 Q521 162 530 170 L558 170 Q566 162 562 120Z" fill="#7B1A3A"/>
+      <path d="M526 100 L523 124 L564 124 L561 100Z" fill="#fff8f0"/>
+      <path d="M543 100 L537 112" stroke="#20B2AA" strokeWidth="3" strokeLinecap="round" fill="none"/>
+      <path d="M543 100 L549 112" stroke="#20B2AA" strokeWidth="3" strokeLinecap="round" fill="none"/>
+      {/* Arm reaching for bowl */}
+      <path d="M523 108 L498 120 L502 127 L526 116Z" fill="#fff0e8"/>
+      <ellipse cx="496" cy="123" rx="6" ry="6" fill="#f5c5a3"/>
+      <path d="M561 108 L576 120 L570 126 L558 114Z" fill="#fff0e8"/>
+      <rect x="537" y="86" width="8" height="14" rx="4" fill="#f5c5a3"/>
+      <ellipse cx="541" cy="76" rx="18" ry="19" fill="#f5c5a3"/>
+      <path d="M525 68 Q526 53 541 51 Q556 53 557 68 Q551 60 541 58 Q531 60 525 68Z" fill="#1a1a1a"/>
+      <circle cx="541" cy="53" r="10" fill="#1a1a1a"/>
+      <circle cx="534" cy="49" r="3.5" fill="#C8102E"/>
+      <path d="M525 68 Q520 77 522 83" fill="none" stroke="#1a1a1a" strokeWidth="6" strokeLinecap="round"/>
+      <path d="M557 68 Q562 77 560 83" fill="none" stroke="#1a1a1a" strokeWidth="6" strokeLinecap="round"/>
+      <path d="M532 74 Q535 78 538 74" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M544 74 Q547 78 550 74" fill="none" stroke="#5a3010" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="520" cy="81" r="5.5" fill="#ffb3a7" opacity="0.4"/>
+      <circle cx="562" cy="81" r="5.5" fill="#ffb3a7" opacity="0.4"/>
+      {/* Speech bubble — mashita */}
+      <rect x="590" y="55" width="160" height="45" rx="12" fill="#ffff00"/>
+      <path d="M600 100 L592 115 L614 100Z" fill="#ffff00"/>
+      <text x="670" y="78" textAnchor="middle" fontSize="14" fontWeight="900" fill="#111">맛있어!</text>
+      <text x="670" y="95" textAnchor="middle" fontSize="11" fontWeight="700" fill="#333">Delicious!</text>
+    </svg>
   );
 }
 
@@ -601,7 +1018,7 @@ function HistoryAr() {
 
       {/* Photo header */}
       <div style={{ marginBottom:"10px", borderRadius:"10px", overflow:"hidden" }}>
-        <CharacterIllustration h={110} radius={10} />
+        <SceneClassroom h={110} radius={10} />
       </div>
       <DancheongBorder />
 
@@ -651,7 +1068,7 @@ function SejongAr() {
       <div style={{ background:BK, borderRadius:"14px", padding:"16px", marginBottom:"12px", display:"grid", gridTemplateColumns:"120px 1fr", gap:"14px" }}>
         {/* Portrait — real palace photo */}
         <div style={{ borderRadius:"10px", overflow:"hidden", border:`3px solid ${Y}`, display:"flex", flexDirection:"column", minHeight:"130px" }}>
-          <CharacterIllustration h={100} radius={0} />
+          <SceneTeacher h={100} radius={0} />
           <div style={{ background:"#1a1a00", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"6px", flex:1 }}>
             <div style={{ fontSize:"18px", fontWeight:900, color:Y, direction:"ltr" }}>세종대왕</div>
             <div style={{ fontSize:"11px", color:"#888", marginTop:"1px" }}>سيجونغ الكبير</div>
@@ -726,7 +1143,7 @@ function CultureAr() {
 
         {/* K-Drama */}
         <div style={{ background:BK, borderRadius:"12px", overflow:"hidden" }}>
-          <CharacterIllustration h={75} radius={0} />
+          <SceneStreet h={75} radius={0} />
           <div style={{ padding:"10px" }}>
             <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>المسلسلات الكورية (K-Drama)</div>
             <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.7 }}>
@@ -742,7 +1159,7 @@ function CultureAr() {
 
         {/* K-Pop */}
         <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
-          <CharacterIllustration h={75} radius={0} />
+          <SceneConcert h={75} radius={0} />
           <div style={{ padding:"10px" }}>
             <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>موسيقى البوب الكوري (K-Pop)</div>
             <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.7 }}>
@@ -758,7 +1175,7 @@ function CultureAr() {
 
         {/* Food */}
         <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
-          <CharacterIllustration h={65} radius={0} />
+          <SceneFood h={65} radius={0} />
           <div style={{ padding:"10px" }}>
           <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"4px" }}>المطبخ الكوري</div>
           <div style={{ fontSize:"11px", color:"#555", lineHeight:1.8 }}>
@@ -944,7 +1361,7 @@ function CoverAr() {
 
         {/* Full-bleed cinematic photo */}
         <div style={{ width:"100%", position:"relative", marginBottom:"0" }}>
-          <CharacterIllustration h={100} radius={0} />
+          <SceneCover h={100} radius={0} />
         </div>
 
         {/* Dancheong colour band bottom */}
@@ -1712,7 +2129,7 @@ function HistoryEn() {
 
       {/* Photo header */}
       <div style={{ marginBottom:"10px", borderRadius:"10px", overflow:"hidden" }}>
-        <CharacterIllustration h={110} radius={10} />
+        <SceneClassroom h={110} radius={10} />
       </div>
       <DancheongBorder />
 
@@ -1757,7 +2174,7 @@ function SejongEn() {
 
       <div style={{ background:BK, borderRadius:"14px", padding:"16px", marginBottom:"12px", display:"grid", gridTemplateColumns:"120px 1fr", gap:"14px" }}>
         <div style={{ borderRadius:"10px", overflow:"hidden", border:`3px solid ${Y}`, display:"flex", flexDirection:"column", minHeight:"130px" }}>
-          <CharacterIllustration h={100} radius={0} />
+          <SceneTeacher h={100} radius={0} />
           <div style={{ background:"#1a1a00", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"6px", flex:1 }}>
             <div style={{ fontSize:"18px", fontWeight:900, color:Y }}>세종대왕</div>
             <div style={{ fontSize:"11px", color:"#888", marginTop:"1px" }}>Sejong the Great</div>
@@ -1827,7 +2244,7 @@ function CultureEn() {
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
         <div style={{ background:BK, borderRadius:"12px", overflow:"hidden" }}>
-          <CharacterIllustration h={75} radius={0} />
+          <SceneStreet h={75} radius={0} />
           <div style={{ padding:"10px" }}>
             <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>K-Drama</div>
             <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.7 }}>
@@ -1842,7 +2259,7 @@ function CultureEn() {
         </div>
 
         <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
-          <CharacterIllustration h={75} radius={0} />
+          <SceneConcert h={75} radius={0} />
           <div style={{ padding:"10px" }}>
             <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>K-Pop</div>
             <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.7 }}>
@@ -1857,7 +2274,7 @@ function CultureEn() {
         </div>
 
         <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
-          <CharacterIllustration h={65} radius={0} />
+          <SceneFood h={65} radius={0} />
           <div style={{ padding:"10px" }}>
           <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"4px" }}>Korean Food</div>
           <div style={{ fontSize:"11px", color:"#555", lineHeight:1.7 }}>
@@ -2040,7 +2457,7 @@ function CoverEn() {
 
         {/* Full-bleed cinematic photo */}
         <div style={{ width:"100%", position:"relative" }}>
-          <CharacterIllustration h={100} radius={0} />
+          <SceneCover h={100} radius={0} />
         </div>
 
         {/* Dancheong colour band bottom */}
