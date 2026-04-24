@@ -909,8 +909,7 @@ function CoverAr() {
         {/* Logo bar */}
         <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"12px", padding:"13mm 16mm 6mm" }}>
           <div style={{ flex:1, height:"1px", background:"rgba(255,255,0,0.22)" }} />
-          <TaegeukIcon size={20} />
-          <span style={{ fontSize:"12px", fontWeight:900, color:"rgba(255,255,0,0.65)", letterSpacing:"6px" }}>KLOVERS</span>
+          <img src="/klovers-logo.jpg" alt="Klovers" style={{ height:"38px", objectFit:"contain", borderRadius:"6px" }} />
           <div style={{ flex:1, height:"1px", background:"rgba(255,255,0,0.22)" }} />
         </div>
 
@@ -2007,8 +2006,7 @@ function CoverEn() {
         {/* Logo bar */}
         <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"12px", padding:"13mm 16mm 6mm" }}>
           <div style={{ flex:1, height:"1px", background:"rgba(255,255,0,0.22)" }} />
-          <TaegeukIcon size={20} />
-          <span style={{ fontSize:"12px", fontWeight:900, color:"rgba(255,255,0,0.65)", letterSpacing:"6px" }}>KLOVERS</span>
+          <img src="/klovers-logo.jpg" alt="Klovers" style={{ height:"38px", objectFit:"contain", borderRadius:"6px" }} />
           <div style={{ flex:1, height:"1px", background:"rgba(255,255,0,0.22)" }} />
         </div>
 
@@ -2749,10 +2747,7 @@ function BackCoverAr() {
 
       {/* Logo */}
       <div style={{ display:"flex", justifyContent:"center", marginTop:"4mm", marginBottom:"6mm" }}>
-        <div style={{ background:Y, borderRadius:"40px", padding:"8px 24px", display:"flex", alignItems:"center", gap:"10px" }}>
-          <TaegeukIcon size={26} />
-          <span style={{ fontSize:"18px", fontWeight:900, color:BK, letterSpacing:"3px" }}>KLOVERS</span>
-        </div>
+        <img src="/klovers-logo.jpg" alt="Klovers" style={{ height:"52px", objectFit:"contain", borderRadius:"8px" }} />
       </div>
 
       <DancheongBorder />
@@ -2839,10 +2834,7 @@ function BackCoverEn() {
 
       {/* Logo */}
       <div style={{ display:"flex", justifyContent:"center", marginTop:"4mm", marginBottom:"6mm" }}>
-        <div style={{ background:Y, borderRadius:"40px", padding:"8px 24px", display:"flex", alignItems:"center", gap:"10px" }}>
-          <TaegeukIcon size={26} />
-          <span style={{ fontSize:"18px", fontWeight:900, color:BK, letterSpacing:"3px" }}>KLOVERS</span>
-        </div>
+        <img src="/klovers-logo.jpg" alt="Klovers" style={{ height:"52px", objectFit:"contain", borderRadius:"8px" }} />
       </div>
 
       <DancheongBorder />
