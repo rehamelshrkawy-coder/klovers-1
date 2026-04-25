@@ -190,10 +190,9 @@ function BarcodeIcon() {
 /* ── Scene: Cover — "Welcome to Hangul!" ── */
 function SceneCover({ h = 240, radius = 0 }: { h?: number; radius?: number }) {
   return (
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Front_view_of_the_Imperial_Throne_Hall_Geunjeongjeon_at_Gyeongbokgung_Palace_with_blue_sky_in_Seoul.jpg/1920px-Front_view_of_the_Imperial_Throne_Hall_Geunjeongjeon_at_Gyeongbokgung_Palace_with_blue_sky_in_Seoul.jpg"
+    <img src="/book-photos/cover.jpg"
       alt="Gyeongbokgung Palace, Seoul"
       style={{ width:"100%", height:`${h}px`, objectFit:"cover", display:"block", borderRadius:`${radius}px` }}
-      crossOrigin="anonymous"
       loading="lazy"
     />
   );
@@ -202,10 +201,9 @@ function SceneCover({ h = 240, radius = 0 }: { h?: number; radius?: number }) {
 /* ── Scene: Classroom — "Study Time!" ── */
 function SceneClassroom({ h = 280, radius = 0 }: { h?: number; radius?: number }) {
   return (
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Hunminjeongeumhaerye.jpg/1920px-Hunminjeongeumhaerye.jpg"
+    <img src="/book-photos/classroom.jpg"
       alt="Hunminjeongeum — original Hangul manuscript"
       style={{ width:"100%", height:`${h}px`, objectFit:"cover", display:"block", borderRadius:`${radius}px` }}
-      crossOrigin="anonymous"
       loading="lazy"
     />
   );
@@ -213,10 +211,9 @@ function SceneClassroom({ h = 280, radius = 0 }: { h?: number; radius?: number }
 /* ── Scene: Street — "Seoul at Night!" ── */
 function SceneStreet({ h = 220, radius = 0 }: { h?: number; radius?: number }) {
   return (
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Bukchon-ro_11-gil_street_with_hanok_houses_at_blue_hour_in_Bukchon_Hanok_Village_Seoul.jpg/1920px-Bukchon-ro_11-gil_street_with_hanok_houses_at_blue_hour_in_Bukchon_Hanok_Village_Seoul.jpg"
+    <img src="/book-photos/street.jpg"
       alt="Bukchon Hanok Village street, Seoul"
       style={{ width:"100%", height:`${h}px`, objectFit:"cover", display:"block", borderRadius:`${radius}px` }}
-      crossOrigin="anonymous"
       loading="lazy"
     />
   );
@@ -224,10 +221,9 @@ function SceneStreet({ h = 220, radius = 0 }: { h?: number; radius?: number }) {
 /* ── Scene: Concert — "K-Pop Night!" ── */
 function SceneConcert({ h = 220, radius = 0 }: { h?: number; radius?: number }) {
   return (
-    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5b/Close_Your_Eyes_Kpop_live_concert_stage_performance_2026_1.jpg"
+    <img src="/book-photos/concert.jpg"
       alt="K-pop live concert stage"
       style={{ width:"100%", height:`${h}px`, objectFit:"cover", display:"block", borderRadius:`${radius}px` }}
-      crossOrigin="anonymous"
       loading="lazy"
     />
   );
@@ -235,10 +231,9 @@ function SceneConcert({ h = 220, radius = 0 }: { h?: number; radius?: number }) 
 /* ── Scene: Teacher — "Junho Teaches 가나다!" ── */
 function SceneTeacher({ h = 260, radius = 0 }: { h?: number; radius?: number }) {
   return (
-    <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/King_sejong_the_great_gwanghwamun_square_police-859145.jpg"
+    <img src="/book-photos/teacher.jpg"
       alt="King Sejong statue, Gwanghwamun Square"
       style={{ width:"100%", height:`${h}px`, objectFit:"cover", display:"block", borderRadius:`${radius}px` }}
-      crossOrigin="anonymous"
       loading="lazy"
     />
   );
@@ -246,10 +241,9 @@ function SceneTeacher({ h = 260, radius = 0 }: { h?: number; radius?: number }) 
 /* ── Scene: Food — "Let's Eat Korean Food!" ── */
 function SceneFood({ h = 200, radius = 0 }: { h?: number; radius?: number }) {
   return (
-    <img src="https://upload.wikimedia.org/wikipedia/commons/a/ad/Bibimbap_with_side_dishes.jpg"
+    <img src="/book-photos/food.jpg"
       alt="Bibimbap with Korean side dishes"
       style={{ width:"100%", height:`${h}px`, objectFit:"cover", display:"block", borderRadius:`${radius}px` }}
-      crossOrigin="anonymous"
       loading="lazy"
     />
   );
