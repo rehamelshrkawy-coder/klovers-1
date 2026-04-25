@@ -1291,134 +1291,64 @@ function CourseAr() {
 }
 
 function CoverAr() {
-  const syllables = "가나다라마바사아자차카타파하갈날달랄말발살알잘찰칼탈팔할감남담람맘밤삼암잠참캄탐팜함강낭당랑망방상앙장창캉탕팡항";
   return (
     <div className="book-page" style={{
-      width:"210mm", minHeight:"297mm", background:"#080808",
+      width:"210mm", minHeight:"297mm", background:"#0a0a0a",
       pageBreakAfter:"always", breakAfter:"page",
       position:"relative", overflow:"hidden", boxSizing:"border-box",
       display:"flex", flexDirection:"column",
       direction:"rtl",
     }}>
-      {/* Wallpaper — Korean syllables at near-invisible opacity */}
-      <div style={{
-        position:"absolute", inset:0, zIndex:0,
-        fontSize:"26px", fontWeight:900, color:Y, opacity:0.035,
-        lineHeight:1.5, letterSpacing:"6px", padding:"8px",
-        wordBreak:"break-all", userSelect:"none", overflow:"hidden",
-      }}>{syllables.repeat(35)}</div>
-
-      {/* Radial spotlight behind hero text */}
-      <div style={{
-        position:"absolute", top:"12%", left:"50%", transform:"translateX(-50%)",
-        width:"500px", height:"320px",
-        background:"radial-gradient(ellipse at center, rgba(255,255,0,0.18) 0%, rgba(255,255,0,0.06) 45%, transparent 72%)",
-        zIndex:1, pointerEvents:"none",
-      }} />
-
-      {/* ── CONTENT ── */}
-      <div style={{ position:"relative", zIndex:2, flex:1, display:"flex", flexDirection:"column" }}>
-
-        {/* Logo bar */}
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"12px", padding:"13mm 16mm 6mm" }}>
-          <div style={{ flex:1, height:"1px", background:"rgba(255,255,0,0.22)" }} />
-          <img src="/klovers-logo.jpg" alt="Klovers" style={{ height:"38px", objectFit:"contain", borderRadius:"6px" }} />
-          <div style={{ flex:1, height:"1px", background:"rgba(255,255,0,0.22)" }} />
-        </div>
-
-        {/* Publisher tag */}
-        <div style={{ textAlign:"center", marginBottom:"6mm" }}>
-          <span style={{ fontSize:"10px", color:"rgba(255,255,255,0.35)", letterSpacing:"3px" }}>KLOVERS KOREAN ACADEMY</span>
-        </div>
-
-        {/* ── HERO: 한글 ── */}
-        <div style={{ textAlign:"center", padding:"0 10mm", marginBottom:"6mm" }}>
+      <div style={{ position:"relative", width:"100%", height:"175mm", overflow:"hidden" }}>
+        <img src="/book-photos/cover.jpg" alt=""
+          style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }} />
+        <div style={{
+          position:"absolute", inset:0,
+          background:"linear-gradient(to bottom, rgba(10,10,10,0.10) 0%, rgba(10,10,10,0.35) 55%, rgba(10,10,10,0.98) 100%)",
+        }} />
+        <div style={{
+          position:"absolute", top:"14mm", left:0, right:0, textAlign:"center",
+          fontSize:"10px", fontWeight:700, color:"rgba(255,255,255,0.85)",
+          letterSpacing:"5px", textTransform:"uppercase",
+        }}>KLOVERS · 클로버스</div>
+        <div style={{
+          position:"absolute", top:"13mm", insetInlineEnd:"14mm",
+          border:"1px solid rgba(212,175,55,0.7)", padding:"3px 10px", borderRadius:"2px",
+          fontSize:"9px", fontWeight:800, color:GOLD, letterSpacing:"2px",
+        }}>المستوى ١</div>
+        <div style={{
+          position:"absolute", left:0, right:0, bottom:"24mm", textAlign:"center",
+        }}>
           <div style={{
-            fontSize:"172px", fontWeight:900, color:GOLD, lineHeight:0.88,
-            textShadow:`0 0 50px rgba(212,175,55,0.75), 0 0 100px rgba(212,175,55,0.35), 0 0 180px rgba(212,175,55,0.18)`,
-            marginBottom:"10px",
+            fontSize:"112px", fontWeight:900, color:GOLD, lineHeight:1,
+            letterSpacing:"-2px",
+            textShadow:"0 4px 28px rgba(0,0,0,0.7), 0 0 60px rgba(212,175,55,0.25)",
           }}>한글</div>
-          <div style={{ fontSize:"11px", color:"rgba(255,255,255,0.35)", letterSpacing:"13px", fontWeight:500 }}>
-            H&nbsp;&nbsp;A&nbsp;&nbsp;N&nbsp;&nbsp;G&nbsp;&nbsp;U&nbsp;&nbsp;L
-          </div>
         </div>
-
-        {/* Dancheong colour band */}
-        <div style={{ display:"flex", height:"5px", overflow:"hidden", marginBottom:"0" }}>
-          {(["#C8102E","#0047AB","#FFFF00","#228B22","#C8102E","#0047AB","#FFFF00","#228B22",
-             "#C8102E","#0047AB","#FFFF00","#228B22","#C8102E","#0047AB","#FFFF00","#228B22"] as string[]).map((c,i)=>(
-            <div key={i} style={{ flex:1, background:c }} />
-          ))}
+        <div style={{
+          position:"absolute", left:"50%", transform:"translateX(-50%)",
+          bottom:"15mm", width:"56px", height:"2px", background:GOLD,
+        }} />
+      </div>
+      <div style={{ flex:1, padding:"15mm 20mm 18mm", display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
+        <div style={{ textAlign:"center" }}>
+          <div style={{
+            fontSize:"32px", fontWeight:900,
+            color:"#fff", lineHeight:1.15, marginBottom:"10px",
+          }}>اقرأ الكورية في ٧ أيام</div>
+          <div style={{
+            fontSize:"13px", color:"rgba(255,255,255,0.6)", fontWeight:400,
+            lineHeight:1.6, maxWidth:"140mm", margin:"0 auto",
+          }}>دليل عربي–كوري شامل لتعلّم الهانغول من الصفر — مستوحى من المسلسلات والكيبوب</div>
         </div>
-
-        {/* Full-bleed cinematic photo */}
-        <div style={{ width:"100%", position:"relative", marginBottom:"0" }}>
-          <SceneCover h={240} radius={0} />
-        </div>
-
-        {/* Dancheong colour band bottom */}
-        <div style={{ display:"flex", height:"5px", overflow:"hidden", marginBottom:"9mm" }}>
-          {(["#228B22","#FFFF00","#0047AB","#C8102E","#228B22","#FFFF00","#0047AB","#C8102E",
-             "#228B22","#FFFF00","#0047AB","#C8102E","#228B22","#FFFF00","#0047AB","#C8102E"] as string[]).map((c,i)=>(
-            <div key={i} style={{ flex:1, background:c }} />
-          ))}
-        </div>
-
-        {/* Arabic title */}
-        <div style={{ textAlign:"center", padding:"0 14mm", marginBottom:"7mm" }}>
-          <div style={{ fontSize:"28px", fontWeight:900, color:"#ffffff", lineHeight:1.15, marginBottom:"5px" }}>
-            اقرأ الكورية في ٧ أيام
-          </div>
-          <div style={{ fontSize:"13px", color:`rgba(212,175,55,0.9)`, fontWeight:700, letterSpacing:"1px" }}>
-            النسخة العربية–الكورية الحصرية
-          </div>
-        </div>
-
-        {/* Glassmorphism tags */}
-        <div style={{ display:"flex", gap:"7px", justifyContent:"center", flexWrap:"wrap", padding:"0 14mm", marginBottom:"7mm" }}>
-          {["🎬 مسلسلات كورية", "🎵 كيبوب", "🌸 ثقافة كورية"].map(t => (
-            <span key={t} style={{
-              background:"rgba(212,175,55,0.10)", color:`rgba(212,175,55,0.95)`,
-              border:`1px solid rgba(212,175,55,0.35)`,
-              fontSize:"11px", fontWeight:700, padding:"5px 13px", borderRadius:"20px",
-            }}>{t}</span>
-          ))}
-        </div>
-
-        {/* Spacer */}
-        <div style={{ flex:1 }} />
-
-        {/* Level badge + alphabet strip + copyright */}
-        <div style={{ padding:"0 14mm 11mm" }}>
-          <div style={{ display:"flex", justifyContent:"center", marginBottom:"8px" }}>
-            <div style={{
-              border:`1.5px solid rgba(212,175,55,0.6)`, borderRadius:"7px",
-              padding:"5px 22px", textAlign:"center",
-            }}>
-              <span style={{ fontSize:"11px", fontWeight:900, color:`rgba(212,175,55,0.9)`, letterSpacing:"1px" }}>
-                المستوى ١ — مبتدئ
-              </span>
-            </div>
-          </div>
-
-          {/* Alphabet strip */}
-          <div style={{ display:"flex", gap:"3px", justifyContent:"center", marginBottom:"9px" }}>
-            {"ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㅏㅓㅗㅜ".split("").map((ch,i) => (
-              <div key={i} style={{
-                width:"21px", height:"21px",
-                background:`rgba(212,175,55,${i%3===0?0.14:i%3===1?0.07:0.10})`,
-                border:"1px solid rgba(212,175,55,0.22)",
-                borderRadius:"4px",
-                display:"flex", alignItems:"center", justifyContent:"center",
-                fontSize:"12px", color:`rgba(212,175,55,0.85)`, fontWeight:700,
-              }}>{ch}</div>
-            ))}
-          </div>
-
-          <div style={{ textAlign:"center" }}>
-            <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.22)", letterSpacing:"1px" }}>
-              © 2025 Klovers Korean Academy — klovers.academy
-            </div>
+        <div style={{ textAlign:"center" }}>
+          <div style={{ width:"36px", height:"1px", background:"rgba(255,255,255,0.22)", margin:"0 auto 10px" }} />
+          <div style={{
+            fontSize:"10px", fontWeight:700, color:"rgba(255,255,255,0.55)",
+            letterSpacing:"3px", textTransform:"uppercase",
+          }}>أكاديمية كلوفرز للغة الكورية</div>
+          <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.3)", marginTop:"4px", letterSpacing:"1px" }}>
+            kloversegy.com
           </div>
         </div>
       </div>
@@ -2281,134 +2211,64 @@ function CourseEn() {
 }
 
 function CoverEn() {
-  const syllables = "가나다라마바사아자차카타파하갈날달랄말발살알잘찰칼탈팔할감남담람맘밤삼암잠참캄탐팜함강낭당랑망방상앙장창캉탕팡항";
   return (
     <div className="book-page" style={{
-      width:"210mm", minHeight:"297mm", background:"#080808",
+      width:"210mm", minHeight:"297mm", background:"#0a0a0a",
       pageBreakAfter:"always", breakAfter:"page",
       position:"relative", overflow:"hidden", boxSizing:"border-box",
       display:"flex", flexDirection:"column",
       direction:"ltr",
     }}>
-      {/* Wallpaper — Korean syllables at near-invisible opacity */}
-      <div style={{
-        position:"absolute", inset:0, zIndex:0,
-        fontSize:"26px", fontWeight:900, color:Y, opacity:0.035,
-        lineHeight:1.5, letterSpacing:"6px", padding:"8px",
-        wordBreak:"break-all", userSelect:"none", overflow:"hidden",
-      }}>{syllables.repeat(35)}</div>
-
-      {/* Radial spotlight behind hero text */}
-      <div style={{
-        position:"absolute", top:"12%", left:"50%", transform:"translateX(-50%)",
-        width:"500px", height:"320px",
-        background:"radial-gradient(ellipse at center, rgba(255,255,0,0.18) 0%, rgba(255,255,0,0.06) 45%, transparent 72%)",
-        zIndex:1, pointerEvents:"none",
-      }} />
-
-      {/* ── CONTENT ── */}
-      <div style={{ position:"relative", zIndex:2, flex:1, display:"flex", flexDirection:"column" }}>
-
-        {/* Logo bar */}
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"12px", padding:"13mm 16mm 6mm" }}>
-          <div style={{ flex:1, height:"1px", background:"rgba(255,255,0,0.22)" }} />
-          <img src="/klovers-logo.jpg" alt="Klovers" style={{ height:"38px", objectFit:"contain", borderRadius:"6px" }} />
-          <div style={{ flex:1, height:"1px", background:"rgba(255,255,0,0.22)" }} />
-        </div>
-
-        {/* Publisher tag */}
-        <div style={{ textAlign:"center", marginBottom:"6mm" }}>
-          <span style={{ fontSize:"10px", color:"rgba(255,255,255,0.35)", letterSpacing:"3px" }}>KLOVERS KOREAN ACADEMY</span>
-        </div>
-
-        {/* ── HERO: 한글 ── */}
-        <div style={{ textAlign:"center", padding:"0 10mm", marginBottom:"6mm" }}>
+      <div style={{ position:"relative", width:"100%", height:"175mm", overflow:"hidden" }}>
+        <img src="/book-photos/cover.jpg" alt=""
+          style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }} />
+        <div style={{
+          position:"absolute", inset:0,
+          background:"linear-gradient(to bottom, rgba(10,10,10,0.10) 0%, rgba(10,10,10,0.35) 55%, rgba(10,10,10,0.98) 100%)",
+        }} />
+        <div style={{
+          position:"absolute", top:"14mm", left:0, right:0, textAlign:"center",
+          fontSize:"10px", fontWeight:700, color:"rgba(255,255,255,0.85)",
+          letterSpacing:"5px", textTransform:"uppercase",
+        }}>KLOVERS · 클로버스</div>
+        <div style={{
+          position:"absolute", top:"13mm", insetInlineEnd:"14mm",
+          border:"1px solid rgba(212,175,55,0.7)", padding:"3px 10px", borderRadius:"2px",
+          fontSize:"9px", fontWeight:800, color:GOLD, letterSpacing:"2px",
+        }}>LEVEL 1</div>
+        <div style={{
+          position:"absolute", left:0, right:0, bottom:"24mm", textAlign:"center",
+        }}>
           <div style={{
-            fontSize:"172px", fontWeight:900, color:GOLD, lineHeight:0.88,
-            textShadow:`0 0 50px rgba(212,175,55,0.75), 0 0 100px rgba(212,175,55,0.35), 0 0 180px rgba(212,175,55,0.18)`,
-            marginBottom:"10px",
+            fontSize:"112px", fontWeight:900, color:GOLD, lineHeight:1,
+            letterSpacing:"-2px",
+            textShadow:"0 4px 28px rgba(0,0,0,0.7), 0 0 60px rgba(212,175,55,0.25)",
           }}>한글</div>
-          <div style={{ fontSize:"11px", color:"rgba(255,255,255,0.35)", letterSpacing:"13px", fontWeight:500 }}>
-            H&nbsp;&nbsp;A&nbsp;&nbsp;N&nbsp;&nbsp;G&nbsp;&nbsp;U&nbsp;&nbsp;L
-          </div>
         </div>
-
-        {/* Dancheong colour band */}
-        <div style={{ display:"flex", height:"5px", overflow:"hidden" }}>
-          {(["#C8102E","#0047AB","#FFFF00","#228B22","#C8102E","#0047AB","#FFFF00","#228B22",
-             "#C8102E","#0047AB","#FFFF00","#228B22","#C8102E","#0047AB","#FFFF00","#228B22"] as string[]).map((c,i)=>(
-            <div key={i} style={{ flex:1, background:c }} />
-          ))}
+        <div style={{
+          position:"absolute", left:"50%", transform:"translateX(-50%)",
+          bottom:"15mm", width:"56px", height:"2px", background:GOLD,
+        }} />
+      </div>
+      <div style={{ flex:1, padding:"15mm 20mm 18mm", display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
+        <div style={{ textAlign:"center" }}>
+          <div style={{
+            fontSize:"30px", fontWeight:900,
+            color:"#fff", lineHeight:1.15, marginBottom:"10px",
+          }}>Read Korean in 7 Days</div>
+          <div style={{
+            fontSize:"13px", color:"rgba(255,255,255,0.6)", fontWeight:400,
+            lineHeight:1.6, maxWidth:"140mm", margin:"0 auto",
+          }}>A bilingual guide for absolute beginners — learn Hangul through K-drama, K-pop & Korean culture</div>
         </div>
-
-        {/* Full-bleed cinematic photo */}
-        <div style={{ width:"100%", position:"relative" }}>
-          <SceneCover h={240} radius={0} />
-        </div>
-
-        {/* Dancheong colour band bottom */}
-        <div style={{ display:"flex", height:"5px", overflow:"hidden", marginBottom:"9mm" }}>
-          {(["#228B22","#FFFF00","#0047AB","#C8102E","#228B22","#FFFF00","#0047AB","#C8102E",
-             "#228B22","#FFFF00","#0047AB","#C8102E","#228B22","#FFFF00","#0047AB","#C8102E"] as string[]).map((c,i)=>(
-            <div key={i} style={{ flex:1, background:c }} />
-          ))}
-        </div>
-
-        {/* English title */}
-        <div style={{ textAlign:"center", padding:"0 14mm", marginBottom:"7mm" }}>
-          <div style={{ fontSize:"28px", fontWeight:900, color:"#ffffff", lineHeight:1.15, marginBottom:"5px" }}>
-            Read Korean in 7 Days
-          </div>
-          <div style={{ fontSize:"13px", color:`rgba(212,175,55,0.9)`, fontWeight:700, letterSpacing:"1px" }}>
-            Exclusive English–Korean Edition
-          </div>
-        </div>
-
-        {/* Glassmorphism tags */}
-        <div style={{ display:"flex", gap:"7px", justifyContent:"center", flexWrap:"wrap", padding:"0 14mm", marginBottom:"7mm" }}>
-          {["🎬 K-Drama", "🎵 K-Pop", "🌸 Korean Culture"].map(t => (
-            <span key={t} style={{
-              background:"rgba(212,175,55,0.10)", color:`rgba(212,175,55,0.95)`,
-              border:`1px solid rgba(212,175,55,0.35)`,
-              fontSize:"11px", fontWeight:700, padding:"5px 13px", borderRadius:"20px",
-            }}>{t}</span>
-          ))}
-        </div>
-
-        {/* Spacer */}
-        <div style={{ flex:1 }} />
-
-        {/* Level badge + alphabet strip + copyright */}
-        <div style={{ padding:"0 14mm 11mm" }}>
-          <div style={{ display:"flex", justifyContent:"center", marginBottom:"8px" }}>
-            <div style={{
-              border:`1.5px solid rgba(212,175,55,0.6)`, borderRadius:"7px",
-              padding:"5px 22px", textAlign:"center",
-            }}>
-              <span style={{ fontSize:"11px", fontWeight:900, color:`rgba(212,175,55,0.9)`, letterSpacing:"1px" }}>
-                Level 1 — Beginner
-              </span>
-            </div>
-          </div>
-
-          {/* Alphabet strip */}
-          <div style={{ display:"flex", gap:"3px", justifyContent:"center", marginBottom:"9px" }}>
-            {"ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㅏㅓㅗㅜ".split("").map((ch,i) => (
-              <div key={i} style={{
-                width:"21px", height:"21px",
-                background:`rgba(212,175,55,${i%3===0?0.14:i%3===1?0.07:0.10})`,
-                border:"1px solid rgba(212,175,55,0.22)",
-                borderRadius:"4px",
-                display:"flex", alignItems:"center", justifyContent:"center",
-                fontSize:"12px", color:`rgba(212,175,55,0.85)`, fontWeight:700,
-              }}>{ch}</div>
-            ))}
-          </div>
-
-          <div style={{ textAlign:"center" }}>
-            <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.22)", letterSpacing:"1px" }}>
-              © 2025 Klovers Korean Academy — klovers.academy
-            </div>
+        <div style={{ textAlign:"center" }}>
+          <div style={{ width:"36px", height:"1px", background:"rgba(255,255,255,0.22)", margin:"0 auto 10px" }} />
+          <div style={{
+            fontSize:"10px", fontWeight:700, color:"rgba(255,255,255,0.55)",
+            letterSpacing:"3px", textTransform:"uppercase",
+          }}>Klovers Korean Academy</div>
+          <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.3)", marginTop:"4px", letterSpacing:"1px" }}>
+            kloversegy.com
           </div>
         </div>
       </div>
