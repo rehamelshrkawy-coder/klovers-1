@@ -4168,32 +4168,44 @@ export default function HangulBookPage() {
             <CultureAr />
             <CourseAr />
             <WelcomeAr />
-            {/* WEEK 1 + WEEK 2 — Consonants: Teach → Practice → Review → Homework → DailyPractice per lesson */}
+            {/* WEEK 1 — Consonants Part 1 (ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ) */}
             {[
               { lesson:1, slice:[0,3] as [number,number] },
               { lesson:2, slice:[3,6] as [number,number] },
-              { lesson:3, slice:[6,9] as [number,number] },
-              { lesson:4, slice:[9,12] as [number,number] },
-              { lesson:5, slice:[12,14] as [number,number] },
             ].map(L => (
-              <Fragment key={`ar-l${L.lesson}`}>
+              <Fragment key={`ar-w1-l${L.lesson}`}>
                 <TeachLetters lesson={L.lesson} slice={L.slice} lang="ar" />
                 <PracticeLetters lesson={L.lesson} slice={L.slice} lang="ar" />
                 <ReviewLetters lesson={L.lesson} slice={L.slice} lang="ar" />
                 <PictureWords lesson={L.lesson} slice={L.slice} lang="ar" />
                 <Homework lesson={L.lesson} slice={L.slice} lang="ar" />
                 <DailyPractice lesson={L.lesson} lang="ar" />
-                {L.lesson === 2 && <WeeklyCheckpoint week={1} lang="ar" />}
-                {L.lesson === 5 && <WeeklyCheckpoint week={2} lang="ar" />}
               </Fragment>
             ))}
-            {/* WEEK 3 — Vowels + Syllables */}
+            <WeeklyCheckpoint week={1} lang="ar" />
+            {/* WEEK 2 — Vowels */}
             <VowelsLesson part={1} lang="ar" />
             <VowelsLesson part={2} lang="ar" />
             <VowelsLesson part={3} lang="ar" />
-            <SyllableAr />
+            <WeeklyCheckpoint week={2} lang="ar" />
+            {/* WEEK 3 — Complete Consonants (ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ) */}
+            {[
+              { lesson:3, slice:[6,9] as [number,number] },
+              { lesson:4, slice:[9,12] as [number,number] },
+              { lesson:5, slice:[12,14] as [number,number] },
+            ].map(L => (
+              <Fragment key={`ar-w3-l${L.lesson}`}>
+                <TeachLetters lesson={L.lesson} slice={L.slice} lang="ar" />
+                <PracticeLetters lesson={L.lesson} slice={L.slice} lang="ar" />
+                <ReviewLetters lesson={L.lesson} slice={L.slice} lang="ar" />
+                <PictureWords lesson={L.lesson} slice={L.slice} lang="ar" />
+                <Homework lesson={L.lesson} slice={L.slice} lang="ar" />
+                <DailyPractice lesson={L.lesson} lang="ar" />
+              </Fragment>
+            ))}
             <WeeklyCheckpoint week={3} lang="ar" />
-            {/* WEEK 4 — Batchim + Reading */}
+            {/* WEEK 4 — Syllables + Batchim + Simple Words */}
+            <SyllableAr />
             <BatchimLesson part={1} lang="ar" />
             <BatchimLesson part={2} lang="ar" />
             <BatchimLesson part={3} lang="ar" />
@@ -4224,32 +4236,44 @@ export default function HangulBookPage() {
             <CultureEn />
             <CourseEn />
             <WelcomeEn />
-            {/* WEEK 1 + WEEK 2 — Consonants: Teach → Practice → Review → Homework → DailyPractice per lesson */}
+            {/* WEEK 1 — Consonants Part 1 (ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ) */}
             {[
               { lesson:1, slice:[0,3] as [number,number] },
               { lesson:2, slice:[3,6] as [number,number] },
-              { lesson:3, slice:[6,9] as [number,number] },
-              { lesson:4, slice:[9,12] as [number,number] },
-              { lesson:5, slice:[12,14] as [number,number] },
             ].map(L => (
-              <Fragment key={`en-l${L.lesson}`}>
+              <Fragment key={`en-w1-l${L.lesson}`}>
                 <TeachLetters lesson={L.lesson} slice={L.slice} lang="en" />
                 <PracticeLetters lesson={L.lesson} slice={L.slice} lang="en" />
                 <ReviewLetters lesson={L.lesson} slice={L.slice} lang="en" />
                 <PictureWords lesson={L.lesson} slice={L.slice} lang="en" />
                 <Homework lesson={L.lesson} slice={L.slice} lang="en" />
                 <DailyPractice lesson={L.lesson} lang="en" />
-                {L.lesson === 2 && <WeeklyCheckpoint week={1} lang="en" />}
-                {L.lesson === 5 && <WeeklyCheckpoint week={2} lang="en" />}
               </Fragment>
             ))}
-            {/* WEEK 3 — Vowels + Syllables */}
+            <WeeklyCheckpoint week={1} lang="en" />
+            {/* WEEK 2 — Vowels */}
             <VowelsLesson part={1} lang="en" />
             <VowelsLesson part={2} lang="en" />
             <VowelsLesson part={3} lang="en" />
-            <SyllableEn />
+            <WeeklyCheckpoint week={2} lang="en" />
+            {/* WEEK 3 — Complete Consonants (ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ) */}
+            {[
+              { lesson:3, slice:[6,9] as [number,number] },
+              { lesson:4, slice:[9,12] as [number,number] },
+              { lesson:5, slice:[12,14] as [number,number] },
+            ].map(L => (
+              <Fragment key={`en-w3-l${L.lesson}`}>
+                <TeachLetters lesson={L.lesson} slice={L.slice} lang="en" />
+                <PracticeLetters lesson={L.lesson} slice={L.slice} lang="en" />
+                <ReviewLetters lesson={L.lesson} slice={L.slice} lang="en" />
+                <PictureWords lesson={L.lesson} slice={L.slice} lang="en" />
+                <Homework lesson={L.lesson} slice={L.slice} lang="en" />
+                <DailyPractice lesson={L.lesson} lang="en" />
+              </Fragment>
+            ))}
             <WeeklyCheckpoint week={3} lang="en" />
-            {/* WEEK 4 — Batchim + Reading */}
+            {/* WEEK 4 — Syllables + Batchim + Simple Words */}
+            <SyllableEn />
             <BatchimLesson part={1} lang="en" />
             <BatchimLesson part={2} lang="en" />
             <BatchimLesson part={3} lang="en" />
