@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
+import { logLeadEvent } from "@/lib/leadTracking";
 import { useSEO } from "@/hooks/useSEO";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
@@ -110,6 +111,46 @@ const Index = () => {
     return () => { el.remove(); bizEl.remove(); };
   }, []);
 
+  // ── Scroll depth + section visibility analytics ────────────────
+  useEffect(() => {
+    const milestones = new Set<number>();
+    const onScroll = () => {
+      const pct = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
+      [25, 50, 75, 90].forEach((m) => {
+        if (pct >= m && !milestones.has(m)) {
+          milestones.add(m);
+          try { logLeadEvent({ source_type: "homepage", cta_label: `scroll_depth_${m}` }); } catch {}
+        }
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const sections = [
+      { id: "how-it-works", label: "section_how_it_works" },
+      { id: "placement-cta", label: "section_placement_cta" },
+      { id: "testimonials", label: "section_testimonials" },
+      { id: "meet-teacher", label: "section_meet_teacher" },
+      { id: "final-cta", label: "section_final_cta" },
+    ];
+    const observers: IntersectionObserver[] = [];
+    sections.forEach(({ id, label }) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const obs = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) {
+          try { logLeadEvent({ source_type: "homepage", cta_label: label }); } catch {}
+          obs.disconnect();
+        }
+      }, { threshold: 0.3 });
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach(o => o.disconnect());
+  }, []);
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -123,24 +164,32 @@ const Index = () => {
         <InterviewBannerChip />
 
         {/* Interest — immediately answer "how does this work?" */}
-        <Suspense fallback={<SectionFallback />}>
-          <HowItWorks />
-        </Suspense>
+        <div id="how-it-works" style={{ minHeight: 480 }}>
+          <Suspense fallback={<SectionFallback />}>
+            <HowItWorks />
+          </Suspense>
+        </div>
         {/* Action — low-friction free CTA (no payment). Placed high because
             placement-test takers convert 5x more than bounced visitors. */}
-        <Suspense fallback={<SectionFallback />}>
-          <PlacementTestCTA />
-        </Suspense>
+        <div id="placement-cta" style={{ minHeight: 400 }}>
+          <Suspense fallback={<SectionFallback />}>
+            <PlacementTestCTA />
+          </Suspense>
+        </div>
         {/* Desire — social proof builds trust early */}
-        <Suspense fallback={<SectionFallback />}>
-          <TestimonialsSection />
-        </Suspense>
+        <div id="testimonials" style={{ minHeight: 400 }}>
+          <Suspense fallback={<SectionFallback />}>
+            <TestimonialsSection />
+          </Suspense>
+        </div>
         {/* Desire — reinforces motivation after seeing proof */}
         <WhyLearnKorean />
         {/* Desire — humanize the brand, build connection */}
-        <Suspense fallback={<SectionFallback />}>
-          <MeetTeacher />
-        </Suspense>
+        <div id="meet-teacher" style={{ minHeight: 400 }}>
+          <Suspense fallback={<SectionFallback />}>
+            <MeetTeacher />
+          </Suspense>
+        </div>
         {/* Desire — show the clear path forward */}
         <Suspense fallback={<SectionFallback />}>
           <LearningRoadmap />
@@ -158,9 +207,11 @@ const Index = () => {
           <HomeBlogSection />
         </Suspense>
         {/* Action — final conversion push */}
-        <Suspense fallback={<SectionFallback />}>
-          <FinalCTA />
-        </Suspense>
+        <div id="final-cta">
+          <Suspense fallback={<SectionFallback />}>
+            <FinalCTA />
+          </Suspense>
+        </div>
       </main>
       <Footer />
       <StickyEnrollBar />

@@ -76,7 +76,7 @@ const PlacementTestCTA = () => {
 
           {/* ── Left: Copy ── */}
           <div
-            className={`space-y-6 text-center md:text-left transition-all duration-700 ${
+            className={`space-y-6 text-center md:text-start transition-all duration-700 ${
               visible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
             }`}
           >

@@ -189,7 +189,7 @@ const HeroSection = () => {
           </p>
 
           {/* CTA Buttons — 2 max to eliminate choice paralysis */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center w-full max-w-sm sm:max-w-none mx-auto">
             <Button
               size="lg"
               asChild
@@ -226,6 +226,23 @@ const HeroSection = () => {
           <p className="text-white/60 text-xs" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.8)" }}>
             {isAr ? "✓ بدون بطاقة بنكية · ✓ ٩٨٪ راضون · ✓ رد خلال دقائق" : "✓ No credit card · ✓ 98% satisfaction · ✓ Reply in minutes"}
           </p>
+
+          {/* Class schedule — answers "when can I start?" immediately */}
+          <div className="flex flex-wrap gap-2 justify-center">
+            {[
+              { day: isAr ? "السبت" : "Sat", time: "4:00 PM" },
+              { day: isAr ? "الأحد" : "Sun", time: "6:30 PM" },
+              { day: isAr ? "الأربعاء" : "Wed", time: "5:30 PM" },
+            ].map(({ day, time }) => (
+              <div key={day} className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/80">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+                {day} · {time}
+              </div>
+            ))}
+            <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/60">
+              {isAr ? "توقيت القاهرة" : "Cairo time"}
+            </div>
+          </div>
 
           {/* Hangul sheet — reciprocity trigger */}
           <Link

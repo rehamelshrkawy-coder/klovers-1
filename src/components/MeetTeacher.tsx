@@ -1,13 +1,15 @@
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Users, BookOpen, Award, ArrowRight } from "lucide-react";
+import { Users, BookOpen, Award, ArrowRight, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import rehamPhoto from "@/assets/reham-teacher.jpg";
+import { logLeadEvent } from "@/lib/leadTracking";
 
 const highlightIcons = [Users, BookOpen, Award];
 
 const MeetTeacher = () => {
-  const { t, tArray } = useLanguage();
+  const { t, tArray, language } = useLanguage();
+  const isAr = language === "ar";
   const highlights = tArray("teacher", "highlights") as { label: string; description: string }[];
 
   return (
@@ -43,8 +45,12 @@ const MeetTeacher = () => {
                 />
                 {/* Name overlay at bottom */}
                 <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-6 py-5">
+                  <div className="flex items-center gap-2 mb-1">
+                    <ShieldCheck className="h-4 w-4 text-amber-300 shrink-0" />
+                    <span className="text-amber-300 text-xs font-bold tracking-wider uppercase">TOPIK Certified</span>
+                  </div>
                   <p className="text-white font-bold text-lg leading-tight">{t("teacher", "name")}</p>
-                  <p className="text-amber-300 text-sm font-semibold mt-0.5">Lead Korean Instructor</p>
+                  <p className="text-amber-300 text-sm font-semibold mt-0.5">{isAr ? "المدرّسة الرئيسية" : "Lead Korean Instructor"}</p>
                 </div>
               </div>
             </div>
@@ -88,10 +94,43 @@ const MeetTeacher = () => {
               {t("teacher", "bio4")}
             </p>
 
+            {/* Typical student timeline — pedagogical clarity */}
+            <div className="bg-muted/50 rounded-2xl p-4 border border-border">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">
+                {isAr ? "مسار طالب عادي" : "Typical student journey"}
+              </p>
+              <div className="flex gap-0 items-stretch">
+                {(isAr ? [
+                  { m: "شهر ١", desc: "هانغل + تحيات" },
+                  { m: "شهر ٣", desc: "محادثات A2" },
+                  { m: "شهر ٦", desc: "B1 واثق" },
+                ] : [
+                  { m: "Month 1", desc: "Hangul + greetings" },
+                  { m: "Month 3", desc: "A2 conversations" },
+                  { m: "Month 6", desc: "Confident B1" },
+                ]).map(({ m, desc }, i, arr) => (
+                  <div key={m} className="flex-1 flex flex-col items-center gap-1 text-center relative">
+                    <div className="flex items-center w-full">
+                      <div className={`h-px flex-1 bg-border ${i === 0 ? "opacity-0" : ""}`} />
+                      <div className="w-3 h-3 rounded-full bg-primary border-2 border-background shrink-0" />
+                      <div className={`h-px flex-1 bg-border ${i === arr.length - 1 ? "opacity-0" : ""}`} />
+                    </div>
+                    <p className="text-[10px] font-bold text-primary">{m}</p>
+                    <p className="text-[10px] text-muted-foreground leading-tight">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* CTA */}
             <div className="pt-2">
-              <Button size="lg" asChild className="gap-2 text-base font-bold h-12 px-8">
-                <Link to="/enroll-now">
+              <Button
+                size="lg"
+                asChild
+                className="gap-2 text-base font-bold h-12 px-8"
+                onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "meet_teacher_cta" }); } catch {} }}
+              >
+                <Link to="/free-trial">
                   {t("teacher", "cta")}
                   <ArrowRight className="h-5 w-5" />
                 </Link>
