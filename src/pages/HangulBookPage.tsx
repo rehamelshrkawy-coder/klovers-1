@@ -1099,6 +1099,143 @@ function SceneFood({ h = 200, radius = 0 }: { h?: number; radius?: number }) {
   );
 }
 
+/* ── Story Page — Arabic ── */
+function StoryPageAr() {
+  return (
+    <div className="book-page" style={{
+      width:"210mm", minHeight:"297mm", padding:"0",
+      boxSizing:"border-box", background:"#0a0800",
+      position:"relative", pageBreakAfter:"always", breakAfter:"page",
+      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+      overflow:"hidden",
+    }}>
+      {/* top stripe */}
+      <div style={{ position:"absolute", top:0, left:0, right:0, height:"9px", background:"#FFFF00" }} />
+      <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"6px", background:"#111111" }} />
+
+      {/* Title */}
+      <div style={{ textAlign:"center", marginBottom:"18px", zIndex:2, direction:"rtl", padding:"0 20mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:900, color:"#FFFF00", letterSpacing:"4px", textTransform:"uppercase", marginBottom:"6px", opacity:0.7 }}>قصة كلوفرز</div>
+        <div style={{ fontSize:"26px", fontWeight:900, color:"#fff", lineHeight:1.2, marginBottom:"6px" }}>
+          تعرّف على جونهو وميا 🇰🇷
+        </div>
+        <div style={{ fontSize:"12px", color:"#aaa", lineHeight:1.7 }}>
+          مرحباً بك في رحلة تعلم الهانغول مع رفيقَيك الكوريَّيْن — جونهو وميا.
+          تابع مغامراتهما من شوارع سيول إلى قاعة الدراسة، وتعلَّم الكورية بطريقة تجعلك تعيشها!
+        </div>
+      </div>
+
+      {/* Video */}
+      <div style={{
+        width:"calc(210mm - 30mm)", borderRadius:"16px",
+        overflow:"hidden", border:"3px solid #FFFF00",
+        boxShadow:"0 0 40px rgba(255,255,0,0.2)",
+        zIndex:2, position:"relative",
+      }}>
+        <video
+          src="/videos/klovers-story.mp4"
+          controls
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ width:"100%", display:"block", maxHeight:"340px", objectFit:"cover" }}
+        />
+      </div>
+
+      {/* Character labels */}
+      <div style={{ display:"flex", gap:"40px", marginTop:"20px", zIndex:2, direction:"rtl" }}>
+        <div style={{ textAlign:"center" }}>
+          <div style={{ fontSize:"18px" }}>🧑‍🎓</div>
+          <div style={{ fontSize:"13px", fontWeight:900, color:"#20B2AA" }}>جونهو</div>
+          <div style={{ fontSize:"10px", color:"#777" }}>Junho</div>
+        </div>
+        <div style={{ textAlign:"center" }}>
+          <div style={{ fontSize:"18px" }}>🦊</div>
+          <div style={{ fontSize:"13px", fontWeight:900, color:"#D2691E" }}>ثعلب غوميهو</div>
+          <div style={{ fontSize:"10px", color:"#777" }}>The Gumiho Fox</div>
+        </div>
+        <div style={{ textAlign:"center" }}>
+          <div style={{ fontSize:"18px" }}>👩‍🎓</div>
+          <div style={{ fontSize:"13px", fontWeight:900, color:"#7B1A3A" }}>ميا</div>
+          <div style={{ fontSize:"10px", color:"#777" }}>Miya</div>
+        </div>
+      </div>
+
+      {/* Bottom decoration */}
+      <div style={{ position:"absolute", bottom:"16px", left:0, right:0, textAlign:"center", fontSize:"10px", color:"#444", zIndex:2 }}>
+        klovers.academy • تعلم الكورية مع كلوفرز
+      </div>
+    </div>
+  );
+}
+
+/* ── Story Page — English ── */
+function StoryPageEn() {
+  return (
+    <div className="book-page" style={{
+      width:"210mm", minHeight:"297mm", padding:"0",
+      boxSizing:"border-box", background:"#0a0800",
+      position:"relative", pageBreakAfter:"always", breakAfter:"page",
+      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+      overflow:"hidden",
+    }}>
+      <div style={{ position:"absolute", top:0, left:0, right:0, height:"9px", background:"#FFFF00" }} />
+      <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"6px", background:"#111111" }} />
+
+      <div style={{ textAlign:"center", marginBottom:"18px", zIndex:2, padding:"0 20mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:900, color:"#FFFF00", letterSpacing:"4px", textTransform:"uppercase", marginBottom:"6px", opacity:0.7 }}>The Klovers Story</div>
+        <div style={{ fontSize:"26px", fontWeight:900, color:"#fff", lineHeight:1.2, marginBottom:"6px" }}>
+          Meet Junho & Miya 🇰🇷
+        </div>
+        <div style={{ fontSize:"12px", color:"#aaa", lineHeight:1.7 }}>
+          Welcome to your Hangul journey with your Korean companions — Junho and Miya.
+          Follow their adventures from the streets of Seoul to the classroom, and learn Korean by living it!
+        </div>
+      </div>
+
+      <div style={{
+        width:"calc(210mm - 30mm)", borderRadius:"16px",
+        overflow:"hidden", border:"3px solid #FFFF00",
+        boxShadow:"0 0 40px rgba(255,255,0,0.2)",
+        zIndex:2, position:"relative",
+      }}>
+        <video
+          src="/videos/klovers-story.mp4"
+          controls
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ width:"100%", display:"block", maxHeight:"340px", objectFit:"cover" }}
+        />
+      </div>
+
+      <div style={{ display:"flex", gap:"40px", marginTop:"20px", zIndex:2 }}>
+        <div style={{ textAlign:"center" }}>
+          <div style={{ fontSize:"18px" }}>🧑‍🎓</div>
+          <div style={{ fontSize:"13px", fontWeight:900, color:"#20B2AA" }}>Junho</div>
+          <div style={{ fontSize:"10px", color:"#777" }}>Our Korean guide</div>
+        </div>
+        <div style={{ textAlign:"center" }}>
+          <div style={{ fontSize:"18px" }}>🦊</div>
+          <div style={{ fontSize:"13px", fontWeight:900, color:"#D2691E" }}>Gumiho Fox</div>
+          <div style={{ fontSize:"10px", color:"#777" }}>The magical fox</div>
+        </div>
+        <div style={{ textAlign:"center" }}>
+          <div style={{ fontSize:"18px" }}>👩‍🎓</div>
+          <div style={{ fontSize:"13px", fontWeight:900, color:"#7B1A3A" }}>Miya</div>
+          <div style={{ fontSize:"10px", color:"#777" }}>Your learning partner</div>
+        </div>
+      </div>
+
+      <div style={{ position:"absolute", bottom:"16px", left:0, right:0, textAlign:"center", fontSize:"10px", color:"#444", zIndex:2 }}>
+        klovers.academy • Learn Korean with Klovers
+      </div>
+    </div>
+  );
+}
+
 type Lang = "ar" | "en";
 
 /* ══════════════════════════════════════════════════
@@ -4018,30 +4155,78 @@ export default function HangulBookPage() {
           .book-page { box-shadow: none !important; margin: 0 !important; }
           @page { size: A4; margin: 0; }
         }
+
         @media screen {
-          .book-page { box-shadow: 0 4px 24px rgba(0,0,0,0.15); margin: 0 auto 28px; }
+          /* Each page looks like a real book page */
+          .book-page {
+            box-shadow:
+              -6px 0 18px rgba(0,0,0,0.25),
+              6px 4px 20px rgba(0,0,0,0.2),
+              0 8px 32px rgba(0,0,0,0.3),
+              inset -3px 0 8px rgba(0,0,0,0.08);
+            margin: 0 auto 48px;
+            position: relative;
+          }
+          /* Left binding shadow — spine effect */
+          .book-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 22px;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.08) 60%, transparent 100%);
+            z-index: 10;
+            pointer-events: none;
+            border-radius: 2px 0 0 2px;
+          }
+          /* Right page curl shadow */
+          .book-page::after {
+            content: counter(book-page);
+            position: absolute;
+            bottom: 7px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.65);
+            font-family: 'Noto Sans KR', sans-serif;
+            letter-spacing: 1px;
+            pointer-events: none;
+            z-index: 5;
+          }
         }
+
         #hangul-book {
-          background: #e5e5e5;
+          /* Dark wood desk look */
+          background: radial-gradient(ellipse at center, #2a1a0e 0%, #1a0e08 60%, #0d0804 100%);
           font-family: 'Cairo', 'Noto Sans KR', system-ui, sans-serif;
           counter-reset: book-page;
+          padding: 20px 40px 40px;
         }
+
         .book-page {
           counter-increment: book-page;
+          /* Cream paper instead of pure white */
+          background: #fffdf8 !important;
         }
-        .book-page::after {
-          content: counter(book-page);
-          position: absolute;
-          bottom: 7px;
-          left: 50%;
-          transform: translateX(-50%);
-          font-size: 9px;
-          font-weight: 700;
-          color: rgba(255,255,255,0.65);
-          font-family: 'Noto Sans KR', sans-serif;
-          letter-spacing: 1px;
-          pointer-events: none;
-          z-index: 5;
+
+        /* Override white backgrounds on page content */
+        .book-page > div[style*="background:#fff"],
+        .book-page > div[style*='background: #fff'] {
+          background: #fffdf8 !important;
+        }
+
+        /* Book title ribbon at top of viewer */
+        #book-title-ribbon {
+          text-align: center;
+          padding: 14px 0 20px;
+          font-size: 13px;
+          font-weight: 900;
+          color: #FFFF00;
+          letter-spacing: 6px;
+          text-transform: uppercase;
+          opacity: 0.5;
         }
       `}</style>
 
@@ -4097,9 +4282,11 @@ export default function HangulBookPage() {
 
       {/* Book — renders only the selected language */}
       <div id="hangul-book" style={{ paddingTop:"64px", paddingBottom:"40px", minHeight:"100vh" }}>
+        <div id="book-title-ribbon" className="no-print">📖 KLOVERS HANGUL BOOK 🇰🇷</div>
         {isAr ? (
           <>
             <CoverAr />
+            <StoryPageAr />
             <TocAr />
             <HistoryAr />
             <SejongAr />
@@ -4121,6 +4308,7 @@ export default function HangulBookPage() {
         ) : (
           <>
             <CoverEn />
+            <StoryPageEn />
             <TocEn />
             <HistoryEn />
             <SejongEn />
