@@ -65,8 +65,19 @@ export default function CommunityFeed() {
 
   useEffect(() => {
     fetchFeed();
-    const timer = setInterval(fetchFeed, 60_000);
-    return () => clearInterval(timer);
+
+    // Subscribe to real-time inserts on student_badges so the feed updates
+    // instantly when any student earns a new badge — no polling needed.
+    const channel = supabase
+      .channel("community-badges")
+      .on(
+        "postgres_changes" as any,
+        { event: "INSERT", schema: "public", table: "student_badges" },
+        () => fetchFeed()
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   if (loading) {

@@ -20,6 +20,7 @@ import RegistrationChecklist from "@/components/RegistrationChecklist";
 import { LeagueProgressBar, BadgeGrid } from "@/components/GamificationUI";
 import { LeaguePromotionModal, BadgeUnlockToast, StreakCelebration } from "@/components/XpAnimation";
 import { useGamification } from "@/hooks/useGamification";
+import { useChurnPrevention } from "@/hooks/useChurnPrevention";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { BADGES } from "@/constants/gamification";
 // Korean scene photos for immersive gallery
@@ -525,6 +526,14 @@ const StudentDashboard = () => {
 
   const lessonsCompleted = Object.values(gamification.lessonProgress).filter((p) => p.chapter_completed).length;
 
+  // Churn prevention — fires analytics events for at-risk signals
+  useChurnPrevention({
+    userId: gamification.userId,
+    lastActivityDate: gamification.progress.streak.last_activity_date,
+    sessionsRemaining: enrollments[0]?.sessions_remaining ?? null,
+    currentStreak: gamification.progress.streak.current_streak,
+  });
+
   // Derive the next lesson to continue: first in-progress, else first unstarted
   const continueLessonId = useMemo(() => {
     const inProgress = Object.entries(gamification.lessonProgress)
@@ -848,6 +857,14 @@ const StudentDashboard = () => {
       <Suspense fallback={null}>
         <NpsModal userId={gamification.userId} chapterCount={lessonsCompleted} />
       </Suspense>
+      {/* Screen-reader live region — announces XP awards and badge unlocks to AT users */}
+      <div
+        id="xp-announcer"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      />
       <Header />
       <main id="main-content" className="pt-24 pb-16 px-4">
         <div className="max-w-5xl mx-auto space-y-5">
