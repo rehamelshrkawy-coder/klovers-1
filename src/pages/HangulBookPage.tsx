@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock } from "lucide-react";
@@ -2435,48 +2435,6 @@ function TocAr() {
   );
 }
 
-function ConsonantsAr({ slice, page }: { slice:[number,number]; page:number }) {
-  const count = slice[1] - slice[0];
-  const kpopLyrics = page === 1
-    ? { lyric:"나비야", rom:"نا-بي-يا", meaning:"يا فراشة", song:"أغنية شعبية كورية" }
-    : { lyric:"고마워", rom:"go-ma-wo", meaning:"شكراً", song:"IU — Palette" };
-  return (
-    <Page dir="rtl" chapter="الحروف الساكنة">
-      <SHead title={`الحروف الساكنة (자음) — الجزء ${page===1?"١":"٢"} من ٢`} subtitle="كل مقطع كوري يبدأ بحرف ساكن" />
-      <p style={{ fontSize:"11px", color:T2, marginBottom:"4mm", lineHeight:1.6 }}>
-        بنهاية هذه الصفحة ستتمكن من قراءة ونطق <strong>{count}</strong> حروف كورية جديدة وكتابتها.
-        {page===1 && " هناك ١٤ حرفاً ساكناً أساسياً — تعلّم هذه أولاً."}
-      </p>
-      <StrokeOrderTip lang="ar" />
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px 16px" }}>
-        {CONSONANTS.slice(...slice).map(c => <ConsCard key={c.char} c={c} lang="ar" />)}
-      </div>
-      {/* QR audio — clean book style */}
-      <div style={{ display:"flex", alignItems:"center", gap:"12px", marginTop:"5mm",
-        borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
-        <QRPlaceholder size={44} label="" />
-        <div>
-          <div style={{ fontSize:"11px", fontWeight:700, color:T1 }}>استمع للنطق</div>
-          <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>klovers.academy/audio</div>
-        </div>
-      </div>
-      {/* K-Pop context — light style */}
-      <div style={{ marginTop:"4mm", paddingTop:"3mm", borderTop:`1px solid ${BD}` }}>
-        <span style={{ fontSize:"9px", color:T3, textTransform:"uppercase", letterSpacing:"1px" }}>تعرّفتَ للتو على هذه الكلمة في K-Pop </span>
-        <div style={{ marginTop:"2px", fontSize:"16px", fontWeight:900, color:T1, direction:"ltr" }}>
-          {kpopLyrics.lyric}
-          <span style={{ fontSize:"11px", fontWeight:400, color:T3 }}> [{kpopLyrics.rom}] — {kpopLyrics.meaning}</span>
-        </div>
-      </div>
-      {/* Practice task */}
-      <div style={{ marginTop:"4mm" }}>
-        <div style={{ fontSize:"10px", color:T3, marginBottom:"3px" }}>جربها الآن — اكتب اسمك بالحروف التي تعلمتها:</div>
-        <div style={{ height:"22px", borderBottom:`1px solid ${BD}` }} />
-      </div>
-    </Page>
-  );
-}
-
 function MiniReadingStripAr() {
   const words = [
     { k:"나", r:"نا", m:"أنا" },
@@ -3577,40 +3535,207 @@ function TocEn() {
   );
 }
 
-function ConsonantsEn({ slice, page }: { slice:[number,number]; page:number }) {
-  const count = slice[1] - slice[0];
-  const kpopLyrics = page === 1
-    ? { lyric:"나비야", rom:"na-bi-ya", meaning:"Oh butterfly", song:"Korean folk song" }
-    : { lyric:"고마워", rom:"go-ma-wo", meaning:"Thank you", song:"IU — Palette" };
+/* ════════════════════════════════════════════════════════════════
+   NEW WORKBOOK LESSON COMPONENTS — Teach / Practice / Review
+   Each lesson covers 2–3 consonants. One clear goal per page.
+═════════════════════════════════════════════════════════════════ */
+
+type LessonProps = { lesson: number; slice: [number, number]; lang: Lang };
+
+function LessonHeader({ lesson, kind, lang }: { lesson: number; kind: "teach"|"practice"|"review"; lang: Lang }) {
+  const isAr = lang === "ar";
+  const num = isAr ? ["١","٢","٣","٤","٥"][lesson-1] : String(lesson);
+  const kindLabel = isAr
+    ? { teach:"تعلّم", practice:"تدريب", review:"مراجعة" }[kind]
+    : { teach:"Learn", practice:"Practice", review:"Review" }[kind];
   return (
-    <Page dir="ltr" chapter="Consonants">
-      <SHead title={`Consonants (자음) — Part ${page} of 2`} subtitle="Every Korean syllable begins with a consonant" />
-      <p style={{ fontSize:"11px", color:T2, marginBottom:"4mm", lineHeight:1.6 }}>
-        By the end of this page you will be able to read, pronounce, and write <strong>{count}</strong> new Korean letters.
-        {page===1 && " There are 14 basic consonants — master these before the aspirated forms."}
-      </p>
-      <StrokeOrderTip lang="en" />
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px 16px" }}>
-        {CONSONANTS.slice(...slice).map(c=><ConsCard key={c.char} c={c} lang="en" />)}
+    <div style={{ marginBottom:"8mm", paddingBottom:"4mm", borderBottom:`1px solid ${BD}` }}>
+      <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"2px", marginBottom:"3px" }}>
+        {isAr ? `الدرس ${num}` : `Lesson ${num}`}
       </div>
-      <div style={{ display:"flex", alignItems:"center", gap:"12px", marginTop:"5mm",
-        borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
-        <QRPlaceholder size={44} label="" />
-        <div>
-          <div style={{ fontSize:"11px", fontWeight:700, color:T1 }}>Listen to pronunciation</div>
-          <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>klovers.academy/audio</div>
+      <div style={{ fontSize:"22px", fontWeight:900, color:T1 }}>{kindLabel}</div>
+    </div>
+  );
+}
+
+function TeachLetters({ lesson, slice, lang }: LessonProps) {
+  const isAr = lang === "ar";
+  const letters = CONSONANTS.slice(...slice);
+  return (
+    <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "الحروف الساكنة" : "Consonants"}>
+      <LessonHeader lesson={lesson} kind="teach" lang={lang} />
+
+      <div style={{ fontSize:"12px", color:T2, marginBottom:"7mm", lineHeight:1.7 }}>
+        {isAr
+          ? `في هذه الصفحة ستتعرّف على ${letters.length === 2 ? "حرفين جديدين" : "ثلاثة حروف جديدة"}. اقرأ الاسم، استمع للصوت، وانظر إلى الشكل بعناية.`
+          : `On this page you will meet ${letters.length} new letter${letters.length>1?"s":""}. Read the name, hear the sound, study the shape.`}
+      </div>
+
+      {letters.map((c, idx) => {
+        const d = isAr ? c.ar : c.en;
+        return (
+          <div key={c.char} style={{
+            paddingTop: idx === 0 ? "0" : "8mm",
+            paddingBottom: "8mm",
+            borderTop: idx === 0 ? "none" : `1px solid ${BD}`,
+            display:"grid", gridTemplateColumns:"110px 1fr", gap:"14mm", alignItems:"start",
+          }}>
+            <div style={{ textAlign:"center" }}>
+              <div style={{ fontSize:"96px", fontWeight:900, color:T1, lineHeight:1, marginBottom:"4mm" }}>{c.char}</div>
+              <div style={{ fontSize:"11px", color:T3, fontWeight:700, letterSpacing:"1px" }}>{c.roman.toUpperCase()}</div>
+              <div style={{ fontSize:"10px", color:T2, marginTop:"2mm" }}>{d.name}</div>
+            </div>
+
+            <div>
+              <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"2px" }}>
+                {isAr ? "الصوت" : "Sound"}
+              </div>
+              <div style={{ fontSize:"13px", color:T1, fontWeight:700, marginBottom:"5mm" }}>{d.sound}</div>
+
+              <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"2px" }}>
+                {isAr ? "تذكّره هكذا" : "Remember it"}
+              </div>
+              <div style={{ fontSize:"12px", color:T2, lineHeight:1.7, fontStyle:"italic", borderLeft:`2px solid ${Y}`, paddingLeft:"8px", marginBottom:"5mm" }}>{d.mnemonic}</div>
+
+              {isAr && c.arDialect && (
+                <>
+                  <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"2px" }}>🇪🇬 بالمصري</div>
+                  <div style={{ fontSize:"12px", color:T2, lineHeight:1.7, marginBottom:"5mm" }}>{c.arDialect}</div>
+                </>
+              )}
+
+              <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"3px" }}>
+                {isAr ? "ترتيب الكتابة" : "Stroke order"}
+              </div>
+              <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginBottom:"4mm" }}>
+                {c.strokes.map((s, i) => (
+                  <span key={i} style={{ border:`1px solid ${BD}`, color:T1, fontSize:"11px", fontWeight:700, padding:"3px 8px", borderRadius:"3px", background:"#fff" }}>{s}</span>
+                ))}
+              </div>
+
+              <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"3px" }}>
+                {isAr ? "مثال" : "Example"}
+              </div>
+              <div style={{ display:"flex", gap:"10px", alignItems:"baseline", direction:"ltr" }}>
+                <div style={{ fontSize:"22px", fontWeight:900, color:T1 }}>{d.ex[0].k}</div>
+                <div style={{ fontSize:"11px", color:T3 }}>[{d.ex[0].r}]</div>
+                <div style={{ fontSize:"11px", color:T2, direction: isAr?"rtl":"ltr" }}>— {d.ex[0].m}</div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </Page>
+  );
+}
+
+function PracticeLetters({ lesson, slice, lang }: LessonProps) {
+  const isAr = lang === "ar";
+  const letters = CONSONANTS.slice(...slice);
+  return (
+    <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "تدريب الكتابة" : "Writing Practice"}>
+      <LessonHeader lesson={lesson} kind="practice" lang={lang} />
+
+      <div style={{ fontSize:"12px", color:T2, marginBottom:"6mm", lineHeight:1.7 }}>
+        {isAr
+          ? "تتبّع كل حرف ٤ مرات (الصف الأول)، ثم اكتبه من ذاكرتك ٤ مرات (الصف الثاني)."
+          : "Trace each letter 4 times (top row), then write it from memory 4 times (bottom row)."}
+      </div>
+
+      {letters.map((c, idx) => (
+        <div key={c.char} style={{ marginBottom: idx === letters.length - 1 ? "0" : "9mm" }}>
+          <div style={{ display:"flex", alignItems:"baseline", gap:"10px", marginBottom:"3mm" }}>
+            <div style={{ fontSize:"32px", fontWeight:900, color:T1 }}>{c.char}</div>
+            <div style={{ fontSize:"11px", color:T3, letterSpacing:"1px" }}>{c.roman.toUpperCase()} · {(isAr ? c.ar : c.en).name}</div>
+          </div>
+
+          <div style={{ fontSize:"9px", color:T3, marginBottom:"2mm", textTransform:"uppercase", letterSpacing:"1px" }}>
+            {isAr ? "تتبّع" : "Trace"}
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:"5mm", marginBottom:"5mm" }}>
+            {Array(4).fill(null).map((_, i) => (
+              <div key={i} style={{ border:`1px solid ${BD}`, height:"24mm", display:"flex", alignItems:"center", justifyContent:"center", borderRadius:"4px", background:"#fff" }}>
+                <span style={{ fontSize:"56px", color:"#E8E8E8", fontWeight:900, lineHeight:1 }}>{c.char}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ fontSize:"9px", color:T3, marginBottom:"2mm", textTransform:"uppercase", letterSpacing:"1px" }}>
+            {isAr ? "اكتبه من ذاكرتك" : "Write from memory"}
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:"5mm" }}>
+            {Array(4).fill(null).map((_, i) => (
+              <div key={i} style={{ border:`1px solid ${BD}`, height:"24mm", borderRadius:"4px", background:"#fff" }} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </Page>
+  );
+}
+
+function ReviewLetters({ lesson, slice, lang }: LessonProps) {
+  const isAr = lang === "ar";
+  const letters = CONSONANTS.slice(...slice);
+  return (
+    <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "مراجعة" : "Review"}>
+      <LessonHeader lesson={lesson} kind="review" lang={lang} />
+
+      <div style={{ fontSize:"12px", color:T2, marginBottom:"7mm", lineHeight:1.7 }}>
+        {isAr ? "تأكّد ممّا تتذكّره قبل المتابعة للدرس التالي." : "Make sure you remember before moving on."}
+      </div>
+
+      {/* Task 1 — Match character to sound */}
+      <div style={{ marginBottom:"9mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"2mm" }}>
+          1. {isAr ? "صل الحرف بصوته" : "Match the letter to its sound"}
+        </div>
+        <div style={{ fontSize:"10px", color:T3, marginBottom:"4mm" }}>
+          {isAr ? "ارسم خطاً بين الحرف والصوت الصحيح." : "Draw a line between each letter and its sound."}
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4mm 30mm", direction:"ltr" }}>
+          {letters.map(c => (
+            <div key={"L"+c.char} style={{ fontSize:"34px", fontWeight:900, color:T1, textAlign:"center", border:`1px solid ${BD}`, padding:"6mm 0", borderRadius:"4px" }}>{c.char}</div>
+          ))}
+          {[...letters].reverse().map(c => (
+            <div key={"R"+c.char} style={{ fontSize:"16px", fontWeight:700, color:T1, textAlign:"center", border:`1px solid ${BD}`, padding:"10mm 0", borderRadius:"4px" }}>{c.roman.toUpperCase()}</div>
+          ))}
         </div>
       </div>
-      <div style={{ marginTop:"4mm", paddingTop:"3mm", borderTop:`1px solid ${BD}` }}>
-        <span style={{ fontSize:"9px", color:T3, textTransform:"uppercase", letterSpacing:"1px" }}>K-Pop lyric you can now read </span>
-        <div style={{ marginTop:"2px", fontSize:"16px", fontWeight:900, color:T1 }}>
-          {kpopLyrics.lyric}
-          <span style={{ fontSize:"11px", fontWeight:400, color:T3 }}> [{kpopLyrics.rom}] — {kpopLyrics.meaning}</span>
+
+      {/* Task 2 — Write the sound under each letter */}
+      <div style={{ marginBottom:"9mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"2mm" }}>
+          2. {isAr ? "اكتب الصوت تحت كل حرف" : "Write the sound under each letter"}
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:`repeat(${letters.length}, 1fr)`, gap:"6mm", marginTop:"3mm" }}>
+          {letters.map(c => (
+            <div key={c.char} style={{ textAlign:"center" }}>
+              <div style={{ fontSize:"42px", fontWeight:900, color:T1, marginBottom:"3mm" }}>{c.char}</div>
+              <div style={{ borderBottom:`1px solid ${T2}`, height:"12mm" }} />
+            </div>
+          ))}
         </div>
       </div>
-      <div style={{ marginTop:"4mm" }}>
-        <div style={{ fontSize:"10px", color:T3, marginBottom:"3px" }}>Now try it — spell your name in Korean:</div>
-        <div style={{ height:"22px", borderBottom:`1px solid ${BD}` }} />
+
+      {/* Task 3 — Read these syllables */}
+      <div style={{ marginBottom:"9mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"2mm" }}>
+          3. {isAr ? "اقرأ هذه المقاطع بصوت عالٍ" : "Read these syllables out loud"}
+        </div>
+        <div style={{ display:"flex", gap:"8mm", flexWrap:"wrap", marginTop:"3mm", direction:"ltr" }}>
+          {letters.map(c => (
+            <div key={c.char} style={{ fontSize:"42px", fontWeight:900, color:T1 }}>{c.char + "ㅏ"}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* Completion */}
+      <div style={{ marginTop:"auto", paddingTop:"6mm", borderTop:`1px solid ${BD}`, display:"flex", alignItems:"center", gap:"10px" }}>
+        <div style={{ width:"18px", height:"18px", border:`2px solid ${T1}`, borderRadius:"3px", flexShrink:0 }} />
+        <span style={{ fontSize:"12px", color:T1, fontWeight:700 }}>
+          {isAr ? `أتممتُ الدرس ${["١","٢","٣","٤","٥"][lesson-1]}` : `I completed Lesson ${lesson}`}
+        </span>
       </div>
     </Page>
   );
@@ -4582,8 +4707,20 @@ export default function HangulBookPage() {
             <CultureAr />
             <CourseAr />
             <WelcomeAr />
-            <ConsonantsAr slice={[0,7]} page={1} />
-            <ConsonantsAr slice={[7,14]} page={2} />
+            {/* Consonants — workbook flow: Teach → Practice → Review per lesson */}
+            {[
+              { lesson:1, slice:[0,3] as [number,number] },
+              { lesson:2, slice:[3,6] as [number,number] },
+              { lesson:3, slice:[6,9] as [number,number] },
+              { lesson:4, slice:[9,12] as [number,number] },
+              { lesson:5, slice:[12,14] as [number,number] },
+            ].map(L => (
+              <Fragment key={`ar-l${L.lesson}`}>
+                <TeachLetters lesson={L.lesson} slice={L.slice} lang="ar" />
+                <PracticeLetters lesson={L.lesson} slice={L.slice} lang="ar" />
+                <ReviewLetters lesson={L.lesson} slice={L.slice} lang="ar" />
+              </Fragment>
+            ))}
             <VowelsAr />
             <AspiratedAr />
             <CompoundVowelsAr />
@@ -4608,8 +4745,19 @@ export default function HangulBookPage() {
             <CultureEn />
             <CourseEn />
             <WelcomeEn />
-            <ConsonantsEn slice={[0,7]} page={1} />
-            <ConsonantsEn slice={[7,14]} page={2} />
+            {[
+              { lesson:1, slice:[0,3] as [number,number] },
+              { lesson:2, slice:[3,6] as [number,number] },
+              { lesson:3, slice:[6,9] as [number,number] },
+              { lesson:4, slice:[9,12] as [number,number] },
+              { lesson:5, slice:[12,14] as [number,number] },
+            ].map(L => (
+              <Fragment key={`en-l${L.lesson}`}>
+                <TeachLetters lesson={L.lesson} slice={L.slice} lang="en" />
+                <PracticeLetters lesson={L.lesson} slice={L.slice} lang="en" />
+                <ReviewLetters lesson={L.lesson} slice={L.slice} lang="en" />
+              </Fragment>
+            ))}
             <VowelsEn />
             <AspiratedEn />
             <CompoundVowelsEn />
