@@ -3,15 +3,17 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { attachLeadToUser } from "@/lib/attachLeadToUser";
 import { attachSessionToUser } from "@/lib/attachSessionToUser";
 import { captureUtmFromUrl } from "@/lib/leadSession";
+import { identify, trackPageView, capture } from "@/lib/analytics";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import WhatsAppButton from "./components/WhatsAppButton";
 import CookieBanner from "./components/CookieBanner";
+import InstallPrompt from "./components/InstallPrompt";
 
 // Route guards — kept eager (tiny, needed immediately)
 import ProtectedRoute from "./components/admin/ProtectedRoute";
@@ -82,13 +84,28 @@ const queryClient = new QueryClient({
   },
 });
 
+// Tracks page views on every client-side navigation
+const PageViewTracker = () => {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageView(location.pathname, document.title);
+  }, [location.pathname]);
+  return null;
+};
+
 const AppInner = () => {
   useEffect(() => {
     captureUtmFromUrl();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         attachLeadToUser(session.user);
         attachSessionToUser();
+        // Link future analytics events to the authenticated user
+        identify(session.user.id, {
+          email: session.user.email,
+          created_at: session.user.created_at,
+        });
       }
     });
 
@@ -130,6 +147,8 @@ const App = () => (
         <WhatsAppButton />
         <CookieBanner />
         <BrowserRouter>
+          <PageViewTracker />
+          <InstallPrompt />
           <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
               <Routes>
