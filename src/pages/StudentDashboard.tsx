@@ -31,6 +31,10 @@ import imgKpop from "@/assets/blog/kpop-concert.jpg";
 import imgNightMarket from "@/assets/blog/korean-nightmarket.jpg";
 import imgTea from "@/assets/blog/korean-tea.jpg";
 import imgMarket from "@/assets/blog/korean-market.jpg";
+// Community & NPS — lazy loaded (non-critical)
+const CommunityFeed = lazy(() => import("@/components/CommunityFeed"));
+const NpsModal = lazy(() => import("@/components/NpsModal"));
+
 // Below-fold components — lazy loaded to keep initial paint fast
 const AnalyticsSection = lazy(() =>
   import("@/components/AnalyticsSection").then(m => ({ default: m.AnalyticsSection }))
@@ -841,6 +845,9 @@ const StudentDashboard = () => {
         </div>
       )}
       <WelcomeModal open={showWelcome} onClose={() => setShowWelcome(false)} />
+      <Suspense fallback={null}>
+        <NpsModal userId={gamification.userId} chapterCount={lessonsCompleted} />
+      </Suspense>
       <Header />
       <main id="main-content" className="pt-24 pb-16 px-4">
         <div className="max-w-5xl mx-auto space-y-5">
@@ -1172,6 +1179,7 @@ const StudentDashboard = () => {
 
                 <StreakCalendar />
                 <LeaderboardCard />
+                <CommunityFeed />
               </Suspense>
             </div>
           )}

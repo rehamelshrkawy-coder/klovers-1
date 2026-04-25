@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { XP_VALUES, getLeague, BADGES } from "@/constants/gamification";
+import { capture } from "@/lib/analytics";
 
 interface UserProgress {
   totalXp: number;
@@ -123,6 +124,10 @@ export function useGamification() {
         activity_type: "streak_bonus",
         xp_earned: XP_VALUES.streak_bonus,
       });
+      capture({ event: "streak_continued", streakDays: newStreak });
+    } else {
+      // Streak broken — track it for churn analysis
+      capture({ event: "streak_broken", previousStreak: existing.current_streak });
     }
 
     const milestones = [
@@ -175,10 +180,15 @@ export function useGamification() {
       const newLeague = getLeague(newProgress.totalXp);
       if (newLeague.key !== oldLeague.key) {
         setLeaguePromotion({ fromLeague: oldLeague.key, toLeague: newLeague.key });
+        capture({ event: "league_promoted", fromLeague: oldLeague.key, toLeague: newLeague.key, totalXp: newProgress.totalXp });
       }
       const newlyEarned = newProgress.badges.filter(b => !oldBadges.has(b));
       if (newlyEarned.length > 0) {
         setNewBadges(prev => [...prev, ...newlyEarned]);
+        newlyEarned.forEach(badgeKey => {
+          const badge = BADGES.find(b => b.key === badgeKey);
+          if (badge) capture({ event: "badge_earned", badgeKey, badgeName: badge.name });
+        });
       }
     }
 
@@ -245,9 +255,12 @@ export function useGamification() {
       reading_done: "reading",
       writing_done: "writing",
     };
+    const activityType = activityMap[section];
+    capture({ event: "lesson_section_complete", lessonId, section, xpEarned: XP_VALUES[activityType] });
+
     // Run XP award and badge check in parallel — both are independent
     await Promise.all([
-      awardXp(lessonId, activityMap[section]),
+      awardXp(lessonId, activityType),
       checkBadges(),
     ]);
     // awardXp already calls fetchProgress internally; no extra re-fetch needed
@@ -292,6 +305,8 @@ export function useGamification() {
 
   const awardGameXp = useCallback(async (gameId: string, score: number, totalRounds: number) => {
     if (!userId || score <= 0) return 0;
+
+    capture({ event: "game_played", gameId, score, totalRounds, xpEarned: score * XP_VALUES.game_complete });
 
     const xpPerCorrect = XP_VALUES.game_complete;
     const totalXpEarned = score * xpPerCorrect;

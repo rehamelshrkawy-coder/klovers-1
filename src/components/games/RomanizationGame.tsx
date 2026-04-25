@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RotateCcw, Trophy, Sparkles, ArrowRight } from "lucide-react";
+import Korean from "@/components/Korean";
 import { useGameData, GameVocabItem } from "@/hooks/useGameData";
 
 interface Question { korean: string; romanization: string; meaning: string; }
@@ -105,7 +106,7 @@ const RomanizationGame = ({ onGameComplete }: { onGameComplete?: (score: number,
         </div>
         <Card className="p-6 text-center space-y-4">
           <p className="text-sm text-muted-foreground">Type the romanization (pronunciation) of:</p>
-          <p className="text-5xl font-bold text-foreground">{q.korean}</p>
+          <Korean className="text-5xl font-bold text-foreground block">{q.korean}</Korean>
           <p className="text-muted-foreground text-sm">{q.meaning}</p>
           <div className="flex gap-2 justify-center">
             <input

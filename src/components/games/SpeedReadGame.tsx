@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RotateCcw, Trophy, Sparkles, ArrowRight, Zap } from "lucide-react";
+import Korean from "@/components/Korean";
 import { useGameData, GameVocabItem } from "@/hooks/useGameData";
 
 interface Question { korean: string; meaning: string; options: string[]; }
@@ -128,7 +129,7 @@ const SpeedReadGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
           {phase === "flash" ? (
             <>
               <p className="text-sm text-muted-foreground flex items-center gap-1"><Zap className="h-4 w-4" /> Memorize this word!</p>
-              <p className="text-6xl font-bold text-foreground animate-pulse">{q.korean}</p>
+              <Korean className="text-6xl font-bold text-foreground animate-pulse block">{q.korean}</Korean>
               <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                 <div className="bg-primary h-full transition-all" style={{ width: `${(countdown / (FLASH_MS / 1000)) * 100}%` }} />
               </div>
