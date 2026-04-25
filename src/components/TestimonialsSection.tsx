@@ -1,4 +1,4 @@
-import { Star, Facebook } from "lucide-react";
+import { Star, Facebook, CheckCircle2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const reviews = [
@@ -8,6 +8,8 @@ const reviews = [
     lang: "en",
     text: "Very professional and fun at the same time! Makes learning very easy and enjoyable. I highly recommend it to anyone ❤️",
     date: "Dec 2021",
+    duration: "3 months",
+    level: "A1 → A2",
   },
   {
     name: "Ayaya Salah",
@@ -15,6 +17,8 @@ const reviews = [
     lang: "en",
     text: "The course is absolutely entertaining. I enjoy every second of it — educational, not boring and I can already see progress. Highly recommend it!",
     date: "Dec 2021",
+    duration: "4 months",
+    level: "A1 → A2",
   },
   {
     name: "Maged M. Aziz",
@@ -22,6 +26,8 @@ const reviews = [
     lang: "en",
     text: "Very effective. Reham is soo awesome and I learnt a lot from her. I give her 10/10. Thank you for making things easier! 👊👊",
     date: "Jul 2023",
+    duration: "6 months",
+    level: "A1 → B1",
   },
   {
     name: "Nami Waka",
@@ -29,6 +35,8 @@ const reviews = [
     lang: "en",
     text: "Reham is a wonderful teacher. She has a really nice smile. I'm looking forward to having her teach me Korean from now on.",
     date: "Jul 2024",
+    duration: "2 months",
+    level: "Beginner",
   },
   {
     name: "Kholoud Al-Bahay",
@@ -36,6 +44,8 @@ const reviews = [
     lang: "en",
     text: "One of the best courses I've ever enrolled in ❤️❤️❤️ How much I love how she strives and cares for us and our learning process. Highly recommend!",
     date: "Aug 2022",
+    duration: "4 months",
+    level: "A1 → A2",
   },
   {
     name: "Jomana Azouz",
@@ -43,6 +53,8 @@ const reviews = [
     lang: "en",
     text: "She is amazing and really a good teacher. She simplifies everything to make it understandable, and doing the homework you will notice the development in your accent!",
     date: "Jul 2023",
+    duration: "5 months",
+    level: "A1 → B1",
   },
   {
     name: "حياة مصطفى",
@@ -50,6 +62,8 @@ const reviews = [
     lang: "ar",
     text: "ميرسي جداً على تعليمنا اللغة الكورية 😍 متشكرة جداً على المستويات اللي وصلنالها من الصفر — تعليم الحروف والكتابة والقراءة والكلام. الكلام ده مايوصفش جهدك وصبرك 선생님 감사합니다",
     date: "Jul 2023",
+    duration: "٦ أشهر",
+    level: "A1 ← B1",
   },
   {
     name: "يمنى دراهم",
@@ -57,6 +71,8 @@ const reviews = [
     lang: "ar",
     text: "من الكورسات اللذيذة والممتعة جداً! طريقتها حلوة جداً وبتوضح الحاجة بصورة بسيطة وسهلة، دا غير شخصيتها العسولة وأنها هتساعدك في أي وقت 💕💕💕",
     date: "Jul 2023",
+    duration: "٤ أشهر",
+    level: "A1 ← A2",
   },
   {
     name: "سامة آدم",
@@ -64,6 +80,8 @@ const reviews = [
     lang: "ar",
     text: "بجد أحلى سونتسينيم في الدنيا 😍 الكورس خفيف وبستمتع بيه جداً. قربت أكمل سنة وبجد اتحسنت كتير في الكوري والجرامر بتسهله جداً علينا ❤️❤️❤️",
     date: "Nov 2022",
+    duration: "١١ شهر",
+    level: "A1 ← B2",
   },
   {
     name: "مريم ميرا",
@@ -71,6 +89,8 @@ const reviews = [
     lang: "ar",
     text: "بجد يستفاد كتير في الكورس ده ويتعلم أكتر. ممكن اني أكتب جملة كاملة بالكوري رغم اني مكنتش أعرف أقرأ أو أكتب كوري من قبل! 선생님 감사합니다 ❤️",
     date: "Nov 2022",
+    duration: "٣ أشهر",
+    level: "A0 ← A1",
   },
   {
     name: "بوسي محمد",
@@ -78,6 +98,8 @@ const reviews = [
     lang: "ar",
     text: "تعلمت الحروف والأرقام وأبدأت أحس بالفرق! بالصدفة شوفت البوست وكنت فخورة جداً. أجرب وحقيقي انا من أوائل المحاضرين حسيت بفرق جامد ❤️❤️",
     date: "Nov 2022",
+    duration: "٢ شهر",
+    level: "مبتدئ",
   },
   {
     name: "نهال أشرف",
@@ -85,6 +107,8 @@ const reviews = [
     lang: "ar",
     text: "استفدت حلو أوي وبجد المستوى هايل ❤️",
     date: "Nov 2022",
+    duration: "٣ أشهر",
+    level: "A1 ← A2",
   },
 ];
 
@@ -126,6 +150,13 @@ const ReviewCard = ({ review }: { review: (typeof reviews)[0] }) => {
             <div className="flex items-center gap-2 mt-0.5">
               <StarRow />
               <span className="text-xs text-muted-foreground">{review.date}</span>
+            </div>
+            <div className="flex items-center gap-1 mt-1 flex-wrap">
+              <CheckCircle2 className="h-3 w-3 text-green-500 flex-shrink-0" />
+              <span className="text-[10px] text-green-600 font-semibold">Verified Student</span>
+              {review.duration && (
+                <span className="text-[10px] text-muted-foreground">· {review.duration} · {review.level}</span>
+              )}
             </div>
           </div>
         </div>

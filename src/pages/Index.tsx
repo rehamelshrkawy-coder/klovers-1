@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { logLeadEvent } from "@/lib/leadTracking";
 import { useSEO } from "@/hooks/useSEO";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import WhyLearnKorean from "@/components/WhyLearnKorean";
@@ -20,6 +21,52 @@ const HomeGamesSection = lazy(() => import("@/components/HomeGamesSection"));
 const FinalCTA = lazy(() => import("@/components/FinalCTA"));
 const ReturningStudentOffer = lazy(() => import("@/components/ReturningStudentOffer"));
 
+const CommunityBand = () => {
+  const { language } = useLanguage();
+  const isAr = language === "ar";
+  return (
+    <section className="py-10 bg-gradient-to-r from-amber-50 to-yellow-50 border-y border-amber-200/60">
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-center sm:text-start">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl" aria-hidden="true">🌍</span>
+            <div>
+              <p className="font-extrabold text-foreground text-lg leading-tight">
+                {isAr ? "انضم لأكثر من ٢٠٠٠+ متعلم" : "Join 2,000+ Korean Learners"}
+              </p>
+              <p className="text-muted-foreground text-sm">
+                {isAr ? "في مجتمعنا على تيليغرام وفيسبوك" : "in our Telegram & Facebook community"}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <a
+              href="https://t.me/+Fu5T7d4wLMsxNDY9"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#229ED9] hover:bg-[#1a8fc0] text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
+              onClick={() => { try { logLeadEvent({ source_type: "community", cta_label: "community_band_telegram" }); } catch {} }}
+            >
+              <span aria-hidden="true">✈️</span>
+              {isAr ? "تيليغرام" : "Telegram"}
+            </a>
+            <a
+              href="https://www.facebook.com/Klovers.net/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#1877F2] hover:bg-[#1565d8] text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
+              onClick={() => { try { logLeadEvent({ source_type: "community", cta_label: "community_band_facebook" }); } catch {} }}
+            >
+              <span aria-hidden="true">📘</span>
+              {isAr ? "فيسبوك" : "Facebook"}
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const SectionFallback = () => (
   <div className="py-20 px-4">
     <div className="max-w-4xl mx-auto space-y-4 animate-pulse">
@@ -34,6 +81,24 @@ const SectionFallback = () => (
 
 const Index = () => {
   useSEO({ title: "Korean Classes in Arabic | Klovers Academy", description: "Join Klovers Korean Lovers Academy. Interactive online Korean lessons, placement tests, and gamified learning for all levels.", canonical: "https://kloversegy.com/" });
+
+  // Hreflang alternates for EN / AR homepage
+  useEffect(() => {
+    const addAlt = (hreflang: string, href: string) => {
+      const el = document.createElement("link");
+      el.setAttribute("rel", "alternate");
+      el.setAttribute("hreflang", hreflang);
+      el.setAttribute("href", href);
+      el.id = `hreflang-${hreflang}`;
+      document.head.appendChild(el);
+    };
+    addAlt("en", "https://kloversegy.com/");
+    addAlt("ar", "https://kloversegy.com/?lang=ar");
+    addAlt("x-default", "https://kloversegy.com/");
+    return () => {
+      ["en", "ar", "x-default"].forEach(hl => document.getElementById(`hreflang-${hl}`)?.remove());
+    };
+  }, []);
 
   useEffect(() => {
     const schema = {
@@ -182,6 +247,8 @@ const Index = () => {
             <TestimonialsSection />
           </Suspense>
         </div>
+        {/* Community social proof band */}
+        <CommunityBand />
         {/* Desire — reinforces motivation after seeing proof */}
         <WhyLearnKorean />
         {/* Desire — humanize the brand, build connection */}

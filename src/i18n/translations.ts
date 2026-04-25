@@ -72,9 +72,9 @@ export const translations = {
       title: "What Our Students Say",
       subtitle: "Real stories from real K-Lovers",
       items: [
-        { name: "Nada Tamer", quote: "Very professional and fun at the same time! Makes learning very easy and enjoyable. I highly recommend it to anyone ❤️", location: "Egypt" },
-        { name: "Jomana Azouz", quote: "She is amazing and really a good teacher. She simplifies everything to make it understandable, and doing the homework you will notice the development in your accent!", location: "Egypt" },
-        { name: "Kholoud Al-Bahay", quote: "One of the best courses I've ever enrolled in. How much I love how she strives and cares for us and our learning process. Highly recommend!", location: "Saudi Arabia" },
+        { name: "Nada Tamer", quote: "Very professional and fun at the same time! Makes learning very easy and enjoyable. I highly recommend it to anyone ❤️", location: "Egypt", duration: "3 months", level: "A1 → A2" },
+        { name: "Jomana Azouz", quote: "She is amazing and really a good teacher. She simplifies everything to make it understandable, and doing the homework you will notice the development in your accent!", location: "Egypt", duration: "5 months", level: "A1 → B1" },
+        { name: "Kholoud Al-Bahay", quote: "One of the best courses I've ever enrolled in. How much I love how she strives and cares for us and our learning process. Highly recommend!", location: "Saudi Arabia", duration: "4 months", level: "A1 → A2" },
       ],
     },
     finalCta: {
@@ -1902,9 +1902,9 @@ export const translations = {
       title: "ماذا يقول طلابنا",
       subtitle: "قصص حقيقية من محبي الكورية",
       items: [
-        { name: "حياة مصطفى", quote: "ميرسي جداً على تعليمنا اللغة الكورية 😍 متشكرة جداً على المستويات اللي وصلنالها من الصفر — تعليم الحروف والكتابة والقراءة والكلام.", location: "مصر" },
-        { name: "سامة آدم", quote: "بجد أحلى سونتسينيم في الدنيا 😍 الكورس خفيف وبستمتع بيه جداً. قربت أكمل سنة وبجد اتحسنت كتير في الكوري والجرامر بتسهله جداً علينا ❤️", location: "مصر" },
-        { name: "يمنى دراهم", quote: "من الكورسات اللذيذة والممتعة جداً! طريقتها حلوة جداً وبتوضح الحاجة بصورة بسيطة وسهلة، دا غير شخصيتها العسولة وأنها هتساعدك في أي وقت 💕", location: "مصر" },
+        { name: "حياة مصطفى", quote: "ميرسي جداً على تعليمنا اللغة الكورية 😍 متشكرة جداً على المستويات اللي وصلنالها من الصفر — تعليم الحروف والكتابة والقراءة والكلام.", location: "مصر", duration: "٦ أشهر", level: "A1 → B1" },
+        { name: "سامة آدم", quote: "بجد أحلى سونتسينيم في الدنيا 😍 الكورس خفيف وبستمتع بيه جداً. قربت أكمل سنة وبجد اتحسنت كتير في الكوري والجرامر بتسهله جداً علينا ❤️", location: "مصر", duration: "١١ شهر", level: "A1 → B2" },
+        { name: "يمنى دراهم", quote: "من الكورسات اللذيذة والممتعة جداً! طريقتها حلوة جداً وبتوضح الحاجة بصورة بسيطة وسهلة، دا غير شخصيتها العسولة وأنها هتساعدك في أي وقت 💕", location: "مصر", duration: "٤ أشهر", level: "A1 → A2" },
       ],
     },
     finalCta: {
