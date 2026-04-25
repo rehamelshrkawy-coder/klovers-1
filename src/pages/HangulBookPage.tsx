@@ -4,14 +4,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { Lock } from "lucide-react";
 
 /* ─── Brand tokens ─────────────────────────────── */
-const Y    = "#FFFF00";   // primary yellow (accents, borders, page stripes)
-const YL   = "#FFFFBB";   // light yellow (warm accent)
-const GL   = "#C8FFD4";   // light mint green (clover accent)
-const GD   = "#166534";   // dark green (green on green)
-const BK   = "#111111";
-const BK2  = "#222222";
-const GOLD = "#D4AF37";   // Pantone-safe print gold — cover hero text
-const CREAM = "#FFFEF0";  // warm cream — large background accents
+const Y    = "#FFFF00";   // yellow — thin accent lines only
+const YL   = "#FFFDE7";   // very pale yellow — subtle row tints
+const GL   = "#F0FFF4";   // very pale mint — subtle vowel tint
+const GD   = "#166534";   // dark green text on mint
+const BK   = "#111111";   // primary text
+const BK2  = "#333333";   // secondary text
+const GOLD = "#D4AF37";   // cover gold accent
+const CREAM = "#FAFAF8";  // page soft background (near-white)
+/* ─── Book design system ────────────────────────── */
+const T1   = "#111111";   // heading text
+const T2   = "#444444";   // body text
+const T3   = "#777777";   // captions / metadata
+const BD   = "#DDDDDD";   // borders / dividers
+const SBG  = "#F8F8F8";   // soft background (very subtle)
+const MAR  = "15mm 16mm"; // page margins
 
 /* ─── Custom Korean-style SVG Icons ─────────────── */
 
@@ -1461,38 +1468,65 @@ const SYLLABLES = [
 /* ══════════════════════════════════════════════════
    LAYOUT HELPERS
 ══════════════════════════════════════════════════ */
-function Page({ children, dir = "ltr" }: { children: React.ReactNode; dir?: "ltr" | "rtl" }) {
+function Page({ children, dir = "ltr", chapter }: { children: React.ReactNode; dir?: "ltr" | "rtl"; chapter?: string }) {
+  const isRtl = dir === "rtl";
   return (
     <div
       className="book-page"
       style={{
-        width:"210mm", minHeight:"297mm", padding:"14mm 13mm",
-        boxSizing:"border-box", background:"#fff",
+        width:"210mm", minHeight:"297mm", padding:"13mm 16mm 12mm",
+        boxSizing:"border-box", background:"#ffffff",
         position:"relative",
         pageBreakAfter:"always", breakAfter:"page",
         direction: dir,
+        fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
       }}
     >
-      {/* yellow top stripe */}
-      <div style={{ position:"absolute", top:0, left:0, right:0, height:"9px", background:Y }} />
-      {/* black bottom stripe */}
-      <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"6px", background:BK }} />
-      {/* yellow side bar — right edge for RTL, left edge for LTR */}
-      <div style={{ position:"absolute", top:"9px", bottom:"6px", [dir === "rtl" ? "right" : "left"]:0, width:"5px", background:Y }} />
+      {/* Running header */}
+      <div style={{
+        position:"absolute", top:"7mm",
+        left:"16mm", right:"16mm",
+        display:"flex", justifyContent: isRtl ? "flex-end" : "flex-start",
+        alignItems:"center", gap:"6px",
+        borderBottom:`1px solid ${BD}`, paddingBottom:"2.5mm",
+        direction: isRtl ? "rtl" : "ltr",
+      }}>
+        <div style={{ width:"4px", height:"4px", borderRadius:"50%", background:Y, flexShrink:0 }} />
+        <span style={{ fontSize:"8px", color:T3, letterSpacing:"1.5px", textTransform:"uppercase", fontWeight:600 }}>
+          Klovers Hangul Book 1
+        </span>
+        {chapter && (
+          <>
+            <span style={{ fontSize:"8px", color:BD }}>·</span>
+            <span style={{ fontSize:"8px", color:T3 }}>{chapter}</span>
+          </>
+        )}
+      </div>
 
-      <div style={{ marginTop:"8mm" }}>{children}</div>
+      {/* Content area */}
+      <div style={{ marginTop:"9mm" }}>{children}</div>
+
+      {/* Footer */}
+      <div style={{
+        position:"absolute", bottom:"6mm",
+        left:"16mm", right:"16mm",
+        borderTop:`1px solid ${BD}`, paddingTop:"2mm",
+        display:"flex", justifyContent:"center",
+      }}>
+        <span style={{ fontSize:"8px", color:T3 }}>klovers.academy</span>
+      </div>
     </div>
   );
 }
 
 function SHead({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"10px" }}>
-      <div style={{ width:"6px", height:"34px", background:Y, borderRadius:"3px", flexShrink:0 }} />
-      <div>
-        <div style={{ fontSize:"19px", fontWeight:900, color:BK, lineHeight:1.1 }}>{title}</div>
-        {subtitle && <div style={{ fontSize:"11px", color:"#777", marginTop:"2px" }}>{subtitle}</div>}
-      </div>
+    <div style={{ marginBottom:"7mm" }}>
+      <h2 style={{ fontSize:"22px", fontWeight:900, color:T1, lineHeight:1.15, margin:0, marginBottom:"3px" }}>
+        {title}
+      </h2>
+      <div style={{ width:"36px", height:"3px", background:Y, borderRadius:"2px", marginBottom:"4px" }} />
+      {subtitle && <p style={{ fontSize:"11px", color:T3, margin:0, lineHeight:1.5 }}>{subtitle}</p>}
     </div>
   );
 }
@@ -1503,16 +1537,16 @@ function SHead({ title, subtitle }: { title: string; subtitle?: string }) {
 function StrokeOrderTip({ lang }: { lang: "ar" | "en" }) {
   const isAr = lang === "ar";
   return (
-    <div style={{ background:"#fff9f0", border:"2px solid #f97316", borderRadius:"8px", padding:"7px 12px", fontSize:"11px", color:"#9a3412", marginBottom:"7px" }}>
-      <strong>✍️ {isAr ? "ترتيب الكتابة الصحيح:" : "Correct stroke order:"}</strong>{" "}
+    <div style={{ borderLeft: isAr ? "none" : `3px solid ${Y}`, borderRight: isAr ? `3px solid ${Y}` : "none",
+      paddingLeft: isAr ? "0" : "10px", paddingRight: isAr ? "10px" : "0",
+      marginBottom:"5mm", color:T2, fontSize:"11px", lineHeight:1.6 }}>
+      <strong style={{ color:T1 }}>{isAr ? "ترتيب الكتابة:" : "Stroke order rule:"}</strong>{" "}
       {isAr
-        ? "اكتب دائماً من الأعلى للأسفل ← ثم من اليسار لليمين. هذا هو ترتيب كل الحروف الكورية بدون استثناء."
-        : "Always write top → bottom, then left → right. This rule applies to every single Korean letter without exception."}
-      <div style={{ display:"flex", gap:"10px", marginTop:"5px", direction:"ltr" }}>
-        {["ㄱ(2)","ㄴ(2)","ㄷ(3)","ㄹ(5)","ㅁ(4)","ㅂ(4)","ㅅ(2)"].map(c=>(
-          <span key={c} style={{ background:"#f97316", color:"#fff", fontSize:"10px", fontWeight:700, padding:"2px 6px", borderRadius:"4px" }}>{c}</span>
-        ))}
-        {isAr ? null : <span style={{ fontSize:"10px", color:"#9a3412" }}>(number = stroke count)</span>}
+        ? "دائماً من الأعلى للأسفل، ثم من اليسار لليمين."
+        : "Always top → bottom, then left → right."}
+      <div style={{ marginTop:"3px", color:T3, fontSize:"10px", direction:"ltr" }}>
+        ㄱ(2) · ㄴ(2) · ㄷ(3) · ㄹ(5) · ㅁ(4) · ㅂ(4) · ㅅ(2)
+        {!isAr && " — numbers = stroke count"}
       </div>
     </div>
   );
@@ -1557,84 +1591,87 @@ function ConsCard({ c, lang }: { c: typeof CONSONANTS[0]; lang: Lang }) {
   const isAr = lang === "ar";
   return (
     <div style={{
-      display:"grid", gridTemplateColumns:"70px 1fr", gap:"8px",
-      background:"#f9f9f9", border:`2px solid ${Y}`,
-      borderRadius:"10px", padding:"8px",
+      display:"grid", gridTemplateColumns:"68px 1fr",
+      gap:"10px", direction: isAr ? "rtl" : "ltr",
       pageBreakInside:"avoid", breakInside:"avoid",
-      marginBottom:"6px",
-      direction: isAr ? "rtl" : "ltr",
+      paddingBottom:"8px", marginBottom:"8px",
+      borderBottom:`1px solid ${BD}`,
     }}>
-      {/* Character */}
-      <div style={{
-        background:BK, borderRadius:"8px",
-        display:"flex", flexDirection:"column",
-        alignItems:"center", justifyContent:"center",
-        minHeight:"72px", padding:"6px",
-      }}>
-        <div style={{ fontSize:"44px", color:Y, fontWeight:900, lineHeight:1 }}>{c.char}</div>
-        <div style={{ fontSize:"11px", color:"#ccc", marginTop:"1px" }}>{c.roman}</div>
+      {/* Character column */}
+      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"4px" }}>
+        <div style={{
+          width:"68px", height:"68px",
+          border:`1px solid ${BD}`, borderRadius:"6px",
+          background:SBG,
+          display:"flex", flexDirection:"column",
+          alignItems:"center", justifyContent:"center",
+        }}>
+          <span style={{ fontSize:"46px", fontWeight:900, color:T1, lineHeight:1 }}>{c.char}</span>
+        </div>
+        <span style={{ fontSize:"10px", color:T3, fontWeight:600, direction:"ltr" }}>{c.roman}</span>
         <ShapeMnemonic char={c.char} />
-        <div style={{ display:"flex", gap:"2px", flexWrap:"wrap", marginTop:"2px", justifyContent:"center" }}>
-          {c.strokes.map((s, si) => (
-            <span key={si} style={{
-              background:"#f97316", color:"#fff", fontSize:"8px",
-              fontWeight:700, padding:"1px 3px", borderRadius:"2px", lineHeight:1.3,
-            }}>{s}</span>
-          ))}
+        <div style={{ fontSize:"8.5px", color:T3, textAlign:"center", direction:"ltr", lineHeight:1.4 }}>
+          {c.strokes.join(" · ")}
         </div>
       </div>
-      {/* Info — pure target language */}
+
+      {/* Content column */}
       <div>
-        <div style={{ fontWeight:900, fontSize:"13px", color:BK, marginBottom:"2px" }}>{d.name}</div>
+        {/* Letter name */}
+        <div style={{ fontSize:"13px", fontWeight:900, color:T1, marginBottom:"3px" }}>{d.name}</div>
+
+        {/* Sound */}
+        <div style={{ fontSize:"11px", color:T2, marginBottom:"3px", lineHeight:1.5 }}>
+          <span style={{ fontWeight:700, color:T1 }}>{isAr ? "النطق: " : "Sound: "}</span>{d.sound}
+        </div>
+
+        {/* Mnemonic */}
         <div style={{
-          background: isAr ? YL : "#f0f0f0",
-          borderRadius:"6px", padding:"3px 7px",
-          fontSize:"11px", color:"#444", marginBottom:"3px",
-        }}>🔊 {d.sound}</div>
-        <div style={{
-          background:YL, borderRadius:"6px",
-          padding:"3px 7px", fontSize:"11px", color:"#555", marginBottom:"4px",
-        }}>💡 {d.mnemonic}</div>
+          fontSize:"10.5px", color:T2, fontStyle:"italic", marginBottom:"5px",
+          paddingRight: isAr ? "8px" : "0", paddingLeft: isAr ? "0" : "8px",
+          borderRight: isAr ? `2px solid ${Y}` : "none",
+          borderLeft: isAr ? "none" : `2px solid ${Y}`,
+          lineHeight:1.5,
+        }}>
+          {d.mnemonic}
+        </div>
+
+        {/* Arabic phonetic bridge */}
         {d.eq && (
-          <div style={{
-            background:"#EEF4FF", border:"1px solid #93c5fd", borderRadius:"6px",
-            padding:"3px 7px", fontSize:"11px", color:"#1e3a8a",
-            marginBottom:"4px", fontWeight:800, direction:"ltr",
-          }}>
-            🔤 {isAr ? "يشبه حرف: " : "Arabic eq: "}
-            <span style={{ fontSize:"14px" }}>{d.eq}</span>
+          <div style={{ fontSize:"10.5px", color:T2, marginBottom:"3px" }}>
+            <span style={{ fontWeight:700 }}>{isAr ? "يشبه: " : "Like: "}</span>
+            <span style={{ color:T1 }}>{d.eq}</span>
           </div>
         )}
+
+        {/* Egyptian dialect note */}
         {c.arDialect && isAr && (
-          <div style={{
-            background:"#fef9ec", border:"1px solid #f59e0b", borderRadius:"5px",
-            padding:"2px 7px", fontSize:"10px", color:"#92400e", marginBottom:"4px",
-          }}>
-            🇪🇬 {c.arDialect}
+          <div style={{ fontSize:"10px", color:T3, marginBottom:"4px", lineHeight:1.4 }}>
+            🇪🇬 <em>{c.arDialect}</em>
           </div>
         )}
-        <div style={{ display:"flex", gap:"5px", flexWrap:"wrap" }}>
+
+        {/* Example words */}
+        <div style={{ display:"flex", gap:"8px", flexWrap:"wrap", marginBottom:"5px" }}>
           {d.ex.map((ex, i) => (
-            <div key={i} style={{
-              background:BK2, borderRadius:"5px",
-              padding:"3px 7px", fontSize:"11px", color:"#fff",
-            }}>
-              <span style={{ color:Y, fontWeight:800 }}>{ex.k}</span>
-              {" "}({ex.r}) — {ex.m}
+            <div key={i} style={{ fontSize:"10.5px", color:T2 }}>
+              <span style={{ fontSize:"14px", fontWeight:900, color:T1, direction:"ltr", display:"inline-block" }}>{ex.k}</span>
+              <span style={{ color:T3 }}> {ex.r}</span>
+              <span style={{ color:T2 }}> — {ex.m}</span>
             </div>
           ))}
         </div>
-        {/* Writing practice lines — Aleksandrova method */}
-        <div style={{ marginTop:"5px", borderTop:"1px dashed #ddd", paddingTop:"4px" }}>
-          <div style={{ fontSize:"10px", color:"#999", marginBottom:"3px" }}>{isAr ? "✏️ تدرب على الكتابة:" : "✏️ Practice writing:"}</div>
-          <div style={{ display:"flex", gap:"3px" }}>
-            <div style={{ position:"relative", width:"28px", height:"28px", border:"1px dashed #ccc", borderRadius:"4px", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-              <span style={{ fontSize:"19px", color:"rgba(0,0,0,0.09)", fontWeight:900, position:"absolute", lineHeight:1 }}>{c.char}</span>
-            </div>
-            {[1,2,3,4,5].map(n=>(
-              <div key={n} style={{ width:"28px", height:"28px", border:"1px dashed #ccc", borderRadius:"4px", flexShrink:0 }} />
-            ))}
+
+        {/* Practice boxes */}
+        <div style={{ display:"flex", gap:"3px", alignItems:"center" }}>
+          <span style={{ fontSize:"9px", color:T3, flexShrink:0 }}>{isAr ? "تدرب:" : "Write:"}</span>
+          <div style={{ position:"relative", width:"26px", height:"26px", border:`1px solid ${BD}`, borderRadius:"3px",
+            display:"flex", alignItems:"center", justifyContent:"center", background:SBG }}>
+            <span style={{ fontSize:"18px", color:"rgba(0,0,0,0.07)", fontWeight:900 }}>{c.char}</span>
           </div>
+          {[1,2,3,4,5].map(n=>(
+            <div key={n} style={{ width:"26px", height:"26px", border:`1px solid ${BD}`, borderRadius:"3px" }} />
+          ))}
         </div>
       </div>
     </div>
@@ -1647,46 +1684,45 @@ function VowCard({ v, lang }: { v: typeof VOWELS[0]; lang: Lang }) {
   const isAr = lang === "ar";
   return (
     <div style={{
-      background:"#f9f9f9", border:`2px solid ${GL}`,
-      borderRadius:"10px", padding:"8px",
-      display:"grid", gridTemplateColumns:"58px 1fr", gap:"8px",
-      pageBreakInside:"avoid", breakInside:"avoid", marginBottom:"6px",
+      display:"grid", gridTemplateColumns:"60px 1fr", gap:"10px",
+      pageBreakInside:"avoid", breakInside:"avoid",
+      paddingBottom:"8px", marginBottom:"8px",
+      borderBottom:`1px solid ${BD}`,
       direction: isAr ? "rtl" : "ltr",
     }}>
-      <div style={{
-        background:GL, borderRadius:"8px",
-        display:"flex", flexDirection:"column",
-        alignItems:"center", justifyContent:"center",
-        minHeight:"64px", padding:"6px",
-      }}>
-        <div style={{ fontSize:"40px", fontWeight:900, color:GD, lineHeight:1 }}>{v.char}</div>
-        <div style={{ fontSize:"11px", fontWeight:700, color:GD, marginTop:"2px" }}>{v.roman}</div>
-        <div style={{ fontSize:"15px" }}>{v.emoji}</div>
-      </div>
-      <div>
-        <div style={{ fontWeight:900, fontSize:"12px", color:BK, marginBottom:"2px" }}>{d.name}</div>
+      {/* Character */}
+      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"3px" }}>
         <div style={{
-          background: isAr ? YL : "#f0f0f0",
-          borderRadius:"6px", padding:"3px 6px",
-          fontSize:"11px", color:"#444", marginBottom:"3px",
-        }}>🔊 {d.sound}</div>
-        <div style={{ background:GL, borderRadius:"6px", padding:"3px 6px", fontSize:"11px", color:GD, marginBottom:"4px" }}>
-          💡 {d.mnemonic}
+          width:"60px", height:"60px",
+          border:`1px solid ${BD}`, borderRadius:"6px", background:SBG,
+          display:"flex", alignItems:"center", justifyContent:"center",
+        }}>
+          <span style={{ fontSize:"40px", fontWeight:900, color:T1, lineHeight:1 }}>{v.char}</span>
         </div>
-        <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginBottom:"4px" }}>
+        <span style={{ fontSize:"10px", color:T3, fontWeight:600, direction:"ltr" }}>{v.roman}</span>
+      </div>
+      {/* Content */}
+      <div>
+        <div style={{ fontSize:"12px", fontWeight:900, color:T1, marginBottom:"3px" }}>{d.name}</div>
+        <div style={{ fontSize:"11px", color:T2, marginBottom:"3px" }}>
+          <span style={{ fontWeight:700 }}>{isAr ? "النطق: " : "Sound: "}</span>{d.sound}
+        </div>
+        <div style={{ fontSize:"10.5px", color:T2, fontStyle:"italic", marginBottom:"4px",
+          paddingRight: isAr ? "8px" : "0", paddingLeft: isAr ? "0" : "8px",
+          borderRight: isAr ? `2px solid ${Y}` : "none",
+          borderLeft: isAr ? "none" : `2px solid ${Y}`,
+        }}>{d.mnemonic}</div>
+        <div style={{ display:"flex", gap:"10px", flexWrap:"wrap", marginBottom:"3px" }}>
           {d.ex.map((ex, i) => (
-            <div key={i} style={{
-              background:BK2, borderRadius:"5px",
-              padding:"2px 6px", fontSize:"11px", color:"#fff",
-            }}>
-              <span style={{ color:Y, fontWeight:800 }}>{ex.k}</span> — {ex.m}
-            </div>
+            <span key={i} style={{ fontSize:"10.5px", color:T2 }}>
+              <span style={{ fontSize:"14px", fontWeight:900, color:T1, direction:"ltr", display:"inline-block" }}>{ex.k}</span>
+              {" — "}{ex.m}
+            </span>
           ))}
         </div>
         {(d as any).eq && (
           <div style={{
-            background:"#EEF4FF", border:"1px solid #93c5fd", borderRadius:"5px",
-            padding:"2px 6px", fontSize:"10px", color:"#1e3a8a", fontWeight:800, direction:"ltr",
+            fontSize:"10px", color:T3, direction:"ltr",
           }}>
             🔤 {isAr ? "يشبه: " : "Like: "}<span style={{ fontSize:"13px" }}>{(d as any).eq}</span>
           </div>
@@ -1734,37 +1770,25 @@ function StudyPlanAr() {
   ];
   return (
     <Page dir="rtl">
-      <SHead title="خطة الدراسة — ٧ أيام 🗓️" subtitle="اتبع هذه الخطة وستقرأ الكورية في أسبوع واحد!" />
-      <div style={{ background:BK, borderRadius:"12px", padding:"10px 14px", marginBottom:"10px", display:"flex", gap:"10px", alignItems:"center" }}>
-        <div style={{ fontSize:"28px" }}>🎯</div>
-        <div>
-          <div style={{ fontSize:"13px", fontWeight:900, color:GOLD, marginBottom:"2px" }}>الهدف: قراءة الهانغول في ٧ أيام</div>
-          <div style={{ fontSize:"11px", color:"#aaa", lineHeight:1.6 }}>٣٠–٤٥ دقيقة يومياً تكفي. الاستمرارية أهم من الكم!</div>
-        </div>
+      <SHead title="خطة الدراسة — ٧ أيام" subtitle="اتبع هذه الخطة وستقرأ الكورية في أسبوع واحد!" />
+      <div style={{ borderLeft:`3px solid ${Y}`, paddingLeft:"10px", marginBottom:"8mm", background:SBG, padding:"8px 10px" }}>
+        <div style={{ fontSize:"12px", fontWeight:800, color:T1, marginBottom:"2px" }}>🎯 الهدف: قراءة الهانغول في ٧ أيام</div>
+        <div style={{ fontSize:"11px", color:T3, lineHeight:1.6 }}>٣٠–٤٥ دقيقة يومياً تكفي. الاستمرارية أهم من الكم!</div>
       </div>
-      <div style={{ display:"flex", flexDirection:"column", gap:"6px", marginBottom:"10px" }}>
+      <div style={{ display:"flex", flexDirection:"column", marginBottom:"8mm" }}>
         {days.map((day, i) => (
-          <div key={i} style={{ display:"grid", gridTemplateColumns:"60px 1fr", gap:"8px", background:day.color, border:`1px solid ${i===6 ? GOLD+"88" : "#e5e7eb"}`, borderRadius:"10px", padding:"8px 10px" }}>
-            <div style={{ textAlign:"center" }}>
-              <div style={{ fontSize:"18px" }}>{day.icon}</div>
-              <div style={{ fontSize:"10px", fontWeight:900, color:BK, background:i===6 ? GOLD : Y, borderRadius:"4px", padding:"1px 4px", marginTop:"2px" }}>{day.d}</div>
-            </div>
+          <div key={i} style={{ display:"grid", gridTemplateColumns:"54px 1fr", gap:"10px", padding:"7px 0", borderBottom:`1px solid ${BD}`, alignItems:"baseline" }}>
+            <div style={{ fontSize:"10px", fontWeight:900, color: i===6 ? T1 : T3, background: i===6 ? Y : "transparent", padding: i===6 ? "1px 5px" : "0", borderRadius:"3px", display:"inline-block" }}>{day.d}</div>
             <div>
-              <div style={{ fontSize:"12px", fontWeight:800, color:BK, marginBottom:"2px" }}>{day.task}</div>
-              <div style={{ fontSize:"10px", color:"#666", display:"flex", gap:"4px", alignItems:"center" }}>
-                <span style={{ color:"#f97316" }}>💡</span>{day.tip}
-              </div>
+              <div style={{ fontSize:"11px", fontWeight:700, color:T1 }}>{day.task}</div>
+              <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>{day.tip}</div>
             </div>
           </div>
         ))}
       </div>
-      <div style={{ background:GL, borderRadius:"10px", padding:"10px 14px", display:"flex", gap:"10px", alignItems:"center" }}>
-        <TaegeukIcon size={36} />
-        <div>
-          <div style={{ fontSize:"12px", fontWeight:900, color:GD, marginBottom:"2px" }}>🔑 سر النجاح</div>
-          <div style={{ fontSize:"11px", color:GD, lineHeight:1.6 }}>لا تنتقل لليوم التالي قبل أن تتقن حروف اليوم الحالي. الجودة تتفوق على السرعة دائماً!</div>
-        </div>
-      </div>
+      <p style={{ fontSize:"11px", color:T2, lineHeight:1.7, borderTop:`1px solid ${BD}`, paddingTop:"4mm", margin:0 }}>
+        🔑 <strong>سر النجاح:</strong> لا تنتقل لليوم التالي قبل أن تتقن حروف اليوم الحالي. الجودة تتفوق على السرعة دائماً!
+      </p>
     </Page>
   );
 }
@@ -1797,44 +1821,42 @@ function AspiratedAr() {
   return (
     <Page dir="rtl">
       <SHead title="الحروف الساكنة المُشدَّدة (된소리) 💥" subtitle="٥ حروف تُنطق بضغط إضافي — بدون هواء!" />
-      <div style={{ background:"#fff3cd", border:"2px solid #f59e0b", borderRadius:"8px", padding:"8px 12px", marginBottom:"8px", fontSize:"11px", color:"#78350f", fontWeight:700 }}>
+      <p style={{ fontSize:"11px", color:T2, lineHeight:1.6, marginBottom:"4mm", borderLeft:`3px solid ${Y}`, paddingLeft:"8px" }}>
         ⚠️ <strong>للمبتدئين:</strong> هذه حروف متقدمة — ركز أولاً على الـ١٤ حرفاً الأساسية. ارجع لهذه الصفحة في الأسبوع الثاني!
-      </div>
-      <div style={{ background:GL, borderRadius:"8px", padding:"8px 12px", marginBottom:"10px", fontSize:"11px", color:GD, fontWeight:700 }}>
-        💡 الفرق الأساسي: الحروف العادية مع نفخة هواء خفيفة. الحروف المُشدَّدة <strong>بدون</strong> أي هواء — الحلق والفم مضغوطان.
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"7px", marginBottom:"10px" }}>
+      </p>
+      <p style={{ fontSize:"11px", color:T2, lineHeight:1.6, marginBottom:"5mm" }}>
+        الفرق الأساسي: الحروف العادية مع نفخة هواء خفيفة. الحروف المُشدَّدة <strong>بدون</strong> أي هواء — الحلق والفم مضغوطان.
+      </p>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"7px 16px", marginBottom:"8mm" }}>
         {ASPIRATED.map(a => (
-          <div key={a.char} style={{ background:"#f9f9f9", border:`2px solid #f97316`, borderRadius:"10px", padding:"8px", pageBreakInside:"avoid", breakInside:"avoid" }}>
-            <div style={{ display:"flex", gap:"8px", alignItems:"center", marginBottom:"5px" }}>
-              <div style={{ background:BK, borderRadius:"6px", width:"50px", height:"50px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
-                <div style={{ fontSize:"32px", color:GOLD, fontWeight:900, lineHeight:1 }}>{a.char}</div>
-                <div style={{ fontSize:"10px", color:"#aaa" }}>{a.roman}</div>
+          <div key={a.char} style={{ paddingBottom:"7px", borderBottom:`1px solid ${BD}`, pageBreakInside:"avoid", breakInside:"avoid" }}>
+            <div style={{ display:"flex", gap:"10px", alignItems:"center", marginBottom:"4px" }}>
+              <div style={{ border:`1px solid ${BD}`, borderRadius:"4px", width:"50px", height:"50px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:SBG, flexShrink:0 }}>
+                <div style={{ fontSize:"32px", color:T1, fontWeight:900, lineHeight:1 }}>{a.char}</div>
+                <div style={{ fontSize:"10px", color:T3 }}>{a.roman}</div>
               </div>
               <div>
-                <div style={{ fontSize:"12px", fontWeight:900, color:BK }}>{a.ar.name}</div>
-                <div style={{ fontSize:"10px", color:"#666", background:"#fff3cd", padding:"1px 5px", borderRadius:"4px" }}>
-                  = {a.base} مع ضغط إضافي
-                </div>
+                <div style={{ fontSize:"12px", fontWeight:800, color:T1 }}>{a.ar.name}</div>
+                <div style={{ fontSize:"10px", color:T3 }}>= {a.base} مع ضغط إضافي</div>
               </div>
             </div>
-            <div style={{ background:"#fff9ec", borderRadius:"5px", padding:"3px 7px", fontSize:"10px", color:"#9a3412", marginBottom:"3px" }}>🔊 {a.ar.sound}</div>
-            <div style={{ background:YL, borderRadius:"5px", padding:"3px 7px", fontSize:"10px", color:"#555", marginBottom:"4px" }}>💡 {a.ar.mnemonic}</div>
-            <div style={{ display:"flex", gap:"4px", flexWrap:"wrap" }}>
+            <div style={{ fontSize:"10px", color:T2, marginBottom:"2px" }}>🔊 {a.ar.sound}</div>
+            <div style={{ fontSize:"10px", color:T2, borderRight:`2px solid ${Y}`, paddingRight:"5px", marginBottom:"4px", fontStyle:"italic" }}>{a.ar.mnemonic}</div>
+            <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", direction:"ltr" }}>
               {a.ar.ex.map((ex, i) => (
-                <div key={i} style={{ background:BK2, borderRadius:"4px", padding:"2px 6px", fontSize:"10px", color:"#fff" }}>
-                  <span style={{ color:Y, fontWeight:800 }}>{ex.k}</span> ({ex.r}) — {ex.m}
-                </div>
+                <span key={i} style={{ fontSize:"10px", color:T2 }}>
+                  <strong style={{ color:T1 }}>{ex.k}</strong> ({ex.r}) — {ex.m}
+                </span>
               ))}
             </div>
           </div>
         ))}
       </div>
-      <div style={{ background:BK, borderRadius:"10px", padding:"10px 14px", display:"flex", gap:"10px", alignItems:"center" }}>
+      <div style={{ display:"flex", alignItems:"center", gap:"12px", borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
         <QRPlaceholder size={44} label="" />
         <div>
-          <div style={{ fontSize:"11px", fontWeight:800, color:GOLD }}>🔊 اسمع الفرق بين العادي والمُشدَّد</div>
-          <div style={{ fontSize:"10px", color:"#888", marginTop:"2px" }}>klovers.academy/audio/tensed</div>
+          <div style={{ fontSize:"11px", fontWeight:700, color:T1 }}>🔊 اسمع الفرق بين العادي والمُشدَّد</div>
+          <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>klovers.academy/audio/tensed</div>
         </div>
       </div>
     </Page>
@@ -1860,30 +1882,28 @@ function CompoundVowelsAr() {
   return (
     <Page dir="rtl">
       <SHead title="حروف المد المُركَّبة (이중모음) 🔗" subtitle="١١ حرف مد مُركَّب — تُبنى من حرفين بسيطين!" />
-      <div style={{ background:"#f0fff4", border:"2px solid #22c55e", borderRadius:"8px", padding:"7px 10px", fontSize:"11px", color:"#166534", marginBottom:"8px", fontWeight:700 }}>
-        💡 لا تحفظها كلها الآن! الأكثر استخداماً: <strong style={{ fontSize:"13px" }}>ㅘ ㅝ ㅐ ㅔ ㅢ</strong> — ستقابلهم كثيراً في المسلسلات والأغاني.
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"6px", marginBottom:"10px" }}>
+      <p style={{ fontSize:"11px", color:T2, lineHeight:1.6, marginBottom:"5mm" }}>
+        لا تحفظها كلها الآن! الأكثر استخداماً: <strong>ㅘ ㅝ ㅐ ㅔ ㅢ</strong> — ستقابلهم كثيراً في المسلسلات والأغاني.
+      </p>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"6px 10px", marginBottom:"8mm" }}>
         {COMPOUND_VOWELS.map(v => (
-          <div key={v.char} style={{ background:"#f9f9f9", border:`2px solid ${GL}`, borderRadius:"8px", padding:"7px", pageBreakInside:"avoid", breakInside:"avoid" }}>
-            <div style={{ display:"flex", gap:"6px", alignItems:"center", marginBottom:"4px" }}>
-              <div style={{ background:GD, borderRadius:"6px", width:"36px", height:"36px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                <div style={{ fontSize:"22px", color:"#fff", fontWeight:900, lineHeight:1 }}>{v.char}</div>
-                <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.7)" }}>{v.roman}</div>
-              </div>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:"10px", color:"#555" }}>{v.ar}</div>
-              </div>
+          <div key={v.char} style={{ display:"flex", gap:"8px", alignItems:"flex-start", paddingBottom:"5px", borderBottom:`1px solid ${BD}`, pageBreakInside:"avoid", breakInside:"avoid" }}>
+            <div style={{ border:`1px solid ${BD}`, borderRadius:"4px", width:"34px", height:"34px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:SBG, flexShrink:0 }}>
+              <div style={{ fontSize:"20px", color:T1, fontWeight:900, lineHeight:1 }}>{v.char}</div>
+              <div style={{ fontSize:"9px", color:T3 }}>{v.roman}</div>
             </div>
-            <div style={{ background:GL, borderRadius:"4px", padding:"2px 5px", fontSize:"9px", color:GD, fontWeight:700 }}>{v.ex}</div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:"10px", color:T2, marginBottom:"2px" }}>{v.ar}</div>
+              <div style={{ fontSize:"9px", color:T3 }}>{v.ex}</div>
+            </div>
           </div>
         ))}
       </div>
-      <div style={{ background:BK, borderRadius:"10px", padding:"8px 12px", display:"flex", gap:"8px", alignItems:"center" }}>
+      <div style={{ display:"flex", alignItems:"center", gap:"12px", borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
         <QRPlaceholder size={40} label="" />
         <div>
-          <div style={{ fontSize:"11px", fontWeight:800, color:GOLD }}>🔊 اسمع نطق حروف المد المركبة</div>
-          <div style={{ fontSize:"10px", color:"#888", marginTop:"2px" }}>klovers.academy/audio/compound</div>
+          <div style={{ fontSize:"11px", fontWeight:700, color:T1 }}>🔊 اسمع نطق حروف المد المركبة</div>
+          <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>klovers.academy/audio/compound</div>
         </div>
       </div>
     </Page>
@@ -1903,36 +1923,29 @@ function HistoryAr() {
       <DancheongBorder />
 
       {/* Timeline */}
-      <div style={{ position:"relative", marginBottom:"12px" }}>
-        {/* vertical line */}
-        <div style={{ position:"absolute", right:"18px", top:0, bottom:0, width:"3px", background:Y, borderRadius:"2px" }} />
-
+      <div style={{ display:"flex", flexDirection:"column", gap:"0", marginBottom:"8mm" }}>
         {[
           { era:"قبل ١٠٠٠ م", icon:"🏔️", title:"بدايات اللغة الكورية", body:"تطورت اللغة الكورية على مدى آلاف السنين في شبه الجزيرة الكورية. تُصنَّف اليوم كـ«لغة معزولة» — لا تنتمي لأي مجموعة لغوية أخرى في العالم. ليست صينية، وليست يابانية، وليست عربية — إنها فريدة من نوعها!" },
-          { era:"١٠٠٠–١٤٤٢ م", icon:"📜", title:"عصر الهانجا — حروف المستعارة", body:"قبل اختراع الهانغول، كان الكوريون يستخدمون الحروف الصينية (한자 هانجا). كانت صعبة التعلم جداً — فقط النخبة والعلماء كانوا يقرؤون ويكتبون. أكثر من ٩٥٪ من الشعب الكوري كان أمياً بالكامل. القوانين والعقود والأدب — كلها كانت مكتوبة بحروف لا يفهمها الغالبية!" },
-          { era:"١٤٤٣ م 🌟", icon:"👑", title:"ثورة الملك سيجونغ", body:"أدرك الملك سيجونغ أن هذا ظلم بيّن. قال: «كيف يمكن لشعب أن يحكم نفسه إذا لم يستطع القراءة؟» فأسس مجمعاً من ثمانية علماء نوابغ في «قاعة الحكماء» (집현전) وعملوا سنوات في سرية تامة لاختراع أبجدية جديدة تناسب الأصوات الكورية تماماً." },
-          { era:"١٤٤٦ م", icon:"📚", title:"إعلان هونمينجونغأوم", body:"أُعلن عن الأبجدية الجديدة تحت اسم «훈민정음» (هونمينجونغأوم) بمعنى «الأصوات الصحيحة لتعليم الشعب». واجه الملك معارضة شديدة من الطبقة الحاكمة التي أرادت الإبقاء على امتيازاتها — لكنه أصرّ. واليوم يُحتفل بيوم الهانغول كل عام في التاسع من أكتوبر." },
+          { era:"١٠٠٠–١٤٤٢ م", icon:"📜", title:"عصر الهانجا — حروف المستعارة", body:"قبل اختراع الهانغول، كان الكوريون يستخدمون الحروف الصينية (한자 هانجا). كانت صعبة التعلم جداً — فقط النخبة والعلماء كانوا يقرؤون ويكتبون. أكثر من ٩٥٪ من الشعب الكوري كان أمياً بالكامل." },
+          { era:"١٤٤٣ م ★", icon:"👑", title:"ثورة الملك سيجونغ", body:"أدرك الملك سيجونغ أن هذا ظلم بيّن. فأسس مجمعاً من ثمانية علماء نوابغ في «قاعة الحكماء» (집현전) وعملوا سنوات في سرية تامة لاختراع أبجدية جديدة تناسب الأصوات الكورية تماماً." },
+          { era:"١٤٤٦ م", icon:"📚", title:"إعلان هونمينجونغأوم", body:"أُعلن عن الأبجدية الجديدة تحت اسم «훈민정음» (هونمينجونغأوم) بمعنى «الأصوات الصحيحة لتعليم الشعب». واجه الملك معارضة شديدة من الطبقة الحاكمة — لكنه أصرّ. واليوم يُحتفل بيوم الهانغول كل عام في التاسع من أكتوبر." },
         ].map((item, i) => (
-          <div key={i} style={{ display:"flex", gap:"12px", marginBottom:"10px", alignItems:"flex-start" }}>
-            <div style={{ width:"36px", height:"36px", background:Y, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px", flexShrink:0, zIndex:1 }}>{item.icon}</div>
-            <div style={{ flex:1, background: i===2?"#111":"#f9f9f9", border:`2px solid ${i===2?Y:"#e5e5e5"}`, borderRadius:"10px", padding:"10px 12px" }}>
-              <div style={{ fontSize:"11px", fontWeight:700, color:i===2?Y:"#888", marginBottom:"2px" }}>{item.era}</div>
-              <div style={{ fontSize:"11px", fontWeight:800, color:i===2?"#fff":BK, marginBottom:"4px" }}>{item.title}</div>
-              <div style={{ fontSize:"11px", color:i===2?"#ccc":"#555", lineHeight:1.8 }}>{item.body}</div>
+          <div key={i} style={{ display:"flex", gap:"12px", marginBottom:"6px", paddingBottom:"6px", borderBottom:`1px solid ${BD}`, alignItems:"flex-start" }}>
+            <div style={{ fontSize:"18px", flexShrink:0, marginTop:"2px" }}>{item.icon}</div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:"10px", fontWeight:600, color:T3, marginBottom:"1px" }}>{item.era}</div>
+              <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"3px" }}>{item.title}</div>
+              <div style={{ fontSize:"11px", color:T2, lineHeight:1.7 }}>{item.body}</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Fun fact strip */}
-      <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
-        <MugunghwaIcon size={36} color={BK} />
-        <div>
-          <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>حقيقة مذهلة!</div>
-          <div style={{ fontSize:"11px", color:BK2, lineHeight:1.6 }}>
-            يتحدث الكورية أكثر من <strong>٨٠ مليون شخص</strong> حول العالم. وقد صنّفت منظمة اليونسكو الهانغول كواحد من أكثر أنظمة الكتابة علمية ومنطقية في التاريخ البشري!
-          </div>
-        </div>
+      <div style={{ borderTop:`3px solid ${Y}`, paddingTop:"4mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"3px" }}>حقيقة مذهلة!</div>
+        <p style={{ fontSize:"11px", color:T2, lineHeight:1.7, margin:0 }}>
+          يتحدث الكورية أكثر من <strong>٨٠ مليون شخص</strong> حول العالم. وقد صنّفت منظمة اليونسكو الهانغول كواحد من أكثر أنظمة الكتابة علمية ومنطقية في التاريخ البشري!
+        </p>
       </div>
     </Page>
   );
@@ -1944,23 +1957,18 @@ function SejongAr() {
     <Page dir="rtl">
       <SHead title="الملك سيجونغ العظيم 👑" subtitle="الرجل الذي غيّر مصير شعب بكلمة واحدة: العدالة" />
 
-      {/* Hero portrait area */}
-      <div style={{ background:BK, borderRadius:"14px", padding:"16px", marginBottom:"12px", display:"grid", gridTemplateColumns:"120px 1fr", gap:"14px" }}>
-        {/* Portrait — real palace photo */}
-        <div style={{ borderRadius:"10px", overflow:"hidden", border:`3px solid ${Y}`, display:"flex", flexDirection:"column", minHeight:"130px" }}>
-          <SceneTeacher h={260} radius={0} />
-          <div style={{ background:"#1a1a00", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"6px", flex:1 }}>
-            <div style={{ fontSize:"18px", fontWeight:900, color:Y, direction:"ltr" }}>세종대왕</div>
-            <div style={{ fontSize:"11px", color:"#888", marginTop:"1px" }}>سيجونغ الكبير</div>
+      {/* Bio */}
+      <div style={{ display:"grid", gridTemplateColumns:"120px 1fr", gap:"14px", marginBottom:"8mm", paddingBottom:"6mm", borderBottom:`1px solid ${BD}` }}>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", overflow:"hidden", display:"flex", flexDirection:"column" }}>
+          <SceneTeacher h={120} radius={0} />
+          <div style={{ background:SBG, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"6px" }}>
+            <div style={{ fontSize:"16px", fontWeight:900, color:T1, direction:"ltr" }}>세종대왕</div>
+            <div style={{ fontSize:"10px", color:T3, marginTop:"1px" }}>سيجونغ الكبير</div>
           </div>
         </div>
-        {/* Bio */}
-        <div style={{ color:"#fff" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"8px" }}>
-            <PalaceRoofIcon size={28} color={Y} />
-            <div style={{ fontSize:"16px", fontWeight:900, color:Y }}>سيجونغ الكبير</div>
-          </div>
-          <div style={{ display:"flex", flexDirection:"column", gap:"5px" }}>
+        <div>
+          <div style={{ fontSize:"15px", fontWeight:900, color:T1, marginBottom:"8px" }}>سيجونغ الكبير</div>
+          <div style={{ display:"flex", flexDirection:"column", gap:"4px" }}>
             {[
               { icon:"🎂", label:"الميلاد", val:"١٥ مايو ١٣٩٧م" },
               { icon:"👑", label:"الحكم", val:"١٤١٨ – ١٤٥٠م" },
@@ -1969,9 +1977,9 @@ function SejongAr() {
               { icon:"🌟", label:"لقبه", val:"«أعظم ملوك كوريا»" },
             ].map(r=>(
               <div key={r.label} style={{ display:"flex", gap:"8px", alignItems:"center" }}>
-                <span style={{ fontSize:"13px" }}>{r.icon}</span>
-                <span style={{ fontSize:"11px", color:"#888", minWidth:"60px" }}>{r.label}</span>
-                <span style={{ fontSize:"11px", color:"#ddd", fontWeight:600 }}>{r.val}</span>
+                <span style={{ fontSize:"12px" }}>{r.icon}</span>
+                <span style={{ fontSize:"10px", color:T3, minWidth:"60px" }}>{r.label}</span>
+                <span style={{ fontSize:"10px", color:T2, fontWeight:600 }}>{r.val}</span>
               </div>
             ))}
           </div>
@@ -1979,35 +1987,29 @@ function SejongAr() {
       </div>
 
       {/* The creation story */}
-      <div style={{ marginBottom:"10px" }}>
-        <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"7px", display:"flex", alignItems:"center", gap:"6px" }}>
-          <span style={{ background:Y, padding:"2px 8px", borderRadius:"6px" }}>القصة</span>
-          كيف صُمِّمت الحروف؟
-        </div>
+      <div style={{ marginBottom:"8mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"5mm" }}>كيف صُمِّمت الحروف؟</div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"7px" }}>
           {[
             { icon:"👅", title:"شكل اللسان", body:"كل حرف ساكن صُمِّم بناءً على شكل اللسان والفم لحظة نطق الصوت — علم وفن في آنٍ واحد!" },
             { icon:"🔬", title:"علم صوتي دقيق", body:"ㄱ = قاعدة اللسان ترتفع نحو الحلق. ㄴ = طرف اللسان يلمس سقف الفم. ㅁ = الشفتان منطبقتان." },
             { icon:"🏗️", title:"بنية منطقية", body:"الحروف المشتقة من بعضها تتشابه في الشكل — ㄱ الأصل، ㄲ الشديدة، ㅋ المنفوخة. نظام متكامل ومتسق!" },
           ].map(c=>(
-            <div key={c.title} style={{ background:YL, borderRadius:"10px", padding:"10px", border:`1px solid ${Y}` }}>
-              <div style={{ fontSize:"24px", marginBottom:"5px" }}>{c.icon}</div>
-              <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"4px" }}>{c.title}</div>
-              <div style={{ fontSize:"11px", color:"#555", lineHeight:1.7 }}>{c.body}</div>
+            <div key={c.title} style={{ background:SBG, borderRadius:"6px", padding:"10px", border:`1px solid ${BD}` }}>
+              <div style={{ fontSize:"22px", marginBottom:"5px" }}>{c.icon}</div>
+              <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"3px" }}>{c.title}</div>
+              <div style={{ fontSize:"10px", color:T2, lineHeight:1.7 }}>{c.body}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Quote */}
-      <div style={{ background:BK, borderRadius:"12px", padding:"14px", display:"flex", gap:"12px", alignItems:"flex-start" }}>
-        <div style={{ fontSize:"36px", color:Y, fontWeight:900, lineHeight:1, flexShrink:0 }}>"</div>
-        <div>
-          <div style={{ fontSize:"12px", color:"#fff", lineHeight:1.9, fontStyle:"italic" }}>
-            كل إنسان لديه ما يريد أن يقوله، لكن كثيرين لا يجدون طريقة للتعبير. أريد أن يكون كل شخص في مملكتي قادراً على القراءة والكتابة.
-          </div>
-          <div style={{ fontSize:"11px", color:Y, fontWeight:700, marginTop:"6px" }}>— الملك سيجونغ الكبير، ١٤٤٦م</div>
+      <div style={{ borderRight:`3px solid ${Y}`, paddingRight:"12px", direction:"rtl" }}>
+        <div style={{ fontSize:"12px", color:T2, lineHeight:2, fontStyle:"italic" }}>
+          كل إنسان لديه ما يريد أن يقوله، لكن كثيرين لا يجدون طريقة للتعبير. أريد أن يكون كل شخص في مملكتي قادراً على القراءة والكتابة.
         </div>
+        <div style={{ fontSize:"11px", color:T3, fontWeight:700, marginTop:"5px" }}>— الملك سيجونغ الكبير، ١٤٤٦م</div>
       </div>
     </Page>
   );
@@ -2019,99 +2021,70 @@ function CultureAr() {
     <Page dir="rtl">
       <SHead title="الثقافة الكورية 🌸" subtitle="خمسة آلاف عام من الجمال والفلسفة والفن" />
 
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"8mm" }}>
 
         {/* K-Drama */}
-        <div style={{ background:BK, borderRadius:"12px", overflow:"hidden" }}>
-          <SceneStreet h={220} radius={0} />
-          <div style={{ padding:"10px" }}>
-            <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>المسلسلات الكورية (K-Drama)</div>
-            <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.7 }}>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", overflow:"hidden" }}>
+          <SceneStreet h={160} radius={0} />
+          <div style={{ padding:"8px", background:SBG }}>
+            <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"3px" }}>المسلسلات الكورية (K-Drama)</div>
+            <div style={{ fontSize:"10px", color:T2, lineHeight:1.6 }}>
               من أكثر المحتوى مشاهدةً على Netflix عالمياً. «لعبة الحبّار» غيّرت مفهوم الدراما عالمياً!
-            </div>
-            <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
-              {["❤️ رومانسي", "🕵️ إثارة", "😂 كوميدي"].map(t=>(
-                <span key={t} style={{ background:"#222", color:Y, fontSize:"11px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
-              ))}
             </div>
           </div>
         </div>
 
         {/* K-Pop */}
-        <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
-          <SceneConcert h={220} radius={0} />
-          <div style={{ padding:"10px" }}>
-            <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>موسيقى البوب الكوري (K-Pop)</div>
-            <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.7 }}>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", overflow:"hidden" }}>
+          <SceneConcert h={160} radius={0} />
+          <div style={{ padding:"8px", background:SBG }}>
+            <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"3px" }}>موسيقى البوب الكوري (K-Pop)</div>
+            <div style={{ fontSize:"10px", color:T2, lineHeight:1.6 }}>
               BTS، BLACKPINK، Stray Kids — نجوم عالميون. K-Pop ظاهرة ثقافية شاملة!
-            </div>
-            <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
-              {["BTS 💜", "BLACKPINK 🖤", "Stray Kids 🐺"].map(t=>(
-                <span key={t} style={{ background:BK, color:Y, fontSize:"11px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
-              ))}
             </div>
           </div>
         </div>
 
         {/* Food */}
-        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
-          <SceneFood h={200} radius={0} />
-          <div style={{ padding:"10px" }}>
-          <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"4px" }}>المطبخ الكوري</div>
-          <div style={{ fontSize:"11px", color:"#555", lineHeight:1.8 }}>
-            الكيمتشي، البيبيمباب، التيكبوكي، السامجيوبسال — أطعمة تفاجئك وتُدمنها! المطبخ الكوري يعتمد على التوازن بين الحامض والحار والأومامي. وليس هناك وجبة كاملة بدون كيمتشي!
-          </div>
-          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
-            {["🥬 김치","🍚 비빔밥","🌶️ 떡볶이","🥩 삼겹살"].map(t=>(
-              <span key={t} style={{ background:BK, color:Y, fontSize:"11px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
-            ))}
-          </div>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", overflow:"hidden" }}>
+          <SceneFood h={140} radius={0} />
+          <div style={{ padding:"8px", background:SBG }}>
+            <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"3px" }}>المطبخ الكوري</div>
+            <div style={{ fontSize:"10px", color:T2, lineHeight:1.6 }}>
+              الكيمتشي، البيبيمباب، التيكبوكي — أطعمة تفاجئك وتُدمنها!
+            </div>
           </div>
         </div>
 
         {/* Values & Spirit */}
-        <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🌿</div>
-          <div style={{ fontWeight:800, fontSize:"12px", color:GD, marginBottom:"5px" }}>القيم والروح الكورية</div>
-          <div style={{ fontSize:"11px", color:GD, lineHeight:1.8 }}>
-            <strong>빨리빨리 (بالي-بالي)</strong> = «يلا يلا!» — الكوريون يحبون السرعة والإتقان معاً. <strong>눈치 (نونتشي)</strong> = فهم المشاعر دون كلام. <strong>한 (هان)</strong> = إحساس عميق بالحنين والمقاومة — روح الشعب الكوري الأبدية.
-          </div>
-          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
-            {["👴 احترام الكبار", "👨‍👩‍👧 الأسرة أولاً", "📚 التعليم مقدس"].map(t=>(
-              <span key={t} style={{ background:BK, color:Y, fontSize:"11px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
-            ))}
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", background:SBG }}>
+          <div style={{ fontSize:"22px", marginBottom:"5px" }}>🌿</div>
+          <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"4px" }}>القيم والروح الكورية</div>
+          <div style={{ fontSize:"10px", color:T2, lineHeight:1.7 }}>
+            <strong>빨리빨리</strong> = «يلا يلا!» — <strong>눈치</strong> = فهم المشاعر دون كلام. <strong>한</strong> = الحنين العميق والمقاومة — روح الشعب الكوري الأبدية.
           </div>
         </div>
       </div>
 
-      {/* Diamond — 정(jeong) concept: 5th culture card */}
-      <div style={{ background:"#2d1b4e", border:"2px solid #a78bfa", borderRadius:"12px", padding:"12px", marginBottom:"10px" }}>
-        <div style={{ display:"flex", gap:"10px", alignItems:"flex-start" }}>
-          <div style={{ fontSize:"36px", color:"#a78bfa", fontWeight:900, lineHeight:1, flexShrink:0, direction:"ltr" }}>정</div>
+      {/* 정 Jeong concept */}
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", marginBottom:"8mm", background:SBG }}>
+        <div style={{ display:"flex", gap:"12px", alignItems:"flex-start" }}>
+          <div style={{ fontSize:"32px", fontWeight:900, color:T1, lineHeight:1, flexShrink:0, direction:"ltr" }}>정</div>
           <div>
-            <div style={{ fontWeight:800, fontSize:"12px", color:"#a78bfa", marginBottom:"4px" }}>정 (Jeong) — أعمق مفهوم في الثقافة الكورية</div>
-            <div style={{ fontSize:"11px", color:"#d8b4fe", lineHeight:1.8 }}>
-              <strong style={{color:"#a78bfa"}}>정 (جيونغ)</strong> هي كلمة لا تُترجم بسهولة — إنها ذلك الشعور العميق بالارتباط والألفة الذي يتشكّل تدريجياً بين الناس. ليست حباً عاطفياً بالضرورة — بل رابطة روحية تنشأ من مشاركة اللحظات اليومية. في المسلسلات الكورية، ستسمع: <span style={{color:"#fff",fontWeight:800,direction:"ltr"}}>«정이 들었어»</span> = «أصبحت قريباً منك بشكل لم أتوقعه»
-            </div>
-            <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
-              {["💜 رابطة عاطفية", "🕰️ تتشكل مع الوقت", "🎬 قلب الدراما الكورية"].map(t=>(
-                <span key={t} style={{ background:"rgba(167,139,250,0.2)", color:"#a78bfa", fontSize:"11px", padding:"2px 6px", borderRadius:"10px", border:"1px solid rgba(167,139,250,0.4)" }}>{t}</span>
-              ))}
+            <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"4px" }}>정 (Jeong) — أعمق مفهوم في الثقافة الكورية</div>
+            <div style={{ fontSize:"10px", color:T2, lineHeight:1.8 }}>
+              رابطة روحية تتشكّل تدريجياً بين الناس من مشاركة اللحظات اليومية. في المسلسلات الكورية: <strong>«정이 들었어»</strong> = «أصبحت قريباً منك بشكل لم أتوقعه»
             </div>
           </div>
         </div>
       </div>
 
-      {/* Korean sentence teaser */}
-      <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"14px", alignItems:"center" }}>
-        <KoreanLanternIcon size={40} color={Y} />
-        <div>
-          <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"4px" }}>بعد إتمام هذه الكتب الستة ستتمكن من:</div>
-          <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-            {["فهم المسلسلات الكورية بدون ترجمة 🎬","التحدث مع الكوريين بثقة 🗣️","قراءة اللافتات في كوريا 🪧","غناء أغاني K-Pop 🎵"].map(t=>(
-              <div key={t} style={{ background:"#222", color:"#ddd", fontSize:"11px", padding:"4px 8px", borderRadius:"8px" }}>{t}</div>
-            ))}
-          </div>
+      <div style={{ borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:700, color:T1, marginBottom:"5px" }}>بعد إتمام هذه الكتب الستة ستتمكن من:</div>
+        <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
+          {["فهم المسلسلات الكورية بدون ترجمة 🎬","التحدث مع الكوريين بثقة 🗣️","قراءة اللافتات في كوريا 🪧","غناء أغاني K-Pop 🎵"].map(t=>(
+            <div key={t} style={{ fontSize:"10px", color:T2, padding:"3px 7px", border:`1px solid ${BD}`, borderRadius:"4px" }}>{t}</div>
+          ))}
         </div>
       </div>
     </Page>
@@ -2124,36 +2097,34 @@ function CourseAr() {
     <Page dir="rtl">
       <SHead title="سلسلة كتب Klovers — ٦ كتب إلى الإتقان 📚" subtitle="خارطة رحلتك من الصفر إلى الطلاقة" />
 
-      <div style={{ background:BK, borderRadius:"12px", padding:"14px", marginBottom:"12px" }}>
-        <div style={{ fontSize:"11px", color:"#aaa", lineHeight:1.9 }}>
-          صُمِّمت سلسلة Klovers لتأخذك من <span style={{color:Y,fontWeight:800}}>لا تعرف حرفاً واحداً</span> إلى <span style={{color:Y,fontWeight:800}}>التحدث والكتابة بطلاقة</span> — بطريقة ممتعة تعتمد على مسلسلاتك المفضلة وموسيقاك الكورية المحبوبة. كل كتاب يبني على السابق.
-        </div>
-      </div>
+      <p style={{ fontSize:"11px", color:T2, lineHeight:1.8, marginBottom:"6mm" }}>
+        صُمِّمت سلسلة Klovers لتأخذك من <strong>لا تعرف حرفاً واحداً</strong> إلى <strong>التحدث والكتابة بطلاقة</strong> — بطريقة ممتعة تعتمد على مسلسلاتك المفضلة وموسيقاك الكورية المحبوبة. كل كتاب يبني على السابق.
+      </p>
 
-      <div style={{ display:"flex", flexDirection:"column", gap:"8px", marginBottom:"12px" }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:"0", marginBottom:"8mm" }}>
         {BOOKS_AR.map((b,i)=>(
           <div key={i} style={{
-            background: b.current ? Y : "#f9f9f9",
-            border: `2px solid ${b.current ? Y : "#e5e5e5"}`,
-            borderRadius:"10px", padding:"10px 14px",
             display:"flex", alignItems:"center", gap:"12px",
             flexDirection:"row-reverse",
+            padding:"7px 0", borderBottom:`1px solid ${BD}`,
+            background: b.current ? YL : "transparent",
           }}>
             <div style={{
-              background: b.current ? BK : "#e0e0e0",
-              color: b.current ? Y : "#999",
+              border: b.current ? `2px solid ${Y}` : `1px solid ${BD}`,
+              background: b.current ? Y : SBG,
+              color: b.current ? T1 : T3,
               fontWeight:900,
-              width:"40px", height:"40px", borderRadius:"8px",
+              width:"36px", height:"36px", borderRadius:"6px",
               display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
               flexShrink:0, gap:"1px",
             }}>
               <span style={{ fontSize:"9px", fontWeight:700, opacity:0.7 }}>كتاب</span>
-              <span style={{ fontSize:"18px", lineHeight:1 }}>{b.n}</span>
+              <span style={{ fontSize:"15px", lineHeight:1 }}>{b.n}</span>
             </div>
-            <div style={{ fontSize:"22px", flexShrink:0 }}>{b.icon}</div>
+            <div style={{ fontSize:"18px", flexShrink:0 }}>{b.icon}</div>
             <div style={{ flex:1 }}>
-              <div style={{ fontWeight:800, fontSize:"12px", color: b.current ? BK : "#444" }}>{b.title}</div>
-              <div style={{ fontSize:"11px", color: b.current ? BK2 : "#999", marginTop:"2px" }}>
+              <div style={{ fontWeight: b.current ? 900 : 700, fontSize:"11px", color:T1 }}>{b.title}</div>
+              <div style={{ fontSize:"10px", color: b.current ? T2 : T3, marginTop:"1px" }}>
                 {b.current ? "📍 أنت هنا — ابدأ رحلتك!" : b.sub}
               </div>
             </div>
@@ -2167,10 +2138,10 @@ function CourseAr() {
           { icon:"🎯", title:"٦ كتب", sub:"من الصفر للطلاقة" },
           { icon:"🎬", title:"لغة حقيقية", sub:"من المسلسلات والحياة" },
         ].map(s=>(
-          <div key={s.title} style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"10px", padding:"10px", textAlign:"center" }}>
-            <div style={{ fontSize:"24px", marginBottom:"4px" }}>{s.icon}</div>
-            <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>{s.title}</div>
-            <div style={{ fontSize:"11px", color:"#666" }}>{s.sub}</div>
+          <div key={s.title} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"10px", textAlign:"center", background:SBG }}>
+            <div style={{ fontSize:"22px", marginBottom:"4px" }}>{s.icon}</div>
+            <div style={{ fontWeight:800, fontSize:"11px", color:T1 }}>{s.title}</div>
+            <div style={{ fontSize:"10px", color:T3 }}>{s.sub}</div>
           </div>
         ))}
       </div>
@@ -2325,42 +2296,42 @@ function WelcomeAr() {
     <Page dir="rtl">
       <SHead title="مرحباً بعالم الهانغول!" subtitle="اكتشف جمال الأبجدية الكورية" />
 
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
-        <div style={{ background:BK, borderRadius:"12px", padding:"14px", color:"#fff" }}>
-          <div style={{ fontSize:"12px", fontWeight:800, color:Y, marginBottom:"7px" }}>لماذا الهانغول رائع؟</div>
-          <p style={{ fontSize:"11px", lineHeight:2, color:"#ddd", margin:0 }}>
-            اخترع الملك سيجونغ الهانغول عام ١٤٤٣م. إنها <strong style={{color:Y}}>أبجدية صوتية</strong> — كل حرف يمثل صوتاً واحداً فقط. معظم المتعلمين يستطيعون القراءة في <strong style={{color:Y}}>٢ إلى ٣ أيام</strong> فقط!
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"7mm" }}>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", background:SBG }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"5px" }}>لماذا الهانغول رائع؟</div>
+          <p style={{ fontSize:"10px", lineHeight:1.8, color:T2, margin:0 }}>
+            اخترع الملك سيجونغ الهانغول عام ١٤٤٣م. إنها <strong>أبجدية صوتية</strong> — كل حرف يمثل صوتاً واحداً فقط. معظم المتعلمين يستطيعون القراءة في <strong>٢ إلى ٣ أيام</strong> فقط!
           </p>
         </div>
-        <div style={{ background:GL, borderRadius:"12px", padding:"14px" }}>
-          <div style={{ fontSize:"12px", fontWeight:800, color:GD, marginBottom:"7px" }}>الأرقام السحرية</div>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", background:SBG }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"7px" }}>الأرقام السحرية</div>
           {[{n:"١٤", l:"حرفاً ساكناً أساسياً"},{n:"١٠", l:"حروف مد أساسية"},{n:"∞", l:"مقطع ممكن التكوين"}].map(({n,l})=>(
-            <div key={n} style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"7px" }}>
-              <div style={{ background:GD, color:Y, fontWeight:900, fontSize:"18px", width:"36px", height:"36px", borderRadius:"8px", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{n}</div>
-              <div style={{ fontSize:"11px", color:GD, fontWeight:600 }}>{l}</div>
+            <div key={n} style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px" }}>
+              <div style={{ border:`2px solid ${Y}`, color:T1, fontWeight:900, fontSize:"16px", width:"34px", height:"34px", borderRadius:"6px", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{n}</div>
+              <div style={{ fontSize:"10px", color:T2, fontWeight:600 }}>{l}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Syllable diagram */}
-      <div style={{ border:`3px solid ${Y}`, borderRadius:"12px", padding:"12px", marginBottom:"10px", background:YL }}>
-        <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"8px", textAlign:"center" }}>كيف تُبنى الكتلة المقطعية؟</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", marginBottom:"7mm", background:SBG }}>
+        <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"8px", textAlign:"center" }}>كيف تُبنى الكتلة المقطعية؟</div>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"10px", flexWrap:"wrap", direction:"ltr" }}>
           {[
-            {label:"حرف ساكن", char:"ㅎ", sub:"h", bg:BK, fg:Y},
-            {label:"+", char:"", sub:"", bg:"", fg:Y},
-            {label:"حرف مد", char:"ㅏ", sub:"a", bg:Y, fg:BK},
-            {label:"=", char:"", sub:"", bg:"", fg:BK},
-            {label:"المقطع!", char:"하", sub:"ha", bg:BK, fg:Y},
+            {label:"حرف ساكن", char:"ㅎ", sub:"h"},
+            {label:"+", char:"", sub:""},
+            {label:"حرف مد", char:"ㅏ", sub:"a"},
+            {label:"=", char:"", sub:""},
+            {label:"المقطع!", char:"하", sub:"ha"},
           ].map((item,i)=>
             item.char===""?(
-              <div key={i} style={{fontSize:"24px",fontWeight:900,color:BK}}>{item.label}</div>
+              <div key={i} style={{fontSize:"20px",fontWeight:900,color:T3}}>{item.label}</div>
             ):(
               <div key={i} style={{textAlign:"center"}}>
-                <div style={{fontSize:"11px",color:"#555",marginBottom:"3px",direction:"rtl"}}>{item.label}</div>
-                <div style={{background:item.bg,borderRadius:"10px",padding:"8px 14px",fontSize:"40px",fontWeight:900,color:item.fg,lineHeight:1,border:item.bg==="transparent"?"none":`2px solid ${Y}`}}>{item.char}</div>
-                {item.sub&&<div style={{fontSize:"11px",color:"#555",marginTop:"3px"}}>{item.sub}</div>}
+                <div style={{fontSize:"10px",color:T3,marginBottom:"3px",direction:"rtl"}}>{item.label}</div>
+                <div style={{border:`1px solid ${BD}`,borderRadius:"6px",padding:"6px 12px",fontSize:"36px",fontWeight:900,color:T1,lineHeight:1,background:i===4?YL:"#fff"}}>{item.char}</div>
+                {item.sub&&<div style={{fontSize:"10px",color:T3,marginTop:"3px"}}>{item.sub}</div>}
               </div>
             )
           )}
@@ -2368,38 +2339,38 @@ function WelcomeAr() {
       </div>
 
       {/* 7-day plan */}
-      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>📅 خطة الدراسة في ٧ أيام</div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"5px" }}>
+      <div style={{ fontSize:"10px", fontWeight:700, color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"5px" }}>خطة الدراسة في ٧ أيام</div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"4px", marginBottom:"6mm" }}>
         {plan.map((p,i)=>(
-          <div key={i} style={{ background:i===6?Y:BK, borderRadius:"8px", padding:"7px 3px", textAlign:"center" }}>
-            <div style={{ fontSize:"11px", fontWeight:800, color:i===6?BK:Y }}>{p.d}</div>
-            <div style={{ fontSize:"11px", color:i===6?BK2:"#aaa", marginTop:"3px", lineHeight:1.4 }}>{p.t}</div>
+          <div key={i} style={{ border:`1px solid ${i===6?Y:BD}`, borderRadius:"4px", padding:"5px 3px", textAlign:"center", background:i===6?YL:SBG }}>
+            <div style={{ fontSize:"9px", fontWeight:800, color:T1 }}>{p.d}</div>
+            <div style={{ fontSize:"9px", color:T3, marginTop:"2px", lineHeight:1.3 }}>{p.t}</div>
           </div>
         ))}
       </div>
 
-      {/* Buzan: letter family tree */}
-      <div style={{ marginTop:"8px", background:BK, borderRadius:"10px", padding:"10px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>🧬 عائلات الحروف — كيف تتشابه؟</div>
+      {/* Letter family tree */}
+      <div style={{ borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
+        <div style={{ fontSize:"10px", fontWeight:700, color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"5px" }}>عائلات الحروف — كيف تتشابه؟</div>
         <div style={{ display:"flex", gap:"10px", flexWrap:"wrap", direction:"ltr" }}>
           {[
-            { base:"ㄱ", derived:["ㅋ","ㄲ"], label:"g-family" },
-            { base:"ㄷ", derived:["ㅌ","ㄸ"], label:"d-family" },
-            { base:"ㅂ", derived:["ㅍ","ㅃ"], label:"b-family" },
-            { base:"ㅅ", derived:["ㅆ"], label:"s-family" },
-            { base:"ㅈ", derived:["ㅊ","ㅉ"], label:"j-family" },
+            { base:"ㄱ", derived:["ㅋ","ㄲ"] },
+            { base:"ㄷ", derived:["ㅌ","ㄸ"] },
+            { base:"ㅂ", derived:["ㅍ","ㅃ"] },
+            { base:"ㅅ", derived:["ㅆ"] },
+            { base:"ㅈ", derived:["ㅊ","ㅉ"] },
           ].map(f=>(
             <div key={f.base} style={{ display:"flex", alignItems:"center", gap:"4px" }}>
-              <div style={{ background:Y, color:BK, fontWeight:900, fontSize:"16px", borderRadius:"6px", padding:"4px 8px" }}>{f.base}</div>
-              <span style={{ color:"#555", fontSize:"11px" }}>→</span>
+              <span style={{ border:`2px solid ${Y}`, color:T1, fontWeight:900, fontSize:"15px", borderRadius:"4px", padding:"2px 6px" }}>{f.base}</span>
+              <span style={{ color:T3, fontSize:"10px" }}>→</span>
               {f.derived.map(d=>(
-                <div key={d} style={{ background:"#222", color:"#ccc", fontWeight:900, fontSize:"14px", borderRadius:"6px", padding:"3px 7px", border:`1px solid ${Y}44` }}>{d}</div>
+                <span key={d} style={{ border:`1px solid ${BD}`, color:T2, fontWeight:700, fontSize:"13px", borderRadius:"4px", padding:"2px 6px", background:SBG }}>{d}</span>
               ))}
             </div>
           ))}
         </div>
-        <div style={{ fontSize:"10px", color:"#666", marginTop:"5px" }}>
-          الحرف الأساسي (أصفر) يكتسب شدة بإضافة خطوط — ㄱ→ㅋ (نفخة هواء)، ㄱ→ㄲ (مضاعف/مشدّد)
+        <div style={{ fontSize:"10px", color:T3, marginTop:"4px" }}>
+          الحرف الأساسي (مؤطر) يكتسب شدة بإضافة خطوط — ㄱ→ㅋ (نفخة هواء)، ㄱ→ㄲ (مضاعف/مشدّد)
         </div>
       </div>
     </Page>
@@ -2438,39 +2409,28 @@ function TocAr() {
         <div style={{ marginTop:"8px" }}><DancheongBorder /></div>
       </div>
 
-      <div style={{ display:"flex", flexDirection:"column", gap:"5px", marginBottom:"16px" }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:"0", marginBottom:"8mm" }}>
         {chapters.map((ch, i) => (
           <div key={i} style={{
             display:"flex", alignItems:"center", gap:"10px",
-            padding:"8px 12px", borderRadius:"10px",
-            background: i % 2 === 0 ? "#f9f9f9" : "#fff",
-            border:`1px solid ${i % 2 === 0 ? Y + "55" : "#eee"}`,
+            padding:"6px 0", borderBottom:`1px solid ${BD}`,
           }}>
-            <div style={{
-              background:BK, color:Y, fontWeight:900, fontSize:"11px",
-              width:"30px", height:"30px", borderRadius:"6px",
-              display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0,
-            }}>{ch.n}</div>
-            <div style={{ fontSize:"18px", flexShrink:0 }}>{ch.icon}</div>
-            <div style={{ flex:1, fontSize:"12px", fontWeight:700, color:BK, display:"flex", alignItems:"center", gap:"5px" }}>
+            <div style={{ fontSize:"10px", fontWeight:700, color:T3, width:"24px", textAlign:"center", flexShrink:0 }}>{ch.n}</div>
+            <div style={{ flex:1, fontSize:"11px", fontWeight:700, color:T1, display:"flex", alignItems:"center", gap:"5px" }}>
               {ch.title}
-              {(ch as any).new && <span style={{ background:"#22c55e", color:"#fff", fontSize:"8px", fontWeight:900, padding:"1px 4px", borderRadius:"3px", flexShrink:0 }}>NEW</span>}
+              {(ch as any).new && <span style={{ background:Y, color:T1, fontSize:"8px", fontWeight:900, padding:"0 4px", borderRadius:"2px", flexShrink:0 }}>NEW</span>}
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:"4px", flexShrink:0 }}>
-              <div style={{ width:"40px", borderBottom:"1px dashed #ccc" }} />
-              <div style={{ background:Y, color:BK, fontWeight:900, fontSize:"11px", padding:"2px 8px", borderRadius:"6px" }}>{ch.page}</div>
+              <div style={{ width:"30px", borderBottom:"1px dotted #ccc" }} />
+              <span style={{ fontSize:"10px", color:T3, width:"16px", textAlign:"left" }}>{ch.page}</span>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"12px", alignItems:"center" }}>
-        <TaegeukIcon size={42} />
-        <div>
-          <div style={{ fontSize:"13px", fontWeight:900, color:GOLD, marginBottom:"3px" }}>رحلتك تبدأ من هنا 🚀</div>
-          <div style={{ fontSize:"11px", color:"#aaa", lineHeight:1.6 }}>اقرأ كل فصل بالترتيب — كل فصل يبني على السابق. في ٧ أيام ستقرأ الكورية!</div>
-        </div>
-      </div>
+      <p style={{ fontSize:"11px", color:T2, lineHeight:1.7, borderTop:`1px solid ${BD}`, paddingTop:"4mm", margin:0 }}>
+        اقرأ كل فصل بالترتيب — كل فصل يبني على السابق. في ٧ أيام ستقرأ الكورية!
+      </p>
     </Page>
   );
 }
@@ -2481,44 +2441,37 @@ function ConsonantsAr({ slice, page }: { slice:[number,number]; page:number }) {
     ? { lyric:"나비야", rom:"نا-بي-يا", meaning:"يا فراشة", song:"أغنية شعبية كورية" }
     : { lyric:"고마워", rom:"go-ma-wo", meaning:"شكراً", song:"IU — Palette" };
   return (
-    <Page dir="rtl">
+    <Page dir="rtl" chapter="الحروف الساكنة">
       <SHead title={`الحروف الساكنة (자음) — الجزء ${page===1?"١":"٢"} من ٢`} subtitle="كل مقطع كوري يبدأ بحرف ساكن" />
-      {/* Marzano "I can..." learning objective */}
-      <div style={{ background:"#f0fff4", border:"2px solid #22c55e", borderRadius:"8px", padding:"7px 10px", fontSize:"11px", color:"#166534", marginBottom:"7px", fontWeight:700 }}>
-        ✅ بنهاية هذه الصفحة ستتمكن من: قراءة ونطق <strong>{count}</strong> حروف كورية جديدة وكتابتها بنفسك!
-      </div>
+      <p style={{ fontSize:"11px", color:T2, marginBottom:"4mm", lineHeight:1.6 }}>
+        بنهاية هذه الصفحة ستتمكن من قراءة ونطق <strong>{count}</strong> حروف كورية جديدة وكتابتها.
+        {page===1 && " هناك ١٤ حرفاً ساكناً أساسياً — تعلّم هذه أولاً."}
+      </p>
       <StrokeOrderTip lang="ar" />
-      <div style={{ background:YL, borderRadius:"8px", padding:"6px 10px", fontSize:"11px", color:BK2, marginBottom:"8px" }}>
-        💡 هناك ١٤ حرفاً ساكناً أساسياً، و٥ حروف ساكنة مُشدَّدة (مع نفخة هواء). تعلّم الأساسية أولاً!
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6px" }}>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px 16px" }}>
         {CONSONANTS.slice(...slice).map(c => <ConsCard key={c.char} c={c} lang="ar" />)}
       </div>
-      <div style={{ display:"flex", alignItems:"center", gap:"12px", background:"#111", borderRadius:"10px", padding:"10px 14px", marginTop:"8px" }}>
-        <QRPlaceholder size={50} label="" />
+      {/* QR audio — clean book style */}
+      <div style={{ display:"flex", alignItems:"center", gap:"12px", marginTop:"5mm",
+        borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
+        <QRPlaceholder size={44} label="" />
         <div>
-          <div style={{ fontSize:"12px", fontWeight:800, color:Y }}>🔊 اسمع النطق الصحيح</div>
-          <div style={{ fontSize:"11px", color:"#888", marginTop:"3px" }}>امسح الكود أو زر: <span style={{color:Y}}>klovers.academy/audio</span></div>
+          <div style={{ fontSize:"11px", fontWeight:700, color:T1 }}>استمع للنطق</div>
+          <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>klovers.academy/audio</div>
         </div>
       </div>
-      {/* Mogi K-Pop lyric strip */}
-      <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"8px", padding:"7px 12px", marginTop:"6px", display:"flex", gap:"10px", alignItems:"center" }}>
-        <div style={{ fontSize:"20px" }}>🎵</div>
-        <div>
-          <div style={{ fontSize:"10px", color:"rgba(255,255,0,0.65)", marginBottom:"2px", fontWeight:700 }}>كلمات K-Pop بالحروف التي تعلمتها للتو:</div>
-          <span style={{ fontSize:"18px", color:Y, fontWeight:900, direction:"ltr" }}>{kpopLyrics.lyric}</span>
-          <span style={{ fontSize:"11px", color:"#aaa", marginRight:"6px" }}> [{kpopLyrics.rom}] = {kpopLyrics.meaning}</span>
-          <span style={{ fontSize:"10px", color:"#555" }}>— {kpopLyrics.song}</span>
+      {/* K-Pop context — light style */}
+      <div style={{ marginTop:"4mm", paddingTop:"3mm", borderTop:`1px solid ${BD}` }}>
+        <span style={{ fontSize:"9px", color:T3, textTransform:"uppercase", letterSpacing:"1px" }}>تعرّفتَ للتو على هذه الكلمة في K-Pop </span>
+        <div style={{ marginTop:"2px", fontSize:"16px", fontWeight:900, color:T1, direction:"ltr" }}>
+          {kpopLyrics.lyric}
+          <span style={{ fontSize:"11px", fontWeight:400, color:T3 }}> [{kpopLyrics.rom}] — {kpopLyrics.meaning}</span>
         </div>
       </div>
-      {/* Nunan micro-task */}
-      <div style={{ background:GL, border:`1px solid ${GD}`, borderRadius:"8px", padding:"8px 10px", marginTop:"6px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"3px" }}>📝 جربها الآن!</div>
-        <div style={{ fontSize:"11px", color:GD, marginBottom:"5px" }}>حاول كتابة اسمك الأول بالحروف الكورية التي تعلمتها:</div>
-        <div style={{ height:"24px", border:"1px dashed #aaa", borderRadius:"4px", background:"#fff" }} />
-      </div>
-      <div style={{ background:"#fef9ec", border:"1px solid #f59e0b", borderRadius:"6px", padding:"5px 10px", marginTop:"4px", fontSize:"10px", color:"#78350f" }}>
-        🇪🇬 <strong>نصيحة ذهبية:</strong> ابحث عن علم 🇪🇬 في كل بطاقة — ده مكتوب خصيصاً بالعامية المصرية عشانك!
+      {/* Practice task */}
+      <div style={{ marginTop:"4mm" }}>
+        <div style={{ fontSize:"10px", color:T3, marginBottom:"3px" }}>جربها الآن — اكتب اسمك بالحروف التي تعلمتها:</div>
+        <div style={{ height:"22px", borderBottom:`1px solid ${BD}` }} />
       </div>
     </Page>
   );
@@ -2533,16 +2486,14 @@ function MiniReadingStripAr() {
     { k:"사다", r:"سا-دا", m:"يشتري" },
   ];
   return (
-    <div style={{ background:"#1a2744", border:"2px solid #60a5fa", borderRadius:"10px", padding:"10px 12px", marginTop:"8px" }}>
-      <div style={{ fontSize:"11px", fontWeight:800, color:"#93c5fd", marginBottom:"6px" }}>
-        🎉 يمكنك الآن قراءة كلمات حقيقية! جرّب:
-      </div>
-      <div style={{ display:"flex", gap:"8px", flexWrap:"wrap", direction:"ltr" }}>
+    <div style={{ marginTop:"5mm", paddingTop:"4mm", borderTop:`1px solid ${BD}` }}>
+      <div style={{ fontSize:"10px", color:T3, marginBottom:"4px" }}>يمكنك الآن قراءة هذه الكلمات الحقيقية:</div>
+      <div style={{ display:"flex", gap:"10px", flexWrap:"wrap", direction:"ltr" }}>
         {words.map(w => (
-          <div key={w.k} style={{ background:"#0f172a", borderRadius:"8px", padding:"6px 10px", textAlign:"center" }}>
-            <div style={{ fontSize:"20px", color:"#fbbf24", fontWeight:900 }}>{w.k}</div>
-            <div style={{ fontSize:"10px", color:"#60a5fa" }}>{w.r}</div>
-            <div style={{ fontSize:"10px", color:"#94a3b8", direction:"rtl" }}>{w.m}</div>
+          <div key={w.k} style={{ textAlign:"center" }}>
+            <div style={{ fontSize:"22px", fontWeight:900, color:T1 }}>{w.k}</div>
+            <div style={{ fontSize:"9px", color:T3 }}>{w.r}</div>
+            <div style={{ fontSize:"9px", color:T2, direction:"rtl" }}>{w.m}</div>
           </div>
         ))}
       </div>
@@ -2559,16 +2510,14 @@ function MiniReadingStripEn() {
     { k:"사다", r:"sa-da", m:"to buy" },
   ];
   return (
-    <div style={{ background:"#1a2744", border:"2px solid #60a5fa", borderRadius:"10px", padding:"10px 12px", marginTop:"8px" }}>
-      <div style={{ fontSize:"11px", fontWeight:800, color:"#93c5fd", marginBottom:"6px" }}>
-        🎉 You can now read real Korean words! Try these:
-      </div>
-      <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
+    <div style={{ marginTop:"5mm", paddingTop:"4mm", borderTop:`1px solid ${BD}` }}>
+      <div style={{ fontSize:"10px", color:T3, marginBottom:"4px" }}>You can now read these real Korean words:</div>
+      <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
         {words.map(w => (
-          <div key={w.k} style={{ background:"#0f172a", borderRadius:"8px", padding:"6px 10px", textAlign:"center" }}>
-            <div style={{ fontSize:"20px", color:"#fbbf24", fontWeight:900 }}>{w.k}</div>
-            <div style={{ fontSize:"10px", color:"#60a5fa" }}>{w.r}</div>
-            <div style={{ fontSize:"10px", color:"#94a3b8" }}>{w.m}</div>
+          <div key={w.k} style={{ textAlign:"center" }}>
+            <div style={{ fontSize:"22px", fontWeight:900, color:T1 }}>{w.k}</div>
+            <div style={{ fontSize:"9px", color:T3 }}>{w.r}</div>
+            <div style={{ fontSize:"9px", color:T2 }}>{w.m}</div>
           </div>
         ))}
       </div>
@@ -2578,22 +2527,21 @@ function MiniReadingStripEn() {
 
 function VowelsAr() {
   return (
-    <Page dir="rtl">
+    <Page dir="rtl" chapter="حروف المد">
       <SHead title="حروف المد (모음)" subtitle="حروف المد لا تقف وحدها — تحتاج دائماً حرفاً ساكناً" />
-      <div style={{ background:"#f0fff4", border:"2px solid #22c55e", borderRadius:"8px", padding:"7px 10px", fontSize:"11px", color:"#166534", marginBottom:"7px", fontWeight:700 }}>
-        ✅ بنهاية هذه الصفحة ستتمكن من: قراءة ونطق ١٠ حروف مد كورية وتكوين مقاطع كاملة!
-      </div>
-      <div style={{ background:GL, borderRadius:"8px", padding:"6px 10px", fontSize:"11px", color:GD, marginBottom:"8px", fontWeight:700 }}>
-        🌟 إذا بدأت الكلمة بصوت مدّي، نضع الحرف الصامت ㅇ أمامه: مثال → أ = 아 (ㅇ + ㅏ)
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6px" }}>
+      <p style={{ fontSize:"11px", color:T2, marginBottom:"4mm", lineHeight:1.6 }}>
+        بنهاية هذه الصفحة ستتمكن من قراءة ونطق ١٠ حروف مد كورية وتكوين مقاطع كاملة.
+        إذا بدأت الكلمة بصوت مدّي، استخدم الحرف الصامت ㅇ أمامه: أ = 아 (ㅇ + ㅏ).
+      </p>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px 16px" }}>
         {VOWELS.map(v => <VowCard key={v.char} v={v} lang="ar" />)}
       </div>
-      <div style={{ display:"flex", alignItems:"center", gap:"12px", background:"#111", borderRadius:"10px", padding:"10px 14px", marginTop:"8px" }}>
-        <QRPlaceholder size={50} label="" />
+      <div style={{ display:"flex", alignItems:"center", gap:"12px", marginTop:"5mm",
+        borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
+        <QRPlaceholder size={44} label="" />
         <div>
-          <div style={{ fontSize:"12px", fontWeight:800, color:Y }}>🔊 اسمع نطق حروف المد</div>
-          <div style={{ fontSize:"11px", color:"#888", marginTop:"3px" }}>امسح الكود أو زر: <span style={{color:Y}}>klovers.academy/audio</span></div>
+          <div style={{ fontSize:"11px", fontWeight:700, color:T1 }}>استمع لنطق حروف المد</div>
+          <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>klovers.academy/audio</div>
         </div>
       </div>
       <MiniReadingStripAr />
@@ -2603,31 +2551,34 @@ function VowelsAr() {
 
 function SyllableAr() {
   return (
-    <Page dir="rtl">
+    <Page dir="rtl" chapter="الكتل المقطعية">
       <SHead title="بناء الكتل المقطعية" subtitle="الطريقة الذكية لتركيب الكورية" />
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:"5px", marginBottom:"6mm" }}>
         {[
           { n:"①", t:"كل مقطع يبدأ بحرف ساكن", n2:"إذا بدأ بمدّ، نضع ㅇ الصامت", ex:"아 = ㅇ+ㅏ" },
           { n:"②", t:"حروف المد الطويلة تجلس يميناً", n2:"ㅏ ㅓ ㅣ ㅐ ㅔ ㅑ ㅕ", ex:"가 나 사 바" },
           { n:"③", t:"حروف المد العريضة تجلس أسفل", n2:"ㅗ ㅜ ㅡ ㅛ ㅠ", ex:"고 노 소 도" },
           { n:"④", t:"باتشيم — حرف ساكن أخير تحت الكتلة", n2:"اختياري — يُوضع في الأسفل", ex:"한 = ㅎ+ㅏ+ㄴ" },
         ].map(r=>(
-          <div key={r.n} style={{ background:BK, borderRadius:"10px", padding:"10px" }}>
-            <div style={{ fontSize:"22px", color:Y, fontWeight:900 }}>{r.n}</div>
-            <div style={{ fontSize:"11px", fontWeight:700, color:"#fff", lineHeight:1.6, marginBottom:"3px" }}>{r.t}</div>
-            <div style={{ fontSize:"11px", color:"#aaa", marginBottom:"4px" }}>{r.n2}</div>
-            <div style={{ fontSize:"14px", color:Y, fontWeight:800 }}>{r.ex}</div>
+          <div key={r.n} style={{ display:"flex", gap:"10px", alignItems:"baseline",
+            paddingBottom:"5px", borderBottom:`1px solid ${BD}` }}>
+            <span style={{ fontSize:"13px", fontWeight:900, color:T1, flexShrink:0, width:"18px" }}>{r.n}</span>
+            <div>
+              <span style={{ fontSize:"11px", fontWeight:700, color:T1 }}>{r.t}</span>
+              <span style={{ fontSize:"10px", color:T3 }}> — {r.n2}</span>
+              <span style={{ fontSize:"13px", fontWeight:900, color:T1, marginRight:"8px", direction:"ltr", display:"inline-block" }}> {r.ex}</span>
+            </div>
           </div>
         ))}
       </div>
-      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>🔤 أمثلة على المقاطع</div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:"5px" }}>
+      <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"3mm" }}>أمثلة على المقاطع</div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:"6px" }}>
         {SYLLABLES.map(s=>(
-          <div key={s.b} style={{ background:BK, borderRadius:"8px", padding:"7px 4px", textAlign:"center" }}>
-            <div style={{ fontSize:"11px", color:"#555", direction:"ltr" }}>{s.c}+{s.v}</div>
-            <div style={{ fontSize:"32px", fontWeight:900, color:Y, lineHeight:1 }}>{s.b}</div>
-            <div style={{ fontSize:"11px", color:"#aaa" }}>{s.r}</div>
-            <div style={{ fontSize:"11px", color:"#888" }}>{s.ar}</div>
+          <div key={s.b} style={{ border:`1px solid ${BD}`, borderRadius:"4px", padding:"6px 3px", textAlign:"center", background:SBG }}>
+            <div style={{ fontSize:"9px", color:T3, direction:"ltr" }}>{s.c}+{s.v}</div>
+            <div style={{ fontSize:"30px", fontWeight:900, color:T1, lineHeight:1.1 }}>{s.b}</div>
+            <div style={{ fontSize:"9px", color:T3 }}>{s.r}</div>
+            <div style={{ fontSize:"9px", color:T2 }}>{s.ar}</div>
           </div>
         ))}
       </div>
@@ -2651,91 +2602,79 @@ function BatchimAr() {
       <SHead title="الباتشيم (받침) — الحرف الساكن الأخير" subtitle="المقطع الكوري قد ينتهي بحرف ساكن تحت الكتلة" />
 
       {/* What is batchim */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
-        <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>ما هو الباتشيم؟</div>
-          <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.9 }}>
-            الباتشيم هو الحرف الساكن الذي يجلس <strong style={{color:Y}}>أسفل</strong> الكتلة المقطعية.
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"6mm" }}>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", background:SBG }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>ما هو الباتشيم؟</div>
+          <p style={{ fontSize:"10px", color:T2, lineHeight:1.8, margin:0, marginBottom:"8px" }}>
+            الباتشيم هو الحرف الساكن الذي يجلس <strong>أسفل</strong> الكتلة المقطعية.
             ليس كل مقطع يحتاجه — لكنه ضروري في آلاف الكلمات.
-          </div>
-          <div style={{ display:"flex", gap:"10px", justifyContent:"center", marginTop:"10px", direction:"ltr" }}>
+          </p>
+          <div style={{ display:"flex", gap:"10px", justifyContent:"center", direction:"ltr" }}>
             {[
               {top:"ㅎ", mid:"ㅏ", bot:null, label:"하 (ha)", note:"بدون باتشيم"},
               {top:"ㅎ", mid:"ㅏ", bot:"ㄴ", label:"한 (han)", note:"مع باتشيم ㄴ"},
             ].map((b,i)=>(
               <div key={i} style={{ textAlign:"center" }}>
-                <div style={{ background: i===1?Y:YL, borderRadius:"10px", padding:"10px 14px", border:`2px solid ${Y}`, display:"inline-flex", flexDirection:"column", alignItems:"center", width:"60px" }}>
-                  <div style={{ fontSize:"11px", color:i===1?BK:"#666" }}>{b.top}</div>
-                  <div style={{ fontSize:"11px", color:i===1?BK:"#666" }}>{b.mid}</div>
-                  {b.bot && <div style={{ fontSize:"11px", color:BK, fontWeight:900, borderTop:"1px solid rgba(0,0,0,0.2)", marginTop:"3px", paddingTop:"3px", width:"100%", textAlign:"center" }}>{b.bot}</div>}
+                <div style={{ border:`1px solid ${i===1?Y:BD}`, borderRadius:"6px", padding:"8px 12px", display:"inline-flex", flexDirection:"column", alignItems:"center", width:"52px", background:i===1?YL:"#fff" }}>
+                  <div style={{ fontSize:"11px", color:T2 }}>{b.top}</div>
+                  <div style={{ fontSize:"11px", color:T2 }}>{b.mid}</div>
+                  {b.bot && <div style={{ fontSize:"11px", color:T1, fontWeight:900, borderTop:`1px solid ${BD}`, marginTop:"3px", paddingTop:"3px", width:"100%", textAlign:"center" }}>{b.bot}</div>}
                 </div>
-                <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginTop:"5px" }}>{b.label}</div>
-                <div style={{ fontSize:"11px", color:"#777", direction:"rtl" }}>{b.note}</div>
+                <div style={{ fontSize:"10px", fontWeight:700, color:T1, marginTop:"4px" }}>{b.label}</div>
+                <div style={{ fontSize:"9px", color:T3, direction:"rtl" }}>{b.note}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"6px" }}>القاعدة الذهبية 🥇</div>
-          <div style={{ fontSize:"11px", color:GD, lineHeight:1.9 }}>
-            رغم وجود أكثر من ١٤ حرفاً ساكناً، لا يوجد في اللغة الكورية سوى <strong>٧ أصوات نهائية فقط</strong> يمكن نطقها في نهاية المقطع. كل الحروف الأخرى تُحوَّل إلى أحد هذه الأصوات السبعة.
-          </div>
-          <div style={{ background:BK, borderRadius:"8px", padding:"8px", marginTop:"8px", textAlign:"center" }}>
-            <div style={{ display:"flex", gap:"6px", justifyContent:"center", flexWrap:"wrap" }}>
-              {["ك","ن","ت","ل","م","ب","نغ"].map(s=>(
-                <div key={s} style={{ background:Y, color:BK, fontWeight:900, fontSize:"14px", width:"32px", height:"32px", borderRadius:"8px", display:"flex", alignItems:"center", justifyContent:"center" }}>{s}</div>
-              ))}
-            </div>
-            <div style={{ fontSize:"11px", color:"#aaa", marginTop:"5px" }}>الأصوات النهائية السبعة</div>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", background:SBG }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>القاعدة الذهبية</div>
+          <p style={{ fontSize:"10px", color:T2, lineHeight:1.8, margin:0, marginBottom:"8px" }}>
+            رغم وجود أكثر من ١٤ حرفاً ساكناً، لا يوجد في الكورية سوى <strong>٧ أصوات نهائية فقط</strong>. كل الحروف الأخرى تُحوَّل إلى أحدها.
+          </p>
+          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", direction:"ltr" }}>
+            {["ك","ن","ت","ل","م","ب","نغ"].map(s=>(
+              <span key={s} style={{ border:`1px solid ${BD}`, color:T1, fontWeight:900, fontSize:"13px", padding:"4px 8px", borderRadius:"4px", background:"#fff" }}>{s}</span>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* 7 final sounds table */}
-      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>جدول الأصوات النهائية السبعة</div>
-      <div style={{ display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" }}>
+      <div style={{ fontSize:"10px", fontWeight:700, color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"4px" }}>جدول الأصوات النهائية السبعة</div>
+      <div style={{ display:"flex", flexDirection:"column", marginBottom:"6mm" }}>
         {FINAL7.map((row,i)=>(
-          <div key={i} style={{ display:"grid", gridTemplateColumns:"40px 1fr 1fr", gap:"6px", alignItems:"center", background:i%2===0?"#f9f9f9":"#fff", borderRadius:"8px", padding:"6px 10px", border:`1px solid ${Y}44` }}>
-            <div style={{ background:BK, color:Y, fontWeight:900, fontSize:"16px", textAlign:"center", borderRadius:"6px", padding:"4px", direction:"ltr" }}>{row.sound}</div>
-            <div style={{ display:"flex", gap:"5px", flexWrap:"wrap" }}>
+          <div key={i} style={{ display:"grid", gridTemplateColumns:"36px 1fr 1fr", gap:"6px", alignItems:"center", padding:"5px 0", borderBottom:`1px solid ${BD}` }}>
+            <div style={{ border:`1px solid ${BD}`, color:T1, fontWeight:900, fontSize:"14px", textAlign:"center", borderRadius:"4px", padding:"2px", direction:"ltr", background:SBG }}>{row.sound}</div>
+            <div style={{ display:"flex", gap:"4px", flexWrap:"wrap" }}>
               {row.chars.map(ch=>(
-                <span key={ch} style={{ background:Y, color:BK, fontSize:"15px", fontWeight:900, padding:"2px 7px", borderRadius:"6px", direction:"ltr" }}>{ch}</span>
+                <span key={ch} style={{ border:`1px solid ${BD}`, color:T1, fontSize:"13px", fontWeight:900, padding:"1px 5px", borderRadius:"3px", direction:"ltr" }}>{ch}</span>
               ))}
             </div>
-            <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
-              {row.ex.map(e=>(
-                <span key={e.k} style={{ background:BK2, color:"#ddd", fontSize:"11px", padding:"2px 5px", borderRadius:"4px", direction:"rtl" }}>
-                  <span style={{color:Y,fontWeight:800}}>{e.k}</span> {e.r} — {e.m}
-                </span>
-              ))}
+            <div style={{ fontSize:"10px", color:T2, direction:"rtl" }}>
+              {row.ex.map(e=>(<span key={e.k}><strong>{e.k}</strong> {e.r} — {e.m}  </span>))}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Linking rule */}
-      <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"12px", alignItems:"flex-start" }}>
-        <KoreanLanternIcon size={42} color={Y} />
-        <div>
-          <div style={{ fontSize:"12px", fontWeight:800, color:Y, marginBottom:"5px" }}>قاعدة الربط (연음법칙 يون-إيم)</div>
-          <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.9, marginBottom:"6px" }}>
-            إذا جاء بعد الباتشيم مقطع يبدأ بـ <strong style={{color:Y}}>ㅇ</strong> الصامت، ينتقل الباتشيم إلى ذلك المقطع ويُنطق فيه.
-          </div>
-          <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
-            {[
-              {w:"먹어요",before:"موك-أو-يو ❌",after:"مو-غو-يو ✅",m:"آكل"},
-              {w:"한국어",before:"هان-غوك-أو ❌",after:"هان-غو-غو ✅",m:"كورية"},
-              {w:"없어요",before:"أوبس-أو-يو ❌",after:"أوب-سو-يو ✅",m:"لا يوجد"},
-            ].map(e=>(
-              <div key={e.w} style={{ background:"#1a1a1a", borderRadius:"8px", padding:"8px 10px", direction:"ltr" }}>
-                <div style={{ fontSize:"16px", color:Y, fontWeight:900 }}>{e.w}</div>
-                <div style={{ fontSize:"11px", color:"#666", marginTop:"2px" }}>{e.before}</div>
-                <div style={{ fontSize:"11px", color:"#4ade80", fontWeight:700 }}>{e.after}</div>
-                <div style={{ fontSize:"11px", color:"#888", direction:"rtl" }}>{e.m}</div>
-              </div>
-            ))}
-          </div>
+      <div style={{ borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"5px" }}>قاعدة الربط (연음법칙 يون-إيم)</div>
+        <p style={{ fontSize:"10px", color:T2, lineHeight:1.7, marginBottom:"6px" }}>
+          إذا جاء بعد الباتشيم مقطع يبدأ بـ <strong>ㅇ</strong> الصامت، ينتقل الباتشيم إلى ذلك المقطع ويُنطق فيه.
+        </p>
+        <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
+          {[
+            {w:"먹어요",before:"موك-أو-يو ❌",after:"مو-غو-يو ✅",m:"آكل"},
+            {w:"한국어",before:"هان-غوك-أو ❌",after:"هان-غو-غو ✅",m:"كورية"},
+            {w:"없어요",before:"أوبس-أو-يو ❌",after:"أوب-سو-يو ✅",m:"لا يوجد"},
+          ].map(e=>(
+            <div key={e.w} style={{ border:`1px solid ${BD}`, borderRadius:"4px", padding:"6px 8px", direction:"ltr", background:SBG }}>
+              <div style={{ fontSize:"16px", color:T1, fontWeight:900 }}>{e.w}</div>
+              <div style={{ fontSize:"10px", color:"#aaa", marginTop:"1px" }}>{e.before}</div>
+              <div style={{ fontSize:"10px", color:"#166534", fontWeight:700 }}>{e.after}</div>
+              <div style={{ fontSize:"10px", color:T3, direction:"rtl" }}>{e.m}</div>
+            </div>
+          ))}
         </div>
       </div>
     </Page>
@@ -2848,18 +2787,18 @@ function KdramaPageAr({ slice, page }: { slice:[number,number]; page:number }) {
   return (
     <Page dir="rtl">
       <SHead title={`أساسيات المسلسلات الكورية 🎬 — الجزء ${page===1?"١":"٢"} من ٢`} subtitle="كلمات سمعتها مئة مرة — اقرأها الآن بالهانغول!" />
-      <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"8px", padding:"7px 12px", marginBottom:"8px", fontSize:"11px", color:"rgba(212,175,55,0.9)", fontWeight:700 }}>
+      <div style={{ borderLeft:`3px solid ${Y}`, paddingLeft:"10px", marginBottom:"8px", fontSize:"11px", color:T2, fontWeight:700, background:SBG, padding:"7px 10px" }}>
         🎬 {page===1 ? "الكلمات الأساسية — تُسمع في كل حلقة تقريباً!" : "الكلمات المتقدمة — ستبدو كالمحترف!"}
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"7px" }}>
         {KDRAMA_AR.slice(...slice).map(v=>(
-          <div key={v.k} style={{ background:"#f9f9f9", border:`2px solid ${Y}`, borderRadius:"10px", padding:"8px 10px", display:"flex", gap:"8px", alignItems:"flex-start", pageBreakInside:"avoid", breakInside:"avoid" }}>
+          <div key={v.k} style={{ background:"#fff", border:`1px solid ${BD}`, borderRadius:"8px", padding:"8px 10px", display:"flex", gap:"8px", alignItems:"flex-start", pageBreakInside:"avoid", breakInside:"avoid" }}>
             <div style={{ fontSize:"22px" }}>{v.emoji}</div>
             <div style={{ flex:1 }}>
-              <div style={{ fontSize:"22px", fontWeight:900, color:BK, background:Y, display:"inline-block", padding:"1px 8px", borderRadius:"6px", marginBottom:"2px", direction:"ltr" }}>{v.k}</div>
-              <div style={{ fontSize:"11px", fontWeight:700, color:"#777", direction:"ltr" }}>{v.r}</div>
-              <div style={{ fontSize:"11px", color:BK, fontWeight:700 }}>{v.m}</div>
-              <div style={{ fontSize:"11px", color:"#888", fontStyle:"italic" }}>{v.note}</div>
+              <div style={{ fontSize:"22px", fontWeight:900, color:T1, background:Y, display:"inline-block", padding:"1px 8px", borderRadius:"4px", marginBottom:"2px", direction:"ltr" }}>{v.k}</div>
+              <div style={{ fontSize:"11px", fontWeight:700, color:T3, direction:"ltr" }}>{v.r}</div>
+              <div style={{ fontSize:"11px", color:T1, fontWeight:700 }}>{v.m}</div>
+              <div style={{ fontSize:"11px", color:T3, fontStyle:"italic" }}>{v.note}</div>
             </div>
           </div>
         ))}
@@ -2874,8 +2813,8 @@ function PracticeAr() {
     <Page dir="rtl">
       <SHead title="تمارين تطبيقية ✏️" subtitle="اختبر نفسك!" />
       {/* Knowles self-assessment checklist */}
-      <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"10px", padding:"10px 12px", marginBottom:"10px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"7px" }}>✅ قائمة التحقق الذاتي — هل أنت مستعد للتمارين؟</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px 12px", marginBottom:"10px", background:SBG }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"7px" }}>✅ قائمة التحقق الذاتي — هل أنت مستعد للتمارين؟</div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4px" }}>
           {[
             "أستطيع نطق الـ١٤ حرفاً الساكناً",
@@ -2886,8 +2825,8 @@ function PracticeAr() {
             "فهمت قاعدة الربط الصوتي",
           ].map((item, i) => (
             <div key={i} style={{ display:"flex", gap:"7px", alignItems:"flex-start" }}>
-              <div style={{ width:"16px", height:"16px", border:`2px solid ${GD}`, borderRadius:"3px", flexShrink:0, marginTop:"1px" }} />
-              <span style={{ fontSize:"10px", color:GD, lineHeight:1.5 }}>{item}</span>
+              <div style={{ width:"15px", height:"15px", border:`1px solid ${BD}`, borderRadius:"3px", flexShrink:0, marginTop:"2px" }} />
+              <span style={{ fontSize:"10px", color:T2, lineHeight:1.5 }}>{item}</span>
             </div>
           ))}
         </div>
@@ -2895,55 +2834,55 @@ function PracticeAr() {
 
       <div style={{ display:"flex", gap:"8px", marginBottom:"8px" }}>
         {["المستوى ١ — /٥","المستوى ٢ — /٥","المستوى ٣ — /٥"].map((l,i)=>(
-          <div key={i} style={{ flex:1, background:"#111", border:`1px solid ${Y}33`, borderRadius:"8px", padding:"6px", textAlign:"center" }}>
+          <div key={i} style={{ flex:1, border:`1px solid ${BD}`, borderRadius:"6px", padding:"6px", textAlign:"center", background:SBG }}>
             <div style={{ fontSize:"16px" }}>{"⭐".repeat(i+1)}</div>
-            <div style={{ fontSize:"10px", color:"#666", marginTop:"2px" }}>{l}</div>
+            <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>{l}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ background:BK, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>⭐ تحدي المستوى ١ — الصوت الصحيح</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", marginBottom:"8px", background:SBG }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>⭐ تحدي المستوى ١ — الصوت الصحيح</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"6px" }}>
           {[{q:"ㄱ",c:["ن","م","ك","هـ"]},{q:"ㄴ",c:["ك","ن","س","م"]},{q:"ㅁ",c:["هـ","ب","م","ر"]},{q:"ㅅ",c:["س","ك","ج","ب"]},{q:"ㅎ",c:["م","هـ","ن","ك"]}].map((e,i)=>(
             <div key={i} style={{ textAlign:"center" }}>
-              <div style={{ fontSize:"30px", color:Y, fontWeight:900 }}>{e.q}</div>
+              <div style={{ fontSize:"28px", color:T1, fontWeight:900 }}>{e.q}</div>
               <div style={{ display:"flex", flexDirection:"column", gap:"2px", marginTop:"4px" }}>
-                {e.c.map(ch=><div key={ch} style={{ background:"#222", borderRadius:"4px", padding:"2px", fontSize:"11px", color:"#ccc" }}>{ch}</div>)}
+                {e.c.map(ch=><div key={ch} style={{ border:`1px solid ${BD}`, borderRadius:"3px", padding:"2px", fontSize:"11px", color:T2, background:"#fff" }}>{ch}</div>)}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>⭐⭐ تحدي المستوى ٢ — اكتب النطق</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", marginBottom:"8px", background:SBG }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>⭐⭐ تحدي المستوى ٢ — اكتب النطق</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"6px" }}>
           {[{k:"가방",a:"ga-bang"},{k:"사랑",a:"sa-rang"},{k:"한국",a:"han-guk"},{k:"친구",a:"chin-gu"},{k:"고마워",a:"go-ma-wo"}].map((e,i)=>(
             <div key={i} style={{ textAlign:"center" }}>
-              <div style={{ background:BK, borderRadius:"8px", padding:"8px 4px", fontSize:"20px", color:Y, fontWeight:900 }}>{e.k}</div>
+              <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"6px 4px", fontSize:"20px", color:T1, fontWeight:900, background:"#fff" }}>{e.k}</div>
               <div style={{ marginTop:"4px", border:"1px dashed #aaa", borderRadius:"4px", height:"20px", background:"#fff" }} />
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ background:"#f9f9f9", border:`2px solid #E6E600`, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>⭐⭐⭐ تحدي المستوى ٣ — ابنِ المقطع</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", marginBottom:"8px", background:SBG }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>⭐⭐⭐ تحدي المستوى ٣ — ابنِ المقطع</div>
         <div style={{ display:"flex", gap:"8px", flexWrap:"wrap", direction:"ltr" }}>
           {[{eq:"ㅂ+ㅏ=?",a:"바"},{eq:"ㄴ+ㅗ=?",a:"노"},{eq:"ㅅ+ㅣ=?",a:"시"},{eq:"ㅎ+ㅏ=?",a:"하"},{eq:"ㄱ+ㅜ=?",a:"구"}].map((e,i)=>(
-            <div key={i} style={{ background:BK, borderRadius:"8px", padding:"8px 10px", textAlign:"center" }}>
-              <div style={{ fontSize:"12px", color:Y, fontWeight:700 }}>{e.eq}</div>
-              <div style={{ marginTop:"4px", border:`1px dashed ${Y}`, borderRadius:"4px", height:"28px", width:"38px", margin:"4px auto 0" }} />
+            <div key={i} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"8px 10px", textAlign:"center", background:"#fff" }}>
+              <div style={{ fontSize:"12px", color:T1, fontWeight:700 }}>{e.eq}</div>
+              <div style={{ marginTop:"4px", border:"1px dashed #aaa", borderRadius:"4px", height:"28px", width:"38px", margin:"4px auto 0" }} />
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"5px" }}>✏️ شبكة الكتابة الحرة</div>
+      <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"5px" }}>✏️ شبكة الكتابة الحرة</div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(8,1fr)", gap:"3px" }}>
         {Array(32).fill(null).map((_,i)=>(
-          <div key={i} style={{ border:`1px solid ${Y}`, borderRadius:"4px", height:"30px", background:"#fffffe" }} />
+          <div key={i} style={{ border:`1px solid ${BD}`, borderRadius:"3px", height:"30px", background:"#fff" }} />
         ))}
       </div>
     </Page>
@@ -2973,36 +2912,36 @@ function AnswerAr() {
         ))}
       </div>
 
-      <div style={{ background:BK, borderRadius:"10px", padding:"10px", marginBottom:"10px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"7px" }}>جدول المرجع السريع — الحروف الساكنة</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", marginBottom:"10px", background:SBG }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"7px" }}>جدول المرجع السريع — الحروف الساكنة</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"4px", marginBottom:"8px" }}>
           {CONSONANTS.map(c=>(
             <div key={c.char} style={{ textAlign:"center" }}>
-              <div style={{ fontSize:"22px", color:Y, fontWeight:900, lineHeight:1 }}>{c.char}</div>
-              <div style={{ fontSize:"11px", color:"#aaa" }}>{c.roman}</div>
+              <div style={{ fontSize:"22px", color:T1, fontWeight:900, lineHeight:1 }}>{c.char}</div>
+              <div style={{ fontSize:"10px", color:T3 }}>{c.roman}</div>
               <div style={{ fontSize:"12px" }}>{c.emoji}</div>
             </div>
           ))}
         </div>
-        <div style={{ height:"1px", background:"#333", margin:"6px 0" }} />
-        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>حروف المد</div>
+        <div style={{ height:"1px", background:BD, margin:"6px 0" }} />
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>حروف المد</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(10,1fr)", gap:"4px" }}>
           {VOWELS.map(v=>(
             <div key={v.char} style={{ textAlign:"center" }}>
-              <div style={{ fontSize:"20px", color:"#fff9c4", fontWeight:900, lineHeight:1 }}>{v.char}</div>
-              <div style={{ fontSize:"11px", color:"#aaa" }}>{v.roman}</div>
+              <div style={{ fontSize:"20px", color:T1, fontWeight:900, lineHeight:1 }}>{v.char}</div>
+              <div style={{ fontSize:"10px", color:T3 }}>{v.roman}</div>
               <div style={{ fontSize:"11px" }}>{v.emoji}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ border:`4px solid ${Y}`, borderRadius:"14px", padding:"16px", textAlign:"center", background:`linear-gradient(135deg,${YL} 0%,#fff 60%,${YL} 100%)` }}>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"16px", textAlign:"center", background:SBG }}>
         <div style={{ fontSize:"32px", marginBottom:"4px" }}>🏆</div>
-        <div style={{ fontSize:"20px", fontWeight:900, color:BK }}>تهانينا! أتممت مستوى الهانغول الأول</div>
-        <div style={{ margin:"12px auto", width:"220px", borderBottom:`2px solid ${BK}` }} />
-        <div style={{ fontSize:"11px", color:"#888" }}>اسم الطالب</div>
-        <div style={{ marginTop:"10px", fontSize:"11px", color:"#aaa" }}>Klovers Korean Academy • klovers.academy • 2025</div>
+        <div style={{ fontSize:"20px", fontWeight:900, color:T1 }}>تهانينا! أتممت مستوى الهانغول الأول</div>
+        <div style={{ margin:"12px auto", width:"220px", borderBottom:`2px solid ${BD}` }} />
+        <div style={{ fontSize:"11px", color:T3 }}>اسم الطالب</div>
+        <div style={{ marginTop:"10px", fontSize:"11px", color:T3 }}>Klovers Korean Academy • klovers.academy • 2025</div>
       </div>
     </Page>
   );
@@ -3024,34 +2963,29 @@ function HistoryEn() {
       </div>
       <DancheongBorder />
 
-      <div style={{ position:"relative", marginBottom:"12px" }}>
-        <div style={{ position:"absolute", left:"18px", top:0, bottom:0, width:"3px", background:Y, borderRadius:"2px" }} />
-
+      <div style={{ display:"flex", flexDirection:"column", gap:"0", marginBottom:"8mm" }}>
         {[
           { era:"Before 1000 AD", icon:"🏔️", title:"Origins of Korean", body:"The Korean language developed over thousands of years on the Korean Peninsula. It is classified today as a language isolate — not related to Chinese, Japanese, or any other language family. It has its own unique grammar, vocabulary, and rhythm unlike any other language on Earth!" },
-          { era:"1000–1442 AD", icon:"📜", title:"The Era of Hanja — Borrowed Characters", body:"Before Hangul, Koreans used Chinese characters (漢字 Hanja). They were incredibly difficult to learn — only the elite scholarly class could read and write. Over 95% of the Korean population was completely illiterate. Laws, contracts, and all literature were written in a script most people could not understand." },
-          { era:"1443 AD 🌟", icon:"👑", title:"King Sejong's Revolution", body:"King Sejong the Great recognized this as a profound injustice. He said: 'How can a people govern themselves if they cannot read?' He assembled 8 brilliant scholars in the Hall of Worthies (집현전) and they worked for years in secret to invent a new alphabet perfectly suited to Korean sounds." },
-          { era:"1446 AD", icon:"📚", title:"Hunminjeongeum Announced", body:"The new alphabet was proclaimed as «훈민정음» (Hunminjeongeum) — 'The Correct Sounds for the Instruction of the People.' The ruling class fiercely opposed it, fearing loss of power — but the king prevailed. Today, Hangul Day is celebrated every October 9th worldwide." },
+          { era:"1000–1442 AD", icon:"📜", title:"The Era of Hanja — Borrowed Characters", body:"Before Hangul, Koreans used Chinese characters (漢字 Hanja). They were incredibly difficult to learn — only the elite scholarly class could read and write. Over 95% of the Korean population was completely illiterate." },
+          { era:"1443 AD ★", icon:"👑", title:"King Sejong's Revolution", body:"King Sejong recognized this as a profound injustice. He assembled 8 brilliant scholars in the Hall of Worthies (집현전) and they worked for years in secret to invent a new alphabet perfectly suited to Korean sounds." },
+          { era:"1446 AD", icon:"📚", title:"Hunminjeongeum Announced", body:"The new alphabet was proclaimed as «훈민정음» (Hunminjeongeum) — 'The Correct Sounds for the Instruction of the People.' The ruling class fiercely opposed it — but the king prevailed. Today, Hangul Day is celebrated every October 9th worldwide." },
         ].map((item, i) => (
-          <div key={i} style={{ display:"flex", gap:"12px", marginBottom:"10px", alignItems:"flex-start" }}>
-            <div style={{ width:"36px", height:"36px", background:Y, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px", flexShrink:0, zIndex:1 }}>{item.icon}</div>
-            <div style={{ flex:1, background: i===2 ? "#111" : "#f9f9f9", border:`2px solid ${i===2?Y:"#e5e5e5"}`, borderRadius:"10px", padding:"10px 12px" }}>
-              <div style={{ fontSize:"11px", fontWeight:700, color:i===2?Y:"#888", marginBottom:"2px" }}>{item.era}</div>
-              <div style={{ fontSize:"11px", fontWeight:800, color:i===2?"#fff":BK, marginBottom:"4px" }}>{item.title}</div>
-              <div style={{ fontSize:"11px", color:i===2?"#ccc":"#555", lineHeight:1.8 }}>{item.body}</div>
+          <div key={i} style={{ display:"flex", gap:"12px", marginBottom:"6px", paddingBottom:"6px", borderBottom:`1px solid ${BD}`, alignItems:"flex-start" }}>
+            <div style={{ fontSize:"18px", flexShrink:0, marginTop:"2px" }}>{item.icon}</div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:"10px", fontWeight:600, color:T3, marginBottom:"1px" }}>{item.era}</div>
+              <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"3px" }}>{item.title}</div>
+              <div style={{ fontSize:"11px", color:T2, lineHeight:1.7 }}>{item.body}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
-        <MugunghwaIcon size={36} color={BK} />
-        <div>
-          <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>Amazing Fact!</div>
-          <div style={{ fontSize:"11px", color:BK2, lineHeight:1.6 }}>
-            Korean is spoken by over <strong>80 million people</strong> worldwide. UNESCO recognized Hangul as one of the most scientifically designed and logically structured writing systems ever created in human history!
-          </div>
-        </div>
+      <div style={{ borderTop:`3px solid ${Y}`, paddingTop:"4mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"3px" }}>Amazing Fact!</div>
+        <p style={{ fontSize:"11px", color:T2, lineHeight:1.7, margin:0 }}>
+          Korean is spoken by over <strong>80 million people</strong> worldwide. UNESCO recognized Hangul as one of the most scientifically designed and logically structured writing systems ever created in human history!
+        </p>
       </div>
     </Page>
   );
@@ -3063,20 +2997,18 @@ function SejongEn() {
     <Page dir="ltr">
       <SHead title="King Sejong the Great 👑" subtitle="The man who changed a nation's destiny with one word: justice" />
 
-      <div style={{ background:BK, borderRadius:"14px", padding:"16px", marginBottom:"12px", display:"grid", gridTemplateColumns:"120px 1fr", gap:"14px" }}>
-        <div style={{ borderRadius:"10px", overflow:"hidden", border:`3px solid ${Y}`, display:"flex", flexDirection:"column", minHeight:"130px" }}>
-          <SceneTeacher h={260} radius={0} />
-          <div style={{ background:"#1a1a00", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"6px", flex:1 }}>
-            <div style={{ fontSize:"18px", fontWeight:900, color:Y }}>세종대왕</div>
-            <div style={{ fontSize:"11px", color:"#888", marginTop:"1px" }}>Sejong the Great</div>
+      {/* Bio */}
+      <div style={{ display:"grid", gridTemplateColumns:"120px 1fr", gap:"14px", marginBottom:"8mm", paddingBottom:"6mm", borderBottom:`1px solid ${BD}` }}>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", overflow:"hidden", display:"flex", flexDirection:"column" }}>
+          <SceneTeacher h={120} radius={0} />
+          <div style={{ background:SBG, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"6px" }}>
+            <div style={{ fontSize:"16px", fontWeight:900, color:T1 }}>세종대왕</div>
+            <div style={{ fontSize:"10px", color:T3, marginTop:"1px" }}>Sejong the Great</div>
           </div>
         </div>
-        <div style={{ color:"#fff" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"8px" }}>
-            <PalaceRoofIcon size={28} color={Y} />
-            <div style={{ fontSize:"16px", fontWeight:900, color:Y }}>Sejong the Great</div>
-          </div>
-          <div style={{ display:"flex", flexDirection:"column", gap:"5px" }}>
+        <div>
+          <div style={{ fontSize:"15px", fontWeight:900, color:T1, marginBottom:"8px" }}>Sejong the Great</div>
+          <div style={{ display:"flex", flexDirection:"column", gap:"4px" }}>
             {[
               { icon:"🎂", label:"Born", val:"May 15, 1397 AD" },
               { icon:"👑", label:"Reign", val:"1418 – 1450 AD" },
@@ -3085,43 +3017,37 @@ function SejongEn() {
               { icon:"🌟", label:"Title", val:"'Greatest King of Korea'" },
             ].map(r=>(
               <div key={r.label} style={{ display:"flex", gap:"8px", alignItems:"center" }}>
-                <span style={{ fontSize:"13px" }}>{r.icon}</span>
-                <span style={{ fontSize:"11px", color:"#888", minWidth:"70px" }}>{r.label}</span>
-                <span style={{ fontSize:"11px", color:"#ddd", fontWeight:600 }}>{r.val}</span>
+                <span style={{ fontSize:"12px" }}>{r.icon}</span>
+                <span style={{ fontSize:"10px", color:T3, minWidth:"70px" }}>{r.label}</span>
+                <span style={{ fontSize:"10px", color:T2, fontWeight:600 }}>{r.val}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div style={{ marginBottom:"10px" }}>
-        <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"7px", display:"flex", alignItems:"center", gap:"6px" }}>
-          <span style={{ background:Y, padding:"2px 8px", borderRadius:"6px" }}>The Story</span>
-          How were the letters designed?
-        </div>
+      <div style={{ marginBottom:"8mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"5mm" }}>How were the letters designed?</div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"7px" }}>
           {[
             { icon:"👅", title:"Tongue & Mouth Shape", body:"Every consonant was designed based on the exact shape of the tongue and mouth when producing that sound — science and art combined!" },
             { icon:"🔬", title:"Precise Phonetics", body:"ㄱ = tongue root rising toward throat. ㄴ = tongue tip touching upper palate. ㅁ = lips pressed together. Each shape mirrors the sound." },
             { icon:"🏗️", title:"Logical Structure", body:"Related letters look alike — ㄱ is the base, ㄲ is doubled, ㅋ has an extra stroke for aspiration. A complete, consistent system." },
           ].map(c=>(
-            <div key={c.title} style={{ background:YL, borderRadius:"10px", padding:"10px", border:`1px solid ${Y}` }}>
-              <div style={{ fontSize:"24px", marginBottom:"5px" }}>{c.icon}</div>
-              <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"4px" }}>{c.title}</div>
-              <div style={{ fontSize:"11px", color:"#555", lineHeight:1.7 }}>{c.body}</div>
+            <div key={c.title} style={{ background:SBG, borderRadius:"6px", padding:"10px", border:`1px solid ${BD}` }}>
+              <div style={{ fontSize:"22px", marginBottom:"5px" }}>{c.icon}</div>
+              <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"3px" }}>{c.title}</div>
+              <div style={{ fontSize:"10px", color:T2, lineHeight:1.7 }}>{c.body}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ background:BK, borderRadius:"12px", padding:"14px", display:"flex", gap:"12px", alignItems:"flex-start" }}>
-        <div style={{ fontSize:"36px", color:Y, fontWeight:900, lineHeight:1, flexShrink:0 }}>"</div>
-        <div>
-          <div style={{ fontSize:"12px", color:"#fff", lineHeight:1.9, fontStyle:"italic" }}>
+      <div style={{ borderLeft:`3px solid ${Y}`, paddingLeft:"12px" }}>
+        <div style={{ fontSize:"12px", color:T2, lineHeight:2, fontStyle:"italic" }}>
             A wise man can acquaint himself with them before the morning is over; a stupid man can learn them in the space of ten days.
           </div>
-          <div style={{ fontSize:"11px", color:Y, fontWeight:700, marginTop:"6px" }}>— King Sejong the Great, Hunminjeongeum Preface, 1446 AD</div>
-        </div>
+          <div style={{ fontSize:"11px", color:T3, fontWeight:700, marginTop:"5px" }}>— King Sejong the Great, Hunminjeongeum Preface, 1446 AD</div>
       </div>
     </Page>
   );
@@ -3133,93 +3059,65 @@ function CultureEn() {
     <Page dir="ltr">
       <SHead title="Korean Culture 🌸" subtitle="5,000 years of beauty, philosophy, and art" />
 
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
-        <div style={{ background:BK, borderRadius:"12px", overflow:"hidden" }}>
-          <SceneStreet h={220} radius={0} />
-          <div style={{ padding:"10px" }}>
-            <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>K-Drama</div>
-            <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.7 }}>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"8mm" }}>
+
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", overflow:"hidden" }}>
+          <SceneStreet h={160} radius={0} />
+          <div style={{ padding:"8px", background:SBG }}>
+            <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"3px" }}>K-Drama</div>
+            <div style={{ fontSize:"10px", color:T2, lineHeight:1.6 }}>
               Among Netflix's most-watched content. Squid Game changed global TV. Korean storytelling captures hearts!
             </div>
-            <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
-              {["❤️ Romance","🕵️ Thriller","😂 Comedy"].map(t=>(
-                <span key={t} style={{ background:"#222", color:Y, fontSize:"11px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
-              ))}
-            </div>
           </div>
         </div>
 
-        <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
-          <SceneConcert h={220} radius={0} />
-          <div style={{ padding:"10px" }}>
-            <div style={{ fontWeight:800, fontSize:"12px", color:Y, marginBottom:"4px" }}>K-Pop</div>
-            <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.7 }}>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", overflow:"hidden" }}>
+          <SceneConcert h={160} radius={0} />
+          <div style={{ padding:"8px", background:SBG }}>
+            <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"3px" }}>K-Pop</div>
+            <div style={{ fontSize:"10px", color:T2, lineHeight:1.6 }}>
               BTS, BLACKPINK, Stray Kids — global superstars. K-Pop is dance, fashion, art, and worldwide fandom!
             </div>
-            <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
-              {["BTS 💜","BLACKPINK 🖤","Stray Kids 🐺"].map(t=>(
-                <span key={t} style={{ background:BK, color:Y, fontSize:"11px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
-              ))}
+          </div>
+        </div>
+
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", overflow:"hidden" }}>
+          <SceneFood h={140} radius={0} />
+          <div style={{ padding:"8px", background:SBG }}>
+            <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"3px" }}>Korean Food</div>
+            <div style={{ fontSize:"10px", color:T2, lineHeight:1.6 }}>
+              Kimchi, Bibimbap, Tteokbokki — foods that surprise and addict you!
             </div>
           </div>
         </div>
 
-        <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"12px", overflow:"hidden" }}>
-          <SceneFood h={200} radius={0} />
-          <div style={{ padding:"10px" }}>
-          <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"4px" }}>Korean Food</div>
-          <div style={{ fontSize:"11px", color:"#555", lineHeight:1.7 }}>
-            Kimchi, Bibimbap, Tteokbokki — foods that surprise and addict you! Korean cuisine balances sour, spicy, and umami.
-          </div>
-          <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", marginTop:"6px" }}>
-            {["🥬 김치","🍚 비빔밥","🌶️ 떡볶이","🥩 삼겹살"].map(t=>(
-              <span key={t} style={{ background:BK, color:Y, fontSize:"11px", padding:"2px 5px", borderRadius:"10px" }}>{t}</span>
-            ))}
-          </div>
-          </div>
-        </div>
-
-        <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"28px", marginBottom:"6px" }}>🌿</div>
-          <div style={{ fontWeight:800, fontSize:"12px", color:GD, marginBottom:"5px" }}>Korean Values & Spirit</div>
-          <div style={{ fontSize:"11px", color:GD, lineHeight:1.8 }}>
-            <strong>빨리빨리 (Ppalli-ppalli)</strong> = "hurry hurry" — Koreans value speed and excellence together. <strong>눈치 (Nunchi)</strong> = reading unspoken feelings. <strong>한 (Han)</strong> = a deep bittersweet longing — the eternal spirit of the Korean people.
-          </div>
-          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
-            {["👴 Respect Elders","👨‍👩‍👧 Family First","📚 Education Sacred"].map(t=>(
-              <span key={t} style={{ background:BK, color:Y, fontSize:"11px", padding:"2px 6px", borderRadius:"10px" }}>{t}</span>
-            ))}
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", background:SBG }}>
+          <div style={{ fontSize:"22px", marginBottom:"5px" }}>🌿</div>
+          <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"4px" }}>Korean Values & Spirit</div>
+          <div style={{ fontSize:"10px", color:T2, lineHeight:1.7 }}>
+            <strong>빨리빨리</strong> = "hurry hurry" — <strong>눈치</strong> = reading unspoken feelings. <strong>한</strong> = a deep bittersweet longing — the eternal spirit of the Korean people.
           </div>
         </div>
       </div>
 
-      {/* Diamond — 정(jeong) concept: 5th culture card */}
-      <div style={{ background:"#2d1b4e", border:"2px solid #a78bfa", borderRadius:"12px", padding:"12px", marginBottom:"10px" }}>
-        <div style={{ display:"flex", gap:"10px", alignItems:"flex-start" }}>
-          <div style={{ fontSize:"36px", color:"#a78bfa", fontWeight:900, lineHeight:1, flexShrink:0 }}>정</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", marginBottom:"8mm", background:SBG }}>
+        <div style={{ display:"flex", gap:"12px", alignItems:"flex-start" }}>
+          <div style={{ fontSize:"32px", fontWeight:900, color:T1, lineHeight:1, flexShrink:0 }}>정</div>
           <div>
-            <div style={{ fontWeight:800, fontSize:"12px", color:"#a78bfa", marginBottom:"4px" }}>정 (Jeong) — The untranslatable heart of Korean culture</div>
-            <div style={{ fontSize:"11px", color:"#d8b4fe", lineHeight:1.8 }}>
-              <strong style={{color:"#a78bfa"}}>정 (Jeong)</strong> has no direct English equivalent — it's the deep emotional bond that slowly forms between people through shared daily moments. Not romantic love exactly, but a soul-level attachment. In K-dramas you'll constantly hear: <span style={{color:"#fff",fontWeight:800}}>«정이 들었어»</span> = "I've grown attached to you without realizing it."
-            </div>
-            <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginTop:"7px" }}>
-              {["💜 Emotional bond","🕰️ Grows over time","🎬 Heart of K-Drama"].map(t=>(
-                <span key={t} style={{ background:"rgba(167,139,250,0.2)", color:"#a78bfa", fontSize:"11px", padding:"2px 6px", borderRadius:"10px", border:"1px solid rgba(167,139,250,0.4)" }}>{t}</span>
-              ))}
+            <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"4px" }}>정 (Jeong) — The untranslatable heart of Korean culture</div>
+            <div style={{ fontSize:"10px", color:T2, lineHeight:1.8 }}>
+              A soul-level bond that slowly forms through shared daily moments. In K-dramas you'll constantly hear: <strong>«정이 들었어»</strong> = "I've grown attached to you without realizing it."
             </div>
           </div>
         </div>
       </div>
 
-      <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"14px", alignItems:"center" }}>
-        <KoreanLanternIcon size={40} color={Y} />
-        <div>
-          <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"4px" }}>After completing all 6 books you will be able to:</div>
-          <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-            {["Watch K-dramas without subtitles 🎬","Speak to Koreans with confidence 🗣️","Read signs in Korea 🪧","Sing along to K-Pop songs 🎵"].map(t=>(
-              <div key={t} style={{ background:"#222", color:"#ddd", fontSize:"11px", padding:"4px 8px", borderRadius:"8px" }}>{t}</div>
-            ))}
-          </div>
+      <div style={{ borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:700, color:T1, marginBottom:"5px" }}>After completing all 6 books you will be able to:</div>
+        <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
+          {["Watch K-dramas without subtitles 🎬","Speak to Koreans with confidence 🗣️","Read signs in Korea 🪧","Sing along to K-Pop songs 🎵"].map(t=>(
+            <div key={t} style={{ fontSize:"10px", color:T2, padding:"3px 7px", border:`1px solid ${BD}`, borderRadius:"4px" }}>{t}</div>
+          ))}
         </div>
       </div>
     </Page>
@@ -3232,35 +3130,33 @@ function CourseEn() {
     <Page dir="ltr">
       <SHead title="The Klovers Series — 6 Books to Fluency 📚" subtitle="Your complete roadmap from zero to confident Korean" />
 
-      <div style={{ background:BK, borderRadius:"12px", padding:"14px", marginBottom:"12px" }}>
-        <div style={{ fontSize:"11px", color:"#aaa", lineHeight:1.9 }}>
-          The Klovers series takes you from <span style={{color:Y,fontWeight:800}}>knowing nothing</span> to <span style={{color:Y,fontWeight:800}}>speaking and writing fluently</span> — using the K-dramas and music you already love as your learning material. Each book builds on the last.
-        </div>
-      </div>
+      <p style={{ fontSize:"11px", color:T2, lineHeight:1.8, marginBottom:"6mm" }}>
+        The Klovers series takes you from <strong>knowing nothing</strong> to <strong>speaking and writing fluently</strong> — using the K-dramas and music you already love as your learning material. Each book builds on the last.
+      </p>
 
-      <div style={{ display:"flex", flexDirection:"column", gap:"8px", marginBottom:"12px" }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:"0", marginBottom:"8mm" }}>
         {BOOKS_EN.map((b,i)=>(
           <div key={i} style={{
-            background: b.current ? Y : "#f9f9f9",
-            border:`2px solid ${b.current ? Y : "#e5e5e5"}`,
-            borderRadius:"10px", padding:"10px 14px",
             display:"flex", alignItems:"center", gap:"12px",
+            padding:"7px 0", borderBottom:`1px solid ${BD}`,
+            background: b.current ? YL : "transparent",
           }}>
             <div style={{
-              background: b.current ? BK : "#e0e0e0",
-              color: b.current ? Y : "#999",
+              border: b.current ? `2px solid ${Y}` : `1px solid ${BD}`,
+              background: b.current ? Y : SBG,
+              color: b.current ? T1 : T3,
               fontWeight:900,
-              width:"44px", height:"40px", borderRadius:"8px",
+              width:"40px", height:"36px", borderRadius:"6px",
               display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
               flexShrink:0, gap:"1px",
             }}>
               <span style={{ fontSize:"9px", fontWeight:700, opacity:0.7 }}>Book</span>
-              <span style={{ fontSize:"18px", lineHeight:1 }}>{b.n}</span>
+              <span style={{ fontSize:"15px", lineHeight:1 }}>{b.n}</span>
             </div>
-            <div style={{ fontSize:"22px", flexShrink:0 }}>{b.icon}</div>
+            <div style={{ fontSize:"18px", flexShrink:0 }}>{b.icon}</div>
             <div style={{ flex:1 }}>
-              <div style={{ fontWeight:800, fontSize:"12px", color: b.current ? BK : "#444" }}>{b.title}</div>
-              <div style={{ fontSize:"11px", color: b.current ? BK2 : "#999", marginTop:"2px" }}>
+              <div style={{ fontWeight: b.current ? 900 : 700, fontSize:"11px", color:T1 }}>{b.title}</div>
+              <div style={{ fontSize:"10px", color: b.current ? T2 : T3, marginTop:"1px" }}>
                 {b.current ? "📍 You are here — start your journey!" : b.sub}
               </div>
             </div>
@@ -3274,10 +3170,10 @@ function CourseEn() {
           { icon:"🎯", title:"6 Books", sub:"zero to fluency" },
           { icon:"🎬", title:"Real Language", sub:"from dramas & life" },
         ].map(s=>(
-          <div key={s.title} style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"10px", padding:"10px", textAlign:"center" }}>
-            <div style={{ fontSize:"24px", marginBottom:"4px" }}>{s.icon}</div>
-            <div style={{ fontWeight:800, fontSize:"11px", color:BK }}>{s.title}</div>
-            <div style={{ fontSize:"11px", color:"#666" }}>{s.sub}</div>
+          <div key={s.title} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"10px", textAlign:"center", background:SBG }}>
+            <div style={{ fontSize:"22px", marginBottom:"4px" }}>{s.icon}</div>
+            <div style={{ fontWeight:800, fontSize:"11px", color:T1 }}>{s.title}</div>
+            <div style={{ fontSize:"10px", color:T3 }}>{s.sub}</div>
           </div>
         ))}
       </div>
@@ -3433,37 +3329,25 @@ function StudyPlanEn() {
   ];
   return (
     <Page dir="ltr">
-      <SHead title="7-Day Study Plan 🗓️" subtitle="Follow this plan and you'll read Korean in one week!" />
-      <div style={{ background:BK, borderRadius:"12px", padding:"10px 14px", marginBottom:"10px", display:"flex", gap:"10px", alignItems:"center" }}>
-        <div style={{ fontSize:"28px" }}>🎯</div>
-        <div>
-          <div style={{ fontSize:"13px", fontWeight:900, color:GOLD, marginBottom:"2px" }}>Goal: Read Hangul in 7 Days</div>
-          <div style={{ fontSize:"11px", color:"#aaa", lineHeight:1.6 }}>30–45 minutes daily is enough. Consistency beats quantity!</div>
-        </div>
+      <SHead title="7-Day Study Plan" subtitle="Follow this plan and you'll read Korean in one week!" />
+      <div style={{ borderLeft:`3px solid ${Y}`, paddingLeft:"10px", marginBottom:"8mm", background:SBG, padding:"8px 10px" }}>
+        <div style={{ fontSize:"12px", fontWeight:800, color:T1, marginBottom:"2px" }}>🎯 Goal: Read Hangul in 7 Days</div>
+        <div style={{ fontSize:"11px", color:T3, lineHeight:1.6 }}>30–45 minutes daily is enough. Consistency beats quantity!</div>
       </div>
-      <div style={{ display:"flex", flexDirection:"column", gap:"6px", marginBottom:"10px" }}>
+      <div style={{ display:"flex", flexDirection:"column", marginBottom:"8mm" }}>
         {days.map((day, i) => (
-          <div key={i} style={{ display:"grid", gridTemplateColumns:"60px 1fr", gap:"8px", background:day.color, border:`1px solid ${i===6 ? GOLD+"88" : "#e5e7eb"}`, borderRadius:"10px", padding:"8px 10px" }}>
-            <div style={{ textAlign:"center" }}>
-              <div style={{ fontSize:"18px" }}>{day.icon}</div>
-              <div style={{ fontSize:"10px", fontWeight:900, color:BK, background:i===6 ? GOLD : Y, borderRadius:"4px", padding:"1px 4px", marginTop:"2px" }}>{day.d}</div>
-            </div>
+          <div key={i} style={{ display:"grid", gridTemplateColumns:"54px 1fr", gap:"10px", padding:"7px 0", borderBottom:`1px solid ${BD}`, alignItems:"baseline" }}>
+            <div style={{ fontSize:"10px", fontWeight:900, color: i===6 ? T1 : T3, background: i===6 ? Y : "transparent", padding: i===6 ? "1px 5px" : "0", borderRadius:"3px", display:"inline-block" }}>{day.d}</div>
             <div>
-              <div style={{ fontSize:"12px", fontWeight:800, color:BK, marginBottom:"2px" }}>{day.task}</div>
-              <div style={{ fontSize:"10px", color:"#666", display:"flex", gap:"4px", alignItems:"center" }}>
-                <span style={{ color:"#f97316" }}>💡</span>{day.tip}
-              </div>
+              <div style={{ fontSize:"11px", fontWeight:700, color:T1 }}>{day.task}</div>
+              <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>{day.tip}</div>
             </div>
           </div>
         ))}
       </div>
-      <div style={{ background:GL, borderRadius:"10px", padding:"10px 14px", display:"flex", gap:"10px", alignItems:"center" }}>
-        <TaegeukIcon size={36} />
-        <div>
-          <div style={{ fontSize:"12px", fontWeight:900, color:GD, marginBottom:"2px" }}>🔑 The Secret to Success</div>
-          <div style={{ fontSize:"11px", color:GD, lineHeight:1.6 }}>Don't move to the next day until you've mastered the current day's letters. Quality always beats speed!</div>
-        </div>
-      </div>
+      <p style={{ fontSize:"11px", color:T2, lineHeight:1.7, borderTop:`1px solid ${BD}`, paddingTop:"4mm", margin:0 }}>
+        🔑 <strong>The secret to success:</strong> Don't move to the next day until you've mastered the current day's letters. Quality always beats speed!
+      </p>
     </Page>
   );
 }
@@ -3472,44 +3356,42 @@ function AspiratedEn() {
   return (
     <Page dir="ltr">
       <SHead title="Tensed Consonants (된소리) 💥" subtitle="5 consonants pronounced with extra tension — no air!" />
-      <div style={{ background:"#fff3cd", border:"2px solid #f59e0b", borderRadius:"8px", padding:"8px 12px", marginBottom:"8px", fontSize:"11px", color:"#78350f", fontWeight:700 }}>
+      <p style={{ fontSize:"11px", color:T2, lineHeight:1.6, marginBottom:"4mm", borderLeft:`3px solid ${Y}`, paddingLeft:"8px" }}>
         ⚠️ <strong>Beginner note:</strong> These are advanced — master the 14 basic consonants first. Come back to this page in Week 2!
-      </div>
-      <div style={{ background:GL, borderRadius:"8px", padding:"8px 12px", marginBottom:"10px", fontSize:"11px", color:GD, fontWeight:700 }}>
-        💡 Key difference: regular consonants release a puff of air. Tensed consonants release <strong>no</strong> air — throat and mouth are compressed.
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"7px", marginBottom:"10px" }}>
+      </p>
+      <p style={{ fontSize:"11px", color:T2, lineHeight:1.6, marginBottom:"5mm" }}>
+        Key difference: regular consonants release a puff of air. Tensed consonants release <strong>no</strong> air — throat and mouth are compressed.
+      </p>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"7px 16px", marginBottom:"8mm" }}>
         {ASPIRATED.map(a => (
-          <div key={a.char} style={{ background:"#f9f9f9", border:`2px solid #f97316`, borderRadius:"10px", padding:"8px", pageBreakInside:"avoid", breakInside:"avoid" }}>
-            <div style={{ display:"flex", gap:"8px", alignItems:"center", marginBottom:"5px" }}>
-              <div style={{ background:BK, borderRadius:"6px", width:"50px", height:"50px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
-                <div style={{ fontSize:"32px", color:GOLD, fontWeight:900, lineHeight:1 }}>{a.char}</div>
-                <div style={{ fontSize:"10px", color:"#aaa" }}>{a.roman}</div>
+          <div key={a.char} style={{ paddingBottom:"7px", borderBottom:`1px solid ${BD}`, pageBreakInside:"avoid", breakInside:"avoid" }}>
+            <div style={{ display:"flex", gap:"10px", alignItems:"center", marginBottom:"4px" }}>
+              <div style={{ border:`1px solid ${BD}`, borderRadius:"4px", width:"50px", height:"50px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:SBG, flexShrink:0 }}>
+                <div style={{ fontSize:"32px", color:T1, fontWeight:900, lineHeight:1 }}>{a.char}</div>
+                <div style={{ fontSize:"10px", color:T3 }}>{a.roman}</div>
               </div>
               <div>
-                <div style={{ fontSize:"12px", fontWeight:900, color:BK }}>{a.en.name}</div>
-                <div style={{ fontSize:"10px", color:"#666", background:"#fff3cd", padding:"1px 5px", borderRadius:"4px" }}>
-                  = {a.base} + extra tension
-                </div>
+                <div style={{ fontSize:"12px", fontWeight:800, color:T1 }}>{a.en.name}</div>
+                <div style={{ fontSize:"10px", color:T3 }}>= {a.base} + extra tension</div>
               </div>
             </div>
-            <div style={{ background:"#fff9ec", borderRadius:"5px", padding:"3px 7px", fontSize:"10px", color:"#9a3412", marginBottom:"3px" }}>🔊 {a.en.sound}</div>
-            <div style={{ background:YL, borderRadius:"5px", padding:"3px 7px", fontSize:"10px", color:"#555", marginBottom:"4px" }}>💡 {a.en.mnemonic}</div>
+            <div style={{ fontSize:"10px", color:T2, marginBottom:"2px" }}>🔊 {a.en.sound}</div>
+            <div style={{ fontSize:"10px", color:T2, borderLeft:`2px solid ${Y}`, paddingLeft:"5px", marginBottom:"4px", fontStyle:"italic" }}>{a.en.mnemonic}</div>
             <div style={{ display:"flex", gap:"4px", flexWrap:"wrap" }}>
               {a.en.ex.map((ex, i) => (
-                <div key={i} style={{ background:BK2, borderRadius:"4px", padding:"2px 6px", fontSize:"10px", color:"#fff" }}>
-                  <span style={{ color:Y, fontWeight:800 }}>{ex.k}</span> ({ex.r}) — {ex.m}
-                </div>
+                <span key={i} style={{ fontSize:"10px", color:T2 }}>
+                  <strong style={{ color:T1 }}>{ex.k}</strong> ({ex.r}) — {ex.m}
+                </span>
               ))}
             </div>
           </div>
         ))}
       </div>
-      <div style={{ background:BK, borderRadius:"10px", padding:"10px 14px", display:"flex", gap:"10px", alignItems:"center" }}>
+      <div style={{ display:"flex", alignItems:"center", gap:"12px", borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
         <QRPlaceholder size={44} label="" />
         <div>
-          <div style={{ fontSize:"11px", fontWeight:800, color:GOLD }}>🔊 Hear the difference: regular vs tensed</div>
-          <div style={{ fontSize:"10px", color:"#888", marginTop:"2px" }}>klovers.academy/audio/tensed</div>
+          <div style={{ fontSize:"11px", fontWeight:700, color:T1 }}>🔊 Hear the difference: regular vs tensed</div>
+          <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>klovers.academy/audio/tensed</div>
         </div>
       </div>
     </Page>
@@ -3520,30 +3402,28 @@ function CompoundVowelsEn() {
   return (
     <Page dir="ltr">
       <SHead title="Compound Vowels (이중모음) 🔗" subtitle="11 diphthongs built from two simple vowels!" />
-      <div style={{ background:"#f0fff4", border:"2px solid #22c55e", borderRadius:"8px", padding:"7px 10px", fontSize:"11px", color:"#166534", marginBottom:"8px", fontWeight:700 }}>
-        💡 Don't memorize them all now! Most common: <strong style={{ fontSize:"13px" }}>ㅘ ㅝ ㅐ ㅔ ㅢ</strong> — you'll meet these constantly in K-dramas and songs.
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"6px", marginBottom:"10px" }}>
+      <p style={{ fontSize:"11px", color:T2, lineHeight:1.6, marginBottom:"5mm" }}>
+        Don't memorize them all now! Most common: <strong>ㅘ ㅝ ㅐ ㅔ ㅢ</strong> — you'll meet these constantly in K-dramas and songs.
+      </p>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"6px 10px", marginBottom:"8mm" }}>
         {COMPOUND_VOWELS.map(v => (
-          <div key={v.char} style={{ background:"#f9f9f9", border:`2px solid ${GL}`, borderRadius:"8px", padding:"7px", pageBreakInside:"avoid", breakInside:"avoid" }}>
-            <div style={{ display:"flex", gap:"6px", alignItems:"center", marginBottom:"4px" }}>
-              <div style={{ background:GD, borderRadius:"6px", width:"36px", height:"36px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                <div style={{ fontSize:"22px", color:"#fff", fontWeight:900, lineHeight:1 }}>{v.char}</div>
-                <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.7)" }}>{v.roman}</div>
-              </div>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:"10px", color:"#555" }}>{v.en}</div>
-              </div>
+          <div key={v.char} style={{ display:"flex", gap:"8px", alignItems:"flex-start", paddingBottom:"5px", borderBottom:`1px solid ${BD}`, pageBreakInside:"avoid", breakInside:"avoid" }}>
+            <div style={{ border:`1px solid ${BD}`, borderRadius:"4px", width:"34px", height:"34px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:SBG, flexShrink:0 }}>
+              <div style={{ fontSize:"20px", color:T1, fontWeight:900, lineHeight:1 }}>{v.char}</div>
+              <div style={{ fontSize:"9px", color:T3 }}>{v.roman}</div>
             </div>
-            <div style={{ background:GL, borderRadius:"4px", padding:"2px 5px", fontSize:"9px", color:GD, fontWeight:700 }}>{v.ex}</div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:"10px", color:T2, marginBottom:"2px" }}>{v.en}</div>
+              <div style={{ fontSize:"9px", color:T3 }}>{v.ex}</div>
+            </div>
           </div>
         ))}
       </div>
-      <div style={{ background:BK, borderRadius:"10px", padding:"8px 12px", display:"flex", gap:"8px", alignItems:"center" }}>
+      <div style={{ display:"flex", alignItems:"center", gap:"12px", borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
         <QRPlaceholder size={40} label="" />
         <div>
-          <div style={{ fontSize:"11px", fontWeight:800, color:GOLD }}>🔊 Hear compound vowel pronunciation</div>
-          <div style={{ fontSize:"10px", color:"#888", marginTop:"2px" }}>klovers.academy/audio/compound</div>
+          <div style={{ fontSize:"11px", fontWeight:700, color:T1 }}>🔊 Hear compound vowel pronunciation</div>
+          <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>klovers.academy/audio/compound</div>
         </div>
       </div>
     </Page>
@@ -3561,79 +3441,78 @@ function WelcomeEn() {
     <Page dir="ltr">
       <SHead title="Welcome to Hangul!" subtitle="Discover the beauty of the Korean alphabet" />
 
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
-        <div style={{ background:BK, borderRadius:"12px", padding:"14px", color:"#fff" }}>
-          <div style={{ fontSize:"12px", fontWeight:800, color:Y, marginBottom:"7px" }}>Why Hangul is Brilliant</div>
-          <p style={{ fontSize:"11px", lineHeight:2, color:"#ddd", margin:0 }}>
-            King Sejong invented Hangul in 1443. It is a <strong style={{color:Y}}>phonetic alphabet</strong> — each letter represents exactly one sound. Most learners can read in just <strong style={{color:Y}}>2–3 days</strong> of focused practice!
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"7mm" }}>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", background:SBG }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"5px" }}>Why Hangul is Brilliant</div>
+          <p style={{ fontSize:"10px", lineHeight:1.8, color:T2, margin:0 }}>
+            King Sejong invented Hangul in 1443. It is a <strong>phonetic alphabet</strong> — each letter represents exactly one sound. Most learners can read in just <strong>2–3 days</strong> of focused practice!
           </p>
         </div>
-        <div style={{ background:GL, borderRadius:"12px", padding:"14px" }}>
-          <div style={{ fontSize:"12px", fontWeight:800, color:GD, marginBottom:"7px" }}>The Magic Numbers</div>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", background:SBG }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"7px" }}>The Magic Numbers</div>
           {[{n:"14",l:"basic consonants"},{n:"10",l:"basic vowels"},{n:"∞",l:"possible syllables"}].map(({n,l})=>(
-            <div key={n} style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"7px" }}>
-              <div style={{ background:GD, color:Y, fontWeight:900, fontSize:"18px", width:"36px", height:"36px", borderRadius:"8px", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{n}</div>
-              <div style={{ fontSize:"11px", color:GD, fontWeight:600 }}>{l}</div>
+            <div key={n} style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px" }}>
+              <div style={{ border:`2px solid ${Y}`, color:T1, fontWeight:900, fontSize:"16px", width:"34px", height:"34px", borderRadius:"6px", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{n}</div>
+              <div style={{ fontSize:"10px", color:T2, fontWeight:600 }}>{l}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ border:`3px solid ${Y}`, borderRadius:"12px", padding:"12px", marginBottom:"10px", background:YL }}>
-        <div style={{ fontWeight:800, fontSize:"12px", color:BK, marginBottom:"8px", textAlign:"center" }}>How a Syllable Block Works</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", marginBottom:"7mm", background:SBG }}>
+        <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"8px", textAlign:"center" }}>How a Syllable Block Works</div>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"10px", flexWrap:"wrap" }}>
           {[
-            {label:"Consonant",char:"ㅎ",sub:"h",bg:BK,fg:Y},
-            {label:"+",char:"",sub:"",bg:"",fg:Y},
-            {label:"Vowel",char:"ㅏ",sub:"a",bg:Y,fg:BK},
-            {label:"=",char:"",sub:"",bg:"",fg:BK},
-            {label:"Syllable!",char:"하",sub:"ha",bg:BK,fg:Y},
+            {label:"Consonant",char:"ㅎ",sub:"h"},
+            {label:"+",char:"",sub:""},
+            {label:"Vowel",char:"ㅏ",sub:"a"},
+            {label:"=",char:"",sub:""},
+            {label:"Syllable!",char:"하",sub:"ha"},
           ].map((item,i)=>
             item.char===""?(
-              <div key={i} style={{fontSize:"24px",fontWeight:900,color:BK}}>{item.label}</div>
+              <div key={i} style={{fontSize:"20px",fontWeight:900,color:T3}}>{item.label}</div>
             ):(
               <div key={i} style={{textAlign:"center"}}>
-                <div style={{fontSize:"11px",color:"#555",marginBottom:"3px"}}>{item.label}</div>
-                <div style={{background:item.bg,borderRadius:"10px",padding:"8px 14px",fontSize:"40px",fontWeight:900,color:item.fg,lineHeight:1,border:`2px solid ${Y}`}}>{item.char}</div>
-                {item.sub&&<div style={{fontSize:"11px",color:"#555",marginTop:"3px"}}>{item.sub}</div>}
+                <div style={{fontSize:"10px",color:T3,marginBottom:"3px"}}>{item.label}</div>
+                <div style={{border:`1px solid ${BD}`,borderRadius:"6px",padding:"6px 12px",fontSize:"36px",fontWeight:900,color:T1,lineHeight:1,background:i===4?YL:"#fff"}}>{item.char}</div>
+                {item.sub&&<div style={{fontSize:"10px",color:T3,marginTop:"3px"}}>{item.sub}</div>}
               </div>
             )
           )}
         </div>
       </div>
 
-      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>📅 7-Day Study Plan</div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"5px" }}>
+      <div style={{ fontSize:"10px", fontWeight:700, color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"5px" }}>7-Day Study Plan</div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"4px", marginBottom:"6mm" }}>
         {plan.map((p,i)=>(
-          <div key={i} style={{ background:i===6?Y:BK, borderRadius:"8px", padding:"7px 3px", textAlign:"center" }}>
-            <div style={{ fontSize:"11px", fontWeight:800, color:i===6?BK:Y }}>{p.d}</div>
-            <div style={{ fontSize:"11px", color:i===6?BK2:"#aaa", marginTop:"3px", lineHeight:1.4 }}>{p.t}</div>
+          <div key={i} style={{ border:`1px solid ${i===6?Y:BD}`, borderRadius:"4px", padding:"5px 3px", textAlign:"center", background:i===6?YL:SBG }}>
+            <div style={{ fontSize:"9px", fontWeight:800, color:T1 }}>{p.d}</div>
+            <div style={{ fontSize:"9px", color:T3, marginTop:"2px", lineHeight:1.3 }}>{p.t}</div>
           </div>
         ))}
       </div>
 
-      {/* Buzan: letter family tree */}
-      <div style={{ marginTop:"8px", background:BK, borderRadius:"10px", padding:"10px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>🧬 Letter families — how they're related</div>
-        <div style={{ display:"flex", gap:"10px", flexWrap:"wrap", direction:"ltr" }}>
+      <div style={{ borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
+        <div style={{ fontSize:"10px", fontWeight:700, color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"5px" }}>Letter families — how they're related</div>
+        <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
           {[
-            { base:"ㄱ", derived:["ㅋ","ㄲ"], label:"g-family" },
-            { base:"ㄷ", derived:["ㅌ","ㄸ"], label:"d-family" },
-            { base:"ㅂ", derived:["ㅍ","ㅃ"], label:"b-family" },
-            { base:"ㅅ", derived:["ㅆ"], label:"s-family" },
-            { base:"ㅈ", derived:["ㅊ","ㅉ"], label:"j-family" },
+            { base:"ㄱ", derived:["ㅋ","ㄲ"] },
+            { base:"ㄷ", derived:["ㅌ","ㄸ"] },
+            { base:"ㅂ", derived:["ㅍ","ㅃ"] },
+            { base:"ㅅ", derived:["ㅆ"] },
+            { base:"ㅈ", derived:["ㅊ","ㅉ"] },
           ].map(f=>(
             <div key={f.base} style={{ display:"flex", alignItems:"center", gap:"4px" }}>
-              <div style={{ background:Y, color:BK, fontWeight:900, fontSize:"16px", borderRadius:"6px", padding:"4px 8px" }}>{f.base}</div>
-              <span style={{ color:"#555", fontSize:"11px" }}>→</span>
+              <span style={{ border:`2px solid ${Y}`, color:T1, fontWeight:900, fontSize:"15px", borderRadius:"4px", padding:"2px 6px" }}>{f.base}</span>
+              <span style={{ color:T3, fontSize:"10px" }}>→</span>
               {f.derived.map(d=>(
-                <div key={d} style={{ background:"#222", color:"#ccc", fontWeight:900, fontSize:"14px", borderRadius:"6px", padding:"3px 7px", border:`1px solid ${Y}44` }}>{d}</div>
+                <span key={d} style={{ border:`1px solid ${BD}`, color:T2, fontWeight:700, fontSize:"13px", borderRadius:"4px", padding:"2px 6px", background:SBG }}>{d}</span>
               ))}
             </div>
           ))}
         </div>
-        <div style={{ fontSize:"10px", color:"#666", marginTop:"5px" }}>
-          The base letter (yellow) gains strokes for more force — ㄱ→ㅋ (aspirated), ㄱ→ㄲ (tense/doubled)
+        <div style={{ fontSize:"10px", color:T3, marginTop:"4px" }}>
+          The base letter (outlined) gains strokes for more force — ㄱ→ㅋ (aspirated), ㄱ→ㄲ (tense/doubled)
         </div>
       </div>
     </Page>
@@ -3672,39 +3551,28 @@ function TocEn() {
         <div style={{ marginTop:"8px" }}><DancheongBorder /></div>
       </div>
 
-      <div style={{ display:"flex", flexDirection:"column", gap:"5px", marginBottom:"16px" }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:"0", marginBottom:"8mm" }}>
         {chapters.map((ch, i) => (
           <div key={i} style={{
             display:"flex", alignItems:"center", gap:"10px",
-            padding:"8px 12px", borderRadius:"10px",
-            background: i % 2 === 0 ? "#f9f9f9" : "#fff",
-            border:`1px solid ${i % 2 === 0 ? Y + "55" : "#eee"}`,
+            padding:"6px 0", borderBottom:`1px solid ${BD}`,
           }}>
-            <div style={{
-              background:BK, color:Y, fontWeight:900, fontSize:"11px",
-              width:"30px", height:"30px", borderRadius:"6px",
-              display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0,
-            }}>{ch.n}</div>
-            <div style={{ fontSize:"18px", flexShrink:0 }}>{ch.icon}</div>
-            <div style={{ flex:1, fontSize:"12px", fontWeight:700, color:BK, display:"flex", alignItems:"center", gap:"5px" }}>
+            <div style={{ fontSize:"10px", fontWeight:700, color:T3, width:"24px", textAlign:"left", flexShrink:0 }}>{ch.n}</div>
+            <div style={{ flex:1, fontSize:"11px", fontWeight:700, color:T1, display:"flex", alignItems:"center", gap:"5px" }}>
               {ch.title}
-              {(ch as any).new && <span style={{ background:"#22c55e", color:"#fff", fontSize:"8px", fontWeight:900, padding:"1px 4px", borderRadius:"3px", flexShrink:0 }}>NEW</span>}
+              {(ch as any).new && <span style={{ background:Y, color:T1, fontSize:"8px", fontWeight:900, padding:"0 4px", borderRadius:"2px", flexShrink:0 }}>NEW</span>}
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:"4px", flexShrink:0 }}>
-              <div style={{ width:"40px", borderBottom:"1px dashed #ccc" }} />
-              <div style={{ background:Y, color:BK, fontWeight:900, fontSize:"11px", padding:"2px 8px", borderRadius:"6px" }}>{ch.page}</div>
+              <div style={{ width:"30px", borderBottom:"1px dotted #ccc" }} />
+              <span style={{ fontSize:"10px", color:T3, width:"16px", textAlign:"right" }}>{ch.page}</span>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"12px", alignItems:"center" }}>
-        <TaegeukIcon size={42} />
-        <div>
-          <div style={{ fontSize:"13px", fontWeight:900, color:GOLD, marginBottom:"3px" }}>Your journey starts here 🚀</div>
-          <div style={{ fontSize:"11px", color:"#aaa", lineHeight:1.6 }}>Read each chapter in order — every chapter builds on the last. In 7 days you'll be reading Korean!</div>
-        </div>
-      </div>
+      <p style={{ fontSize:"11px", color:T2, lineHeight:1.7, borderTop:`1px solid ${BD}`, paddingTop:"4mm", margin:0 }}>
+        Read each chapter in order — every chapter builds on the last. In 7 days you'll be reading Korean!
+      </p>
     </Page>
   );
 }
@@ -3715,41 +3583,34 @@ function ConsonantsEn({ slice, page }: { slice:[number,number]; page:number }) {
     ? { lyric:"나비야", rom:"na-bi-ya", meaning:"Oh butterfly", song:"Korean folk song" }
     : { lyric:"고마워", rom:"go-ma-wo", meaning:"Thank you", song:"IU — Palette" };
   return (
-    <Page dir="ltr">
+    <Page dir="ltr" chapter="Consonants">
       <SHead title={`Consonants (자음) — Part ${page} of 2`} subtitle="Every Korean syllable begins with a consonant" />
-      {/* Marzano "I can..." learning objective */}
-      <div style={{ background:"#f0fff4", border:"2px solid #22c55e", borderRadius:"8px", padding:"7px 10px", fontSize:"11px", color:"#166534", marginBottom:"7px", fontWeight:700 }}>
-        ✅ By the end of this page you will be able to: read, pronounce, and write <strong>{count}</strong> new Korean letters!
-      </div>
+      <p style={{ fontSize:"11px", color:T2, marginBottom:"4mm", lineHeight:1.6 }}>
+        By the end of this page you will be able to read, pronounce, and write <strong>{count}</strong> new Korean letters.
+        {page===1 && " There are 14 basic consonants — master these before the aspirated forms."}
+      </p>
       <StrokeOrderTip lang="en" />
-      <div style={{ background:YL, borderRadius:"8px", padding:"6px 10px", fontSize:"11px", color:BK2, marginBottom:"8px" }}>
-        💡 There are 14 basic consonants plus 5 aspirated (with a puff of air). Master the basics first!
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6px" }}>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px 16px" }}>
         {CONSONANTS.slice(...slice).map(c=><ConsCard key={c.char} c={c} lang="en" />)}
       </div>
-      <div style={{ display:"flex", alignItems:"center", gap:"12px", background:"#111", borderRadius:"10px", padding:"10px 14px", marginTop:"8px" }}>
-        <QRPlaceholder size={50} label="" />
+      <div style={{ display:"flex", alignItems:"center", gap:"12px", marginTop:"5mm",
+        borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
+        <QRPlaceholder size={44} label="" />
         <div>
-          <div style={{ fontSize:"12px", fontWeight:800, color:Y }}>🔊 Hear the correct pronunciation</div>
-          <div style={{ fontSize:"11px", color:"#888", marginTop:"3px" }}>Scan or visit: <span style={{color:Y}}>klovers.academy/audio</span></div>
+          <div style={{ fontSize:"11px", fontWeight:700, color:T1 }}>Listen to pronunciation</div>
+          <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>klovers.academy/audio</div>
         </div>
       </div>
-      {/* Mogi K-Pop lyric strip */}
-      <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"8px", padding:"7px 12px", marginTop:"6px", display:"flex", gap:"10px", alignItems:"center" }}>
-        <div style={{ fontSize:"20px" }}>🎵</div>
-        <div>
-          <div style={{ fontSize:"10px", color:"rgba(255,255,0,0.65)", marginBottom:"2px", fontWeight:700 }}>K-Pop lyric using letters you just learned:</div>
-          <span style={{ fontSize:"18px", color:Y, fontWeight:900 }}>{kpopLyrics.lyric}</span>
-          <span style={{ fontSize:"11px", color:"#aaa", marginLeft:"6px" }}>[{kpopLyrics.rom}] = "{kpopLyrics.meaning}"</span>
-          <span style={{ fontSize:"10px", color:"#555", marginLeft:"4px" }}>— {kpopLyrics.song}</span>
+      <div style={{ marginTop:"4mm", paddingTop:"3mm", borderTop:`1px solid ${BD}` }}>
+        <span style={{ fontSize:"9px", color:T3, textTransform:"uppercase", letterSpacing:"1px" }}>K-Pop lyric you can now read </span>
+        <div style={{ marginTop:"2px", fontSize:"16px", fontWeight:900, color:T1 }}>
+          {kpopLyrics.lyric}
+          <span style={{ fontSize:"11px", fontWeight:400, color:T3 }}> [{kpopLyrics.rom}] — {kpopLyrics.meaning}</span>
         </div>
       </div>
-      {/* Nunan micro-task */}
-      <div style={{ background:GL, border:`1px solid ${GD}`, borderRadius:"8px", padding:"8px 10px", marginTop:"6px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"3px" }}>📝 Now try it!</div>
-        <div style={{ fontSize:"11px", color:GD, marginBottom:"5px" }}>Try spelling your first name using the Korean letters you just learned:</div>
-        <div style={{ height:"24px", border:"1px dashed #aaa", borderRadius:"4px", background:"#fff" }} />
+      <div style={{ marginTop:"4mm" }}>
+        <div style={{ fontSize:"10px", color:T3, marginBottom:"3px" }}>Now try it — spell your name in Korean:</div>
+        <div style={{ height:"22px", borderBottom:`1px solid ${BD}` }} />
       </div>
     </Page>
   );
@@ -3757,22 +3618,21 @@ function ConsonantsEn({ slice, page }: { slice:[number,number]; page:number }) {
 
 function VowelsEn() {
   return (
-    <Page dir="ltr">
+    <Page dir="ltr" chapter="Vowels">
       <SHead title="Vowels (모음)" subtitle="Vowels never stand alone — they always need a consonant" />
-      <div style={{ background:"#f0fff4", border:"2px solid #22c55e", borderRadius:"8px", padding:"7px 10px", fontSize:"11px", color:"#166534", marginBottom:"7px", fontWeight:700 }}>
-        ✅ By the end of this page you will be able to: read and pronounce all 10 Korean vowels and form complete syllables!
-      </div>
-      <div style={{ background:GL, borderRadius:"8px", padding:"6px 10px", fontSize:"11px", color:GD, marginBottom:"8px", fontWeight:700 }}>
-        🌟 If a syllable starts with a vowel sound, use the silent ㅇ as a placeholder: e.g., "a" = 아 (ㅇ + ㅏ)
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6px" }}>
+      <p style={{ fontSize:"11px", color:T2, marginBottom:"4mm", lineHeight:1.6 }}>
+        By the end of this page you will be able to read and pronounce all 10 Korean vowels and form complete syllables.
+        When a syllable starts with a vowel sound, use silent ㅇ as a placeholder — e.g., "a" = 아.
+      </p>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px 16px" }}>
         {VOWELS.map(v=><VowCard key={v.char} v={v} lang="en" />)}
       </div>
-      <div style={{ display:"flex", alignItems:"center", gap:"12px", background:"#111", borderRadius:"10px", padding:"10px 14px", marginTop:"8px" }}>
-        <QRPlaceholder size={50} label="" />
+      <div style={{ display:"flex", alignItems:"center", gap:"12px", marginTop:"5mm",
+        borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
+        <QRPlaceholder size={44} label="" />
         <div>
-          <div style={{ fontSize:"12px", fontWeight:800, color:Y }}>🔊 Hear all vowel sounds</div>
-          <div style={{ fontSize:"11px", color:"#888", marginTop:"3px" }}>Scan or visit: <span style={{color:Y}}>klovers.academy/audio</span></div>
+          <div style={{ fontSize:"11px", fontWeight:700, color:T1 }}>Hear all vowel sounds</div>
+          <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>klovers.academy/audio</div>
         </div>
       </div>
       <MiniReadingStripEn />
@@ -3782,31 +3642,34 @@ function VowelsEn() {
 
 function SyllableEn() {
   return (
-    <Page dir="ltr">
+    <Page dir="ltr" chapter="Syllable Blocks">
       <SHead title="Building Syllable Blocks" subtitle="The smart way Korean combines letters" />
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:"5px", marginBottom:"6mm" }}>
         {[
           {n:"①",t:"Every syllable starts with a consonant",n2:"Use silent ㅇ if starting with a vowel sound",ex:"아 = ㅇ+ㅏ"},
           {n:"②",t:"Tall vowels sit to the RIGHT",n2:"ㅏ ㅓ ㅣ ㅐ ㅔ ㅑ ㅕ",ex:"가 나 사 바"},
           {n:"③",t:"Wide vowels sit BELOW",n2:"ㅗ ㅜ ㅡ ㅛ ㅠ",ex:"고 노 소 도"},
           {n:"④",t:"받침 — final consonant goes under the block",n2:"Optional — sits at the bottom",ex:"한 = ㅎ+ㅏ+ㄴ"},
         ].map(r=>(
-          <div key={r.n} style={{ background:BK, borderRadius:"10px", padding:"10px" }}>
-            <div style={{ fontSize:"22px", color:Y, fontWeight:900 }}>{r.n}</div>
-            <div style={{ fontSize:"11px", fontWeight:700, color:"#fff", lineHeight:1.6, marginBottom:"3px" }}>{r.t}</div>
-            <div style={{ fontSize:"11px", color:"#aaa", marginBottom:"4px" }}>{r.n2}</div>
-            <div style={{ fontSize:"14px", color:Y, fontWeight:800 }}>{r.ex}</div>
+          <div key={r.n} style={{ display:"flex", gap:"10px", alignItems:"baseline",
+            paddingBottom:"5px", borderBottom:`1px solid ${BD}` }}>
+            <span style={{ fontSize:"13px", fontWeight:900, color:T1, flexShrink:0, width:"18px" }}>{r.n}</span>
+            <div>
+              <span style={{ fontSize:"11px", fontWeight:700, color:T1 }}>{r.t}</span>
+              <span style={{ fontSize:"10px", color:T3 }}> — {r.n2}</span>
+              <span style={{ fontSize:"13px", fontWeight:900, color:T1, marginLeft:"8px", display:"inline-block" }}> {r.ex}</span>
+            </div>
           </div>
         ))}
       </div>
-      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>🔤 Syllable Examples</div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:"5px" }}>
+      <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"3mm" }}>Syllable Examples</div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:"6px" }}>
         {SYLLABLES.map(s=>(
-          <div key={s.b} style={{ background:BK, borderRadius:"8px", padding:"7px 4px", textAlign:"center" }}>
-            <div style={{ fontSize:"11px", color:"#555" }}>{s.c}+{s.v}</div>
-            <div style={{ fontSize:"32px", fontWeight:900, color:Y, lineHeight:1 }}>{s.b}</div>
-            <div style={{ fontSize:"11px", color:"#aaa" }}>{s.r}</div>
-            <div style={{ fontSize:"11px", color:"#888" }}>{s.en}</div>
+          <div key={s.b} style={{ border:`1px solid ${BD}`, borderRadius:"4px", padding:"6px 3px", textAlign:"center", background:SBG }}>
+            <div style={{ fontSize:"9px", color:T3 }}>{s.c}+{s.v}</div>
+            <div style={{ fontSize:"30px", fontWeight:900, color:T1, lineHeight:1.1 }}>{s.b}</div>
+            <div style={{ fontSize:"9px", color:T3 }}>{s.r}</div>
+            <div style={{ fontSize:"9px", color:T2 }}>{s.en}</div>
           </div>
         ))}
       </div>
@@ -3830,10 +3693,10 @@ function BatchimEn() {
       <SHead title="Batchim (받침) — The Final Consonant" subtitle="A syllable block can end with a consonant sitting below" />
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
-        <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>What is Batchim?</div>
-          <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.9 }}>
-            Batchim is the consonant that sits <strong style={{color:Y}}>underneath</strong> the syllable block. Not every syllable has one — but it appears in thousands of Korean words.
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"12px", background:SBG }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>What is Batchim?</div>
+          <div style={{ fontSize:"11px", color:T2, lineHeight:1.9 }}>
+            Batchim is the consonant that sits <strong>underneath</strong> the syllable block. Not every syllable has one — but it appears in thousands of Korean words.
           </div>
           <div style={{ display:"flex", gap:"10px", justifyContent:"center", marginTop:"10px" }}>
             {[
@@ -3841,48 +3704,48 @@ function BatchimEn() {
               {top:"ㅎ", mid:"ㅏ", bot:"ㄴ", label:"한 (han)", note:"Batchim = ㄴ"},
             ].map((b,i)=>(
               <div key={i} style={{ textAlign:"center" }}>
-                <div style={{ background: i===1?Y:YL, borderRadius:"10px", padding:"10px 14px", border:`2px solid ${Y}`, display:"inline-flex", flexDirection:"column", alignItems:"center", width:"60px" }}>
-                  <div style={{ fontSize:"11px", color:i===1?BK:"#666" }}>{b.top}</div>
-                  <div style={{ fontSize:"11px", color:i===1?BK:"#666" }}>{b.mid}</div>
-                  {b.bot && <div style={{ fontSize:"11px", color:BK, fontWeight:900, borderTop:"1px solid rgba(0,0,0,0.2)", marginTop:"3px", paddingTop:"3px", width:"100%", textAlign:"center" }}>{b.bot}</div>}
+                <div style={{ background: i===1?Y:SBG, borderRadius:"6px", padding:"10px 14px", border:`1px solid ${BD}`, display:"inline-flex", flexDirection:"column", alignItems:"center", width:"60px" }}>
+                  <div style={{ fontSize:"11px", color:T2 }}>{b.top}</div>
+                  <div style={{ fontSize:"11px", color:T2 }}>{b.mid}</div>
+                  {b.bot && <div style={{ fontSize:"11px", color:T1, fontWeight:900, borderTop:`1px solid ${BD}`, marginTop:"3px", paddingTop:"3px", width:"100%", textAlign:"center" }}>{b.bot}</div>}
                 </div>
-                <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginTop:"5px" }}>{b.label}</div>
-                <div style={{ fontSize:"11px", color:"#777" }}>{b.note}</div>
+                <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginTop:"5px" }}>{b.label}</div>
+                <div style={{ fontSize:"10px", color:T3 }}>{b.note}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"6px" }}>The Golden Rule 🥇</div>
-          <div style={{ fontSize:"11px", color:GD, lineHeight:1.9 }}>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"12px", background:SBG }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>The Golden Rule 🥇</div>
+          <div style={{ fontSize:"11px", color:T2, lineHeight:1.9 }}>
             Even though there are 14+ consonants, only <strong>7 final sounds</strong> can be pronounced in batchim position. Every other consonant reduces to one of these seven.
           </div>
-          <div style={{ background:BK, borderRadius:"8px", padding:"8px", marginTop:"8px", textAlign:"center" }}>
+          <div style={{ padding:"8px", marginTop:"8px", textAlign:"center" }}>
             <div style={{ display:"flex", gap:"6px", justifyContent:"center", flexWrap:"wrap" }}>
               {["k","n","t","l","m","p","ng"].map(s=>(
-                <div key={s} style={{ background:Y, color:BK, fontWeight:900, fontSize:"13px", padding:"4px 8px", borderRadius:"8px" }}>{s}</div>
+                <span key={s} style={{ border:`1px solid ${BD}`, color:T1, fontWeight:900, fontSize:"13px", padding:"4px 8px", borderRadius:"4px", background:"#fff" }}>{s}</span>
               ))}
             </div>
-            <div style={{ fontSize:"11px", color:"#aaa", marginTop:"5px" }}>The 7 final sounds</div>
+            <div style={{ fontSize:"10px", color:T3, marginTop:"5px" }}>The 7 final sounds</div>
           </div>
         </div>
       </div>
 
-      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>The 7 Final Sound Groups</div>
-      <div style={{ display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" }}>
+      <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"6px" }}>The 7 Final Sound Groups</div>
+      <div style={{ display:"flex", flexDirection:"column", gap:"0", marginBottom:"10px" }}>
         {FINAL7.map((row,i)=>(
-          <div key={i} style={{ display:"grid", gridTemplateColumns:"36px 1fr 1fr", gap:"6px", alignItems:"center", background:i%2===0?"#f9f9f9":"#fff", borderRadius:"8px", padding:"6px 10px", border:`1px solid ${Y}44` }}>
-            <div style={{ background:BK, color:Y, fontWeight:900, fontSize:"14px", textAlign:"center", borderRadius:"6px", padding:"4px" }}>{row.sound}</div>
+          <div key={i} style={{ display:"grid", gridTemplateColumns:"36px 1fr 1fr", gap:"6px", alignItems:"center", padding:"6px 0", borderBottom:`1px solid ${BD}` }}>
+            <div style={{ border:`1px solid ${BD}`, color:T1, fontWeight:900, fontSize:"14px", textAlign:"center", borderRadius:"4px", padding:"4px", background:SBG }}>{row.sound}</div>
             <div style={{ display:"flex", gap:"5px", flexWrap:"wrap" }}>
               {row.chars.map(ch=>(
-                <span key={ch} style={{ background:Y, color:BK, fontSize:"15px", fontWeight:900, padding:"2px 7px", borderRadius:"6px" }}>{ch}</span>
+                <span key={ch} style={{ border:`1px solid ${BD}`, color:T1, fontSize:"15px", fontWeight:900, padding:"2px 7px", borderRadius:"4px", background:"#fff" }}>{ch}</span>
               ))}
             </div>
             <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
               {row.ex.map(e=>(
-                <span key={e.k} style={{ background:BK2, color:"#ddd", fontSize:"11px", padding:"2px 5px", borderRadius:"4px" }}>
-                  <span style={{color:Y,fontWeight:800}}>{e.k}</span> [{e.r}] {e.m}
+                <span key={e.k} style={{ fontSize:"11px", color:T2 }}>
+                  <span style={{fontWeight:800, color:T1}}>{e.k}</span> [{e.r}] {e.m}
                 </span>
               ))}
             </div>
@@ -3890,24 +3753,24 @@ function BatchimEn() {
         ))}
       </div>
 
-      <div style={{ background:BK, borderRadius:"12px", padding:"12px", display:"flex", gap:"12px", alignItems:"flex-start" }}>
-        <KoreanLanternIcon size={42} color={Y} />
+      <div style={{ borderTop:`3px solid ${Y}`, paddingTop:"8px", display:"flex", gap:"12px", alignItems:"flex-start" }}>
+        <KoreanLanternIcon size={36} color={T3} />
         <div>
-          <div style={{ fontSize:"12px", fontWeight:800, color:Y, marginBottom:"5px" }}>Linking Rule — 연음법칙 (Yeon-eum)</div>
-          <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.9, marginBottom:"6px" }}>
-            When batchim is followed by a syllable starting with <strong style={{color:Y}}>ㅇ</strong> (silent), the batchim <strong style={{color:Y}}>moves</strong> to that next syllable and is pronounced there.
+          <div style={{ fontSize:"12px", fontWeight:800, color:T1, marginBottom:"5px" }}>Linking Rule — 연음법칙 (Yeon-eum)</div>
+          <div style={{ fontSize:"11px", color:T2, lineHeight:1.9, marginBottom:"6px" }}>
+            When batchim is followed by a syllable starting with <strong>ㅇ</strong> (silent), the batchim <strong>moves</strong> to that next syllable and is pronounced there.
           </div>
-          <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
+          <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
             {[
               {w:"먹어요",wrong:"meok-eo-yo ❌",right:"meo-geo-yo ✅",m:"I eat"},
               {w:"한국어",wrong:"han-guk-eo ❌",right:"han-gu-geo ✅",m:"Korean language"},
               {w:"없어요",wrong:"eops-eo-yo ❌",right:"eop-seo-yo ✅",m:"There isn't"},
             ].map(e=>(
-              <div key={e.w} style={{ background:"#1a1a1a", borderRadius:"8px", padding:"8px 10px" }}>
-                <div style={{ fontSize:"16px", color:Y, fontWeight:900 }}>{e.w}</div>
-                <div style={{ fontSize:"11px", color:"#666", marginTop:"2px" }}>{e.wrong}</div>
-                <div style={{ fontSize:"11px", color:"#4ade80", fontWeight:700 }}>{e.right}</div>
-                <div style={{ fontSize:"11px", color:"#888" }}>{e.m}</div>
+              <div key={e.w} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"8px 10px", background:"#fff" }}>
+                <div style={{ fontSize:"16px", color:T1, fontWeight:900 }}>{e.w}</div>
+                <div style={{ fontSize:"11px", color:T3, marginTop:"2px" }}>{e.wrong}</div>
+                <div style={{ fontSize:"11px", color:"#166534", fontWeight:700 }}>{e.right}</div>
+                <div style={{ fontSize:"10px", color:T3 }}>{e.m}</div>
               </div>
             ))}
           </div>
@@ -3939,75 +3802,75 @@ function DoubleBatchimEn() {
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
-        <div style={{ background:BK, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>What is Gyeop-batchim?</div>
-          <div style={{ fontSize:"11px", color:"#ccc", lineHeight:1.9 }}>
-            Some syllable blocks hold <strong style={{color:Y}}>two consonants together</strong> in the batchim position. When speaking, usually the <strong style={{color:Y}}>left (first)</strong> one is pronounced and the second is silent.
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"12px", background:SBG }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>What is Gyeop-batchim?</div>
+          <div style={{ fontSize:"11px", color:T2, lineHeight:1.9 }}>
+            Some syllable blocks hold <strong>two consonants together</strong> in the batchim position. When speaking, usually the <strong>left (first)</strong> one is pronounced and the second is silent.
           </div>
           <div style={{ marginTop:"10px", display:"flex", justifyContent:"center" }}>
-            <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"inline-flex", flexDirection:"column", alignItems:"center", border:`2px solid ${BK}` }}>
+            <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"10px 14px", display:"inline-flex", flexDirection:"column", alignItems:"center", background:"#fff" }}>
               <div style={{ display:"flex", gap:"2px" }}>
-                <span style={{ fontSize:"13px", color:BK }}>ㄷ</span>
-                <span style={{ fontSize:"13px", color:BK }}>ㅏ</span>
+                <span style={{ fontSize:"13px", color:T2 }}>ㄷ</span>
+                <span style={{ fontSize:"13px", color:T2 }}>ㅏ</span>
               </div>
-              <div style={{ display:"flex", gap:"2px", borderTop:"1px solid rgba(0,0,0,0.3)", marginTop:"3px", paddingTop:"3px" }}>
+              <div style={{ display:"flex", gap:"2px", borderTop:`1px solid ${BD}`, marginTop:"3px", paddingTop:"3px" }}>
                 <span style={{ fontSize:"13px", fontWeight:900, color:"#0047AB" }}>ㄹ</span>
                 <span style={{ fontSize:"13px", fontWeight:900, color:"#C8102E" }}>ㄱ</span>
               </div>
             </div>
           </div>
-          <div style={{ textAlign:"center", fontSize:"11px", color:"#aaa", marginTop:"5px" }}>닭 = dak (chicken) — ㄱ sounds, ㄹ is silent</div>
+          <div style={{ textAlign:"center", fontSize:"10px", color:T3, marginTop:"5px" }}>닭 = dak (chicken) — ㄱ sounds, ㄹ is silent</div>
         </div>
 
-        <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"12px", padding:"12px" }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"6px" }}>Linking Rule for Double Batchim 🔗</div>
-          <div style={{ fontSize:"11px", color:BK2, lineHeight:1.9, marginBottom:"8px" }}>
+        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"12px", background:SBG }}>
+          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>Linking Rule for Double Batchim 🔗</div>
+          <div style={{ fontSize:"11px", color:T2, lineHeight:1.9, marginBottom:"8px" }}>
             When followed by a syllable starting with <strong>ㅇ</strong>, the <strong style={{color:"#C8102E"}}>right (second)</strong> consonant moves to the next syllable!
           </div>
-          <div style={{ display:"flex", flexDirection:"column", gap:"5px" }}>
+          <div style={{ display:"flex", flexDirection:"column", gap:"4px" }}>
             {[
               {w:"닭이",r:"[dal-gi]",m:"chicken (object)"},
               {w:"없어요",r:"[eop-seo-yo]",m:"there isn't (polite)"},
               {w:"앉아요",r:"[an-ja-yo]",m:"sits (polite)"},
             ].map(e=>(
-              <div key={e.w} style={{ background:BK, borderRadius:"6px", padding:"6px 10px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <span style={{ fontSize:"16px", color:Y, fontWeight:900 }}>{e.w}</span>
-                <span style={{ fontSize:"11px", color:"#4ade80", fontWeight:700 }}>{e.r}</span>
-                <span style={{ fontSize:"11px", color:"#888" }}>{e.m}</span>
+              <div key={e.w} style={{ border:`1px solid ${BD}`, borderRadius:"4px", padding:"5px 8px", display:"flex", justifyContent:"space-between", alignItems:"center", background:"#fff" }}>
+                <span style={{ fontSize:"15px", color:T1, fontWeight:900 }}>{e.w}</span>
+                <span style={{ fontSize:"11px", color:"#166534", fontWeight:700 }}>{e.r}</span>
+                <span style={{ fontSize:"10px", color:T3 }}>{e.m}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"6px" }}>Most Common Double Batchim Pairs</div>
+      <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"6px" }}>Most Common Double Batchim Pairs</div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"6px", marginBottom:"6px" }}>
         {GYEOP.slice(0, 3).map((g,i)=>(
           <div key={i} style={{
-            background: i%2===0 ? BK : BK2,
-            borderRadius:"10px", padding:"10px 8px",
-            border:`2px solid ${Y}44`, textAlign:"center",
+            border:`1px solid ${BD}`,
+            borderRadius:"8px", padding:"10px 8px",
+            background:SBG, textAlign:"center",
           }}>
-            <div style={{ fontSize:"22px", color:Y, fontWeight:900, letterSpacing:"2px" }}>{g.chars}</div>
-            <div style={{ fontSize:"11px", color:"#aaa", marginTop:"2px" }}>sounds like</div>
-            <div style={{ background:Y, color:BK, fontWeight:900, fontSize:"18px", borderRadius:"6px", padding:"2px 8px", margin:"4px auto", display:"inline-block" }}>{g.read}</div>
-            <div style={{ borderTop:`1px solid ${Y}33`, marginTop:"6px", paddingTop:"6px" }}>
-              <div style={{ fontSize:"18px", color:Y, fontWeight:900 }}>{g.ex}</div>
-              <div style={{ fontSize:"11px", color:"#aaa" }}>[{g.rom}]</div>
-              <div style={{ fontSize:"11px", color:"#777" }}>{g.m}</div>
+            <div style={{ fontSize:"22px", color:T1, fontWeight:900, letterSpacing:"2px" }}>{g.chars}</div>
+            <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>sounds like</div>
+            <div style={{ border:`1px solid ${BD}`, color:T1, fontWeight:900, fontSize:"18px", borderRadius:"4px", padding:"2px 8px", margin:"4px auto", display:"inline-block", background:"#fff" }}>{g.read}</div>
+            <div style={{ borderTop:`1px solid ${BD}`, marginTop:"6px", paddingTop:"6px" }}>
+              <div style={{ fontSize:"18px", color:T1, fontWeight:900 }}>{g.ex}</div>
+              <div style={{ fontSize:"10px", color:T3 }}>[{g.rom}]</div>
+              <div style={{ fontSize:"10px", color:T2 }}>{g.m}</div>
             </div>
           </div>
         ))}
       </div>
-      <div style={{ fontSize:"11px", color:"#888", textAlign:"center", marginBottom:"6px" }}>
+      <div style={{ fontSize:"10px", color:T3, textAlign:"center", marginBottom:"6px" }}>
         + 5 more pairs covered in Book 2 →
       </div>
 
-      <div style={{ background:GL, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px" }}>
-        <MugunghwaIcon size={36} color={GD} />
+      <div style={{ borderTop:`3px solid ${Y}`, paddingTop:"8px", display:"flex", alignItems:"flex-start", gap:"10px" }}>
+        <MugunghwaIcon size={32} color={T3} />
         <div>
-          <div style={{ fontWeight:800, fontSize:"11px", color:GD }}>Expert Tip</div>
-          <div style={{ fontSize:"11px", color:GD, lineHeight:1.7 }}>
+          <div style={{ fontWeight:800, fontSize:"11px", color:T1 }}>Expert Tip</div>
+          <div style={{ fontSize:"11px", color:T2, lineHeight:1.7 }}>
             Don't memorize all of these at once! Start with <strong>ㄺ (닭), ㅄ (없다), ㄻ (삶)</strong> — these three cover 80% of double batchim you'll meet at beginner level. The rest will come naturally through reading.
           </div>
         </div>
@@ -4020,18 +3883,18 @@ function KdramaPageEn({ slice, page }: { slice:[number,number]; page:number }) {
   return (
     <Page dir="ltr">
       <SHead title={`K-Drama Essentials 🎬 — Part ${page} of 2`} subtitle="Words you've heard 100 times — now read them in Hangul!" />
-      <div style={{ background:"#1a1a00", border:`2px solid ${Y}`, borderRadius:"8px", padding:"7px 12px", marginBottom:"8px", fontSize:"11px", color:`rgba(212,175,55,0.9)`, fontWeight:700 }}>
+      <div style={{ borderLeft:`3px solid ${Y}`, paddingLeft:"10px", marginBottom:"8px", fontSize:"11px", color:T2, fontWeight:700, background:SBG, padding:"7px 10px" }}>
         🎬 {page===1 ? "Core vocabulary — heard in almost every episode!" : "Advanced words — use these to sound like a native!"}
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"7px" }}>
         {KDRAMA_EN.slice(...slice).map(v=>(
-          <div key={v.k} style={{ background:"#f9f9f9", border:`2px solid ${Y}`, borderRadius:"10px", padding:"8px 10px", display:"flex", gap:"8px", alignItems:"flex-start", pageBreakInside:"avoid", breakInside:"avoid" }}>
+          <div key={v.k} style={{ background:"#fff", border:`1px solid ${BD}`, borderRadius:"8px", padding:"8px 10px", display:"flex", gap:"8px", alignItems:"flex-start", pageBreakInside:"avoid", breakInside:"avoid" }}>
             <div style={{ fontSize:"22px" }}>{v.emoji}</div>
             <div style={{ flex:1 }}>
-              <div style={{ fontSize:"22px", fontWeight:900, color:BK, background:Y, display:"inline-block", padding:"1px 8px", borderRadius:"6px", marginBottom:"2px" }}>{v.k}</div>
-              <div style={{ fontSize:"11px", fontWeight:700, color:"#777" }}>{v.r}</div>
-              <div style={{ fontSize:"11px", color:BK, fontWeight:700 }}>{v.m}</div>
-              <div style={{ fontSize:"11px", color:"#888", fontStyle:"italic" }}>{v.note}</div>
+              <div style={{ fontSize:"22px", fontWeight:900, color:T1, background:Y, display:"inline-block", padding:"1px 8px", borderRadius:"4px", marginBottom:"2px" }}>{v.k}</div>
+              <div style={{ fontSize:"11px", fontWeight:700, color:T3 }}>{v.r}</div>
+              <div style={{ fontSize:"11px", color:T1, fontWeight:700 }}>{v.m}</div>
+              <div style={{ fontSize:"11px", color:T3, fontStyle:"italic" }}>{v.note}</div>
             </div>
           </div>
         ))}
@@ -4046,8 +3909,8 @@ function PracticeEn() {
     <Page dir="ltr">
       <SHead title="Practice Exercises ✏️" subtitle="Test yourself!" />
       {/* Knowles self-assessment checklist */}
-      <div style={{ background:GL, border:`2px solid ${GD}`, borderRadius:"10px", padding:"10px 12px", marginBottom:"10px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:GD, marginBottom:"7px" }}>✅ Self-Assessment Checklist — Ready for the exercises?</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px 12px", marginBottom:"10px", background:SBG }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"7px" }}>✅ Self-Assessment Checklist — Ready for the exercises?</div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4px" }}>
           {[
             "I can pronounce all 14 consonants",
@@ -4058,8 +3921,8 @@ function PracticeEn() {
             "I understand the linking sound rule",
           ].map((item, i) => (
             <div key={i} style={{ display:"flex", gap:"7px", alignItems:"flex-start" }}>
-              <div style={{ width:"16px", height:"16px", border:`2px solid ${GD}`, borderRadius:"3px", flexShrink:0, marginTop:"1px" }} />
-              <span style={{ fontSize:"10px", color:GD, lineHeight:1.5 }}>{item}</span>
+              <div style={{ width:"15px", height:"15px", border:`1px solid ${BD}`, borderRadius:"3px", flexShrink:0, marginTop:"2px" }} />
+              <span style={{ fontSize:"10px", color:T2, lineHeight:1.5 }}>{item}</span>
             </div>
           ))}
         </div>
@@ -4067,55 +3930,55 @@ function PracticeEn() {
 
       <div style={{ display:"flex", gap:"8px", marginBottom:"8px" }}>
         {["Level 1 — /5","Level 2 — /5","Level 3 — /5"].map((l,i)=>(
-          <div key={i} style={{ flex:1, background:"#111", border:`1px solid ${Y}33`, borderRadius:"8px", padding:"6px", textAlign:"center" }}>
+          <div key={i} style={{ flex:1, border:`1px solid ${BD}`, borderRadius:"6px", padding:"6px", textAlign:"center", background:SBG }}>
             <div style={{ fontSize:"16px" }}>{"⭐".repeat(i+1)}</div>
-            <div style={{ fontSize:"10px", color:"#666", marginTop:"2px" }}>{l}</div>
+            <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>{l}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ background:BK, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>⭐ Level 1 Challenge — Spot the Sound</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", marginBottom:"8px", background:SBG }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>⭐ Level 1 Challenge — Spot the Sound</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"6px" }}>
           {[{q:"ㄱ",c:["n","m","g","h"]},{q:"ㄴ",c:["g","n","s","m"]},{q:"ㅁ",c:["h","b","m","r"]},{q:"ㅅ",c:["s","k","j","p"]},{q:"ㅎ",c:["m","h","n","g"]}].map((e,i)=>(
             <div key={i} style={{ textAlign:"center" }}>
-              <div style={{ fontSize:"30px", color:Y, fontWeight:900 }}>{e.q}</div>
+              <div style={{ fontSize:"28px", color:T1, fontWeight:900 }}>{e.q}</div>
               <div style={{ display:"flex", flexDirection:"column", gap:"2px", marginTop:"4px" }}>
-                {e.c.map(ch=><div key={ch} style={{ background:"#222", borderRadius:"4px", padding:"2px", fontSize:"11px", color:"#ccc" }}>{ch}</div>)}
+                {e.c.map(ch=><div key={ch} style={{ border:`1px solid ${BD}`, borderRadius:"3px", padding:"2px", fontSize:"11px", color:T2, background:"#fff" }}>{ch}</div>)}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>⭐⭐ Level 2 Challenge — Write the Romanization</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", marginBottom:"8px", background:SBG }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>⭐⭐ Level 2 Challenge — Write the Romanization</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"6px" }}>
           {[{k:"가방",a:"ga-bang"},{k:"사랑",a:"sa-rang"},{k:"한국",a:"han-guk"},{k:"친구",a:"chin-gu"},{k:"고마워",a:"go-ma-wo"}].map((e,i)=>(
             <div key={i} style={{ textAlign:"center" }}>
-              <div style={{ background:BK, borderRadius:"8px", padding:"8px 4px", fontSize:"20px", color:Y, fontWeight:900 }}>{e.k}</div>
+              <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"6px 4px", fontSize:"20px", color:T1, fontWeight:900, background:"#fff" }}>{e.k}</div>
               <div style={{ marginTop:"4px", border:"1px dashed #aaa", borderRadius:"4px", height:"20px", background:"#fff" }} />
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ background:"#f9f9f9", border:`2px solid #E6E600`, borderRadius:"10px", padding:"10px", marginBottom:"8px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"6px" }}>⭐⭐⭐ Level 3 Challenge — Build the Syllable</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", marginBottom:"8px", background:SBG }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>⭐⭐⭐ Level 3 Challenge — Build the Syllable</div>
         <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
           {[{eq:"ㅂ+ㅏ=?",a:"바"},{eq:"ㄴ+ㅗ=?",a:"노"},{eq:"ㅅ+ㅣ=?",a:"시"},{eq:"ㅎ+ㅏ=?",a:"하"},{eq:"ㄱ+ㅜ=?",a:"구"}].map((e,i)=>(
-            <div key={i} style={{ background:BK, borderRadius:"8px", padding:"8px 10px", textAlign:"center" }}>
-              <div style={{ fontSize:"12px", color:Y, fontWeight:700 }}>{e.eq}</div>
-              <div style={{ marginTop:"4px", border:`1px dashed ${Y}`, borderRadius:"4px", height:"28px", width:"38px", margin:"4px auto 0" }} />
+            <div key={i} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"8px 10px", textAlign:"center", background:"#fff" }}>
+              <div style={{ fontSize:"12px", color:T1, fontWeight:700 }}>{e.eq}</div>
+              <div style={{ marginTop:"4px", border:"1px dashed #aaa", borderRadius:"4px", height:"28px", width:"38px", margin:"4px auto 0" }} />
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ fontWeight:800, fontSize:"11px", color:BK, marginBottom:"5px" }}>✏️ Free Writing Grid</div>
+      <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"5px" }}>✏️ Free Writing Grid</div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(8,1fr)", gap:"3px" }}>
         {Array(32).fill(null).map((_,i)=>(
-          <div key={i} style={{ border:`1px solid ${Y}`, borderRadius:"4px", height:"30px", background:"#fffffe" }} />
+          <div key={i} style={{ border:`1px solid ${BD}`, borderRadius:"3px", height:"30px", background:"#fff" }} />
         ))}
       </div>
     </Page>
@@ -4145,36 +4008,36 @@ function AnswerEn() {
         ))}
       </div>
 
-      <div style={{ background:BK, borderRadius:"10px", padding:"10px", marginBottom:"10px" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"7px" }}>Quick Reference — All Consonants</div>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", marginBottom:"10px", background:SBG }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"7px" }}>Quick Reference — All Consonants</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"4px", marginBottom:"8px" }}>
           {CONSONANTS.map(c=>(
             <div key={c.char} style={{ textAlign:"center" }}>
-              <div style={{ fontSize:"22px", color:Y, fontWeight:900, lineHeight:1 }}>{c.char}</div>
-              <div style={{ fontSize:"11px", color:"#aaa" }}>{c.roman}</div>
+              <div style={{ fontSize:"22px", color:T1, fontWeight:900, lineHeight:1 }}>{c.char}</div>
+              <div style={{ fontSize:"10px", color:T3 }}>{c.roman}</div>
               <div style={{ fontSize:"12px" }}>{c.emoji}</div>
             </div>
           ))}
         </div>
-        <div style={{ height:"1px", background:"#333", margin:"6px 0" }} />
-        <div style={{ fontSize:"11px", fontWeight:800, color:Y, marginBottom:"6px" }}>All Vowels</div>
+        <div style={{ height:"1px", background:BD, margin:"6px 0" }} />
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>All Vowels</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(10,1fr)", gap:"4px" }}>
           {VOWELS.map(v=>(
             <div key={v.char} style={{ textAlign:"center" }}>
-              <div style={{ fontSize:"20px", color:"#fff9c4", fontWeight:900, lineHeight:1 }}>{v.char}</div>
-              <div style={{ fontSize:"11px", color:"#aaa" }}>{v.roman}</div>
+              <div style={{ fontSize:"20px", color:T1, fontWeight:900, lineHeight:1 }}>{v.char}</div>
+              <div style={{ fontSize:"10px", color:T3 }}>{v.roman}</div>
               <div style={{ fontSize:"11px" }}>{v.emoji}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ border:`4px solid ${Y}`, borderRadius:"14px", padding:"16px", textAlign:"center", background:`linear-gradient(135deg,${YL} 0%,#fff 60%,${YL} 100%)` }}>
+      <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"16px", textAlign:"center", background:SBG }}>
         <div style={{ fontSize:"32px", marginBottom:"4px" }}>🏆</div>
-        <div style={{ fontSize:"20px", fontWeight:900, color:BK }}>Hangul Level 1 — Complete!</div>
-        <div style={{ margin:"12px auto", width:"220px", borderBottom:`2px solid ${BK}` }} />
-        <div style={{ fontSize:"11px", color:"#888" }}>Student Name</div>
-        <div style={{ marginTop:"10px", fontSize:"11px", color:"#aaa" }}>Klovers Korean Academy • klovers.academy • 2025</div>
+        <div style={{ fontSize:"20px", fontWeight:900, color:T1 }}>Hangul Level 1 — Complete!</div>
+        <div style={{ margin:"12px auto", width:"220px", borderBottom:`2px solid ${BD}` }} />
+        <div style={{ fontSize:"11px", color:T3 }}>Student Name</div>
+        <div style={{ marginTop:"10px", fontSize:"11px", color:T3 }}>Klovers Korean Academy • klovers.academy • 2025</div>
       </div>
     </Page>
   );
@@ -4413,20 +4276,20 @@ function VocabAppendixAr() {
   return (
     <Page dir="rtl">
       <SHead title="ملحق المفردات — أكثر ٥٠ كلمة شيوعاً 📖" subtitle="مرتبة حسب التكرار في اللغة الكورية اليومية" />
-      <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"8px", padding:"7px 12px", fontSize:"11px", color:BK2, marginBottom:"8px" }}>
+      <div style={{ borderLeft:`3px solid ${Y}`, paddingLeft:"10px", marginBottom:"8px", fontSize:"11px", color:T2, background:SBG, padding:"7px 10px" }}>
         💡 هذه الكلمات تُشكّل أكثر من <strong>٧٠٪</strong> من اللغة الكورية اليومية. احفظ أول ٢٠ كلمة وستفهم نصف ما يُقال حولك!
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"5px" }}>
         {words.map(w => (
           <div key={w.freq} style={{
-            background: w.freq <= 10 ? BK : w.freq <= 25 ? "#1a1a1a" : "#f9f9f9",
-            border: `1px solid ${w.freq <= 10 ? Y : w.freq <= 25 ? Y+"44" : "#e5e5e5"}`,
-            borderRadius:"8px", padding:"6px 5px", textAlign:"center",
+            background: w.freq <= 10 ? SBG : "#fff",
+            border: `1px solid ${w.freq <= 10 ? T1 : BD}`,
+            borderRadius:"6px", padding:"6px 5px", textAlign:"center",
           }}>
-            <div style={{ fontSize:"9px", color: w.freq <= 25 ? "#555" : "#aaa", marginBottom:"1px" }}>#{w.freq}</div>
-            <div style={{ fontSize:"16px", fontWeight:900, color: w.freq <= 25 ? Y : BK, lineHeight:1 }}>{w.k}</div>
-            <div style={{ fontSize:"9px", color: w.freq <= 25 ? "#aaa" : "#888", marginTop:"1px" }}>{w.r}</div>
-            <div style={{ fontSize:"9px", color: w.freq <= 25 ? "#ccc" : "#666", marginTop:"1px" }}>{w.m}</div>
+            <div style={{ fontSize:"9px", color: w.freq <= 10 ? T3 : T3, marginBottom:"1px" }}>#{w.freq}</div>
+            <div style={{ fontSize:"16px", fontWeight:900, color: T1, lineHeight:1 }}>{w.k}</div>
+            <div style={{ fontSize:"9px", color: T3, marginTop:"1px" }}>{w.r}</div>
+            <div style={{ fontSize:"9px", color: T2, marginTop:"1px" }}>{w.m}</div>
           </div>
         ))}
       </div>
@@ -4490,20 +4353,20 @@ function VocabAppendixEn() {
   return (
     <Page dir="ltr">
       <SHead title="Vocabulary Appendix — Top 50 Most Common Words 📖" subtitle="Ranked by frequency in everyday Korean speech" />
-      <div style={{ background:YL, border:`2px solid ${Y}`, borderRadius:"8px", padding:"7px 12px", fontSize:"11px", color:BK2, marginBottom:"8px" }}>
+      <div style={{ borderLeft:`3px solid ${Y}`, paddingLeft:"10px", marginBottom:"8px", fontSize:"11px", color:T2, background:SBG, padding:"7px 10px" }}>
         💡 These 50 words make up over <strong>70%</strong> of everyday Korean. Master the first 20 and you'll understand half of what's said around you!
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"5px" }}>
         {words.map(w => (
           <div key={w.freq} style={{
-            background: w.freq <= 10 ? BK : w.freq <= 25 ? "#1a1a1a" : "#f9f9f9",
-            border: `1px solid ${w.freq <= 10 ? Y : w.freq <= 25 ? Y+"44" : "#e5e5e5"}`,
-            borderRadius:"8px", padding:"6px 5px", textAlign:"center",
+            background: w.freq <= 10 ? SBG : "#fff",
+            border: `1px solid ${w.freq <= 10 ? T1 : BD}`,
+            borderRadius:"6px", padding:"6px 5px", textAlign:"center",
           }}>
-            <div style={{ fontSize:"9px", color: w.freq <= 25 ? "#555" : "#aaa", marginBottom:"1px" }}>#{w.freq}</div>
-            <div style={{ fontSize:"16px", fontWeight:900, color: w.freq <= 25 ? Y : BK, lineHeight:1 }}>{w.k}</div>
-            <div style={{ fontSize:"9px", color: w.freq <= 25 ? "#aaa" : "#888", marginTop:"1px" }}>{w.r}</div>
-            <div style={{ fontSize:"9px", color: w.freq <= 25 ? "#ccc" : "#666", marginTop:"1px" }}>{w.m}</div>
+            <div style={{ fontSize:"9px", color: T3, marginBottom:"1px" }}>#{w.freq}</div>
+            <div style={{ fontSize:"16px", fontWeight:900, color: T1, lineHeight:1 }}>{w.k}</div>
+            <div style={{ fontSize:"9px", color: T3, marginTop:"1px" }}>{w.r}</div>
+            <div style={{ fontSize:"9px", color: T2, marginTop:"1px" }}>{w.m}</div>
           </div>
         ))}
       </div>
