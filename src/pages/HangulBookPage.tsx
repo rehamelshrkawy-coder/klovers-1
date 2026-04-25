@@ -191,6 +191,53 @@ function SceneCover({ h = 240, radius = 0 }: { h?: number; radius?: number }) {
           <stop offset="0%" stopColor="#ffff00" stopOpacity="0.18"/>
           <stop offset="100%" stopColor="#ffff00" stopOpacity="0"/>
         </radialGradient>
+        {/* 3D character gradients — cover */}
+        <radialGradient id="faceGrad_cv" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stopColor="#fde8cc"/>
+          <stop offset="60%" stopColor="#f5c5a3"/>
+          <stop offset="100%" stopColor="#d4956a"/>
+        </radialGradient>
+        <radialGradient id="blushGrad_cv" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#ff9999" stopOpacity="0.6"/>
+          <stop offset="100%" stopColor="#ff6666" stopOpacity="0"/>
+        </radialGradient>
+        <linearGradient id="tealGrad_cv" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#40d4ca"/>
+          <stop offset="40%" stopColor="#20B2AA"/>
+          <stop offset="100%" stopColor="#0d6e68"/>
+        </linearGradient>
+        <linearGradient id="burgGrad_cv" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#a03060"/>
+          <stop offset="40%" stopColor="#7B1A3A"/>
+          <stop offset="100%" stopColor="#3d0d1d"/>
+        </linearGradient>
+        <linearGradient id="hairGrad_cv" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#3a3a3a"/>
+          <stop offset="30%" stopColor="#1a1a1a"/>
+          <stop offset="100%" stopColor="#080808"/>
+        </linearGradient>
+        <radialGradient id="foxGrad_cv" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stopColor="#e8904a"/>
+          <stop offset="55%" stopColor="#D2691E"/>
+          <stop offset="100%" stopColor="#8a4010"/>
+        </radialGradient>
+        <linearGradient id="pantsGrad_cv" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#5a6590"/>
+          <stop offset="50%" stopColor="#3a4570"/>
+          <stop offset="100%" stopColor="#1e2540"/>
+        </linearGradient>
+        <linearGradient id="jeoGrad_cv" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff"/>
+          <stop offset="50%" stopColor="#fff8f0"/>
+          <stop offset="100%" stopColor="#e8e0d5"/>
+        </linearGradient>
+        <filter id="shadow_cv" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="3" dy="4" stdDeviation="4" floodColor="#000" floodOpacity="0.35"/>
+        </filter>
+        <radialGradient id="groundShadow_cv" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#000000" stopOpacity="0.3"/>
+          <stop offset="100%" stopColor="#000000" stopOpacity="0"/>
+        </radialGradient>
       </defs>
       {/* Sky */}
       <rect width="900" height="360" fill="url(#cvSky)"/>
@@ -222,75 +269,90 @@ function SceneCover({ h = 240, radius = 0 }: { h?: number; radius?: number }) {
           <line x1={sx} y1={sy-12} x2={sx} y2={sy+12} stroke="#ffff00" strokeWidth="1.5" opacity="0.4"/>
         </g>
       ))}
-      {/* JUNHO (left, large) */}
-      <ellipse cx="295" cy="348" rx="58" ry="12" fill="#ffff00" opacity="0.07"/>
-      <path d="M268 220 L260 345 L285 345 L290 270 L298 270 L303 345 L328 345 L320 220Z" fill="#3a4570"/>
-      <ellipse cx="268" cy="346" rx="18" ry="7" fill="#1a1508"/>
-      <ellipse cx="316" cy="346" rx="18" ry="7" fill="#1a1508"/>
-      <path d="M258 108 L248 225 L344 225 L334 108Z" fill="#20B2AA"/>
-      <rect x="248" y="200" width="96" height="14" rx="5" fill="#8B1010"/>
-      <path d="M291 108 L278 140" stroke="#fff" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <path d="M291 108 L304 140" stroke="#fff" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <path d="M248 130 L212 190 L228 200 L262 142Z" fill="#1a9090"/>
-      <ellipse cx="215" cy="196" rx="14" ry="14" fill="#f5c5a3"/>
-      <path d="M334 125 L368 170 L380 162 L348 116Z" fill="#1a9090"/>
-      <path d="M368 164 Q392 152 416 164 Q420 190 392 200 Q364 190 368 164Z" fill="#8B6408"/>
-      <path d="M366 168 Q392 158 418 168" fill="none" stroke="#5a3800" strokeWidth="3"/>
-      <circle cx="392" cy="176" r="22" fill="#D2691E"/>
-      <path d="M378 162 L371 142 L385 160Z" fill="#D2691E"/>
-      <path d="M406 162 L413 142 L398 160Z" fill="#D2691E"/>
-      <ellipse cx="392" cy="184" rx="14" ry="10" fill="#f0b090"/>
-      <circle cx="385" cy="172" r="5" fill="#111"/>
-      <circle cx="399" cy="172" r="5" fill="#111"/>
-      <circle cx="386" cy="170" r="2" fill="#fff"/>
-      <circle cx="400" cy="170" r="2" fill="#fff"/>
-      <circle cx="392" cy="180" r="3" fill="#8B0000"/>
-      <path d="M387 185 Q392 191 397 185" fill="none" stroke="#8B0000" strokeWidth="2" strokeLinecap="round"/>
-      <rect x="283" y="90" width="18" height="26" rx="7" fill="#f5c5a3"/>
-      <ellipse cx="292" cy="66" rx="44" ry="46" fill="#f5c5a3"/>
-      <path d="M250 55 Q253 20 292 17 Q331 20 334 55 Q325 36 292 33 Q259 36 250 55Z" fill="#1a1a1a"/>
-      <path d="M250 55 Q242 72 246 85" fill="none" stroke="#1a1a1a" strokeWidth="13" strokeLinecap="round"/>
-      <path d="M334 55 Q342 72 338 85" fill="none" stroke="#1a1a1a" strokeWidth="13" strokeLinecap="round"/>
-      <path d="M272 64 Q278 69 284 64" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M300 64 Q306 69 312 64" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M268 52 Q276 47 283 51" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M301 51 Q308 47 316 52" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
-      <circle cx="256" cy="78" r="13" fill="#ffb3a7" opacity="0.38"/>
-      <circle cx="328" cy="78" r="13" fill="#ffb3a7" opacity="0.38"/>
-      <path d="M278 80 Q292 90 306 80" fill="none" stroke="#8B4513" strokeWidth="2.5" strokeLinecap="round"/>
-      {/* MIYA (right, large) */}
-      <ellipse cx="610" cy="348" rx="52" ry="12" fill="#ffff00" opacity="0.07"/>
-      <path d="M578 140 Q568 255 582 345 L638 345 Q652 255 642 140Z" fill="#7B1A3A"/>
-      <path d="M570 255 Q610 262 650 255" fill="none" stroke="#a03060" strokeWidth="2.5" opacity="0.6"/>
-      <path d="M568 278 Q610 285 652 278" fill="none" stroke="#a03060" strokeWidth="2" opacity="0.4"/>
-      <path d="M578 110 L572 145 L648 145 L642 110Z" fill="#fff8f0"/>
-      <path d="M610 110 L598 132" stroke="#20B2AA" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <path d="M610 110 L622 132" stroke="#20B2AA" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <path d="M594 134 L602 145 L610 140 L618 145 L626 134 L618 141 L610 138 L602 141Z" fill="#C8102E"/>
-      <path d="M572 118 L540 165 L556 175 L582 130Z" fill="#fff0e8"/>
-      <ellipse cx="542" cy="172" rx="13" ry="13" fill="#f5c5a3"/>
-      <path d="M642 118 L662 152 L650 160 L635 128Z" fill="#fff0e8"/>
-      <path d="M660 150 Q670 130 690 120 Q700 140 690 160 Q670 170 660 150Z" fill="#ffff00" opacity="0.8"/>
-      <path d="M660 150 Q670 130 690 120" fill="none" stroke="#8B6914" strokeWidth="1.5" opacity="0.6"/>
-      <path d="M660 150 Q672 135 690 128" fill="none" stroke="#8B6914" strokeWidth="1" opacity="0.4"/>
-      <path d="M660 150 Q674 140 690 136" fill="none" stroke="#8B6914" strokeWidth="1" opacity="0.3"/>
-      <ellipse cx="592" cy="346" rx="16" ry="7" fill="#1a1508"/>
-      <ellipse cx="628" cy="346" rx="16" ry="7" fill="#1a1508"/>
-      <rect x="602" y="92" width="16" height="22" rx="6" fill="#f5c5a3"/>
-      <ellipse cx="610" cy="70" rx="40" ry="43" fill="#f5c5a3"/>
-      <path d="M572 60 Q574 28 610 25 Q646 28 648 60 Q640 42 610 40 Q580 42 572 60Z" fill="#1a1a1a"/>
-      <circle cx="610" cy="27" r="18" fill="#1a1a1a"/>
-      <line x1="595" y1="20" x2="616" y2="16" stroke="#C8102E" strokeWidth="5" strokeLinecap="round"/>
-      <circle cx="595" cy="20" r="7" fill="#C8102E"/>
-      <path d="M572 60 Q564 76 567 88" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round"/>
-      <path d="M648 60 Q656 76 653 88" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round"/>
-      <path d="M592 66 Q598 72 604 66" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M616 66 Q622 72 628 66" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M589 54 Q597 49 604 53" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M616 53 Q623 49 631 54" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
-      <circle cx="576" cy="80" r="12" fill="#ffb3a7" opacity="0.42"/>
-      <circle cx="644" cy="80" r="12" fill="#ffb3a7" opacity="0.42"/>
-      <path d="M598 78 Q610 88 622 78" fill="none" stroke="#8B4513" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* JUNHO (left, large) — 3D */}
+      <ellipse cx="295" cy="350" rx="62" ry="14" fill="url(#groundShadow_cv)"/>
+      <g filter="url(#shadow_cv)">
+        <path d="M268 220 L260 345 L285 345 L290 270 L298 270 L303 345 L328 345 L320 220Z" fill="url(#pantsGrad_cv)"/>
+        <ellipse cx="268" cy="346" rx="18" ry="7" fill="#1a1508"/>
+        <ellipse cx="316" cy="346" rx="18" ry="7" fill="#1a1508"/>
+        <path d="M258 108 L248 225 L344 225 L334 108Z" fill="url(#tealGrad_cv)"/>
+        <rect x="248" y="200" width="96" height="14" rx="5" fill="#8B1010"/>
+        <path d="M291 108 L278 140" stroke="#40d4ca" strokeWidth="5" strokeLinecap="round" fill="none"/>
+        <path d="M291 108 L304 140" stroke="#40d4ca" strokeWidth="5" strokeLinecap="round" fill="none"/>
+        <path d="M248 130 L212 190 L228 200 L262 142Z" fill="url(#tealGrad_cv)"/>
+        <ellipse cx="215" cy="196" rx="14" ry="14" fill="url(#faceGrad_cv)"/>
+        <path d="M334 125 L368 170 L380 162 L348 116Z" fill="url(#tealGrad_cv)"/>
+        {/* Fox basket */}
+        <path d="M368 164 Q392 152 416 164 Q420 190 392 200 Q364 190 368 164Z" fill="#8B6408"/>
+        <path d="M366 168 Q392 158 418 168" fill="none" stroke="#5a3800" strokeWidth="3"/>
+        <circle cx="392" cy="176" r="22" fill="url(#foxGrad_cv)"/>
+        <path d="M378 162 L371 142 L385 160Z" fill="url(#foxGrad_cv)"/>
+        <path d="M406 162 L413 142 L398 160Z" fill="url(#foxGrad_cv)"/>
+        <ellipse cx="392" cy="184" rx="14" ry="10" fill="#f0b090"/>
+        <circle cx="385" cy="172" r="5" fill="#111"/>
+        <circle cx="399" cy="172" r="5" fill="#111"/>
+        <circle cx="386" cy="170" r="2.5" fill="#fff"/>
+        <circle cx="400" cy="170" r="2.5" fill="#fff"/>
+        <circle cx="392" cy="180" r="3" fill="#8B0000"/>
+        <path d="M387 185 Q392 191 397 185" fill="none" stroke="#8B0000" strokeWidth="2" strokeLinecap="round"/>
+        {/* Junho head */}
+        <rect x="283" y="90" width="18" height="26" rx="7" fill="url(#faceGrad_cv)"/>
+        <ellipse cx="292" cy="66" rx="44" ry="46" fill="url(#faceGrad_cv)"/>
+        {/* Specular highlight on head */}
+        <ellipse cx="278" cy="48" rx="14" ry="10" fill="#fff" opacity="0.35"/>
+        <path d="M250 55 Q253 20 292 17 Q331 20 334 55 Q325 36 292 33 Q259 36 250 55Z" fill="url(#hairGrad_cv)"/>
+        {/* Hair shine */}
+        <path d="M258 46 Q280 36 310 40" fill="none" stroke="#6a6a6a" strokeWidth="4" strokeLinecap="round" opacity="0.4"/>
+        <path d="M250 55 Q242 72 246 85" fill="none" stroke="url(#hairGrad_cv)" strokeWidth="13" strokeLinecap="round"/>
+        <path d="M334 55 Q342 72 338 85" fill="none" stroke="url(#hairGrad_cv)" strokeWidth="13" strokeLinecap="round"/>
+        <path d="M272 64 Q278 69 284 64" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
+        <path d="M300 64 Q306 69 312 64" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
+        <path d="M268 52 Q276 47 283 51" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
+        <path d="M301 51 Q308 47 316 52" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
+        <circle cx="256" cy="78" r="15" fill="url(#blushGrad_cv)"/>
+        <circle cx="328" cy="78" r="15" fill="url(#blushGrad_cv)"/>
+        <path d="M278 80 Q292 90 306 80" fill="none" stroke="#8B4513" strokeWidth="2.5" strokeLinecap="round"/>
+      </g>
+      {/* MIYA (right, large) — 3D */}
+      <ellipse cx="610" cy="350" rx="56" ry="14" fill="url(#groundShadow_cv)"/>
+      <g filter="url(#shadow_cv)">
+        <path d="M578 140 Q568 255 582 345 L638 345 Q652 255 642 140Z" fill="url(#burgGrad_cv)"/>
+        <path d="M570 255 Q610 262 650 255" fill="none" stroke="#a03060" strokeWidth="2.5" opacity="0.6"/>
+        <path d="M568 278 Q610 285 652 278" fill="none" stroke="#a03060" strokeWidth="2" opacity="0.4"/>
+        <path d="M578 110 L572 145 L648 145 L642 110Z" fill="url(#jeoGrad_cv)"/>
+        <path d="M610 110 L598 132" stroke="#40d4ca" strokeWidth="6" strokeLinecap="round" fill="none"/>
+        <path d="M610 110 L622 132" stroke="#40d4ca" strokeWidth="6" strokeLinecap="round" fill="none"/>
+        <path d="M594 134 L602 145 L610 140 L618 145 L626 134 L618 141 L610 138 L602 141Z" fill="#C8102E"/>
+        <path d="M572 118 L540 165 L556 175 L582 130Z" fill="url(#jeoGrad_cv)"/>
+        <ellipse cx="542" cy="172" rx="13" ry="13" fill="url(#faceGrad_cv)"/>
+        <path d="M642 118 L662 152 L650 160 L635 128Z" fill="url(#jeoGrad_cv)"/>
+        <path d="M660 150 Q670 130 690 120 Q700 140 690 160 Q670 170 660 150Z" fill="#ffff00" opacity="0.8"/>
+        <path d="M660 150 Q670 130 690 120" fill="none" stroke="#8B6914" strokeWidth="1.5" opacity="0.6"/>
+        <path d="M660 150 Q672 135 690 128" fill="none" stroke="#8B6914" strokeWidth="1" opacity="0.4"/>
+        <path d="M660 150 Q674 140 690 136" fill="none" stroke="#8B6914" strokeWidth="1" opacity="0.3"/>
+        <ellipse cx="592" cy="346" rx="16" ry="7" fill="#1a1508"/>
+        <ellipse cx="628" cy="346" rx="16" ry="7" fill="#1a1508"/>
+        {/* Miya head */}
+        <rect x="602" y="92" width="16" height="22" rx="6" fill="url(#faceGrad_cv)"/>
+        <ellipse cx="610" cy="70" rx="40" ry="43" fill="url(#faceGrad_cv)"/>
+        {/* Specular highlight on head */}
+        <ellipse cx="596" cy="52" rx="12" ry="9" fill="#fff" opacity="0.35"/>
+        <path d="M572 60 Q574 28 610 25 Q646 28 648 60 Q640 42 610 40 Q580 42 572 60Z" fill="url(#hairGrad_cv)"/>
+        <circle cx="610" cy="27" r="18" fill="url(#hairGrad_cv)"/>
+        {/* Hair shine */}
+        <path d="M580 50 Q600 40 628 44" fill="none" stroke="#6a6a6a" strokeWidth="3" strokeLinecap="round" opacity="0.4"/>
+        <line x1="595" y1="20" x2="616" y2="16" stroke="#C8102E" strokeWidth="5" strokeLinecap="round"/>
+        <circle cx="595" cy="20" r="7" fill="#C8102E"/>
+        <path d="M572 60 Q564 76 567 88" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round"/>
+        <path d="M648 60 Q656 76 653 88" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round"/>
+        <path d="M592 66 Q598 72 604 66" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
+        <path d="M616 66 Q622 72 628 66" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
+        <path d="M589 54 Q597 49 604 53" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
+        <path d="M616 53 Q623 49 631 54" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
+        <circle cx="576" cy="80" r="14" fill="url(#blushGrad_cv)"/>
+        <circle cx="644" cy="80" r="14" fill="url(#blushGrad_cv)"/>
+        <path d="M598 78 Q610 88 622 78" fill="none" stroke="#8B4513" strokeWidth="2.5" strokeLinecap="round"/>
+      </g>
       {/* Welcome banner */}
       <rect x="280" y="290" width="340" height="52" rx="14" fill="#ffff00"/>
       <text x="450" y="316" textAnchor="middle" fontSize="18" fontWeight="900" fill="#111">안녕하세요! Welcome!</text>
@@ -307,6 +369,53 @@ function SceneClassroom({ h = 280, radius = 0 }: { h?: number; radius?: number }
         <radialGradient id="clsGlow" cx="50%" cy="60%" r="55%">
           <stop offset="0%" stopColor="#ffff00" stopOpacity="0.1"/>
           <stop offset="100%" stopColor="#ffff00" stopOpacity="0"/>
+        </radialGradient>
+        {/* 3D character gradients — classroom */}
+        <radialGradient id="faceGrad_cls" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stopColor="#fde8cc"/>
+          <stop offset="60%" stopColor="#f5c5a3"/>
+          <stop offset="100%" stopColor="#d4956a"/>
+        </radialGradient>
+        <radialGradient id="blushGrad_cls" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#ff9999" stopOpacity="0.6"/>
+          <stop offset="100%" stopColor="#ff6666" stopOpacity="0"/>
+        </radialGradient>
+        <linearGradient id="tealGrad_cls" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#40d4ca"/>
+          <stop offset="40%" stopColor="#20B2AA"/>
+          <stop offset="100%" stopColor="#0d6e68"/>
+        </linearGradient>
+        <linearGradient id="burgGrad_cls" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#a03060"/>
+          <stop offset="40%" stopColor="#7B1A3A"/>
+          <stop offset="100%" stopColor="#3d0d1d"/>
+        </linearGradient>
+        <linearGradient id="hairGrad_cls" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#3a3a3a"/>
+          <stop offset="30%" stopColor="#1a1a1a"/>
+          <stop offset="100%" stopColor="#080808"/>
+        </linearGradient>
+        <radialGradient id="foxGrad_cls" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stopColor="#e8904a"/>
+          <stop offset="55%" stopColor="#D2691E"/>
+          <stop offset="100%" stopColor="#8a4010"/>
+        </radialGradient>
+        <linearGradient id="pantsGrad_cls" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#5a6590"/>
+          <stop offset="50%" stopColor="#3a4570"/>
+          <stop offset="100%" stopColor="#1e2540"/>
+        </linearGradient>
+        <linearGradient id="jeoGrad_cls" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff"/>
+          <stop offset="50%" stopColor="#fff8f0"/>
+          <stop offset="100%" stopColor="#e8e0d5"/>
+        </linearGradient>
+        <filter id="shadow_cls" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="3" dy="4" stdDeviation="4" floodColor="#000" floodOpacity="0.35"/>
+        </filter>
+        <radialGradient id="groundShadow_cls" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#000000" stopOpacity="0.3"/>
+          <stop offset="100%" stopColor="#000000" stopOpacity="0"/>
         </radialGradient>
       </defs>
       <rect width="900" height="360" fill="#080808"/>
@@ -342,64 +451,72 @@ function SceneClassroom({ h = 280, radius = 0 }: { h?: number; radius?: number }
       <rect x="330" y="258" width="20" height="10" rx="3" fill="#333"/>
       <line x1="344" y1="255" x2="350" y2="240" stroke="#8B6914" strokeWidth="2.5" strokeLinecap="round"/>
       <path d="M344 255 L347 261 L340 261Z" fill="#111"/>
-      <circle cx="138" cy="255" r="18" fill="#D2691E"/>
-      <path d="M126 243 L120 228 L132 242Z" fill="#D2691E"/>
-      <path d="M150 243 L156 228 L144 242Z" fill="#D2691E"/>
+      <circle cx="138" cy="255" r="18" fill="url(#foxGrad_cls)"/>
+      <path d="M126 243 L120 228 L132 242Z" fill="url(#foxGrad_cls)"/>
+      <path d="M150 243 L156 228 L144 242Z" fill="url(#foxGrad_cls)"/>
       <ellipse cx="138" cy="261" rx="11" ry="8" fill="#f0b090"/>
       <circle cx="132" cy="253" r="4" fill="#111"/>
       <circle cx="144" cy="253" r="4" fill="#111"/>
       <circle cx="133" cy="251" r="1.5" fill="#fff"/>
       <circle cx="145" cy="251" r="1.5" fill="#fff"/>
       <path d="M133 260 Q138 265 143 260" fill="none" stroke="#8B0000" strokeWidth="2" strokeLinecap="round"/>
-      {/* JUNHO seated left */}
-      <ellipse cx="248" cy="356" rx="60" ry="10" fill="#ffff00" opacity="0.06"/>
-      <path d="M220 240 L214 290 L250 290 L254 255 L260 255 L264 290 L296 290 L290 240Z" fill="#3a4570"/>
-      <path d="M210 115 L202 248 L298 248 L290 115Z" fill="#20B2AA"/>
-      <rect x="202" y="226" width="96" height="14" rx="5" fill="#8B1010"/>
-      <path d="M250 115 L238 150" stroke="#fff" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <path d="M250 115 L262 150" stroke="#fff" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <path d="M290 135 L380 190 L388 180 L296 125Z" fill="#1a9090"/>
-      <ellipse cx="385" cy="185" rx="12" ry="12" fill="#f5c5a3"/>
-      <path d="M202 148 L175 210 L190 218 L216 158Z" fill="#1a9090"/>
-      <ellipse cx="178" cy="215" rx="11" ry="11" fill="#f5c5a3"/>
-      <rect x="242" y="97" width="16" height="22" rx="6" fill="#f5c5a3"/>
-      <ellipse cx="250" cy="74" rx="44" ry="46" fill="#f5c5a3"/>
-      <path d="M208 62 Q211 26 250 23 Q289 26 292 62 Q283 42 250 39 Q217 42 208 62Z" fill="#1a1a1a"/>
-      <path d="M208 62 Q200 79 203 93" fill="none" stroke="#1a1a1a" strokeWidth="13" strokeLinecap="round"/>
-      <path d="M292 62 Q300 79 297 93" fill="none" stroke="#1a1a1a" strokeWidth="13" strokeLinecap="round"/>
-      <path d="M226 57 Q234 50 242 55" fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M258 55 Q266 50 274 57" fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M226 68 Q233 75 240 68" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M260 68 Q267 75 274 68" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
-      <circle cx="212" cy="86" r="12" fill="#ffb3a7" opacity="0.38"/>
-      <circle cx="288" cy="86" r="12" fill="#ffb3a7" opacity="0.38"/>
-      {/* MIYA seated right */}
-      <ellipse cx="656" cy="356" rx="55" ry="10" fill="#ffff00" opacity="0.06"/>
-      <path d="M622 165 Q614 265 630 295 L682 295 Q698 265 690 165Z" fill="#7B1A3A"/>
-      <path d="M614 272 Q655 280 696 272" fill="none" stroke="#a03060" strokeWidth="2.5" opacity="0.5"/>
-      <path d="M622 130 L618 170 L694 170 L690 130Z" fill="#fff8f0"/>
-      <path d="M656 130 L644 158" stroke="#20B2AA" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <path d="M656 130 L668 158" stroke="#20B2AA" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <path d="M640 161 L648 172 L656 167 L664 172 L672 161 L664 168 L656 165 L648 168Z" fill="#C8102E"/>
-      <path d="M618 142 L590 186 L604 196 L628 155Z" fill="#fff0e8"/>
-      <ellipse cx="592" cy="193" rx="12" ry="12" fill="#f5c5a3"/>
-      <path d="M690 142 L720 175 L710 183 L684 152Z" fill="#fff0e8"/>
-      <line x1="718" y1="173" x2="730" y2="152" stroke="#8B6914" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M718 173 L722 183 L712 183Z" fill="#111"/>
-      <rect x="648" y="112" width="16" height="22" rx="6" fill="#f5c5a3"/>
-      <ellipse cx="656" cy="88" rx="40" ry="43" fill="#f5c5a3"/>
-      <path d="M618 78 Q620 46 656 43 Q692 46 694 78 Q686 60 656 58 Q626 60 618 78Z" fill="#1a1a1a"/>
-      <circle cx="656" cy="45" r="18" fill="#1a1a1a"/>
-      <line x1="640" y1="38" x2="661" y2="34" stroke="#C8102E" strokeWidth="5" strokeLinecap="round"/>
-      <circle cx="640" cy="38" r="7" fill="#C8102E"/>
-      <path d="M618 78 Q610 96 613 110" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round"/>
-      <path d="M694 78 Q702 96 699 110" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round"/>
-      <path d="M636 82 Q643 89 650 82" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M662 82 Q669 89 676 82" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M633 68 Q641 62 649 67" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M663 67 Q671 62 679 68" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
-      <circle cx="622" cy="99" r="11" fill="#ffb3a7" opacity="0.4"/>
-      <circle cx="690" cy="99" r="11" fill="#ffb3a7" opacity="0.4"/>
+      {/* JUNHO seated left — 3D */}
+      <ellipse cx="248" cy="358" rx="64" ry="12" fill="url(#groundShadow_cls)"/>
+      <g filter="url(#shadow_cls)">
+        <path d="M220 240 L214 290 L250 290 L254 255 L260 255 L264 290 L296 290 L290 240Z" fill="url(#pantsGrad_cls)"/>
+        <path d="M210 115 L202 248 L298 248 L290 115Z" fill="url(#tealGrad_cls)"/>
+        <rect x="202" y="226" width="96" height="14" rx="5" fill="#8B1010"/>
+        <path d="M250 115 L238 150" stroke="#40d4ca" strokeWidth="5" strokeLinecap="round" fill="none"/>
+        <path d="M250 115 L262 150" stroke="#40d4ca" strokeWidth="5" strokeLinecap="round" fill="none"/>
+        <path d="M290 135 L380 190 L388 180 L296 125Z" fill="url(#tealGrad_cls)"/>
+        <ellipse cx="385" cy="185" rx="12" ry="12" fill="url(#faceGrad_cls)"/>
+        <path d="M202 148 L175 210 L190 218 L216 158Z" fill="url(#tealGrad_cls)"/>
+        <ellipse cx="178" cy="215" rx="11" ry="11" fill="url(#faceGrad_cls)"/>
+        <rect x="242" y="97" width="16" height="22" rx="6" fill="url(#faceGrad_cls)"/>
+        <ellipse cx="250" cy="74" rx="44" ry="46" fill="url(#faceGrad_cls)"/>
+        <ellipse cx="236" cy="56" rx="13" ry="9" fill="#fff" opacity="0.35"/>
+        <path d="M208 62 Q211 26 250 23 Q289 26 292 62 Q283 42 250 39 Q217 42 208 62Z" fill="url(#hairGrad_cls)"/>
+        <path d="M216 52 Q238 42 268 46" fill="none" stroke="#6a6a6a" strokeWidth="4" strokeLinecap="round" opacity="0.4"/>
+        <path d="M208 62 Q200 79 203 93" fill="none" stroke="#1a1a1a" strokeWidth="13" strokeLinecap="round"/>
+        <path d="M292 62 Q300 79 297 93" fill="none" stroke="#1a1a1a" strokeWidth="13" strokeLinecap="round"/>
+        <path d="M226 57 Q234 50 242 55" fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M258 55 Q266 50 274 57" fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M226 68 Q233 75 240 68" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
+        <path d="M260 68 Q267 75 274 68" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
+        <circle cx="212" cy="86" r="14" fill="url(#blushGrad_cls)"/>
+        <circle cx="288" cy="86" r="14" fill="url(#blushGrad_cls)"/>
+      </g>
+      {/* MIYA seated right — 3D */}
+      <ellipse cx="656" cy="358" rx="58" ry="12" fill="url(#groundShadow_cls)"/>
+      <g filter="url(#shadow_cls)">
+        <path d="M622 165 Q614 265 630 295 L682 295 Q698 265 690 165Z" fill="url(#burgGrad_cls)"/>
+        <path d="M614 272 Q655 280 696 272" fill="none" stroke="#a03060" strokeWidth="2.5" opacity="0.5"/>
+        <path d="M622 130 L618 170 L694 170 L690 130Z" fill="url(#jeoGrad_cls)"/>
+        <path d="M656 130 L644 158" stroke="#40d4ca" strokeWidth="6" strokeLinecap="round" fill="none"/>
+        <path d="M656 130 L668 158" stroke="#40d4ca" strokeWidth="6" strokeLinecap="round" fill="none"/>
+        <path d="M640 161 L648 172 L656 167 L664 172 L672 161 L664 168 L656 165 L648 168Z" fill="#C8102E"/>
+        <path d="M618 142 L590 186 L604 196 L628 155Z" fill="url(#jeoGrad_cls)"/>
+        <ellipse cx="592" cy="193" rx="12" ry="12" fill="url(#faceGrad_cls)"/>
+        <path d="M690 142 L720 175 L710 183 L684 152Z" fill="url(#jeoGrad_cls)"/>
+        <line x1="718" y1="173" x2="730" y2="152" stroke="#8B6914" strokeWidth="3.5" strokeLinecap="round"/>
+        <path d="M718 173 L722 183 L712 183Z" fill="#111"/>
+        <rect x="648" y="112" width="16" height="22" rx="6" fill="url(#faceGrad_cls)"/>
+        <ellipse cx="656" cy="88" rx="40" ry="43" fill="url(#faceGrad_cls)"/>
+        <ellipse cx="641" cy="70" rx="12" ry="9" fill="#fff" opacity="0.35"/>
+        <path d="M618 78 Q620 46 656 43 Q692 46 694 78 Q686 60 656 58 Q626 60 618 78Z" fill="url(#hairGrad_cls)"/>
+        <circle cx="656" cy="45" r="18" fill="url(#hairGrad_cls)"/>
+        <path d="M626 62 Q646 52 674 56" fill="none" stroke="#6a6a6a" strokeWidth="3" strokeLinecap="round" opacity="0.4"/>
+        <line x1="640" y1="38" x2="661" y2="34" stroke="#C8102E" strokeWidth="5" strokeLinecap="round"/>
+        <circle cx="640" cy="38" r="7" fill="#C8102E"/>
+        <path d="M618 78 Q610 96 613 110" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round"/>
+        <path d="M694 78 Q702 96 699 110" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round"/>
+        <path d="M636 82 Q643 89 650 82" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
+        <path d="M662 82 Q669 89 676 82" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
+        <path d="M633 68 Q641 62 649 67" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
+        <path d="M663 67 Q671 62 679 68" fill="none" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round"/>
+        <circle cx="622" cy="99" r="13" fill="url(#blushGrad_cls)"/>
+        <circle cx="690" cy="99" r="13" fill="url(#blushGrad_cls)"/>
+      </g>
       <rect x="750" y="200" width="130" height="62" rx="14" fill="#ffff00"/>
       <path d="M762 262 L750 280 L778 262Z" fill="#ffff00"/>
       <text x="815" y="228" textAnchor="middle" fontSize="22" fontWeight="900" fill="#111">가나다</text>
@@ -420,6 +537,53 @@ function SceneStreet({ h = 220, radius = 0 }: { h?: number; radius?: number }) {
         <radialGradient id="stGlow2" cx="80%" cy="30%" r="30%">
           <stop offset="0%" stopColor="#ffff00" stopOpacity="0.12"/>
           <stop offset="100%" stopColor="#ffff00" stopOpacity="0"/>
+        </radialGradient>
+        {/* 3D character gradients — street */}
+        <radialGradient id="faceGrad_st" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stopColor="#fde8cc"/>
+          <stop offset="60%" stopColor="#f5c5a3"/>
+          <stop offset="100%" stopColor="#d4956a"/>
+        </radialGradient>
+        <radialGradient id="blushGrad_st" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#ff9999" stopOpacity="0.6"/>
+          <stop offset="100%" stopColor="#ff6666" stopOpacity="0"/>
+        </radialGradient>
+        <linearGradient id="tealGrad_st" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#40d4ca"/>
+          <stop offset="40%" stopColor="#20B2AA"/>
+          <stop offset="100%" stopColor="#0d6e68"/>
+        </linearGradient>
+        <linearGradient id="burgGrad_st" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#a03060"/>
+          <stop offset="40%" stopColor="#7B1A3A"/>
+          <stop offset="100%" stopColor="#3d0d1d"/>
+        </linearGradient>
+        <linearGradient id="hairGrad_st" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#3a3a3a"/>
+          <stop offset="30%" stopColor="#1a1a1a"/>
+          <stop offset="100%" stopColor="#080808"/>
+        </linearGradient>
+        <radialGradient id="foxGrad_st" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stopColor="#e8904a"/>
+          <stop offset="55%" stopColor="#D2691E"/>
+          <stop offset="100%" stopColor="#8a4010"/>
+        </radialGradient>
+        <linearGradient id="pantsGrad_st" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#5a6590"/>
+          <stop offset="50%" stopColor="#3a4570"/>
+          <stop offset="100%" stopColor="#1e2540"/>
+        </linearGradient>
+        <linearGradient id="jeoGrad_st" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff"/>
+          <stop offset="50%" stopColor="#fff8f0"/>
+          <stop offset="100%" stopColor="#e8e0d5"/>
+        </linearGradient>
+        <filter id="shadow_st" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="3" dy="4" stdDeviation="4" floodColor="#000" floodOpacity="0.35"/>
+        </filter>
+        <radialGradient id="groundShadow_st" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#000000" stopOpacity="0.3"/>
+          <stop offset="100%" stopColor="#000000" stopOpacity="0"/>
         </radialGradient>
       </defs>
       <rect width="900" height="340" fill="#040408"/>
@@ -462,58 +626,69 @@ function SceneStreet({ h = 220, radius = 0 }: { h?: number; radius?: number }) {
       <line x1="535" y1="20" x2="535" y2="280" stroke="#ffff00" strokeWidth="2.5" opacity="0.3"/>
       <ellipse cx="535" cy="22" rx="30" ry="10" fill="#ffff00" opacity="0.2"/>
       <ellipse cx="535" cy="22" rx="50" ry="22" fill="#ffff00" opacity="0.05"/>
-      {/* JUNHO medium left */}
-      <ellipse cx="388" cy="318" rx="48" ry="10" fill="#ffff00" opacity="0.08"/>
-      <path d="M365 200 L360 312 L378 312 L381 238 L387 238 L390 312 L408 312 L403 200Z" fill="#3a4570"/>
-      <ellipse cx="367" cy="313" rx="16" ry="6" fill="#1a1508"/>
-      <ellipse cx="400" cy="313" rx="16" ry="6" fill="#1a1508"/>
-      <path d="M356 120 L348 205 L428 205 L420 120Z" fill="#20B2AA"/>
-      <rect x="348" y="186" width="80" height="12" rx="4" fill="#8B1010"/>
-      <path d="M388 120 L378 148" stroke="#fff" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
-      <path d="M388 120 L398 148" stroke="#fff" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
-      <path d="M348 136 L290 95 L284 103 L344 146Z" fill="#1a9090"/>
-      <ellipse cx="285" cy="99" rx="11" ry="11" fill="#f5c5a3"/>
-      <path d="M420 136 L456 170 L464 160 L428 124Z" fill="#1a9090"/>
-      <path d="M452 162 Q472 150 492 162 Q496 182 472 190 Q448 182 452 162Z" fill="#8B6408"/>
-      <circle cx="472" cy="170" r="16" fill="#D2691E"/>
-      <path d="M462 160 L456 144 L468 158Z" fill="#D2691E"/>
-      <path d="M482 160 L488 144 L476 158Z" fill="#D2691E"/>
-      <ellipse cx="472" cy="177" rx="10" ry="8" fill="#f0b090"/>
-      <circle cx="467" cy="168" r="3.5" fill="#111"/>
-      <circle cx="477" cy="168" r="3.5" fill="#111"/>
-      <rect x="382" y="103" width="12" height="20" rx="5" fill="#f5c5a3"/>
-      <ellipse cx="388" cy="82" rx="36" ry="38" fill="#f5c5a3"/>
-      <path d="M354 70 Q357 36 388 33 Q419 36 422 70 Q414 52 388 49 Q362 52 354 70Z" fill="#1a1a1a"/>
-      <path d="M354 70 Q346 86 349 100" fill="none" stroke="#1a1a1a" strokeWidth="11" strokeLinecap="round"/>
-      <path d="M422 70 Q430 86 427 100" fill="none" stroke="#1a1a1a" strokeWidth="11" strokeLinecap="round"/>
-      <path d="M367 79 Q374 85 381 79" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M395 79 Q402 85 409 79" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
-      <circle cx="345" cy="94" r="10" fill="#ffb3a7" opacity="0.38"/>
-      <circle cx="431" cy="94" r="10" fill="#ffb3a7" opacity="0.38"/>
-      {/* MIYA medium right */}
-      <ellipse cx="545" cy="318" rx="44" ry="10" fill="#ffff00" opacity="0.08"/>
-      <path d="M516 172 Q508 280 520 314 L568 314 Q580 280 572 172Z" fill="#7B1A3A"/>
-      <path d="M508 265 Q544 273 580 265" fill="none" stroke="#a03060" strokeWidth="2.5" opacity="0.55"/>
-      <path d="M516 136 L512 178 L576 178 L572 136Z" fill="#fff8f0"/>
-      <path d="M544 136 L534 162" stroke="#20B2AA" strokeWidth="5.5" strokeLinecap="round" fill="none"/>
-      <path d="M544 136 L554 162" stroke="#20B2AA" strokeWidth="5.5" strokeLinecap="round" fill="none"/>
-      <path d="M530 165 L537 177 L544 172 L551 177 L558 165 L551 172 L544 169 L537 172Z" fill="#C8102E"/>
-      <path d="M512 148 L490 185 L502 193 L520 160Z" fill="#fff0e8"/>
-      <ellipse cx="492" cy="190" rx="11" ry="11" fill="#f5c5a3"/>
-      <path d="M572 148 L596 175 L586 183 L568 158Z" fill="#fff0e8"/>
-      <ellipse cx="600" cy="180" rx="10" ry="10" fill="#f5c5a3"/>
-      <rect x="537" y="118" width="12" height="20" rx="5" fill="#f5c5a3"/>
-      <ellipse cx="543" cy="97" rx="34" ry="37" fill="#f5c5a3"/>
-      <path d="M510 86 Q512 53 543 50 Q574 53 576 86 Q568 68 543 65 Q518 68 510 86Z" fill="#1a1a1a"/>
-      <circle cx="543" cy="52" r="16" fill="#1a1a1a"/>
-      <line x1="528" y1="44" x2="548" y2="40" stroke="#C8102E" strokeWidth="4.5" strokeLinecap="round"/>
-      <circle cx="528" cy="44" r="6" fill="#C8102E"/>
-      <path d="M510 86 Q502 102 505 116" fill="none" stroke="#1a1a1a" strokeWidth="10" strokeLinecap="round"/>
-      <path d="M576 86 Q584 102 581 116" fill="none" stroke="#1a1a1a" strokeWidth="10" strokeLinecap="round"/>
-      <path d="M522 94 Q529 100 536 94" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M550 94 Q557 100 564 94" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
-      <circle cx="502" cy="110" r="10" fill="#ffb3a7" opacity="0.38"/>
-      <circle cx="584" cy="110" r="10" fill="#ffb3a7" opacity="0.38"/>
+      {/* JUNHO medium left — 3D */}
+      <ellipse cx="388" cy="320" rx="52" ry="12" fill="url(#groundShadow_st)"/>
+      <g filter="url(#shadow_st)">
+        <path d="M365 200 L360 312 L378 312 L381 238 L387 238 L390 312 L408 312 L403 200Z" fill="url(#pantsGrad_st)"/>
+        <ellipse cx="367" cy="313" rx="16" ry="6" fill="#1a1508"/>
+        <ellipse cx="400" cy="313" rx="16" ry="6" fill="#1a1508"/>
+        <path d="M356 120 L348 205 L428 205 L420 120Z" fill="url(#tealGrad_st)"/>
+        <rect x="348" y="186" width="80" height="12" rx="4" fill="#8B1010"/>
+        <path d="M388 120 L378 148" stroke="#40d4ca" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
+        <path d="M388 120 L398 148" stroke="#40d4ca" strokeWidth="4.5" strokeLinecap="round" fill="none"/>
+        <path d="M348 136 L290 95 L284 103 L344 146Z" fill="url(#tealGrad_st)"/>
+        <ellipse cx="285" cy="99" rx="11" ry="11" fill="url(#faceGrad_st)"/>
+        <path d="M420 136 L456 170 L464 160 L428 124Z" fill="url(#tealGrad_st)"/>
+        {/* Fox basket */}
+        <path d="M452 162 Q472 150 492 162 Q496 182 472 190 Q448 182 452 162Z" fill="#8B6408"/>
+        <circle cx="472" cy="170" r="16" fill="url(#foxGrad_st)"/>
+        <path d="M462 160 L456 144 L468 158Z" fill="url(#foxGrad_st)"/>
+        <path d="M482 160 L488 144 L476 158Z" fill="url(#foxGrad_st)"/>
+        <ellipse cx="472" cy="177" rx="10" ry="8" fill="#f0b090"/>
+        <circle cx="467" cy="168" r="3.5" fill="#111"/>
+        <circle cx="477" cy="168" r="3.5" fill="#111"/>
+        <circle cx="468" cy="166" r="1.5" fill="#fff"/>
+        <circle cx="478" cy="166" r="1.5" fill="#fff"/>
+        <rect x="382" y="103" width="12" height="20" rx="5" fill="url(#faceGrad_st)"/>
+        <ellipse cx="388" cy="82" rx="36" ry="38" fill="url(#faceGrad_st)"/>
+        <ellipse cx="375" cy="65" rx="11" ry="8" fill="#fff" opacity="0.35"/>
+        <path d="M354 70 Q357 36 388 33 Q419 36 422 70 Q414 52 388 49 Q362 52 354 70Z" fill="url(#hairGrad_st)"/>
+        <path d="M362 60 Q382 50 410 54" fill="none" stroke="#6a6a6a" strokeWidth="3.5" strokeLinecap="round" opacity="0.4"/>
+        <path d="M354 70 Q346 86 349 100" fill="none" stroke="#1a1a1a" strokeWidth="11" strokeLinecap="round"/>
+        <path d="M422 70 Q430 86 427 100" fill="none" stroke="#1a1a1a" strokeWidth="11" strokeLinecap="round"/>
+        <path d="M367 79 Q374 85 381 79" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M395 79 Q402 85 409 79" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
+        <circle cx="345" cy="94" r="12" fill="url(#blushGrad_st)"/>
+        <circle cx="431" cy="94" r="12" fill="url(#blushGrad_st)"/>
+      </g>
+      {/* MIYA medium right — 3D */}
+      <ellipse cx="545" cy="320" rx="48" ry="12" fill="url(#groundShadow_st)"/>
+      <g filter="url(#shadow_st)">
+        <path d="M516 172 Q508 280 520 314 L568 314 Q580 280 572 172Z" fill="url(#burgGrad_st)"/>
+        <path d="M508 265 Q544 273 580 265" fill="none" stroke="#a03060" strokeWidth="2.5" opacity="0.55"/>
+        <path d="M516 136 L512 178 L576 178 L572 136Z" fill="url(#jeoGrad_st)"/>
+        <path d="M544 136 L534 162" stroke="#40d4ca" strokeWidth="5.5" strokeLinecap="round" fill="none"/>
+        <path d="M544 136 L554 162" stroke="#40d4ca" strokeWidth="5.5" strokeLinecap="round" fill="none"/>
+        <path d="M530 165 L537 177 L544 172 L551 177 L558 165 L551 172 L544 169 L537 172Z" fill="#C8102E"/>
+        <path d="M512 148 L490 185 L502 193 L520 160Z" fill="url(#jeoGrad_st)"/>
+        <ellipse cx="492" cy="190" rx="11" ry="11" fill="url(#faceGrad_st)"/>
+        <path d="M572 148 L596 175 L586 183 L568 158Z" fill="url(#jeoGrad_st)"/>
+        <ellipse cx="600" cy="180" rx="10" ry="10" fill="url(#faceGrad_st)"/>
+        <rect x="537" y="118" width="12" height="20" rx="5" fill="url(#faceGrad_st)"/>
+        <ellipse cx="543" cy="97" rx="34" ry="37" fill="url(#faceGrad_st)"/>
+        <ellipse cx="530" cy="80" rx="10" ry="7" fill="#fff" opacity="0.35"/>
+        <path d="M510 86 Q512 53 543 50 Q574 53 576 86 Q568 68 543 65 Q518 68 510 86Z" fill="url(#hairGrad_st)"/>
+        <circle cx="543" cy="52" r="16" fill="url(#hairGrad_st)"/>
+        <path d="M518 70 Q536 60 562 64" fill="none" stroke="#6a6a6a" strokeWidth="3" strokeLinecap="round" opacity="0.4"/>
+        <line x1="528" y1="44" x2="548" y2="40" stroke="#C8102E" strokeWidth="4.5" strokeLinecap="round"/>
+        <circle cx="528" cy="44" r="6" fill="#C8102E"/>
+        <path d="M510 86 Q502 102 505 116" fill="none" stroke="#1a1a1a" strokeWidth="10" strokeLinecap="round"/>
+        <path d="M576 86 Q584 102 581 116" fill="none" stroke="#1a1a1a" strokeWidth="10" strokeLinecap="round"/>
+        <path d="M522 94 Q529 100 536 94" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M550 94 Q557 100 564 94" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
+        <circle cx="502" cy="110" r="12" fill="url(#blushGrad_st)"/>
+        <circle cx="584" cy="110" r="12" fill="url(#blushGrad_st)"/>
+      </g>
       <rect x="596" y="60" width="160" height="52" rx="14" fill="#ffff00"/>
       <path d="M608 112 L596 130 L624 112Z" fill="#ffff00"/>
       <text x="676" y="86" textAnchor="middle" fontSize="17" fontWeight="900" fill="#111">저기요!</text>
@@ -530,6 +705,43 @@ function SceneConcert({ h = 220, radius = 0 }: { h?: number; radius?: number }) 
         <radialGradient id="concGlow" cx="50%" cy="40%" r="50%">
           <stop offset="0%" stopColor="#ffff00" stopOpacity="0.2"/>
           <stop offset="100%" stopColor="#ffff00" stopOpacity="0"/>
+        </radialGradient>
+        {/* 3D character gradients — concert */}
+        <radialGradient id="faceGrad_cc" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stopColor="#fde8cc"/>
+          <stop offset="60%" stopColor="#f5c5a3"/>
+          <stop offset="100%" stopColor="#d4956a"/>
+        </radialGradient>
+        <radialGradient id="blushGrad_cc" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#ff9999" stopOpacity="0.6"/>
+          <stop offset="100%" stopColor="#ff6666" stopOpacity="0"/>
+        </radialGradient>
+        <linearGradient id="tealGrad_cc" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#40d4ca"/>
+          <stop offset="40%" stopColor="#20B2AA"/>
+          <stop offset="100%" stopColor="#0d6e68"/>
+        </linearGradient>
+        <linearGradient id="burgGrad_cc" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#a03060"/>
+          <stop offset="40%" stopColor="#7B1A3A"/>
+          <stop offset="100%" stopColor="#3d0d1d"/>
+        </linearGradient>
+        <linearGradient id="hairGrad_cc" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#3a3a3a"/>
+          <stop offset="30%" stopColor="#1a1a1a"/>
+          <stop offset="100%" stopColor="#080808"/>
+        </linearGradient>
+        <linearGradient id="jeoGrad_cc" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff"/>
+          <stop offset="50%" stopColor="#fff8f0"/>
+          <stop offset="100%" stopColor="#e8e0d5"/>
+        </linearGradient>
+        <filter id="shadow_cc" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="3" dy="4" stdDeviation="4" floodColor="#000" floodOpacity="0.35"/>
+        </filter>
+        <radialGradient id="groundShadow_cc" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#000000" stopOpacity="0.3"/>
+          <stop offset="100%" stopColor="#000000" stopOpacity="0"/>
         </radialGradient>
       </defs>
       <rect width="900" height="340" fill="#040406"/>
@@ -562,41 +774,49 @@ function SceneConcert({ h = 220, radius = 0 }: { h?: number; radius?: number }) 
       ))}
       <rect x="0" y="212" width="900" height="128" fill="#050508"/>
       <rect x="0" y="212" width="900" height="4" fill="#ffff00" opacity="0.12"/>
-      {/* JUNHO in crowd */}
-      <ellipse cx="300" cy="328" rx="52" ry="10" fill="#ffff00" opacity="0.07"/>
-      <path d="M276 258 L272 325 L292 325 L295 278 L302 278 L305 325 L325 325 L320 258Z" fill="#20B2AA"/>
-      <rect x="272" y="304" width="48" height="10" rx="4" fill="#8B1010"/>
-      <ellipse cx="298" cy="238" rx="36" ry="38" fill="#f5c5a3"/>
-      <path d="M263 228 Q265 196 298 193 Q331 196 333 228 Q326 212 298 209 Q270 212 263 228Z" fill="#1a1a1a"/>
-      <path d="M263 228 Q256 243 259 255" fill="none" stroke="#1a1a1a" strokeWidth="11" strokeLinecap="round"/>
-      <path d="M333 228 Q340 243 337 255" fill="none" stroke="#1a1a1a" strokeWidth="11" strokeLinecap="round"/>
-      <path d="M280 238 Q287 245 294 238" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M302 238 Q309 245 316 238" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
-      <circle cx="255" cy="250" r="10" fill="#ffb3a7" opacity="0.4"/>
-      <circle cx="341" cy="250" r="10" fill="#ffb3a7" opacity="0.4"/>
-      <path d="M276 268 L252 240 L244 248 L270 276Z" fill="#1a9090"/>
-      <line x1="250" y1="242" x2="234" y2="205" stroke="#ffff00" strokeWidth="3.5" strokeLinecap="round"/>
-      <ellipse cx="233" cy="200" rx="8" ry="14" fill="#ffff00" opacity="0.95"/>
-      <ellipse cx="233" cy="200" rx="14" ry="22" fill="#ffff00" opacity="0.22"/>
-      <path d="M320 268 L342 250 L348 258 L326 275Z" fill="#1a9090"/>
-      {/* MIYA in crowd */}
-      <ellipse cx="600" cy="328" rx="48" ry="10" fill="#ffff00" opacity="0.07"/>
-      <path d="M570 240 Q562 300 574 325 L626 325 Q638 300 630 240Z" fill="#7B1A3A"/>
-      <ellipse cx="600" cy="232" rx="34" ry="36" fill="#f5c5a3"/>
-      <path d="M567 222 Q569 192 600 189 Q631 192 633 222 Q626 208 600 205 Q574 208 567 222Z" fill="#1a1a1a"/>
-      <circle cx="600" cy="192" r="16" fill="#1a1a1a"/>
-      <circle cx="593" cy="187" r="6" fill="#C8102E"/>
-      <path d="M567 222 Q560 238 562 250" fill="none" stroke="#1a1a1a" strokeWidth="10" strokeLinecap="round"/>
-      <path d="M633 222 Q640 238 637 250" fill="none" stroke="#1a1a1a" strokeWidth="10" strokeLinecap="round"/>
-      <path d="M582 232 Q589 239 596 232" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M604 232 Q611 239 618 232" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
-      <circle cx="554" cy="246" r="9" fill="#ffb3a7" opacity="0.42"/>
-      <circle cx="646" cy="246" r="9" fill="#ffb3a7" opacity="0.42"/>
-      <path d="M630 250 L652 225 L658 235 L636 258Z" fill="#fff0e8"/>
-      <line x1="654" y1="228" x2="670" y2="190" stroke="#ffff00" strokeWidth="3.5" strokeLinecap="round"/>
-      <ellipse cx="671" cy="184" rx="8" ry="14" fill="#ffff00" opacity="0.95"/>
-      <ellipse cx="671" cy="184" rx="15" ry="24" fill="#ffff00" opacity="0.22"/>
-      <path d="M570 250 L548 232 L542 240 L566 258Z" fill="#fff0e8"/>
+      {/* JUNHO in crowd — 3D */}
+      <ellipse cx="300" cy="330" rx="56" ry="12" fill="url(#groundShadow_cc)"/>
+      <g filter="url(#shadow_cc)">
+        <path d="M276 258 L272 325 L292 325 L295 278 L302 278 L305 325 L325 325 L320 258Z" fill="url(#tealGrad_cc)"/>
+        <rect x="272" y="304" width="48" height="10" rx="4" fill="#8B1010"/>
+        <ellipse cx="298" cy="238" rx="36" ry="38" fill="url(#faceGrad_cc)"/>
+        <ellipse cx="285" cy="220" rx="11" ry="8" fill="#fff" opacity="0.35"/>
+        <path d="M263 228 Q265 196 298 193 Q331 196 333 228 Q326 212 298 209 Q270 212 263 228Z" fill="url(#hairGrad_cc)"/>
+        <path d="M271 217 Q290 207 318 211" fill="none" stroke="#6a6a6a" strokeWidth="3" strokeLinecap="round" opacity="0.4"/>
+        <path d="M263 228 Q256 243 259 255" fill="none" stroke="#1a1a1a" strokeWidth="11" strokeLinecap="round"/>
+        <path d="M333 228 Q340 243 337 255" fill="none" stroke="#1a1a1a" strokeWidth="11" strokeLinecap="round"/>
+        <path d="M280 238 Q287 245 294 238" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M302 238 Q309 245 316 238" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
+        <circle cx="255" cy="250" r="12" fill="url(#blushGrad_cc)"/>
+        <circle cx="341" cy="250" r="12" fill="url(#blushGrad_cc)"/>
+        <path d="M276 268 L252 240 L244 248 L270 276Z" fill="url(#tealGrad_cc)"/>
+        <line x1="250" y1="242" x2="234" y2="205" stroke="#ffff00" strokeWidth="3.5" strokeLinecap="round"/>
+        <ellipse cx="233" cy="200" rx="8" ry="14" fill="#ffff00" opacity="0.95"/>
+        <ellipse cx="233" cy="200" rx="14" ry="22" fill="#ffff00" opacity="0.22"/>
+        <path d="M320 268 L342 250 L348 258 L326 275Z" fill="url(#tealGrad_cc)"/>
+      </g>
+      {/* MIYA in crowd — 3D */}
+      <ellipse cx="600" cy="330" rx="52" ry="12" fill="url(#groundShadow_cc)"/>
+      <g filter="url(#shadow_cc)">
+        <path d="M570 240 Q562 300 574 325 L626 325 Q638 300 630 240Z" fill="url(#burgGrad_cc)"/>
+        <ellipse cx="600" cy="232" rx="34" ry="36" fill="url(#faceGrad_cc)"/>
+        <ellipse cx="587" cy="214" rx="10" ry="7" fill="#fff" opacity="0.35"/>
+        <path d="M567 222 Q569 192 600 189 Q631 192 633 222 Q626 208 600 205 Q574 208 567 222Z" fill="url(#hairGrad_cc)"/>
+        <circle cx="600" cy="192" r="16" fill="url(#hairGrad_cc)"/>
+        <path d="M574 206 Q592 196 618 200" fill="none" stroke="#6a6a6a" strokeWidth="3" strokeLinecap="round" opacity="0.4"/>
+        <circle cx="593" cy="187" r="6" fill="#C8102E"/>
+        <path d="M567 222 Q560 238 562 250" fill="none" stroke="#1a1a1a" strokeWidth="10" strokeLinecap="round"/>
+        <path d="M633 222 Q640 238 637 250" fill="none" stroke="#1a1a1a" strokeWidth="10" strokeLinecap="round"/>
+        <path d="M582 232 Q589 239 596 232" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M604 232 Q611 239 618 232" fill="none" stroke="#5a3010" strokeWidth="3" strokeLinecap="round"/>
+        <circle cx="554" cy="246" r="11" fill="url(#blushGrad_cc)"/>
+        <circle cx="646" cy="246" r="11" fill="url(#blushGrad_cc)"/>
+        <path d="M630 250 L652 225 L658 235 L636 258Z" fill="url(#jeoGrad_cc)"/>
+        <line x1="654" y1="228" x2="670" y2="190" stroke="#ffff00" strokeWidth="3.5" strokeLinecap="round"/>
+        <ellipse cx="671" cy="184" rx="8" ry="14" fill="#ffff00" opacity="0.95"/>
+        <ellipse cx="671" cy="184" rx="15" ry="24" fill="#ffff00" opacity="0.22"/>
+        <path d="M570 250 L548 232 L542 240 L566 258Z" fill="url(#jeoGrad_cc)"/>
+      </g>
       {[[100,270],[160,278],[200,265],[720,268],[780,275],[840,262],[450,285],[500,272],[140,290],[820,288]].map(([cx,cy],i)=>(
         <g key={i}>
           <ellipse cx={cx} cy={cy} rx={20} ry={20} fill="#ffff00" opacity="0.1"/>
@@ -617,6 +837,43 @@ function SceneTeacher({ h = 260, radius = 0 }: { h?: number; radius?: number }) 
         <radialGradient id="tchGlow" cx="50%" cy="55%" r="55%">
           <stop offset="0%" stopColor="#ffff00" stopOpacity="0.12"/>
           <stop offset="100%" stopColor="#ffff00" stopOpacity="0"/>
+        </radialGradient>
+        {/* 3D character gradients — teacher */}
+        <radialGradient id="faceGrad_tc" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stopColor="#fde8cc"/>
+          <stop offset="60%" stopColor="#f5c5a3"/>
+          <stop offset="100%" stopColor="#d4956a"/>
+        </radialGradient>
+        <radialGradient id="blushGrad_tc" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#ff9999" stopOpacity="0.6"/>
+          <stop offset="100%" stopColor="#ff6666" stopOpacity="0"/>
+        </radialGradient>
+        <linearGradient id="tealGrad_tc" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#40d4ca"/>
+          <stop offset="40%" stopColor="#20B2AA"/>
+          <stop offset="100%" stopColor="#0d6e68"/>
+        </linearGradient>
+        <linearGradient id="hairGrad_tc" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#3a3a3a"/>
+          <stop offset="30%" stopColor="#1a1a1a"/>
+          <stop offset="100%" stopColor="#080808"/>
+        </linearGradient>
+        <radialGradient id="foxGrad_tc" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stopColor="#e8904a"/>
+          <stop offset="55%" stopColor="#D2691E"/>
+          <stop offset="100%" stopColor="#8a4010"/>
+        </radialGradient>
+        <linearGradient id="pantsGrad_tc" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#5a6590"/>
+          <stop offset="50%" stopColor="#3a4570"/>
+          <stop offset="100%" stopColor="#1e2540"/>
+        </linearGradient>
+        <filter id="shadow_tc" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="3" dy="4" stdDeviation="4" floodColor="#000" floodOpacity="0.35"/>
+        </filter>
+        <radialGradient id="groundShadow_tc" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#000000" stopOpacity="0.3"/>
+          <stop offset="100%" stopColor="#000000" stopOpacity="0"/>
         </radialGradient>
       </defs>
       <rect width="700" height="360" fill="#080800"/>
@@ -647,45 +904,51 @@ function SceneTeacher({ h = 260, radius = 0 }: { h?: number; radius?: number }) 
       <rect x="610" y="70" width="40" height="8" rx="3" fill="#ffff00" opacity="0.8"/>
       <line x1="630" y1="6" x2="630" y2="14" stroke="#ffff00" strokeWidth="2.5"/>
       <line x1="630" y1="78" x2="630" y2="90" stroke="#C8102E" strokeWidth="2.5"/>
-      {/* JUNHO big teaching pose */}
-      <ellipse cx="218" cy="348" rx="68" ry="12" fill="#ffff00" opacity="0.07"/>
-      <path d="M186 218 L178 342 L202 342 L207 256 L216 256 L221 342 L248 342 L240 218Z" fill="#3a4570"/>
-      <ellipse cx="185" cy="343" rx="20" ry="8" fill="#1a1508"/>
-      <ellipse cx="240" cy="343" rx="20" ry="8" fill="#1a1508"/>
-      <path d="M170 108 L160 225 L278 225 L268 108Z" fill="#20B2AA"/>
-      <rect x="160" y="204" width="118" height="16" rx="6" fill="#8B1010"/>
-      <path d="M218 108 L204 142" stroke="#fff" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <path d="M218 108 L232 142" stroke="#fff" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <path d="M268 124 L382 148 L378 160 L262 136Z" fill="#1a9090"/>
-      <ellipse cx="385" cy="154" rx="13" ry="13" fill="#f5c5a3"/>
-      <path d="M160 138 L122 196 L136 206 L172 150Z" fill="#1a9090"/>
-      <path d="M118 190 Q142 176 166 190 Q170 215 142 224 Q114 215 118 190Z" fill="#8B6408"/>
-      <path d="M116 195 Q142 184 168 195" fill="none" stroke="#5a3800" strokeWidth="3"/>
-      <circle cx="142" cy="200" r="22" fill="#D2691E"/>
-      <path d="M128 188 L121 168 L135 186Z" fill="#D2691E"/>
-      <path d="M156 188 L163 168 L148 186Z" fill="#D2691E"/>
-      <ellipse cx="142" cy="208" rx="14" ry="10" fill="#f0b090"/>
-      <circle cx="135" cy="198" r="4.5" fill="#111"/>
-      <circle cx="149" cy="198" r="4.5" fill="#111"/>
-      <circle cx="136" cy="196" r="1.8" fill="#fff"/>
-      <circle cx="150" cy="196" r="1.8" fill="#fff"/>
-      <circle cx="142" cy="205" r="3" fill="#8B0000"/>
-      <path d="M137 210 Q142 216 147 210" fill="none" stroke="#8B0000" strokeWidth="2" strokeLinecap="round"/>
-      <circle cx="168" cy="168" r="5" fill="#ffff00" opacity="0.5"/>
-      <circle cx="178" cy="158" r="7" fill="#ffff00" opacity="0.45"/>
-      <circle cx="190" cy="148" r="9" fill="#ffff00" opacity="0.4"/>
-      <text x="208" y="142" textAnchor="middle" fontSize="14" fontWeight="900" fill="#ffff00" opacity="0.8">가?</text>
-      <rect x="210" y="88" width="16" height="24" rx="7" fill="#f5c5a3"/>
-      <ellipse cx="218" cy="62" rx="50" ry="52" fill="#f5c5a3"/>
-      <path d="M170 50 Q173 10 218 7 Q263 10 266 50 Q256 28 218 25 Q180 28 170 50Z" fill="#1a1a1a"/>
-      <path d="M170 50 Q160 70 163 86" fill="none" stroke="#1a1a1a" strokeWidth="14" strokeLinecap="round"/>
-      <path d="M266 50 Q276 70 273 86" fill="none" stroke="#1a1a1a" strokeWidth="14" strokeLinecap="round"/>
-      <path d="M197 68 Q205 75 213 68" fill="none" stroke="#5a3010" strokeWidth="4" strokeLinecap="round"/>
-      <path d="M223 68 Q231 75 239 68" fill="none" stroke="#5a3010" strokeWidth="4" strokeLinecap="round"/>
-      <path d="M184 50 Q194 44 204 48" fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M232 48 Q242 44 252 50" fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round"/>
-      <circle cx="174" cy="76" r="14" fill="#ffb3a7" opacity="0.38"/>
-      <circle cx="262" cy="76" r="14" fill="#ffb3a7" opacity="0.38"/>
+      {/* JUNHO big teaching pose — 3D */}
+      <ellipse cx="218" cy="350" rx="72" ry="14" fill="url(#groundShadow_tc)"/>
+      <g filter="url(#shadow_tc)">
+        <path d="M186 218 L178 342 L202 342 L207 256 L216 256 L221 342 L248 342 L240 218Z" fill="url(#pantsGrad_tc)"/>
+        <ellipse cx="185" cy="343" rx="20" ry="8" fill="#1a1508"/>
+        <ellipse cx="240" cy="343" rx="20" ry="8" fill="#1a1508"/>
+        <path d="M170 108 L160 225 L278 225 L268 108Z" fill="url(#tealGrad_tc)"/>
+        <rect x="160" y="204" width="118" height="16" rx="6" fill="#8B1010"/>
+        <path d="M218 108 L204 142" stroke="#40d4ca" strokeWidth="6" strokeLinecap="round" fill="none"/>
+        <path d="M218 108 L232 142" stroke="#40d4ca" strokeWidth="6" strokeLinecap="round" fill="none"/>
+        <path d="M268 124 L382 148 L378 160 L262 136Z" fill="url(#tealGrad_tc)"/>
+        <ellipse cx="385" cy="154" rx="13" ry="13" fill="url(#faceGrad_tc)"/>
+        <path d="M160 138 L122 196 L136 206 L172 150Z" fill="url(#tealGrad_tc)"/>
+        {/* Fox basket */}
+        <path d="M118 190 Q142 176 166 190 Q170 215 142 224 Q114 215 118 190Z" fill="#8B6408"/>
+        <path d="M116 195 Q142 184 168 195" fill="none" stroke="#5a3800" strokeWidth="3"/>
+        <circle cx="142" cy="200" r="22" fill="url(#foxGrad_tc)"/>
+        <path d="M128 188 L121 168 L135 186Z" fill="url(#foxGrad_tc)"/>
+        <path d="M156 188 L163 168 L148 186Z" fill="url(#foxGrad_tc)"/>
+        <ellipse cx="142" cy="208" rx="14" ry="10" fill="#f0b090"/>
+        <circle cx="135" cy="198" r="4.5" fill="#111"/>
+        <circle cx="149" cy="198" r="4.5" fill="#111"/>
+        <circle cx="136" cy="196" r="1.8" fill="#fff"/>
+        <circle cx="150" cy="196" r="1.8" fill="#fff"/>
+        <circle cx="142" cy="205" r="3" fill="#8B0000"/>
+        <path d="M137 210 Q142 216 147 210" fill="none" stroke="#8B0000" strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="168" cy="168" r="5" fill="#ffff00" opacity="0.5"/>
+        <circle cx="178" cy="158" r="7" fill="#ffff00" opacity="0.45"/>
+        <circle cx="190" cy="148" r="9" fill="#ffff00" opacity="0.4"/>
+        <text x="208" y="142" textAnchor="middle" fontSize="14" fontWeight="900" fill="#ffff00" opacity="0.8">가?</text>
+        {/* Junho head */}
+        <rect x="210" y="88" width="16" height="24" rx="7" fill="url(#faceGrad_tc)"/>
+        <ellipse cx="218" cy="62" rx="50" ry="52" fill="url(#faceGrad_tc)"/>
+        <ellipse cx="202" cy="42" rx="16" ry="11" fill="#fff" opacity="0.35"/>
+        <path d="M170 50 Q173 10 218 7 Q263 10 266 50 Q256 28 218 25 Q180 28 170 50Z" fill="url(#hairGrad_tc)"/>
+        <path d="M178 40 Q202 28 238 32" fill="none" stroke="#6a6a6a" strokeWidth="4" strokeLinecap="round" opacity="0.4"/>
+        <path d="M170 50 Q160 70 163 86" fill="none" stroke="#1a1a1a" strokeWidth="14" strokeLinecap="round"/>
+        <path d="M266 50 Q276 70 273 86" fill="none" stroke="#1a1a1a" strokeWidth="14" strokeLinecap="round"/>
+        <path d="M197 68 Q205 75 213 68" fill="none" stroke="#5a3010" strokeWidth="4" strokeLinecap="round"/>
+        <path d="M223 68 Q231 75 239 68" fill="none" stroke="#5a3010" strokeWidth="4" strokeLinecap="round"/>
+        <path d="M184 50 Q194 44 204 48" fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M232 48 Q242 44 252 50" fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round"/>
+        <circle cx="174" cy="76" r="16" fill="url(#blushGrad_tc)"/>
+        <circle cx="262" cy="76" r="16" fill="url(#blushGrad_tc)"/>
+      </g>
     </svg>
   );
 }
@@ -698,6 +961,43 @@ function SceneFood({ h = 200, radius = 0 }: { h?: number; radius?: number }) {
         <radialGradient id="foodGlow" cx="50%" cy="65%" r="55%">
           <stop offset="0%" stopColor="#ffff00" stopOpacity="0.12"/>
           <stop offset="100%" stopColor="#ffff00" stopOpacity="0"/>
+        </radialGradient>
+        {/* 3D character gradients — food */}
+        <radialGradient id="faceGrad_fd" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stopColor="#fde8cc"/>
+          <stop offset="60%" stopColor="#f5c5a3"/>
+          <stop offset="100%" stopColor="#d4956a"/>
+        </radialGradient>
+        <radialGradient id="blushGrad_fd" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#ff9999" stopOpacity="0.6"/>
+          <stop offset="100%" stopColor="#ff6666" stopOpacity="0"/>
+        </radialGradient>
+        <linearGradient id="tealGrad_fd" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#40d4ca"/>
+          <stop offset="40%" stopColor="#20B2AA"/>
+          <stop offset="100%" stopColor="#0d6e68"/>
+        </linearGradient>
+        <linearGradient id="burgGrad_fd" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#a03060"/>
+          <stop offset="40%" stopColor="#7B1A3A"/>
+          <stop offset="100%" stopColor="#3d0d1d"/>
+        </linearGradient>
+        <linearGradient id="hairGrad_fd" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#3a3a3a"/>
+          <stop offset="30%" stopColor="#1a1a1a"/>
+          <stop offset="100%" stopColor="#080808"/>
+        </linearGradient>
+        <linearGradient id="jeoGrad_fd" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff"/>
+          <stop offset="50%" stopColor="#fff8f0"/>
+          <stop offset="100%" stopColor="#e8e0d5"/>
+        </linearGradient>
+        <filter id="shadow_fd" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="3" dy="4" stdDeviation="4" floodColor="#000" floodOpacity="0.35"/>
+        </filter>
+        <radialGradient id="groundShadow_fd" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#000000" stopOpacity="0.3"/>
+          <stop offset="100%" stopColor="#000000" stopOpacity="0"/>
         </radialGradient>
       </defs>
       <rect width="900" height="320" fill="#080808"/>
@@ -739,50 +1039,58 @@ function SceneFood({ h = 200, radius = 0 }: { h?: number; radius?: number }) {
       <line x1="398" y1="192" x2="411" y2="219" stroke="#8B6914" strokeWidth="3" strokeLinecap="round"/>
       <path d="M446 204 Q442 194 446 184 Q450 174 446 164" fill="none" stroke="#fff" strokeWidth="2" opacity="0.2" strokeLinecap="round"/>
       <path d="M454 204 Q458 194 454 184 Q450 174 454 164" fill="none" stroke="#fff" strokeWidth="2" opacity="0.2" strokeLinecap="round"/>
-      {/* JUNHO seated left */}
-      <ellipse cx="278" cy="308" rx="55" ry="10" fill="#ffff00" opacity="0.07"/>
-      <path d="M250 190 L244 300 L268 300 L272 222 L278 222 L282 300 L308 300 L302 190Z" fill="#20B2AA"/>
-      <rect x="244" y="278" width="64" height="12" rx="4" fill="#8B1010"/>
-      <path d="M302 202 L338 192 L335 182 L298 193Z" fill="#1a9090"/>
-      <ellipse cx="341" cy="187" rx="10" ry="10" fill="#f5c5a3"/>
-      <line x1="338" y1="185" x2="354" y2="210" stroke="#8B6914" strokeWidth="3" strokeLinecap="round"/>
-      <line x1="344" y1="182" x2="360" y2="208" stroke="#8B6914" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M244 205 L212 230 L220 240 L250 216Z" fill="#1a9090"/>
-      <ellipse cx="210" cy="236" rx="10" ry="10" fill="#f5c5a3"/>
-      <rect x="270" y="168" width="14" height="24" rx="6" fill="#f5c5a3"/>
-      <ellipse cx="277" cy="143" rx="42" ry="44" fill="#f5c5a3"/>
-      <path d="M237 132 Q239 98 277 95 Q315 98 317 132 Q309 115 277 112 Q245 115 237 132Z" fill="#1a1a1a"/>
-      <path d="M237 132 Q229 148 232 162" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round"/>
-      <path d="M317 132 Q325 148 322 162" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round"/>
-      <path d="M258 142 Q265 150 272 142" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M282 142 Q289 150 296 142" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
-      <circle cx="228" cy="157" r="12" fill="#ffb3a7" opacity="0.38"/>
-      <circle cx="326" cy="157" r="12" fill="#ffb3a7" opacity="0.38"/>
-      <path d="M260 158 Q277 170 294 158" fill="none" stroke="#8B4513" strokeWidth="3" strokeLinecap="round"/>
-      {/* MIYA seated right */}
-      <ellipse cx="624" cy="308" rx="52" ry="10" fill="#ffff00" opacity="0.07"/>
-      <path d="M592 182 Q584 280 597 300 L650 300 Q663 280 655 182Z" fill="#7B1A3A"/>
-      <path d="M584 268 Q624 276 664 268" fill="none" stroke="#a03060" strokeWidth="2.5" opacity="0.5"/>
-      <path d="M592 194 L558 222 L565 232 L598 205Z" fill="#fff0e8"/>
-      <ellipse cx="555" cy="228" rx="10" ry="10" fill="#f5c5a3"/>
-      <path d="M655 194 L680 215 L672 225 L650 205Z" fill="#fff0e8"/>
-      <ellipse cx="683" cy="220" rx="10" ry="10" fill="#f5c5a3"/>
-      <path d="M593 156 L588 188 L660 188 L655 156Z" fill="#fff8f0"/>
-      <path d="M624 156 L613 180" stroke="#20B2AA" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <path d="M624 156 L635 180" stroke="#20B2AA" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <rect x="616" y="136" width="14" height="22" rx="5" fill="#f5c5a3"/>
-      <ellipse cx="623" cy="112" rx="40" ry="42" fill="#f5c5a3"/>
-      <path d="M584 100 Q586 68 623 65 Q660 68 662 100 Q654 82 623 79 Q592 82 584 100Z" fill="#1a1a1a"/>
-      <circle cx="623" cy="68" r="18" fill="#1a1a1a"/>
-      <line x1="606" y1="60" x2="628" y2="55" stroke="#C8102E" strokeWidth="5" strokeLinecap="round"/>
-      <circle cx="606" cy="60" r="7" fill="#C8102E"/>
-      <path d="M584 100 Q575 118 578 132" fill="none" stroke="#1a1a1a" strokeWidth="11" strokeLinecap="round"/>
-      <path d="M662 100 Q671 118 668 132" fill="none" stroke="#1a1a1a" strokeWidth="11" strokeLinecap="round"/>
-      <path d="M603 112 Q611 119 619 112" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M627 112 Q635 119 643 112" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
-      <circle cx="576" cy="124" r="11" fill="#ffb3a7" opacity="0.4"/>
-      <circle cx="670" cy="124" r="11" fill="#ffb3a7" opacity="0.4"/>
-      <path d="M606 126 Q623 140 640 126" fill="none" stroke="#8B4513" strokeWidth="3" strokeLinecap="round"/>
+      {/* JUNHO seated left — 3D */}
+      <ellipse cx="278" cy="310" rx="58" ry="12" fill="url(#groundShadow_fd)"/>
+      <g filter="url(#shadow_fd)">
+        <path d="M250 190 L244 300 L268 300 L272 222 L278 222 L282 300 L308 300 L302 190Z" fill="url(#tealGrad_fd)"/>
+        <rect x="244" y="278" width="64" height="12" rx="4" fill="#8B1010"/>
+        <path d="M302 202 L338 192 L335 182 L298 193Z" fill="url(#tealGrad_fd)"/>
+        <ellipse cx="341" cy="187" rx="10" ry="10" fill="url(#faceGrad_fd)"/>
+        <line x1="338" y1="185" x2="354" y2="210" stroke="#8B6914" strokeWidth="3" strokeLinecap="round"/>
+        <line x1="344" y1="182" x2="360" y2="208" stroke="#8B6914" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M244 205 L212 230 L220 240 L250 216Z" fill="url(#tealGrad_fd)"/>
+        <ellipse cx="210" cy="236" rx="10" ry="10" fill="url(#faceGrad_fd)"/>
+        <rect x="270" y="168" width="14" height="24" rx="6" fill="url(#faceGrad_fd)"/>
+        <ellipse cx="277" cy="143" rx="42" ry="44" fill="url(#faceGrad_fd)"/>
+        <ellipse cx="263" cy="124" rx="13" ry="9" fill="#fff" opacity="0.35"/>
+        <path d="M237 132 Q239 98 277 95 Q315 98 317 132 Q309 115 277 112 Q245 115 237 132Z" fill="url(#hairGrad_fd)"/>
+        <path d="M245 121 Q266 110 296 114" fill="none" stroke="#6a6a6a" strokeWidth="3.5" strokeLinecap="round" opacity="0.4"/>
+        <path d="M237 132 Q229 148 232 162" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round"/>
+        <path d="M317 132 Q325 148 322 162" fill="none" stroke="#1a1a1a" strokeWidth="12" strokeLinecap="round"/>
+        <path d="M258 142 Q265 150 272 142" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
+        <path d="M282 142 Q289 150 296 142" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
+        <circle cx="228" cy="157" r="14" fill="url(#blushGrad_fd)"/>
+        <circle cx="326" cy="157" r="14" fill="url(#blushGrad_fd)"/>
+        <path d="M260 158 Q277 170 294 158" fill="none" stroke="#8B4513" strokeWidth="3" strokeLinecap="round"/>
+      </g>
+      {/* MIYA seated right — 3D */}
+      <ellipse cx="624" cy="310" rx="56" ry="12" fill="url(#groundShadow_fd)"/>
+      <g filter="url(#shadow_fd)">
+        <path d="M592 182 Q584 280 597 300 L650 300 Q663 280 655 182Z" fill="url(#burgGrad_fd)"/>
+        <path d="M584 268 Q624 276 664 268" fill="none" stroke="#a03060" strokeWidth="2.5" opacity="0.5"/>
+        <path d="M592 194 L558 222 L565 232 L598 205Z" fill="url(#jeoGrad_fd)"/>
+        <ellipse cx="555" cy="228" rx="10" ry="10" fill="url(#faceGrad_fd)"/>
+        <path d="M655 194 L680 215 L672 225 L650 205Z" fill="url(#jeoGrad_fd)"/>
+        <ellipse cx="683" cy="220" rx="10" ry="10" fill="url(#faceGrad_fd)"/>
+        <path d="M593 156 L588 188 L660 188 L655 156Z" fill="url(#jeoGrad_fd)"/>
+        <path d="M624 156 L613 180" stroke="#40d4ca" strokeWidth="5" strokeLinecap="round" fill="none"/>
+        <path d="M624 156 L635 180" stroke="#40d4ca" strokeWidth="5" strokeLinecap="round" fill="none"/>
+        <rect x="616" y="136" width="14" height="22" rx="5" fill="url(#faceGrad_fd)"/>
+        <ellipse cx="623" cy="112" rx="40" ry="42" fill="url(#faceGrad_fd)"/>
+        <ellipse cx="609" cy="93" rx="12" ry="8" fill="#fff" opacity="0.35"/>
+        <path d="M584 100 Q586 68 623 65 Q660 68 662 100 Q654 82 623 79 Q592 82 584 100Z" fill="url(#hairGrad_fd)"/>
+        <circle cx="623" cy="68" r="18" fill="url(#hairGrad_fd)"/>
+        <path d="M592 84 Q610 74 638 78" fill="none" stroke="#6a6a6a" strokeWidth="3" strokeLinecap="round" opacity="0.4"/>
+        <line x1="606" y1="60" x2="628" y2="55" stroke="#C8102E" strokeWidth="5" strokeLinecap="round"/>
+        <circle cx="606" cy="60" r="7" fill="#C8102E"/>
+        <path d="M584 100 Q575 118 578 132" fill="none" stroke="#1a1a1a" strokeWidth="11" strokeLinecap="round"/>
+        <path d="M662 100 Q671 118 668 132" fill="none" stroke="#1a1a1a" strokeWidth="11" strokeLinecap="round"/>
+        <path d="M603 112 Q611 119 619 112" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
+        <path d="M627 112 Q635 119 643 112" fill="none" stroke="#5a3010" strokeWidth="3.5" strokeLinecap="round"/>
+        <circle cx="576" cy="124" r="13" fill="url(#blushGrad_fd)"/>
+        <circle cx="670" cy="124" r="13" fill="url(#blushGrad_fd)"/>
+        <path d="M606 126 Q623 140 640 126" fill="none" stroke="#8B4513" strokeWidth="3" strokeLinecap="round"/>
+      </g>
       <rect x="676" y="70" width="190" height="60" rx="14" fill="#ffff00"/>
       <path d="M690 130 L676 150 L706 130Z" fill="#ffff00"/>
       <text x="771" y="98" textAnchor="middle" fontSize="22" fontWeight="900" fill="#111">맛있어! 😋</text>
