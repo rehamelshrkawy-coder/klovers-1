@@ -3516,9 +3516,9 @@ function CoursePlan({ lang }: { lang: Lang }) {
   const isAr = lang === "ar";
   const weeks = [
     { n: isAr ? "الأسبوع ١" : "Week 1", title: isAr ? "الحروف الساكنة — الجزء ١" : "Basic Consonants — Part 1", letters: "ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ", goal: isAr ? "يتعرّف الطالب على الحروف الستة الأولى ويستطيع نطقها وكتابتها." : "Students recognize, pronounce, and write the first 6 consonants." },
-    { n: isAr ? "الأسبوع ٢" : "Week 2", title: isAr ? "إكمال الحروف الساكنة" : "Complete Basic Consonants", letters: "ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ", goal: isAr ? "يستطيع الطالب نطق وكتابة جميع الـ١٤ حرفاً ساكناً." : "Students recognize, pronounce, and write all 14 basic consonants." },
-    { n: isAr ? "الأسبوع ٣" : "Week 3", title: isAr ? "حروف المد + المقاطع" : "Vowels + Syllable Blocks", letters: "ㅏ ㅓ ㅗ ㅜ ㅡ ㅣ ㅐ ㅔ ㅑ ㅕ", goal: isAr ? "يجمع الطالب بين الساكن والمد ليقرأ مقاطع بسيطة مثل 가، 나، 바، 고." : "Students combine consonants + vowels to read simple syllables (가, 나, 바, 고)." },
-    { n: isAr ? "الأسبوع ٤" : "Week 4", title: isAr ? "الباتشيم + تدريب القراءة" : "Batchim + Reading Practice", letters: isAr ? "الحروف النهائية + كلمات بسيطة" : "Final consonants + simple Korean words", goal: isAr ? "يقرأ الطالب كلمات كورية مبدئية ويفهم فكرة الحرف النهائي (الباتشيم)." : "Students read beginner Korean words and understand final consonants." },
+    { n: isAr ? "الأسبوع ٢" : "Week 2", title: isAr ? "حروف المد" : "Vowels", letters: "ㅏ ㅓ ㅗ ㅜ ㅡ ㅣ ㅐ ㅔ ㅑ ㅕ", goal: isAr ? "يتعلّم الطالب حروف المد ويبدأ يجمع المقاطع البسيطة مع حروف الأسبوع الأول." : "Students learn the basic vowels and begin combining them with Week 1 consonants." },
+    { n: isAr ? "الأسبوع ٣" : "Week 3", title: isAr ? "إكمال الحروف الساكنة" : "Complete Basic Consonants", letters: "ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ", goal: isAr ? "يكمل الطالب باقي الحروف الساكنة الـ١٤ ويتمكّن من قراءة كل المقاطع." : "Students learn the remaining 8 consonants and can read all syllable combinations." },
+    { n: isAr ? "الأسبوع ٤" : "Week 4", title: isAr ? "حروف المقاطع + الحروف النهائية + كلمات بسيطة" : "Syllables + Final Consonants + Simple Words", letters: isAr ? "المقاطع + الباتشيم + كلمات" : "Syllables + Batchim + Words", goal: isAr ? "يقرأ الطالب كلمات كورية كاملة، ويفهم فكرة الحرف النهائي (الباتشيم)." : "Students read complete Korean words and understand final consonants (batchim)." },
   ];
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "خطة الكورس" : "Course Plan"}>
@@ -3558,6 +3558,34 @@ function InClassExercise({ lang }: { lang: Lang }) {
         {items.map((t,i) => <li key={i}>{t}</li>)}
       </ul>
     </div>
+  );
+}
+
+function PictureWords({ lesson, slice, lang }: LessonProps) {
+  const isAr = lang === "ar";
+  const letters = CONSONANTS.slice(...slice);
+  return (
+    <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "كلمات بالصور" : "Picture Words"}>
+      <SHead title={isAr ? `كلمات بالصور — الدرس ${["١","٢","٣","٤","٥"][lesson-1]}` : `Picture Words — Lesson ${lesson}`} subtitle={isAr ? "اربط كل حرف بكلمة وصورة لتثبيت الحفظ" : "Anchor each letter to an object and a Korean word"} />
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"5mm", marginBottom:"6mm" }}>
+        {letters.flatMap(c => (c[isAr?"ar":"en"].ex || []).slice(0,2).map((w,wi) => ({ c, w, wi }))).map(({c,w,wi}, i) => (
+          <div key={`${c.char}-${wi}-${i}`} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"4mm 5mm", background:"#fff", display:"flex", alignItems:"center", gap:"4mm", direction:isAr?"rtl":"ltr" }}>
+            <div style={{ fontSize:"42px", lineHeight:1, flexShrink:0 }}>{c.emoji}</div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:"11px", color:T3, fontWeight:800, letterSpacing:"1px", marginBottom:"1mm" }}>
+                {isAr ? "حرف" : "Letter"}: <span style={{ color:T1, fontSize:"16px", fontWeight:900 }}>{c.char}</span>
+              </div>
+              <div style={{ fontSize:"22px", fontWeight:900, color:T1, lineHeight:1.1, direction:"ltr" }}>{w.k}</div>
+              <div style={{ fontSize:"10px", color:T3, marginTop:"1mm", direction:"ltr" }}>[{w.r}]</div>
+              <div style={{ fontSize:"11px", color:T2, marginTop:"1mm" }}>— {w.m}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ borderLeft:`3px solid ${Y}`, padding:"4mm 5mm", background:"#fffdf3", fontSize:"11px", color:T2, lineHeight:1.7 }}>
+        {isAr ? "✍️ اطلب من الطلاب رسم الصورة بجانب كل حرف في كرّاسهم — هذا يثبّت الحرف بالصورة." : "✍️ Ask students to draw the object next to each letter in their notebook — pictures anchor memory."}
+      </div>
+    </Page>
   );
 }
 
@@ -3612,6 +3640,15 @@ function Homework({ lesson, slice, lang }: LessonProps) {
 
       <HwSection letter="D" title={isAr ? "تحدي صغير" : "Mini Challenge"} body={isAr ? "حاول قراءة أو كتابة كلمة كورية بسيطة باستخدام حروف اليوم." : "Try to read or write one simple Korean word using today's letters."} />
       <div style={{ height:"14mm", border:`1px dashed ${BD}`, borderRadius:"4px", marginBottom:"6mm" }} />
+
+      <HwSection letter="E" title={isAr ? "إملاء (واجب لكل حصة)" : "Dictation (every class)"} body={isAr ? "ينطق المعلم ١٠ حروف أو مقاطع، ويكتبها الطالب في المربعات." : "Teacher says 10 letters or syllables; student writes them in the boxes."} />
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"3mm", marginBottom:"6mm" }}>
+        {[1,2,3,4,5,6,7,8,9,10].map(n => (
+          <div key={n} style={{ border:`1px solid ${BD}`, height:"14mm", borderRadius:"4px", background:"#fff", position:"relative" }}>
+            <span style={{ position:"absolute", top:"2px", insetInlineStart:"4px", fontSize:"9px", color:T3, fontWeight:700 }}>{n}</span>
+          </div>
+        ))}
+      </div>
 
       <div style={{ borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
         <div style={{ fontSize:"10px", fontWeight:800, color:T1, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
@@ -4143,6 +4180,7 @@ export default function HangulBookPage() {
                 <TeachLetters lesson={L.lesson} slice={L.slice} lang="ar" />
                 <PracticeLetters lesson={L.lesson} slice={L.slice} lang="ar" />
                 <ReviewLetters lesson={L.lesson} slice={L.slice} lang="ar" />
+                <PictureWords lesson={L.lesson} slice={L.slice} lang="ar" />
                 <Homework lesson={L.lesson} slice={L.slice} lang="ar" />
                 <DailyPractice lesson={L.lesson} lang="ar" />
                 {L.lesson === 2 && <WeeklyCheckpoint week={1} lang="ar" />}
@@ -4198,6 +4236,7 @@ export default function HangulBookPage() {
                 <TeachLetters lesson={L.lesson} slice={L.slice} lang="en" />
                 <PracticeLetters lesson={L.lesson} slice={L.slice} lang="en" />
                 <ReviewLetters lesson={L.lesson} slice={L.slice} lang="en" />
+                <PictureWords lesson={L.lesson} slice={L.slice} lang="en" />
                 <Homework lesson={L.lesson} slice={L.slice} lang="en" />
                 <DailyPractice lesson={L.lesson} lang="en" />
                 {L.lesson === 2 && <WeeklyCheckpoint week={1} lang="en" />}
