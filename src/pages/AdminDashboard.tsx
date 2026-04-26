@@ -1,13 +1,11 @@
 import { Component, ReactNode, lazy, Suspense, useEffect, useState, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import "@/i18n/config";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { getDerivedStatusBadgeVariant } from "@/lib/badge-styles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -26,17 +24,17 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Search, Download, Trash2, Check, X, Eye, Undo2, AlertCircle, Bell, ChevronLeft, ChevronRight, Pencil, Mail, Eraser, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Copy, Clock, Tag, UserPlus, Loader2, Image, Trophy, TrendingUp, Link } from "lucide-react";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { LogOut, Eye, AlertCircle, Bell, Mail, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Clock, Tag, Loader2, Image, Trophy, TrendingUp, Link } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Columns3, Package, BookOpen } from "lucide-react";
+import { ChevronDown, Package } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AdminKpiStrip } from "@/components/admin/AdminKpiStrip";
+
 // Lazy-load heavy tab components — each loads only when its tab is first opened
 const BlogManager = lazy(() => import("@/components/admin/BlogManager"));
 const StudentManager = lazy(() => import("@/components/admin/StudentManager"));
@@ -61,24 +59,12 @@ const ImageAuditPanel = lazy(() => import("@/components/admin/ImageAuditPanel"))
 const LeadsPanel = lazy(() => import("@/components/admin/LeadsPanel").catch(() => import("@/components/admin/LeadsPanel")));
 const LeagueUsersPanel = lazy(() => import("@/components/admin/LeagueUsersPanel"));
 const LeadFunnelPanel = lazy(() => import("@/components/admin/LeadFunnelPanel"));
-const BookAssignmentManager = lazy(() => import("@/components/admin/BookAssignmentManager"));
 
 const TabLoader = () => (
-  <div role="status" aria-label="Loading content" className="flex items-center justify-center py-20">
-    <div className="w-7 h-7 border-4 border-primary border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-    <span className="sr-only">Loading…</span>
+  <div className="flex items-center justify-center py-20">
+    <div className="w-7 h-7 border-4 border-primary border-t-transparent rounded-full animate-spin" />
   </div>
 );
-
-// Human-readable explanations for every derived student status
-const STATUS_TOOLTIPS: Record<string, string> = {
-  LEAD:      "Registered profile but no paid enrollment yet — needs follow-up",
-  ACTIVE:    "Currently enrolled with sessions remaining",
-  COMPLETED: "All package sessions used — ready to renew",
-  LOCKED:    "Account on hold — contact student to resolve",
-  PENDING:   "Enrollment submitted, awaiting admin review",
-  REJECTED:  "Enrollment was declined",
-};
 
 // Lead, Enrollment, AttendanceReq, OverviewRow — imported from @/types/admin
 
@@ -93,18 +79,14 @@ class TabErrorBoundary extends Component<
   static getDerivedStateFromError(error: Error) { return { error: true, errorMsg: error?.message || "Unknown error" }; }
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error(`[TabErrorBoundary] ${this.props.name} crashed:`, error, errorInfo);
-    // Strip absolute file paths from stack traces before remote logging to avoid
-    // leaking build-machine paths or internal module structure.
-    const sanitizeStack = (s: string | undefined) =>
-      s?.replace(/\(.*?\)/g, "(...)").replace(/at \/[^\s]+/g, "at [path]").slice(0, 4000) ?? null;
     // Best-effort remote log. Table is created on demand — if it doesn't
     // exist in this env, silently skip so the fallback UI still renders.
     try {
       void supabase.from("admin_error_log" as never).insert({
         tab: this.props.name,
         message: error?.message?.slice(0, 500) ?? "Unknown error",
-        stack: sanitizeStack(error?.stack),
-        component_stack: sanitizeStack(errorInfo?.componentStack),
+        stack: error?.stack?.slice(0, 4000) ?? null,
+        component_stack: errorInfo?.componentStack?.slice(0, 4000) ?? null,
         user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
         url: typeof window !== "undefined" ? window.location.href.slice(0, 500) : null,
       } as never).then(({ error: insertErr }) => {
@@ -142,8 +124,10 @@ class TabErrorBoundary extends Component<
 
 import { normalizeLevel, LEVEL_SELECT_OPTIONS } from "@/constants/levels";
 import type { Lead, Enrollment, AttendanceReq, OverviewRow } from "@/types/admin";
-import { formatTime, ADMIN_PAGE_SIZE as PAGE_SIZE } from "@/lib/admin-utils";
-import { useProfiles } from "@/hooks/admin/useProfiles";
+import { formatTime, ADMIN_PAGE_SIZE as PAGE_SIZE, MAX_UNIT_PRICE } from "@/lib/admin-utils";
+import type { ProfileEntry } from "@/hooks/admin/useProfiles";
+import { StudentsTab } from "@/components/admin/tabs/StudentsTab";
+import { EnrollmentsTab } from "@/components/admin/tabs/EnrollmentsTab";
 import { useStudentOverview, buildOverviewByEmail } from "@/hooks/admin/useStudentOverview";
 import { useLeads } from "@/hooks/admin/useLeads";
 import { useEnrollments } from "@/hooks/admin/useEnrollments";
@@ -151,16 +135,31 @@ import { useAttendanceRequests } from "@/hooks/admin/useAttendanceRequests";
 import { useReferralStats } from "@/hooks/admin/useReferralStats";
 import { useTrialStats } from "@/hooks/admin/useTrialStats";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { formatMoney, formatDate } from "@/lib/format";
-import { EnrollmentCard } from "@/components/admin/EnrollmentCard";
 
 const AdminDashboard = () => {
+  const { t } = useTranslation("admin");
   const queryClient = useQueryClient();
 
   // ── React Query: shared data (cached, deduplicated) ───────────────────────
-  const { data: profileMap } = useProfiles();
   const { data: overviewRows = [], isLoading: overviewLoading } = useStudentOverview();
   const overviewByEmail = useMemo(() => buildOverviewByEmail(overviewRows), [overviewRows]);
+
+  // Build profileMap from overviewRows (already fetched) instead of a separate
+  // 5000-row profiles query. Eliminates one full-table scan on every page load.
+  const profileMap = useMemo<Record<string, ProfileEntry>>(() => {
+    const map: Record<string, ProfileEntry> = {};
+    for (const r of overviewRows) {
+      map[r.user_id] = {
+        user_id: r.user_id,
+        name: r.name,
+        email: r.email,
+        level: r.level ?? null,
+        country: r.country ?? null,
+      };
+    }
+    return map;
+  }, [overviewRows]);
+
   const { data: leads = [], isLoading: leadsLoading, error: leadsQueryError } = useLeads({ overviewByEmail });
   const { data: enrollments = [], isLoading: enrollmentsLoading } = useEnrollments({ profileMap });
   const { data: attendanceReqs = [], isLoading: attendanceLoading } = useAttendanceRequests({ profileMap, overviewRows });
@@ -190,24 +189,17 @@ const AdminDashboard = () => {
   useEffect(() => {
     try { localStorage.setItem("admin:studentCols", JSON.stringify(Array.from(visibleStudentCols))); } catch { /* ignore */ }
   }, [visibleStudentCols]);
-  // Screen-reader announcement when a column is toggled
-  const [colAnnouncement, setColAnnouncement] = useState("");
   const toggleStudentCol = useCallback((c: StudentCol) => {
     setVisibleStudentCols(prev => {
       const next = new Set(prev);
-      const wasVisible = next.has(c);
-      if (wasVisible) next.delete(c); else next.add(c);
-      setColAnnouncement(`${STUDENT_COL_LABELS[c]} column ${wasVisible ? "hidden" : "shown"}`);
+      if (next.has(c)) next.delete(c); else next.add(c);
       return next;
     });
   }, []);
 
-  // Hero "Insights" open by default — restore last explicit choice from localStorage
+  // Hero "Insights" collapsed by default — restore last choice from localStorage
   const [insightsOpen, setInsightsOpen] = useState<boolean>(() => {
-    try {
-      const stored = localStorage.getItem("admin:insightsOpen");
-      return stored === null ? true : stored === "1"; // first visit → open
-    } catch { return true; }
+    try { return localStorage.getItem("admin:insightsOpen") === "1"; } catch { return false; }
   });
   useEffect(() => {
     try { localStorage.setItem("admin:insightsOpen", insightsOpen ? "1" : "0"); } catch { /* ignore */ }
@@ -256,6 +248,7 @@ const AdminDashboard = () => {
   const [selectedEnrollmentIds, setSelectedEnrollmentIds] = useState<Set<string>>(new Set());
   const [bulkApproving, setBulkApproving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [sendingResend, setSendingResend] = useState<Set<string>>(new Set());
   const [showOverdueOnly, setShowOverdueOnly] = useState(false);
   const navigate = useNavigate();
 
@@ -355,12 +348,6 @@ const AdminDashboard = () => {
   // invalidateAll() triggers targeted cache refresh instead of re-fetching everything.
 
   const handleDeleteStudent = async (userId: string) => {
-    // Fire-and-forget audit log — does not block deletion if table doesn't exist yet
-    void supabase.from("admin_audit_log" as never).insert({
-      action: "delete_student",
-      target_user_id: userId,
-      performed_at: new Date().toISOString(),
-    } as never);
     const { error } = await supabase.from("profiles").delete().eq("user_id", userId);
     if (error) { toast({ title: "Error", description: "Failed to delete student.", variant: "destructive" }); return; }
     queryClient.invalidateQueries({ queryKey: ["admin", "student-overview"] });
@@ -437,17 +424,6 @@ const AdminDashboard = () => {
     setReceiptModalLoading(false);
   }, []);
 
-  // Timezones used by Arabic-speaking countries (Egypt, Gulf, Levant, North Africa)
-  const ARABIC_TIMEZONES = new Set([
-    "Africa/Cairo", "Africa/Tripoli", "Africa/Tunis", "Africa/Algiers", "Africa/Casablanca",
-    "Africa/Khartoum", "Africa/Mogadishu", "Africa/Djibouti", "Africa/Asmara",
-    "Asia/Riyadh", "Asia/Dubai", "Asia/Kuwait", "Asia/Bahrain", "Asia/Qatar",
-    "Asia/Muscat", "Asia/Aden", "Asia/Amman", "Asia/Baghdad", "Asia/Beirut",
-    "Asia/Damascus", "Asia/Gaza", "Asia/Hebron", "Asia/Jerusalem",
-  ]);
-  const getEmailLanguage = (timezone: string) =>
-    ARABIC_TIMEZONES.has(timezone) ? "ar" : timezone ? "en" : "ar";
-
   // Request schedule resubmission — inserts a token row and copies link.
   const handleRequestResubmission = useCallback(async (e: Enrollment) => {
     const token = crypto.randomUUID().replace(/-/g, "");
@@ -489,50 +465,70 @@ const AdminDashboard = () => {
   };
 
   const handleResendPaymentEmail = useCallback(async (e: Enrollment) => {
-    const { error } = await supabase.functions.invoke("send-confirmation-email", {
-      body: {
-        template: "payment_confirmed",
-        email: e.profiles?.email,
-        name: e.profiles?.name ?? "Student",
-        language: "ar",
-        plan_type: e.plan_type,
-        duration: e.duration,
-        sessions_total: e.sessions_total,
-        amount: e.amount,
-        currency: e.currency ?? "EGP",
-        tx_ref: e.tx_ref,
-      },
-    });
-    if (error) {
-      toast({ title: "Failed to resend", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Payment email resent", description: `Sent to ${e.profiles?.email}` });
+    const key = `pay-${e.id}`;
+    if (sendingResend.has(key)) return;
+    setSendingResend(prev => new Set(prev).add(key));
+    try {
+      const { error } = await supabase.functions.invoke("send-confirmation-email", {
+        body: {
+          template: "payment_confirmed",
+          email: e.profiles?.email,
+          name: e.profiles?.name ?? "Student",
+          language: "ar",
+          plan_type: e.plan_type,
+          duration: e.duration,
+          sessions_total: e.sessions_total,
+          amount: e.amount,
+          currency: e.currency ?? "EGP",
+          tx_ref: e.tx_ref,
+        },
+      });
+      if (error) {
+        toast({ title: "Failed to resend", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Payment email resent", description: `Sent to ${e.profiles?.email}` });
+      }
+    } finally {
+      setSendingResend(prev => { const s = new Set(prev); s.delete(key); return s; });
     }
-  }, []);
+  }, [sendingResend]);
 
   const handleResendApprovalEmail = useCallback(async (e: Enrollment) => {
-    const { error } = await supabase.functions.invoke("send-confirmation-email", {
-      body: {
-        template: "approval",
-        email: e.profiles?.email,
-        name: e.profiles?.name ?? "Student",
-        language: "ar",
-        plan_type: e.plan_type,
-        duration: e.duration,
-        sessions_total: e.sessions_total,
-        amount: e.amount,
-        currency: e.currency ?? "EGP",
-      },
-    });
-    if (error) {
-      toast({ title: "Failed to resend", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Approval email resent", description: `Sent to ${e.profiles?.email}` });
+    const key = `appr-${e.id}`;
+    if (sendingResend.has(key)) return;
+    setSendingResend(prev => new Set(prev).add(key));
+    try {
+      const { error } = await supabase.functions.invoke("send-confirmation-email", {
+        body: {
+          template: "approval",
+          email: e.profiles?.email,
+          name: e.profiles?.name ?? "Student",
+          language: "ar",
+          plan_type: e.plan_type,
+          duration: e.duration,
+          sessions_total: e.sessions_total,
+          amount: e.amount,
+          currency: e.currency ?? "EGP",
+        },
+      });
+      if (error) {
+        toast({ title: "Failed to resend", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Approval email resent", description: `Sent to ${e.profiles?.email}` });
+      }
+    } finally {
+      setSendingResend(prev => { const s = new Set(prev); s.delete(key); return s; });
     }
-  }, []);
+  }, [sendingResend]);
 
   const handleSendClassLink = async () => {
     if (!classLinkTarget || !classLinkUrl.trim()) return;
+    // Reject javascript: and data: URLs to prevent XSS/phishing
+    const urlLower = classLinkUrl.trim().toLowerCase();
+    if (urlLower.startsWith("javascript:") || urlLower.startsWith("data:")) {
+      toast({ title: "Invalid URL", description: "Please enter a valid https:// link.", variant: "destructive" });
+      return;
+    }
     setIsSendingClassLink(true);
 
     const recipients: { email: string; name: string; language?: string }[] = [];
@@ -562,7 +558,9 @@ const AdminDashboard = () => {
           if (profiles) {
             for (const p of profiles) {
               if (p.email && p.name) {
-                recipients.push({ email: p.email, name: p.name, language: getEmailLanguage(p.timezone || "") });
+                const tz = p.timezone || "";
+                const lang = tz.startsWith("Asia/") || tz.startsWith("Europe/") || tz.startsWith("America/") ? "en" : "ar";
+                recipients.push({ email: p.email, name: p.name, language: lang });
               }
             }
           }
@@ -582,7 +580,9 @@ const AdminDashboard = () => {
         setIsSendingClassLink(false);
         return;
       }
-      recipients.push({ email, name, language: getEmailLanguage(classLinkTarget.timezone || "") });
+      const tz = classLinkTarget.timezone || "";
+      const lang = tz.startsWith("Asia/") || tz.startsWith("Europe/") || tz.startsWith("America/") ? "en" : "ar";
+      recipients.push({ email, name, language: lang });
     }
 
     let sent = 0;
@@ -680,7 +680,7 @@ const AdminDashboard = () => {
         toast({ title: "Invalid price", description: "Unit price must be greater than zero.", variant: "destructive" });
         return;
       }
-      if (price > 10000) {
+      if (price > MAX_UNIT_PRICE) {
         toast({ title: "Invalid price", description: "Unit price seems too high. Please verify.", variant: "destructive" });
         return;
       }
@@ -716,32 +716,32 @@ const AdminDashboard = () => {
     const { data: { session: bulkSession } } = await supabase.auth.getSession();
     if (!bulkSession) { setBulkApproving(false); return; }
     const ids = Array.from(selectedEnrollmentIds);
-
-    // Run all RPCs in parallel — dramatically faster than sequential for large selections
-    const results = await Promise.allSettled(
-      ids.map(async (id) => {
-        const enrollment = enrollments.find(e => e.id === id);
-        if (!enrollment) throw new Error("not_found");
-        if (!enrollment.matched_at) throw new Error("not_matched");
-        const isManual = enrollment.payment_provider === "egypt_manual" || enrollment.payment_provider === "manual";
-        const hasReceipt = enrollment.receipt_url && enrollment.receipt_url.trim() !== "" && enrollment.receipt_url !== "manual";
-        if (isManual && !hasReceipt) throw new Error("no_receipt");
+    let succeeded = 0;
+    let failed = 0;
+    for (const id of ids) {
+      const enrollment = enrollments.find(e => e.id === id);
+      if (!enrollment) continue;
+      // Skip enrollments not yet placed by the matcher
+      if (!enrollment.matched_at) { failed++; continue; }
+      // Skip manual-payment enrollments missing a receipt
+      const isManual = enrollment.payment_provider === "egypt_manual" || enrollment.payment_provider === "manual";
+      const hasReceipt = enrollment.receipt_url && enrollment.receipt_url.trim() !== "" && enrollment.receipt_url !== "manual";
+      if (isManual && !hasReceipt) { failed++; continue; }
+      try {
         const { error } = await supabase.rpc("approve_enrollment", {
           _enrollment_id: id,
           _admin_id: bulkSession.user.id,
           _unit_price: null,
         });
-        if (error) throw error;
-      })
-    );
-
-    const succeeded = results.filter(r => r.status === "fulfilled").length;
-    const failed = results.filter(r => r.status === "rejected").length;
+        if (error) { failed++; continue; }
+        succeeded++;
+      } catch { failed++; }
+    }
     setBulkApproving(false);
     setSelectedEnrollmentIds(new Set());
     toast({
       title: `Bulk approve complete`,
-      description: `${succeeded} approved${failed > 0 ? `, ${failed} skipped (not matched or missing receipt)` : ""}`,
+      description: `${succeeded} approved${failed > 0 ? `, ${failed} failed` : ""}`,
       variant: failed > 0 ? "destructive" : "default",
     });
     invalidateAll();
@@ -778,7 +778,21 @@ const AdminDashboard = () => {
         toast({ title: "Error", description: error.message || "Failed to approve.", variant: "destructive" });
         return;
       }
-      toast({ title: "Attendance approved", description: `Sessions remaining: ${data}` });
+      const newRemaining = typeof data === "number" ? data : null;
+      toast({ title: "Attendance approved", description: `Sessions remaining: ${newRemaining ?? "?"}` });
+
+      // Notify student when they cross into the LOCKED threshold for the first time
+      if (newRemaining !== null && newRemaining <= 0 && req.profiles?.email) {
+        void supabase.functions.invoke("send-confirmation-email", {
+          body: {
+            template: "sessions_exhausted",
+            email: req.profiles.email,
+            name: req.profiles.name ?? "Student",
+            language: "ar",
+            sessions_remaining: newRemaining,
+          },
+        });
+      }
     } else {
       const { error } = await supabase.rpc("reject_attendance_request", {
         _request_id: req.id,
@@ -894,7 +908,7 @@ const AdminDashboard = () => {
 
   const TAB_GROUPS: { id: string; label: string; icon: typeof Users; tabs: string[] }[] = [
     { id: "ops",     label: "Operations", icon: BarChart3, tabs: ["students", "enrollments", "leads", "trials", "lead-funnel", "manage", "sales", "promos"] },
-    { id: "learn",   label: "Learning",   icon: Users,     tabs: ["group-attendance", "group-matcher", "placement-tests", "session-attendance", "preferences", "league-users", "books"] },
+    { id: "learn",   label: "Learning",   icon: Users,     tabs: ["group-attendance", "group-matcher", "placement-tests", "session-attendance", "preferences", "league-users"] },
     { id: "content", label: "Content",    icon: Sparkles,  tabs: ["blog", "seo-orchestration", "image-audit", "campaigns"] },
     { id: "config",  label: "Config",     icon: Settings,  tabs: ["notifications", "scheduling", "availability", "settings"] },
   ];
@@ -925,8 +939,13 @@ const AdminDashboard = () => {
 
   return (
     <TooltipProvider>
-      {/* Screen-reader live region for column toggle announcements */}
-      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">{colAnnouncement}</div>
+      {/* Skip to main content — keyboard / screen reader shortcut */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+      >
+        Skip to main content
+      </a>
       <div id="main-content" className="min-h-screen bg-muted/30">
         {/* Header */}
         <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border/60 shadow-sm">
@@ -937,50 +956,31 @@ const AdminDashboard = () => {
                 <Sparkles className="h-4.5 w-4.5" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-base md:text-lg font-bold text-foreground leading-tight truncate">Admin Dashboard</h1>
-                <p className="text-[11px] text-muted-foreground hidden sm:block">Manage students, enrollments & content</p>
+                <h1 className="text-base md:text-lg font-bold text-foreground leading-tight truncate">{t("dashboard.title")}</h1>
+                <p className="text-[11px] text-muted-foreground hidden sm:block">{t("dashboard.subtitle")}</p>
               </div>
             </div>
             <div className="flex items-center gap-1.5 md:gap-2">
               <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2" aria-label="Refresh dashboard data">
-                <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} aria-hidden="true" />
-                <span className="hidden sm:inline">{refreshing ? "Refreshing…" : "Refresh"}</span>
+                <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+                <span className="hidden sm:inline">{refreshing ? t("dashboard.refreshing") : t("dashboard.refresh")}</span>
               </Button>
-              {/* Keyboard shortcut reference */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    aria-label="Keyboard shortcuts reference"
-                    className="hidden sm:flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background text-xs font-bold text-muted-foreground hover:bg-muted transition-colors"
-                  >
-                    ?
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-xs space-y-1 p-3 max-w-[200px]">
-                  <p className="font-semibold text-foreground mb-1.5">Keyboard shortcuts</p>
-                  <p><kbd className="font-mono bg-muted px-1 rounded">Alt+1</kbd> → Operations</p>
-                  <p><kbd className="font-mono bg-muted px-1 rounded">Alt+2</kbd> → Learning</p>
-                  <p><kbd className="font-mono bg-muted px-1 rounded">Alt+3</kbd> → Content</p>
-                  <p><kbd className="font-mono bg-muted px-1 rounded">Alt+4</kbd> → Config</p>
-                </TooltipContent>
-              </Tooltip>
               <Button variant="outline" size="sm" onClick={() => navigate("/admin/marketing")} className="gap-2" aria-label="Open marketing dashboard">
-                <Sparkles className="h-4 w-4" aria-hidden="true" /> <span className="hidden sm:inline">Marketing</span>
+                <Sparkles className="h-4 w-4" /> <span className="hidden sm:inline">{t("dashboard.marketing")}</span>
               </Button>
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2" aria-label="Log out">
-                <LogOut className="h-4 w-4" aria-hidden="true" /> <span className="hidden sm:inline">Logout</span>
+                <LogOut className="h-4 w-4" /> <span className="hidden sm:inline">{t("dashboard.logout")}</span>
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6" aria-live="polite" aria-atomic="false">
           {leadsError && (
-            <div className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <div role="alert" className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               <span className="mt-0.5 shrink-0">⚠️</span>
               <div className="flex-1">
-                <p className="font-medium">Data load error</p>
+                <p className="font-medium">{t("common.dataLoadError")}</p>
                 <p className="text-xs mt-0.5 opacity-80">{leadsError}</p>
               </div>
               <button
@@ -991,6 +991,12 @@ const AdminDashboard = () => {
               </button>
             </div>
           )}
+          <AdminKpiStrip
+            overviewRows={overviewRows}
+            actionableEnrollments={actionableEnrollments}
+            isLoading={overviewLoading}
+          />
+
           <LifecycleFunnel
             leadsCount={lifecycleLeads}
             registeredCount={overviewRows.length}
@@ -1094,7 +1100,7 @@ const AdminDashboard = () => {
 
           {/* Unified "Action needed" bar — stacks quick-actions into one row */}
           {(actionableEnrollments > 0 || trialStats.pending > 0) && (
-            <div className="rounded-xl border border-amber-400/60 bg-gradient-to-r from-amber-50 to-amber-100/30 dark:from-amber-950/25 dark:to-amber-900/10 overflow-hidden">
+            <div role="status" aria-label="Action items requiring attention" className="rounded-xl border border-amber-400/60 bg-gradient-to-r from-amber-50 to-amber-100/30 dark:from-amber-950/25 dark:to-amber-900/10 overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-2 border-b border-amber-400/30">
                 <Bell className="h-4 w-4 text-amber-600 animate-pulse" />
                 <span className="text-xs font-semibold text-amber-800 dark:text-amber-300 uppercase tracking-wide">
@@ -1288,11 +1294,6 @@ const AdminDashboard = () => {
                     <Trophy className="h-3.5 w-3.5" /> Leagues
                   </TabsTrigger>
                 )}
-                {inActiveGroup("books") && (
-                  <TabsTrigger value="books" className={TAB_CLS}>
-                    <BookOpen className="h-3.5 w-3.5" /> Books
-                  </TabsTrigger>
-                )}
                 {inActiveGroup("blog") && (
                   <TabsTrigger value="blog" className={TAB_CLS}>Blog</TabsTrigger>
                 )}
@@ -1334,657 +1335,73 @@ const AdminDashboard = () => {
 
             {/* STUDENTS TAB */}
             <TabsContent value="students">
-              <Card className="rounded-2xl">
-                <CardHeader className="pb-4">
-                  <div className="flex flex-col gap-4">
-                     <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <CardTitle className="text-base">Users</CardTitle>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">
-                          Read-only overview of every student. For manual enrollment, packages, or legacy records use
-                          <button
-                            type="button"
-                            onClick={() => setAdminTab("manage")}
-                            className="underline underline-offset-2 hover:text-foreground ml-1"
-                          >
-                            Student Admin →
-                          </button>
-                        </p>
-                      </div>
-                      <p className="text-xs text-muted-foreground shrink-0">{filteredUsers.length} of {overviewRows.length}</p>
-                    </div>
-                    {/* Responsive student filters */}
-                    {isMobile ? (
-                      <Select value={studentFilter} onValueChange={setStudentFilter}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {studentFilterOptions.map(opt => (
-                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <div className="flex gap-2 overflow-x-auto whitespace-nowrap">
-                        {studentFilterOptions.map(opt => (
-                          <Button
-                            key={opt.value}
-                            variant={studentFilter === opt.value ? "default" : "outline"}
-                            size="sm"
-                            className="rounded-full text-xs"
-                            onClick={() => setStudentFilter(opt.value)}
-                          >
-                            {opt.label}
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                    {/* Search + Level filter + Export */}
-                    <div className={`flex gap-2 ${isMobile ? "flex-col" : "flex-row"}`}>
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Search by name or email..."
-                          value={studentSearch}
-                          onChange={(e) => setStudentSearch(e.target.value)}
-                          className="pl-9"
-                          aria-label="Search students by name or email"
-                          type="search"
-                        />
-                      </div>
-                      <Select value={levelFilter} onValueChange={setLevelFilter}>
-                        <SelectTrigger className="w-full sm:w-40">
-                          <SelectValue placeholder="All Levels" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Levels</SelectItem>
-                          {LEVEL_SELECT_OPTIONS.map(opt => (
-                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size={isMobile ? "icon" : "sm"} aria-label="Toggle table columns">
-                            <Columns3 className="h-4 w-4" />
-                            {!isMobile && <span className="ml-1">Columns</span>}
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuLabel className="text-xs">Visible columns</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          {ALL_STUDENT_COLS.map(col => (
-                            <DropdownMenuCheckboxItem
-                              key={col}
-                              checked={visibleStudentCols.has(col)}
-                              onCheckedChange={() => toggleStudentCol(col)}
-                              onSelect={(e) => e.preventDefault()}
-                            >
-                              {STUDENT_COL_LABELS[col]}
-                            </DropdownMenuCheckboxItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      <Button variant="outline" size={isMobile ? "icon" : "sm"} onClick={() => {
-                        const headers = ["Name", "Email", "Country", "Level", "Remaining Sessions", "Status", "Source", "Joined"];
-                        const rows = filteredUsers.map(u => [u.name, u.email, u.country, u.level, u.sessions_remaining, u.derived_status, u.source_label, new Date(u.joined_at).toLocaleDateString()]);
-                        const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(",")).join("\n");
-                        const blob = new Blob([csv], { type: "text/csv" });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement("a"); a.href = url; a.download = `students-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
-                        URL.revokeObjectURL(url);
-                      }}>
-                        <Download className="h-4 w-4" />
-                        {!isMobile && <span className="ml-1">Export CSV</span>}
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-              {loading ? (
-                <div className="py-2">
-                  <div className="flex items-center gap-3 py-3 border-b border-border/50">
-                    <Skeleton className="h-3 w-20" />
-                    <Skeleton className="h-3 w-40 flex-1" />
-                    <Skeleton className="h-3 w-16" />
-                    <Skeleton className="h-3 w-20" />
-                  </div>
-                  {Array.from({ length: 10 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 py-3 border-b border-border/30 last:border-0">
-                      <Skeleton className="h-9 w-9 rounded-full shrink-0" />
-                      <div className="flex-1 space-y-1.5">
-                        <Skeleton className="h-3.5 w-1/3" />
-                        <Skeleton className="h-3 w-1/2 opacity-70" />
-                      </div>
-                      <Skeleton className="h-5 w-16 rounded-full" />
-                      <Skeleton className="h-7 w-20 rounded-md" />
-                    </div>
-                  ))}
-                </div>
-              ) : sortedUsers.length === 0 ? (
-                <div className="text-center py-12 space-y-3">
-                  <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                    <Search className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-medium text-sm text-foreground">No students match your filters</p>
-                    <p className="text-xs text-muted-foreground">Try clearing filters or adjusting your search term</p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => { setStudentFilter("all"); setLevelFilter("all"); setStudentSearch(""); }}
-                  >
-                    <Eraser className="h-4 w-4 mr-1.5" /> Clear all filters
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <div className="border rounded-xl overflow-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="sticky top-0 bg-background/95 backdrop-blur z-10 border-b">
-                          <TableHead className="py-3 px-3 font-semibold">Name</TableHead>
-                          <TableHead className="py-3 px-3 font-semibold">Email</TableHead>
-                          {visibleStudentCols.has("country") && (
-                            <TableHead className="py-3 px-3 font-semibold">Country</TableHead>
-                          )}
-                          {visibleStudentCols.has("level") && (
-                            <TableHead className="py-3 px-3 font-semibold">Level</TableHead>
-                          )}
-                          <TableHead
-                            aria-sort={studentSort.col === "sessions_remaining" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
-                            className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary"
-                            onClick={() => setStudentSort(s => ({ col: "sessions_remaining", dir: s.col === "sessions_remaining" && s.dir === "asc" ? "desc" : "asc" }))}
-                          >
-                            Remaining {studentSort.col === "sessions_remaining" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
-                          </TableHead>
-                          {visibleStudentCols.has("attendance") && (
-                            <TableHead
-                              aria-sort={studentSort.col === "attendance_pct" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
-                              className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary"
-                              onClick={() => setStudentSort(s => ({ col: "attendance_pct", dir: s.col === "attendance_pct" && s.dir === "asc" ? "desc" : "asc" }))}
-                            >
-                              Attend% {studentSort.col === "attendance_pct" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
-                            </TableHead>
-                          )}
-                          <TableHead className="py-3 px-3 font-semibold text-center">Negative</TableHead>
-                          <TableHead
-                            aria-sort={studentSort.col === "amount_due" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
-                            className="py-3 px-3 font-semibold text-right cursor-pointer select-none hover:text-primary"
-                            onClick={() => setStudentSort(s => ({ col: "amount_due", dir: s.col === "amount_due" && s.dir === "asc" ? "desc" : "asc" }))}
-                          >
-                            Amount Due {studentSort.col === "amount_due" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
-                          </TableHead>
-                          <TableHead
-                            aria-sort={studentSort.col === "remaining_balance" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
-                            className="py-3 px-3 font-semibold text-right cursor-pointer select-none hover:text-primary"
-                            onClick={() => setStudentSort(s => ({ col: "remaining_balance", dir: s.col === "remaining_balance" && s.dir === "asc" ? "desc" : "asc" }))}
-                          >
-                            Balance {studentSort.col === "remaining_balance" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
-                          </TableHead>
-                          <TableHead className="py-3 px-3 font-semibold">Status</TableHead>
-                          {visibleStudentCols.has("source") && (
-                            <TableHead className="py-3 px-3 font-semibold">Source</TableHead>
-                          )}
-                          {visibleStudentCols.has("joined") && (
-                            <TableHead
-                              aria-sort={studentSort.col === "joined_at" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
-                              className="py-3 px-3 font-semibold cursor-pointer select-none hover:text-primary"
-                              onClick={() => setStudentSort(s => ({ col: "joined_at", dir: s.col === "joined_at" && s.dir === "asc" ? "desc" : "asc" }))}
-                            >
-                              Joined {studentSort.col === "joined_at" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
-                            </TableHead>
-                          )}
-                          <TableHead className="py-3 px-3 w-10" />
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {pagedUsers.map((u) => (
-                          <TableRow key={u.user_id} className={cn("group odd:bg-muted/30 hover:bg-muted/50 transition cursor-pointer", selectedStudentId === u.user_id && "ring-2 ring-primary/40")} onClick={() => setSelectedStudentId(selectedStudentId === u.user_id ? null : (u.enrollment_id ? u.user_id : null))}>
-                            <TableCell className="py-3 px-3 font-medium">
-                              <div className="flex items-center gap-1.5">
-                                <span>{u.name || "—"}</span>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-6 w-6 shrink-0 text-muted-foreground hover:text-primary"
-                                  title="Manually enroll"
-                                  aria-label={`Manually enroll ${u.name || u.email}`}
-                                  onClick={e => { e.stopPropagation(); openManualEnroll(u); }}
-                                >
-                                  <UserPlus className="h-3.5 w-3.5" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                            <TableCell className="py-3 px-3">
-                              <div className="flex items-center gap-1 max-w-[240px]">
-                                <span className="truncate flex-1 text-sm">{u.email}</span>
-                                <button
-                                  className="shrink-0 p-0.5 rounded text-muted-foreground/60 hover:text-foreground hover:bg-muted focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary/50 transition-colors"
-                                  onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(u.email); toast({ title: "Copied" }); }}
-                                  aria-label={`Copy email ${u.email}`}
-                                >
-                                  <Copy className="h-3 w-3" />
-                                </button>
-                              </div>
-                            </TableCell>
-                            {visibleStudentCols.has("country") && (
-                              <TableCell className="py-3 px-3 text-muted-foreground">{u.country || "—"}</TableCell>
-                            )}
-                            {visibleStudentCols.has("level") && (
-                              <TableCell className="py-3 px-3 text-muted-foreground">{u.level || "—"}</TableCell>
-                            )}
-                            <TableCell className="py-3 px-3 text-center font-mono">{u.sessions_remaining}</TableCell>
-                            {visibleStudentCols.has("attendance") && (
-                            <TableCell className="py-3 px-3 text-center">
-                              {u.sessions_total > 0 ? (() => {
-                                const pct = Math.round(((u.sessions_total - u.sessions_remaining) / u.sessions_total) * 100);
-                                return (
-                                  <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${pct >= 80 ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" : pct >= 50 ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"}`} aria-label={`${pct}% attendance`}>
-                                    {pct}%
-                                  </span>
-                                );
-                              })() : <span className="text-muted-foreground">—</span>}
-                            </TableCell>
-                            )}
-                            <TableCell className="py-3 px-3 text-center font-mono">
-                              {u.negative_sessions > 0 ? (
-                                <span className="inline-flex items-center gap-1 text-destructive font-semibold" aria-label={`${u.negative_sessions} negative sessions`}>
-                                  <AlertCircle className="h-3 w-3" aria-hidden="true" /> {u.negative_sessions}
-                                </span>
-                              ) : "—"}
-                            </TableCell>
-                            <TableCell className="py-3 px-3 text-right font-mono" onClick={(e) => e.stopPropagation()}>
-                              {u.amount_due > 0 ? (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <a
-                                        href={`mailto:${u.email}?subject=Outstanding Balance - Klovers&body=Hi ${(u.name || "").split(" ")[0]},%0A%0AYou have an outstanding balance of ${formatMoney(u.amount_due, u.currency)}. Please arrange payment at your earliest convenience.%0A%0ABest,%0AKlovers Team`}
-                                        className="inline-flex items-center gap-1 text-destructive hover:text-destructive/80 transition-colors text-xs font-semibold"
-                                        aria-label={`Send payment request to ${u.name}`}
-                                      >
-                                        {formatMoney(u.amount_due, u.currency)}
-                                        <Mail className="h-3 w-3 flex-shrink-0" />
-                                      </a>
-                                    </TooltipTrigger>
-                                    <TooltipContent>Send payment request email</TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              ) : "—"}
-                            </TableCell>
-                            <TableCell className="py-3 px-3 text-right font-mono">
-                              {u.remaining_balance > 0 ? (
-                                <span className="text-xs font-medium text-green-700 dark:text-green-400">
-                                  {formatMoney(u.remaining_balance, u.currency)}
-                                </span>
-                              ) : "—"}
-                            </TableCell>
-                            <TableCell className="py-3 px-3">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Badge variant={getDerivedStatusBadgeVariant(u.derived_status)} className="text-xs cursor-help">{u.derived_status}</Badge>
-                                </TooltipTrigger>
-                                <TooltipContent side="left" className="max-w-xs text-xs">
-                                  {STATUS_TOOLTIPS[u.derived_status] ?? u.derived_status}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TableCell>
-                            {visibleStudentCols.has("source") && (
-                              <TableCell className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs cursor-pointer hover:bg-accent transition-colors"
-                                  onClick={() => {
-                                    const f = u.source_label === "Stripe" ? "stripe" : u.source_label === "Egypt" ? "egypt" : null;
-                                    if (f) { setStudentFilter(f); setStudentPage(0); }
-                                  }}
-                                  title={`Filter by ${u.source_label}`}
-                                  role="button"
-                                  aria-label={`Filter students by source: ${u.source_label}`}
-                                >
-                                  {u.source_label}
-                                </Badge>
-                              </TableCell>
-                            )}
-                            {visibleStudentCols.has("joined") && (
-                              <TableCell className="py-3 px-3 text-muted-foreground text-xs">{formatDate(u.joined_at)}</TableCell>
-                            )}
-                            <TableCell className="py-3 px-3 w-10" onClick={(e) => e.stopPropagation()}>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <button
-                                    className="p-1 rounded text-destructive/60 hover:text-destructive hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-destructive/40 transition-colors"
-                                    aria-label="Delete student"
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete student?</AlertDialogTitle>
-                                    <AlertDialogDescription>This will permanently delete {u.name || u.email}'s profile. This cannot be undone.</AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => handleDeleteStudent(u.user_id)}>Delete</AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="flex items-center justify-between pt-4">
-                      <p className="text-xs text-muted-foreground">
-                        Page {studentPage + 1} of {totalPages} · {sortedUsers.length} results
-                      </p>
-                      <div className="flex items-center gap-1">
-                        <Button variant="outline" size="icon" className="h-8 w-8" disabled={studentPage === 0} onClick={() => setStudentPage(p => p - 1)}>
-                          <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="icon" className="h-8 w-8" disabled={studentPage >= totalPages - 1} onClick={() => setStudentPage(p => p + 1)}>
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-                </CardContent>
-              </Card>
-
-              {/* Attendance Panel */}
-              {selectedStudentId && (() => {
-                const student = overviewRows.find(u => u.user_id === selectedStudentId);
-                if (!student || !student.enrollment_id) return null;
-                return (
-                  <AdminAttendancePanel
-                    enrollmentId={student.enrollment_id}
-                    userId={student.user_id}
-                    studentName={student.name || student.email}
-                    sessionsRemaining={student.sessions_remaining}
-                    negativeSessions={student.negative_sessions}
-                    amountDue={student.amount_due}
-                    currency={student.currency}
-                    derivedStatus={student.derived_status}
-                    onClose={() => setSelectedStudentId(null)}
-                    onUpdated={invalidateAll}
-                  />
-                );
-              })()}
+              <StudentsTab
+                overviewRows={overviewRows}
+                filteredUsers={filteredUsers}
+                sortedUsers={sortedUsers}
+                pagedUsers={pagedUsers}
+                totalPages={totalPages}
+                studentPage={studentPage}
+                setStudentPage={setStudentPage}
+                studentFilter={studentFilter}
+                setStudentFilter={setStudentFilter}
+                levelFilter={levelFilter}
+                setLevelFilter={setLevelFilter}
+                studentSearch={studentSearch}
+                setStudentSearch={setStudentSearch}
+                studentSort={studentSort}
+                setStudentSort={setStudentSort}
+                selectedStudentId={selectedStudentId}
+                setSelectedStudentId={setSelectedStudentId}
+                visibleStudentCols={visibleStudentCols}
+                toggleStudentCol={toggleStudentCol}
+                studentFilterOptions={studentFilterOptions}
+                loading={loading}
+                setAdminTab={setAdminTab}
+                onDeleteStudent={handleDeleteStudent}
+                onManualEnroll={openManualEnroll}
+                invalidateAll={invalidateAll}
+              />
             </TabsContent>
 
+            {/* ENROLLMENTS TAB */}
             <TabsContent value="enrollments">
-              <Card className="rounded-2xl">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <CardTitle className="text-base">Enrollments</CardTitle>
-                    <div className="flex items-center gap-2">
-                      <label className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={showLegacyEnrollments}
-                          onChange={(e) => setShowLegacyEnrollments(e.target.checked)}
-                          className="rounded"
-                        />
-                        Show Legacy ({legacyEnrollmentCount})
-                      </label>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs"
-                        onClick={async () => {
-                          const { data, error } = await supabase.rpc("backfill_missing_enrollments");
-                          if (error) {
-                            toast({ title: "Backfill failed", description: error.message, variant: "destructive" });
-                          } else {
-                            const result = data as Record<string, number> | null;
-                            toast({ title: "Backfill complete", description: `Fixed: ${result?.fixed ?? 0}, Remaining: ${result?.remaining ?? 0}` });
-                            invalidateAll();
-                          }
-                        }}
-                      >
-                        Backfill Missing
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                {/* Funnel summary strip */}
-                {!loading && (() => {
-                  const paidUnplaced = enrollments.filter(e => e.payment_status === "PAID" && !e.matched_at && e.approval_status !== "REJECTED" && e.approval_status !== "CANCELLED").length;
-                  const noLink = enrollments.filter(e => e.approval_status === "APPROVED" && e.matched_at && !e.class_link_sent_at).length;
-                  const pendingReceipt = enrollments.filter(e => (e.payment_provider === "egypt_manual" || e.payment_provider === "manual") && (!e.receipt_url || e.receipt_url === "" || e.receipt_url === "manual") && (e.approval_status === "PENDING" || e.approval_status === "UNDER_REVIEW")).length;
-                  if (paidUnplaced === 0 && noLink === 0 && pendingReceipt === 0) return null;
-                  return (
-                    <div className="flex flex-wrap gap-2 px-6 pb-3">
-                      {paidUnplaced > 0 && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium dark:bg-amber-950/20 dark:border-amber-800 dark:text-amber-400">
-                          ⏳ {paidUnplaced} paid, awaiting placement
-                        </div>
-                      )}
-                      {noLink > 0 && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-800 text-xs font-medium dark:bg-red-950/20 dark:border-red-800 dark:text-red-400">
-                          🔗 {noLink} approved, no class link sent
-                        </div>
-                      )}
-                      {pendingReceipt > 0 && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-orange-800 text-xs font-medium dark:bg-orange-950/20 dark:border-orange-800 dark:text-orange-400">
-                          📄 {pendingReceipt} missing receipt
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-                <CardContent className="pt-0">
-              {loading ? (
-                <div className="py-2 space-y-2">
-                  <div className="flex gap-2 mb-3">
-                    <Skeleton className="h-10 flex-1 rounded-md" />
-                    <Skeleton className="h-10 w-28 rounded-md" />
-                  </div>
-                  {Array.from({ length: 7 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 px-3 py-3 rounded-lg border border-border/40">
-                      <Skeleton className="h-4 w-4 rounded" />
-                      <div className="flex-1 space-y-1.5">
-                        <Skeleton className="h-3.5 w-2/5" />
-                        <Skeleton className="h-3 w-1/3 opacity-70" />
-                      </div>
-                      <Skeleton className="h-5 w-20 rounded-full" />
-                      <Skeleton className="h-7 w-24 rounded-md" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <Tabs defaultValue="under_review" onValueChange={() => setEnrollmentPage(0)}>
-                  <div className="flex gap-2 mb-3">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search by name, email or plan…"
-                        value={enrollmentSearch}
-                        onChange={(e) => setEnrollmentSearch(e.target.value)}
-                        className="pl-9"
-                        aria-label="Search enrollments by name, email or plan"
-                        type="search"
-                      />
-                    </div>
-                    <Button
-                      size="sm"
-                      variant={showOverdueOnly ? "default" : "outline"}
-                      onClick={() => setShowOverdueOnly(v => !v)}
-                      className="shrink-0 gap-1.5"
-                    >
-                      <AlertCircle className="h-3.5 w-3.5" />
-                      {!isMobile && "Overdue only"}
-                    </Button>
-                  </div>
-                  {(() => {
-                    const missing = enrollments.filter(e => e.currency === "EGP" && !e.payment_method && (e.approval_status === "PENDING_PAYMENT" || e.approval_status === "UNDER_REVIEW"));
-                    if (missing.length === 0) return null;
-                    return (
-                      <div className="flex items-center justify-between gap-3 bg-amber-50 border border-amber-300 rounded-lg px-4 py-2.5 mb-3">
-                        <span className="text-sm text-amber-800 font-medium flex items-center gap-1.5">
-                          <AlertCircle className="h-4 w-4 shrink-0" />
-                          {missing.length} Egypt enrollment{missing.length > 1 ? "s" : ""} missing payment method
-                        </span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-xs border-amber-400 text-amber-800 hover:bg-amber-100 shrink-0"
-                          disabled={missing.some(e => sendingReminder.has(e.id))}
-                          onClick={async () => { for (const e of missing) await handleSendPaymentMethodReminder(e); }}
-                        >
-                          Notify All ({missing.length})
-                        </Button>
-                      </div>
-                    );
-                  })()}
-                  <TabsList className="flex gap-2 overflow-x-auto whitespace-nowrap pb-3 h-auto bg-transparent p-0 w-full">
-                    {[
-                      { value: "under_review", label: "Under Review", count: enrollments.filter(e => e.approval_status === "UNDER_REVIEW").length },
-                      { value: "pending_payment", label: "Pending Payment", count: enrollments.filter(e => e.approval_status === "PENDING_PAYMENT").length },
-                      { value: "pending", label: "Pending", count: enrollments.filter(e => e.approval_status === "PENDING").length },
-                      { value: "approved", label: "Approved", count: enrollments.filter(e => e.approval_status === "APPROVED").length },
-                      { value: "rejected", label: "Rejected", count: enrollments.filter(e => e.approval_status === "REJECTED").length },
-                    ].map(t => (
-                      <TabsTrigger key={t.value} value={t.value} className="shrink-0 rounded-full px-4 py-2 text-xs border border-border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary bg-background gap-1.5">
-                        {t.label} ({t.count})
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-
-                  {(["pending_payment", "under_review", "pending", "approved", "rejected"] as const).map((tab) => {
-                    const isLegacy = (e: Enrollment) => (!e.level || e.level.trim() === '') && (!e.preferred_day && (!e.preferred_days || e.preferred_days.length === 0));
-                    const filtered = enrollments.filter((e) => {
-                      const matchesTab = tab === "pending_payment" ? e.approval_status === "PENDING_PAYMENT"
-                        : tab === "under_review" ? e.approval_status === "UNDER_REVIEW"
-                        : tab === "pending" ? e.approval_status === "PENDING"
-                        : tab === "approved" ? e.approval_status === "APPROVED"
-                        : e.approval_status === "REJECTED";
-                      if (!matchesTab) return false;
-                      const isActionable = e.approval_status === "PENDING_PAYMENT" || e.approval_status === "UNDER_REVIEW";
-                      if (!showLegacyEnrollments && isLegacy(e) && !isActionable) return false;
-                      if (showOverdueOnly && !e.negative_since) return false;
-                      if (debouncedEnrollmentSearch) {
-                        const q = debouncedEnrollmentSearch.toLowerCase();
-                        const name = e.profiles?.name?.toLowerCase() ?? "";
-                        const email = e.profiles?.email?.toLowerCase() ?? "";
-                        const plan = e.plan_type?.toLowerCase() ?? "";
-                        if (!name.includes(q) && !email.includes(q) && !plan.includes(q)) return false;
-                      }
-                      return true;
-                    });
-                    const isActionableTab = tab === "under_review" || tab === "pending_payment";
-                    const enrollPageCount = Math.ceil(filtered.length / PAGE_SIZE);
-                    const pagedEnrollments = filtered.slice(enrollmentPage * PAGE_SIZE, (enrollmentPage + 1) * PAGE_SIZE);
-                    const allPageSelected = pagedEnrollments.length > 0 && pagedEnrollments.every(e => selectedEnrollmentIds.has(e.id));
-                    return (
-                      <TabsContent key={tab} value={tab} className="space-y-4">
-                        {isActionableTab && filtered.length > 1 && (
-                          <div className="flex items-center gap-2 px-1 pb-1 border-b border-border">
-                            <Checkbox
-                              id={`select-all-${tab}`}
-                              checked={allPageSelected}
-                              onCheckedChange={(checked) => {
-                                setSelectedEnrollmentIds(prev => {
-                                  const next = new Set(prev);
-                                  pagedEnrollments.forEach(e => checked ? next.add(e.id) : next.delete(e.id));
-                                  return next;
-                                });
-                              }}
-                            />
-                            <label htmlFor={`select-all-${tab}`} className="text-xs text-muted-foreground cursor-pointer select-none">
-                              {allPageSelected ? "Deselect all on page" : `Select all on page (${pagedEnrollments.length})`}
-                            </label>
-                          </div>
-                        )}
-                        {filtered.length === 0 ? (
-                          <p className="text-muted-foreground text-center py-8">No {tab.replace(/_/g, " ")} enrollments.</p>
-                        ) : pagedEnrollments.map((e) => {
-                          const profileEmail = e.profiles?.email?.toLowerCase() ?? "";
-                          const leadLvl = profileEmail && leadsByEmail[profileEmail]?.level?.trim()
-                            ? normalizeLevel(leadsByEmail[profileEmail].level)
-                            : "";
-                          const resolvedLevelFallback = (e.level?.trim() ? normalizeLevel(e.level) : null) ?? leadLvl ?? "";
-                          return (
-                            <EnrollmentCard
-                              key={e.id}
-                              enrollment={e}
-                              isActionableTab={isActionableTab}
-                              isSelected={selectedEnrollmentIds.has(e.id)}
-                              onToggleSelect={(id, checked) => {
-                                setSelectedEnrollmentIds(prev => {
-                                  const next = new Set(prev);
-                                  if (checked) next.add(id); else next.delete(id);
-                                  return next;
-                                });
-                              }}
-                              editingPrice={editingUnitPrice[e.id]}
-                              onStartEditPrice={(en) => setEditingUnitPrice(prev => ({ ...prev, [en.id]: String(en.unit_price) }))}
-                              onChangeEditPrice={(id, val) => setEditingUnitPrice(prev => ({ ...prev, [id]: val }))}
-                              isSendingReminder={sendingReminder.has(e.id)}
-                              onSendPaymentMethodReminder={handleSendPaymentMethodReminder}
-                              resolvedLevelFallback={resolvedLevelFallback}
-                              onApprove={(en) => handleEnrollmentAction(en, "APPROVED")}
-                              onApproveAndMatch={async (en) => { await handleEnrollmentAction(en, "APPROVED"); setAdminTab("group-matcher"); }}
-                              onReject={(en) => { setRejectTarget(en); setRejectReason("payment_not_received"); setRejectNote(""); }}
-                              onRevert={handleRevertEnrollment}
-                              onDelete={handleDeleteEnrollment}
-                              onViewReceipt={handleViewReceipt}
-                              onRequestResubmission={handleRequestResubmission}
-                              onSendClassLink={(en) => { setClassLinkTarget(en); setClassLinkUrl(""); setClassLinkSendToGroup(false); }}
-                              onResendPaymentEmail={handleResendPaymentEmail}
-                              onResendApprovalEmail={handleResendApprovalEmail}
-                            />
-                          );
-                        })}
-                        {enrollPageCount > 1 && (
-                          <div className="flex items-center justify-between pt-2">
-                            <p className="text-xs text-muted-foreground">
-                              Page {enrollmentPage + 1} of {enrollPageCount} · {filtered.length} enrollments
-                            </p>
-                            <div className="flex items-center gap-1">
-                              <Button variant="outline" size="icon" className="h-8 w-8" disabled={enrollmentPage === 0} onClick={() => setEnrollmentPage(p => p - 1)} aria-label="Previous page">
-                                <ChevronLeft className="h-4 w-4" />
-                              </Button>
-                              <Button variant="outline" size="icon" className="h-8 w-8" disabled={enrollmentPage >= enrollPageCount - 1} onClick={() => setEnrollmentPage(p => p + 1)} aria-label="Next page">
-                                <ChevronRight className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </TabsContent>
-                    );
-                  })}
-                </Tabs>
-              )}
-                </CardContent>
-              </Card>
+              <EnrollmentsTab
+                enrollments={enrollments}
+                loading={loading}
+                enrollmentSearch={enrollmentSearch}
+                setEnrollmentSearch={setEnrollmentSearch}
+                debouncedEnrollmentSearch={debouncedEnrollmentSearch}
+                enrollmentPage={enrollmentPage}
+                setEnrollmentPage={setEnrollmentPage}
+                selectedEnrollmentIds={selectedEnrollmentIds}
+                setSelectedEnrollmentIds={setSelectedEnrollmentIds}
+                bulkApproving={bulkApproving}
+                handleBulkApprove={handleBulkApprove}
+                showLegacyEnrollments={showLegacyEnrollments}
+                setShowLegacyEnrollments={setShowLegacyEnrollments}
+                legacyEnrollmentCount={legacyEnrollmentCount}
+                showOverdueOnly={showOverdueOnly}
+                setShowOverdueOnly={setShowOverdueOnly}
+                editingUnitPrice={editingUnitPrice}
+                setEditingUnitPrice={setEditingUnitPrice}
+                sendingReminder={sendingReminder}
+                onSendPaymentMethodReminder={handleSendPaymentMethodReminder}
+                sendingResend={sendingResend}
+                onResendPaymentEmail={handleResendPaymentEmail}
+                onResendApprovalEmail={handleResendApprovalEmail}
+                onEnrollmentAction={handleEnrollmentAction}
+                onReject={(en) => { setRejectTarget(en); setRejectReason("payment_not_received"); setRejectNote(""); }}
+                onRevert={handleRevertEnrollment}
+                onDelete={handleDeleteEnrollment}
+                onViewReceipt={handleViewReceipt}
+                onRequestResubmission={handleRequestResubmission}
+                onSendClassLink={(en) => { setClassLinkTarget(en); setClassLinkUrl(""); setClassLinkSendToGroup(false); }}
+                setAdminTab={setAdminTab}
+                leadsByEmail={leadsByEmail}
+                invalidateAll={invalidateAll}
+              />
             </TabsContent>
-
-            {/* Sticky bulk action bar — floats above bottom when enrollments are selected */}
-            {selectedEnrollmentIds.size > 0 && (
-              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-background/95 backdrop-blur border border-border shadow-xl rounded-2xl px-5 py-3 animate-slide-up">
-                <p className="text-sm font-semibold text-foreground">
-                  {selectedEnrollmentIds.size} enrollment{selectedEnrollmentIds.size > 1 ? "s" : ""} selected
-                </p>
-                <Button size="sm" onClick={handleBulkApprove} disabled={bulkApproving}>
-                  {bulkApproving ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Approving…</> : <><Check className="h-4 w-4 mr-1.5" /> Approve All</>}
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => setSelectedEnrollmentIds(new Set())}>
-                  <X className="h-4 w-4 mr-1.5" /> Clear
-                </Button>
-              </div>
-            )}
-
-            {/* LEADS TAB */}
             <TabsContent value="leads">
               <TabErrorBoundary name="Leads">
                 <Suspense fallback={<TabLoader />}>
@@ -2199,64 +1616,6 @@ const AdminDashboard = () => {
               </TabErrorBoundary>
             </TabsContent>
 
-            {/* BOOKS TAB */}
-            <TabsContent value="books">
-              <div className="space-y-4">
-                {/* Trial Class Book */}
-                <Card className="rounded-2xl border-amber-200 bg-amber-50/40">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <BookOpen className="h-4 w-4 text-amber-500" /> Trial Class Book — دليل الحصة التجريبية
-                    </CardTitle>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      30-minute presentation sheet for trial classes. Use this during a trial session to walk students through how classes work, the 6 levels, and a taste of Korean. Admin preview only.
-                    </p>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Admin only</span>
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">⏱ 30 min · 8 pages · AR + EN</span>
-                      <div className="ml-auto flex gap-2">
-                        <button
-                          className="text-xs px-3 py-1.5 border rounded-lg hover:bg-muted transition-colors flex items-center gap-1.5"
-                          onClick={() => window.open("/trial-book", "_blank")}
-                        >
-                          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                          Preview
-                        </button>
-                        <button
-                          className="text-xs px-3 py-1.5 border rounded-lg hover:bg-muted transition-colors flex items-center gap-1.5"
-                          onClick={() => { const w = window.open("/trial-book", "_blank"); if (w) w.addEventListener("load", () => w.print()); }}
-                        >
-                          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                          Download PDF
-                        </button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Hangul Book 1 Assignments */}
-                <Card className="rounded-2xl">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <BookOpen className="h-4 w-4 text-amber-500" /> Book Assignments
-                    </CardTitle>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Assign the Hangul Book 1 to students who purchased a class. Set an unlock date — default is 1 week after assignment. Students see a locked card until their date arrives.
-                    </p>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <TabErrorBoundary name="Book Assignments">
-                      <Suspense fallback={<TabLoader />}>
-                        <BookAssignmentManager />
-                      </Suspense>
-                    </TabErrorBoundary>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
             {/* SALES ANALYTICS TAB */}
             <TabsContent value="sales">
               <TabErrorBoundary name="Sales Analytics">
@@ -2357,7 +1716,7 @@ const AdminDashboard = () => {
             {receiptModal?.isPdf ? (
               <div className="text-center space-y-3 p-6">
                 <p className="text-muted-foreground text-sm">PDF receipt — cannot preview inline.</p>
-                <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank")}>
+                <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank", "noopener,noreferrer")}>
                   <Eye className="h-4 w-4 mr-2" /> Open PDF
                 </Button>
               </div>
@@ -2371,7 +1730,7 @@ const AdminDashboard = () => {
           </div>
           <DialogFooter className="gap-2">
             {receiptModal && !receiptModal.isPdf && (
-              <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank")}>
+              <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank", "noopener,noreferrer")}>
                 <Eye className="h-4 w-4 mr-2" /> Open full size
               </Button>
             )}

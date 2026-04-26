@@ -10,8 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { normalizeLevel, getLevelShortLabel } from "@/constants/levels";
-import { convertSlotToTimezone } from "@/lib/admin-utils";
-import { getAdminTimezone } from "@/lib/viewerTimezone";
 
 interface UnmatchedEnrollment {
   id: string;
@@ -553,7 +551,7 @@ const GroupMatcher = () => {
       return;
     }
     if (receiptUrl.startsWith("http")) {
-      window.open(receiptUrl, "_blank");
+      window.open(receiptUrl, "_blank", "noopener,noreferrer");
       return;
     }
     const { data, error } = await supabase.storage.from("receipts").createSignedUrl(receiptUrl, 600);
@@ -561,7 +559,7 @@ const GroupMatcher = () => {
       toast({ title: "Could not open receipt", description: error?.message || "Failed to generate link.", variant: "destructive" });
       return;
     }
-    window.open(data.signedUrl, "_blank");
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   };
 
   useEffect(() => {
@@ -977,10 +975,6 @@ const GroupMatcher = () => {
               const isReady = cluster.members.length >= 3;
               const dayName = DAY_NAMES[cluster.packageDay] || "Unknown";
               const levelLabel = getLevelShortLabel(cluster.packageLevel);
-              const adminTz = getAdminTimezone();
-              const localSlot = (cluster.packageDay >= 0 && cluster.packageTime && cluster.packageTime !== "—")
-                ? convertSlotToTimezone(cluster.packageDay, cluster.packageTime, cluster.packageTimezone || "Africa/Cairo", adminTz)
-                : null;
               return (
                 <Card key={cluster.key} className={isReady ? "border-primary/50 bg-primary/5" : ""}>
                   <CardHeader className="pb-3">
@@ -988,10 +982,10 @@ const GroupMatcher = () => {
                       <div className="flex items-center gap-2">
                         <CardTitle className="text-base flex items-center gap-2">
                           <CalendarDays className="h-4 w-4" />
-                          {localSlot?.weekday || dayName}
+                          {dayName}
                         </CardTitle>
                         <Badge variant={isReady ? "default" : "secondary"}>
-                          {localSlot?.timeFormatted || cluster.packageTime} {localSlot ? `(${adminTz})` : ""}
+                          {cluster.packageTime}
                         </Badge>
                         <Badge variant="outline" className="text-xs">
                           {levelLabel}

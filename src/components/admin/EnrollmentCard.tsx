@@ -357,7 +357,7 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                       ? `مرحباً ${e.profiles?.name || ""}، تم قبول تسجيلك في KLovers. هل تحتاج أي مساعدة قبل حصتك الأولى؟`
                       : `مرحباً ${e.profiles?.name || ""}، فريق KLovers معك. هل تحتاج مساعدة بخصوص تسجيلك؟`
                   );
-                  window.open(`https://wa.me/?text=${msg}`, "_blank");
+                  window.open(`https://wa.me/?text=${msg}`, "_blank", "noopener,noreferrer");
                 }}
               >
                 <span style={{fontSize: "14px"}}>💬</span>

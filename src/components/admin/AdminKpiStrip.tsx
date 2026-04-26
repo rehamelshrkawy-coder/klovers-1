@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { Users, TrendingUp, AlertTriangle, DollarSign } from "lucide-react";
 import { ResponsiveContainer, LineChart, Line, Tooltip as RechartsTooltip } from "recharts";
 import { AT_RISK_SESSION_THRESHOLD } from "@/lib/admin-utils";
@@ -33,7 +33,7 @@ function buildEnrollmentSparkline(rows: OverviewRow[]): { v: number }[] {
   return counts.map(v => ({ v }));
 }
 
-export function AdminKpiStrip({ overviewRows, actionableEnrollments, isLoading }: Props) {
+export const AdminKpiStrip = memo(function AdminKpiStrip({ overviewRows, actionableEnrollments, isLoading }: Props) {
   const kpis = useMemo<KpiCard[]>(() => {
     const activeRows = overviewRows.filter(r => r.derived_status === "ACTIVE");
     const atRisk = activeRows.filter(
@@ -145,4 +145,4 @@ export function AdminKpiStrip({ overviewRows, actionableEnrollments, isLoading }
       })}
     </div>
   );
-}
+});
