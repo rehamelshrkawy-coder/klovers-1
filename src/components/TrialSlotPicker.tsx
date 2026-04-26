@@ -11,9 +11,22 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CalendarDays } from "lucide-react";
-import { DAY_NAMES, formatTime12h } from "@/lib/calendarUrl";
 import { convertSlotToTimezone } from "@/lib/admin-utils";
-import { getUserTimezone } from "@/lib/viewerTimezone";
+
+/**
+ * Returns the next date (YYYY-MM-DD) on which the given UTC day-of-week falls.
+ * Uses the same UTC-based logic as the `book-trial` edge function so the date
+ * sent to the server always matches what the server would compute as a fallback.
+ */
+function nextDateForDayUTC(dayOfWeek: number): string {
+  const today = new Date();
+  const todayDay = today.getUTCDay();
+  let diff = dayOfWeek - todayDay;
+  if (diff <= 0) diff += 7; // always at least 1 day ahead
+  const next = new Date(today);
+  next.setUTCDate(today.getUTCDate() + diff);
+  return next.toISOString().split("T")[0];
+}
 
 interface TrialSlot {
   day_of_week: number;
@@ -133,18 +146,20 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
     );
   }
 
-  const userTz = getUserTimezone();
+  // Always read from browser — bypasses stale localStorage values that can
+  // bleed from admin sessions (the old getUserTimezone() read localStorage first).
+  const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Africa/Cairo";
   const labelFor = (s: TrialSlot) => {
     const srcTz = s.timezone || "Africa/Cairo";
     const local = convertSlotToTimezone(s.day_of_week, s.start_time, srcTz, userTz);
     const cap = s.capacity ?? DEFAULT_CAPACITY;
     const spotsLeft = cap - s.booked_count;
-    const actualDate = slotDates[`${s.day_of_week}|${s.start_time}`];
-    const dateLabel = actualDate
-      ? new Date(actualDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })
-      : "";
-    const dayPart = dateLabel ? `${local.weekday}, ${dateLabel}` : local.weekday;
-    return `${dayPart} at ${local.timeFormatted} (${userTz.replace(/_/g, " ")}) — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
+    // Use actual upcoming date from existing bookings; fall back to the next
+    // computed occurrence so labels always show a concrete date.
+    const actualDate = slotDates[`${s.day_of_week}|${s.start_time}`]
+      ?? nextDateForDayUTC(s.day_of_week);
+    const dateLabel = new Date(actualDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return `${local.weekday}, ${dateLabel} at ${local.timeFormatted} (${userTz.replace(/_/g, " ")}) — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
   };
 
   const keyFor = (s: TrialSlot) => `${s.day_of_week}|${s.start_time}`;
@@ -158,7 +173,9 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
     if (!selectedKey) return;
     const [dStr, time] = selectedKey.split("|");
     const day = Number(dStr);
-    const actualDate = slotDates[selectedKey];
+    // Always send a concrete date — fall back to next UTC occurrence so it
+    // matches the edge function's own fallback computation exactly.
+    const actualDate = slotDates[selectedKey] ?? nextDateForDayUTC(day);
     onSelect(day, time, actualDate);
   };
 
