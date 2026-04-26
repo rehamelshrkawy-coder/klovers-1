@@ -37,6 +37,7 @@ const DEFAULT_CAPACITY = 6;
 
 const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
   const [slots, setSlots] = useState<TrialSlot[]>([]);
+  const [slotDates, setSlotDates] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedKey, setSelectedKey] = useState<string>("");
@@ -46,9 +47,18 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
       setLoading(true);
       setError(null);
       try {
-        const { data, error: rpcError } = await supabase.rpc(
-          "get_trial_availability" as any,
-        );
+        const [{ data, error: rpcError }, { data: bookingRows }] = await Promise.all([
+          supabase.rpc("get_trial_availability" as any),
+          supabase
+            .from("trial_bookings")
+            .select("day_of_week, start_time, trial_date")
+            .gte("trial_date", new Date().toISOString().slice(0, 10))
+            .not("start_time", "eq", "TBA")
+            .not("trial_date", "eq", "2099-12-31")
+            .eq("is_tba", false)
+            .neq("status", "cancelled")
+            .order("trial_date", { ascending: true }),
+        ]);
         if (rpcError) throw rpcError;
         const rows = (data || []) as any[];
         const normalised: TrialSlot[] = rows.map((s) => ({
@@ -60,6 +70,14 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
           timezone: s.timezone ?? null,
         }));
         setSlots(normalised);
+        // Build map: "dow|start_time" → earliest upcoming trial_date
+        const dateMap: Record<string, string> = {};
+        for (const row of (bookingRows || []) as any[]) {
+          if (!row.trial_date || !row.start_time) continue;
+          const k = `${row.day_of_week}|${row.start_time}`;
+          if (!dateMap[k]) dateMap[k] = row.trial_date;
+        }
+        setSlotDates(dateMap);
       } catch (err: any) {
         console.error("Failed to fetch trial slots:", err);
         setError("Could not load available times. Please try again.");
@@ -121,7 +139,12 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
     const local = convertSlotToTimezone(s.day_of_week, s.start_time, srcTz, userTz);
     const cap = s.capacity ?? DEFAULT_CAPACITY;
     const spotsLeft = cap - s.booked_count;
-    return `${local.weekday} at ${local.timeFormatted} (${userTz.replace(/_/g, " ")}) — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
+    const actualDate = slotDates[`${s.day_of_week}|${s.start_time}`];
+    const dateLabel = actualDate
+      ? new Date(actualDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })
+      : "";
+    const dayPart = dateLabel ? `${local.weekday}, ${dateLabel}` : local.weekday;
+    return `${dayPart} at ${local.timeFormatted} (${userTz.replace(/_/g, " ")}) — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
   };
 
   const keyFor = (s: TrialSlot) => `${s.day_of_week}|${s.start_time}`;
