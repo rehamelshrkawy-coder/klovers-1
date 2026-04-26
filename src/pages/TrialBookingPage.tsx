@@ -20,7 +20,7 @@ import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { track } from "@/lib/tracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
-import { CheckCircle2, CalendarPlus, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2 } from "lucide-react";
+import { CheckCircle2, CalendarPlus, CalendarClock, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { convertDateTimeToTimezone } from "@/lib/admin-utils";
 import { getUserTimezone } from "@/lib/viewerTimezone";
@@ -51,6 +51,7 @@ const TrialBookingPage = () => {
   const [selectedLevel, setSelectedLevel] = useState("");
   const [loading, setLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
+  const [rescheduling, setRescheduling] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -223,6 +224,41 @@ const TrialBookingPage = () => {
     logLeadEvent({ source_type: "free_trial", cta_label: "slot_page_viewed" });
   }, []);
 
+  // ── Reschedule: cancel existing booking then re-show slot picker ──────────
+  const handleReschedule = async () => {
+    if (!user || !bookingResult) return;
+    setRescheduling(true);
+    try {
+      await supabase
+        .from("trial_bookings")
+        .update({ status: "cancelled" })
+        .eq("user_id", user.id)
+        .eq("trial_date", bookingResult.trial_date)
+        .in("status", ["pending", "confirmed"]);
+
+      track.custom("trial_reschedule_started", { old_date: bookingResult.trial_date });
+      logLeadEvent({
+        source_type: "free_trial",
+        cta_label: "trial_reschedule_started",
+        metadata: { old_date: bookingResult.trial_date },
+      });
+
+      toast({
+        title: t("trialBooking.rescheduleToast"),
+        variant: "default",
+      });
+      setBookingResult(null);
+    } catch (err: any) {
+      toast({
+        title: t("trialBooking.somethingWrong"),
+        description: err.message || t("trialBooking.tryAgain"),
+        variant: "destructive",
+      });
+    } finally {
+      setRescheduling(false);
+    }
+  };
+
   // ── Success state ──────────────────────────────────────────────────────────
   if (bookingResult) {
     const formattedDate = new Date(bookingResult.trial_date + "T00:00:00").toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
@@ -264,6 +300,16 @@ const TrialBookingPage = () => {
               <p className="text-muted-foreground mt-4 text-sm max-w-md mx-auto">
                 {t("trialBooking.successDesc")}
               </p>
+
+              {/* Change date link */}
+              <button
+                onClick={handleReschedule}
+                disabled={rescheduling}
+                className="mt-3 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 flex items-center gap-1 mx-auto disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <CalendarClock className="h-3.5 w-3.5" />
+                {rescheduling ? t("trialBooking.rescheduling") : t("trialBooking.changeDateBtn")}
+              </button>
             </div>
 
             {/* While-you-wait — single hero CTA. Previous 3-button panel
