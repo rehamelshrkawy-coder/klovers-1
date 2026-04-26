@@ -226,11 +226,12 @@ const TrialClassesManager = () => {
           email: booking.email,
           name: booking.name || booking.email,
           language: "ar",
-          rebook_url: `${window.location.origin}/free-trial`,
-          available_slots: activeSlots.map((s) => ({
+          rebook_url: `${window.location.origin}/trial-booking`,
+          available_slots: upcomingSlots.map((s) => ({
             day_of_week: s.day_of_week,
             start_time: s.start_time,
             timezone: "Africa/Cairo",
+            date: s.date,
           })),
         },
       });
@@ -269,11 +270,12 @@ const TrialClassesManager = () => {
             email: b.email,
             name: b.name || b.email,
             language: "ar",
-            rebook_url: `${window.location.origin}/free-trial`,
-            available_slots: activeSlots.map((s) => ({
+            rebook_url: `${window.location.origin}/trial-booking`,
+            available_slots: upcomingSlots.map((s) => ({
               day_of_week: s.day_of_week,
               start_time: s.start_time,
               timezone: "Africa/Cairo",
+              date: s.date,
             })),
           },
         });
