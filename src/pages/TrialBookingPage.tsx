@@ -332,7 +332,7 @@ const TrialBookingPage = () => {
                 teacher's trial experience) and downgrading alternatives
                 to plain text links. */}
             <div className="bg-gradient-to-b from-primary/10 to-transparent border border-primary/20 rounded-2xl p-6 mb-4 text-center">
-              <div className="flex items-center justify-center gap-2 text-xs font-semibold text-primary uppercase tracking-wider mb-2">
+              <div className="inline-flex items-center gap-2 text-xs font-bold bg-amber-500 text-black px-3 py-1 rounded-full uppercase tracking-wider mb-4">
                 <Sparkles className="h-3.5 w-3.5" />
                 {daysUntil > 0 ? (daysUntil === 1 ? t("trialBooking.whileWait").replace("{days}", String(daysUntil)) : t("trialBooking.whileWaitPlural").replace("{days}", String(daysUntil))) : t("trialBooking.trialToday")}
               </div>
@@ -364,16 +364,16 @@ const TrialBookingPage = () => {
                     logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_placement_test" });
                     navigate("/placement-test");
                   }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-primary/50 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-blue-400 hover:shadow-md transition-all group"
                 >
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <GraduationCap className="h-5 w-5 text-primary" />
+                  <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
+                    <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-foreground">{t("trialBooking.findLevelTitle")}</p>
                     <p className="text-xs text-muted-foreground">{t("trialBooking.findLevelDesc")}</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all shrink-0" />
                 </button>
 
                 {/* Pricing teaser */}
@@ -383,16 +383,16 @@ const TrialBookingPage = () => {
                     logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_pricing" });
                     navigate("/pricing");
                   }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-primary/50 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-purple-400 hover:shadow-md transition-all group"
                 >
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Tag className="h-5 w-5 text-primary" />
+                  <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
+                    <Tag className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-foreground">{t("trialBooking.peekPlansTitle")}</p>
                     <p className="text-xs text-muted-foreground">{t("trialBooking.peekPlansDesc")}</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all shrink-0" />
                 </button>
 
                 {/* Referral / share */}
@@ -409,10 +409,10 @@ const TrialBookingPage = () => {
                       window.open(`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`, "_blank", "noopener,noreferrer");
                     }
                   }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-primary/50 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-orange-400 hover:shadow-md transition-all group"
                 >
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Share2 className="h-5 w-5 text-primary" />
+                  <div className="h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center shrink-0">
+                    <Share2 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-foreground">
@@ -422,7 +422,7 @@ const TrialBookingPage = () => {
                       {language === "ar" ? "خليهم يجربوا معاك — الحصة المجانية متاحة للكل" : "Invite a friend to join your free class"}
                     </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-orange-600 group-hover:translate-x-0.5 transition-all shrink-0" />
                 </button>
               </div>
               <h2 className="text-xl font-bold text-foreground mb-2">{t("trialBooking.findLevelTitle")}</h2>
