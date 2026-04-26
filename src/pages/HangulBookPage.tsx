@@ -3719,6 +3719,99 @@ function MiniReading({ lesson, slice, lang }: LessonProps) {
   );
 }
 
+const LESSON_VOWEL_INDICES: Record<number, [number, number]> = {
+  1: [0, 2],  // ㅏ ㅓ
+  2: [2, 4],  // ㅗ ㅜ
+  3: [4, 6],  // ㅡ ㅣ
+};
+
+function LessonVowels({ lesson, lang }: { lesson: number; lang: Lang }) {
+  const isAr = lang === "ar";
+  const range = LESSON_VOWEL_INDICES[lesson];
+  if (!range) return null;
+  const vowels = VOWELS.slice(range[0], range[1]);
+  const num = isAr ? ["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1] : String(lesson);
+  return (
+    <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "حروف المد" : "Vowels"}>
+      <SHead
+        title={isAr ? `حروف المد — الدرس ${num}` : `Vowels — Lesson ${lesson}`}
+        subtitle={isAr ? "تعلّم صوتي مد جديدين لتكوين أول مقاطع كورية" : "Two new vowels — combine them with today's consonants to form your first syllables"}
+      />
+      {vowels.map((v, idx) => {
+        const d = isAr ? v.ar : v.en;
+        return (
+          <div key={v.char} style={{
+            paddingTop: idx === 0 ? "0" : "6mm",
+            paddingBottom: "6mm",
+            borderTop: idx === 0 ? "none" : `1px solid ${BD}`,
+            display:"grid", gridTemplateColumns:"100px 1fr", gap:"12mm", alignItems:"start",
+          }}>
+            <div style={{ textAlign:"center" }}>
+              <div style={{ fontSize:"82px", fontWeight:900, color:T1, lineHeight:1, marginBottom:"3mm" }}>{v.char}</div>
+              <div style={{ fontSize:"11px", color:T3, fontWeight:700, letterSpacing:"1px" }}>[ {VOWEL_ROMAN[v.char]} ]</div>
+              <div style={{ fontSize:"10px", color:T2, marginTop:"2mm" }}>{d.name}</div>
+            </div>
+            <div>
+              <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"2px" }}>
+                {isAr ? "الصوت" : "Sound"}
+              </div>
+              <div style={{ fontSize:"13px", color:T1, fontWeight:700, marginBottom:"4mm" }}>{d.sound}</div>
+              <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"2px" }}>
+                {isAr ? "تذكّره هكذا" : "Remember it"}
+              </div>
+              <div style={{ fontSize:"12px", color:T2, lineHeight:1.7, fontStyle:"italic", borderLeft:`2px solid ${Y}`, paddingLeft:"8px", marginBottom:"4mm" }}>{d.mnemonic}</div>
+              <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"2px" }}>
+                {isAr ? "كلمة بسيطة" : "Simple word"}
+              </div>
+              <div style={{ display:"flex", gap:"10px", alignItems:"baseline", direction:"ltr" }}>
+                <div style={{ fontSize:"22px", fontWeight:900, color:T1 }}>{d.ex[0].k}</div>
+                <div style={{ fontSize:"11px", color:T3 }}>[{d.ex[0].r}]</div>
+                <div style={{ fontSize:"11px", color:T2, direction: isAr?"rtl":"ltr" }}>— {d.ex[0].m}</div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+      <div style={{ marginTop:"4mm", borderLeft:`3px solid ${Y}`, padding:"4mm 5mm", background:"#fffdf3", fontSize:"11px", color:T2, lineHeight:1.7 }}>
+        {isAr ? "💡 جرّب الآن: ضع حروف اليوم الساكنة قبل كل صوت مد لتكوين مقاطع جديدة." : "💡 Try it: place today's consonants before each vowel to build new syllables."}
+      </div>
+    </Page>
+  );
+}
+
+function LessonReviewAll({ lang }: { lang: Lang }) {
+  const isAr = lang === "ar";
+  const allCons = CONSONANTS.map(c => c.char).join("  ");
+  const allVow = ["ㅏ","ㅓ","ㅗ","ㅜ","ㅡ","ㅣ"].join("  ");
+  return (
+    <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "مراجعة شاملة" : "Full Review"}>
+      <SHead
+        title={isAr ? "الدرس ٦ — مراجعة شاملة + قراءة + إملاء" : "Lesson 6 — Full Review + Reading + Dictation"}
+        subtitle={isAr ? "ثبّت كل ما تعلمته في الدروس ١–٥" : "Consolidate everything from Lessons 1–5"}
+      />
+      <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"3mm" }}>
+        1. {isAr ? "اقرأ كل الحروف الساكنة بصوت عالٍ" : "Read every consonant out loud"}
+      </div>
+      <div style={{ fontSize:"34px", fontWeight:900, color:T1, lineHeight:1.4, textAlign:"center", border:`1px solid ${BD}`, borderRadius:"6px", padding:"6mm", background:"#fff", marginBottom:"7mm" }}>{allCons}</div>
+      <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"3mm" }}>
+        2. {isAr ? "اقرأ كل حروف المد" : "Read every vowel"}
+      </div>
+      <div style={{ fontSize:"34px", fontWeight:900, color:T1, lineHeight:1.4, textAlign:"center", border:`1px solid ${BD}`, borderRadius:"6px", padding:"6mm", background:"#fff", marginBottom:"7mm" }}>{allVow}</div>
+      <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"3mm" }}>
+        3. {isAr ? "إملاء — اكتب ما يقوله المعلم" : "Dictation — write what the teacher says"}
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"4mm", marginBottom:"6mm" }}>
+        {Array(10).fill(null).map((_,i)=>(
+          <div key={i} style={{ border:`1px solid ${BD}`, height:"18mm", borderRadius:"4px", background:"#fff", display:"flex", alignItems:"flex-end", justifyContent:"flex-start", padding:"2mm 3mm", fontSize:"9px", color:T3 }}>{i+1}</div>
+        ))}
+      </div>
+      <div style={{ borderLeft:`3px solid ${Y}`, padding:"4mm 5mm", background:"#fffdf3", fontSize:"11px", color:T2, lineHeight:1.7 }}>
+        {isAr ? "💬 المعلم يقرأ: 가 / 나 / 다 / 가방 / 나비 / 다리 / 라면 / 사과 / 우유 / 한국" : "💬 Teacher reads: 가 / 나 / 다 / 가방 / 나비 / 다리 / 라면 / 사과 / 우유 / 한국"}
+      </div>
+    </Page>
+  );
+}
+
 function PictureWords({ lesson, slice, lang }: LessonProps) {
   const isAr = lang === "ar";
   const letters = CONSONANTS.slice(...slice);
@@ -4318,13 +4411,14 @@ export default function HangulBookPage() {
             <CourseAr />
             <WelcomeAr />
             <HowToUse lang="ar" />
-            {/* WEEK 1 — Consonants Part 1 (ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ) */}
+            {/* LESSONS 1-2 — Consonants Part 1 (ㄱㄴㄷ + ㅏㅓ, ㄹㅁㅂ + ㅗㅜ) */}
             {[
               { lesson:1, slice:[0,3] as [number,number] },
               { lesson:2, slice:[3,6] as [number,number] },
             ].map(L => (
-              <Fragment key={`ar-w1-l${L.lesson}`}>
+              <Fragment key={`ar-l${L.lesson}`}>
                 <TeachLetters lesson={L.lesson} slice={L.slice} lang="ar" />
+                {LESSON_VOWEL_INDICES[L.lesson] && <LessonVowels lesson={L.lesson} lang="ar" />}
                 <PictureWords lesson={L.lesson} slice={L.slice} lang="ar" />
                 <PracticeLetters lesson={L.lesson} slice={L.slice} lang="ar" />
                 <SpeakingDrill lesson={L.lesson} slice={L.slice} lang="ar" />
@@ -4335,20 +4429,15 @@ export default function HangulBookPage() {
                 <DailyPractice lesson={L.lesson} lang="ar" />
               </Fragment>
             ))}
-            <WeeklyCheckpoint week={1} lang="ar" />
-            {/* WEEK 2 — Vowels */}
-            <VowelsLesson part={1} lang="ar" />
-            <VowelsLesson part={2} lang="ar" />
-            <VowelsLesson part={3} lang="ar" />
-            <WeeklyCheckpoint week={2} lang="ar" />
-            {/* WEEK 3 — Complete Consonants (ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ) */}
+            {/* LESSONS 3-5 — Complete Consonants (ㅅ ㅇ ㅈ + ㅡㅣ, ㅊ ㅋ ㅌ, ㅍ ㅎ) */}
             {[
               { lesson:3, slice:[6,9] as [number,number] },
               { lesson:4, slice:[9,12] as [number,number] },
               { lesson:5, slice:[12,14] as [number,number] },
             ].map(L => (
-              <Fragment key={`ar-w3-l${L.lesson}`}>
+              <Fragment key={`ar-l${L.lesson}`}>
                 <TeachLetters lesson={L.lesson} slice={L.slice} lang="ar" />
+                {LESSON_VOWEL_INDICES[L.lesson] && <LessonVowels lesson={L.lesson} lang="ar" />}
                 <PictureWords lesson={L.lesson} slice={L.slice} lang="ar" />
                 <PracticeLetters lesson={L.lesson} slice={L.slice} lang="ar" />
                 <SpeakingDrill lesson={L.lesson} slice={L.slice} lang="ar" />
@@ -4359,20 +4448,21 @@ export default function HangulBookPage() {
                 <DailyPractice lesson={L.lesson} lang="ar" />
               </Fragment>
             ))}
-            <WeeklyCheckpoint week={3} lang="ar" />
-            {/* WEEK 4 — Syllables + Batchim + Simple Words */}
+            {/* LESSON 6 — Full Review + Reading + Dictation */}
+            <LessonReviewAll lang="ar" />
             <SyllableAr />
+            <ReadingPractice lang="ar" />
+            {/* LESSON 7 — Compound Vowels */}
+            <CompoundVowelsAr />
+            {/* LESSON 8 — Batchim (simplified) */}
             <BatchimLesson part={1} lang="ar" />
             <BatchimLesson part={2} lang="ar" />
-            <ReadingPractice lang="ar" />
             <KdramaPageAr slice={[0,10]} page={1} />
             <KdramaPageAr slice={[10,20]} page={2} />
             <FinalTest lang="ar" />
-            <WeeklyCheckpoint week={4} lang="ar" />
             <Certificate lang="ar" />
             {/* ADVANCED / BONUS */}
             <AspiratedAr />
-            <CompoundVowelsAr />
             <BatchimLesson part={3} lang="ar" />
             <DoubleBatchimAr />
             {/* APPENDIX */}
@@ -4393,13 +4483,14 @@ export default function HangulBookPage() {
             <CourseEn />
             <WelcomeEn />
             <HowToUse lang="en" />
-            {/* WEEK 1 — Consonants Part 1 (ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ) */}
+            {/* LESSONS 1-2 — Consonants Part 1 (ㄱㄴㄷ + ㅏㅓ, ㄹㅁㅂ + ㅗㅜ) */}
             {[
               { lesson:1, slice:[0,3] as [number,number] },
               { lesson:2, slice:[3,6] as [number,number] },
             ].map(L => (
-              <Fragment key={`en-w1-l${L.lesson}`}>
+              <Fragment key={`en-l${L.lesson}`}>
                 <TeachLetters lesson={L.lesson} slice={L.slice} lang="en" />
+                {LESSON_VOWEL_INDICES[L.lesson] && <LessonVowels lesson={L.lesson} lang="en" />}
                 <PictureWords lesson={L.lesson} slice={L.slice} lang="en" />
                 <PracticeLetters lesson={L.lesson} slice={L.slice} lang="en" />
                 <SpeakingDrill lesson={L.lesson} slice={L.slice} lang="en" />
@@ -4410,20 +4501,15 @@ export default function HangulBookPage() {
                 <DailyPractice lesson={L.lesson} lang="en" />
               </Fragment>
             ))}
-            <WeeklyCheckpoint week={1} lang="en" />
-            {/* WEEK 2 — Vowels */}
-            <VowelsLesson part={1} lang="en" />
-            <VowelsLesson part={2} lang="en" />
-            <VowelsLesson part={3} lang="en" />
-            <WeeklyCheckpoint week={2} lang="en" />
-            {/* WEEK 3 — Complete Consonants (ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ) */}
+            {/* LESSONS 3-5 — Complete Consonants */}
             {[
               { lesson:3, slice:[6,9] as [number,number] },
               { lesson:4, slice:[9,12] as [number,number] },
               { lesson:5, slice:[12,14] as [number,number] },
             ].map(L => (
-              <Fragment key={`en-w3-l${L.lesson}`}>
+              <Fragment key={`en-l${L.lesson}`}>
                 <TeachLetters lesson={L.lesson} slice={L.slice} lang="en" />
+                {LESSON_VOWEL_INDICES[L.lesson] && <LessonVowels lesson={L.lesson} lang="en" />}
                 <PictureWords lesson={L.lesson} slice={L.slice} lang="en" />
                 <PracticeLetters lesson={L.lesson} slice={L.slice} lang="en" />
                 <SpeakingDrill lesson={L.lesson} slice={L.slice} lang="en" />
@@ -4434,20 +4520,21 @@ export default function HangulBookPage() {
                 <DailyPractice lesson={L.lesson} lang="en" />
               </Fragment>
             ))}
-            <WeeklyCheckpoint week={3} lang="en" />
-            {/* WEEK 4 — Syllables + Batchim + Simple Words */}
+            {/* LESSON 6 — Full Review + Reading + Dictation */}
+            <LessonReviewAll lang="en" />
             <SyllableEn />
+            <ReadingPractice lang="en" />
+            {/* LESSON 7 — Compound Vowels */}
+            <CompoundVowelsEn />
+            {/* LESSON 8 — Batchim (simplified) */}
             <BatchimLesson part={1} lang="en" />
             <BatchimLesson part={2} lang="en" />
-            <ReadingPractice lang="en" />
             <KdramaPageEn slice={[0,10]} page={1} />
             <KdramaPageEn slice={[10,20]} page={2} />
             <FinalTest lang="en" />
-            <WeeklyCheckpoint week={4} lang="en" />
             <Certificate lang="en" />
             {/* ADVANCED / BONUS */}
             <AspiratedEn />
-            <CompoundVowelsEn />
             <BatchimLesson part={3} lang="en" />
             <DoubleBatchimEn />
             {/* APPENDIX */}
