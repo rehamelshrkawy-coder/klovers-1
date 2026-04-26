@@ -4099,8 +4099,6 @@ function PictureWords({ lesson, lang }: LessonProps) {
               <WordIllustration emoji={w.emoji} en={w.en} alt={isAr ? w.ar : w.en} size={56} />
             </div>
             <div style={{ fontSize:"17px", fontWeight:900, color:T1, lineHeight:1.1, direction:"ltr" }}>{w.k}</div>
-            <div style={{ fontSize:"8px", color:T3, marginTop:"1mm", direction:"ltr" }}>[{w.r}]</div>
-            <div style={{ fontSize:"9px", color:T2, marginTop:"0.5mm", lineHeight:1.3 }}>{isAr ? w.ar : w.en}</div>
           </div>
         ))}
       </div>
