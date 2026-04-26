@@ -82,7 +82,8 @@ function getUpcomingSlotDates(slots: TrialSlot[], weeksAhead = 1): UpcomingSlot[
   for (const slot of slots) {
     for (let w = 0; w < weeksAhead; w++) {
       const d = new Date(today);
-      const diff = (slot.day_of_week - d.getDay() + 7) % 7 + w * 7;
+      const rawDiff = (slot.day_of_week - d.getDay() + 7) % 7;
+      const diff = (rawDiff === 0 ? 7 : rawDiff) + w * 7;
       d.setDate(d.getDate() + diff);
       const dateStr = d.toISOString().slice(0, 10);
       const [h, m] = slot.start_time.split(":").map(Number);
