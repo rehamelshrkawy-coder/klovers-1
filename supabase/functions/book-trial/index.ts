@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { name, email, phone, country, level, goal, day_of_week, start_time, referrer_id, authed } = body;
+    const { name, email, phone, country, level, goal, day_of_week, start_time, trial_date: bodyTrialDate, referrer_id, authed } = body;
 
     // ── Authenticated path: derive identity from JWT, skip placeholder hacks ──
     // When the client passes `authed: true` AND a valid Authorization bearer
@@ -161,7 +161,10 @@ Deno.serve(async (req) => {
 
     const finalName = (resolvedName || name || "").trim() || effectiveEmail.split("@")[0];
     const normalizedEmail = effectiveEmail.trim().toLowerCase();
-    const trialDate = nextDateForDay(day_of_week);
+    // Use the actual group date from the frontend if provided; fall back to computing the next occurrence.
+    const trialDate = (bodyTrialDate && /^\d{4}-\d{2}-\d{2}$/.test(bodyTrialDate))
+      ? bodyTrialDate
+      : nextDateForDay(day_of_week);
     const timezone = "Africa/Cairo";
 
     // Registrations close 1 day before the class (compare in Cairo time UTC+2, no DST)
@@ -300,6 +303,17 @@ Deno.serve(async (req) => {
             ok: false,
             success: false,
             error: "You already have a trial class booked. Check your email for details.",
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      // Conflict trigger: trial time overlaps an existing enrolled class
+      if (bookingError?.code === "23514" || bookingError?.message?.includes("trial_booking_conflict")) {
+        return new Response(
+          JSON.stringify({
+            ok: false,
+            success: false,
+            error: "This trial time overlaps with one of your existing classes. Please pick a different slot or contact us on WhatsApp.",
           }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
