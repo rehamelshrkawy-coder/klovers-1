@@ -3561,6 +3561,164 @@ function InClassExercise({ lang }: { lang: Lang }) {
   );
 }
 
+function HowToUse({ lang }: { lang: Lang }) {
+  const isAr = lang === "ar";
+  const items = isAr
+    ? [
+        { icon:"🖼️", title:"تعلّم بالصور", body:"كل حرف مربوط بكلمة وصورة. اربط الحرف بالشيء، مش بالقاعدة." },
+        { icon:"✍️", title:"تعلّم بالتطبيق", body:"اكتب، انطق، اقرأ — التطبيق أهم من الشرح. لا تتجاوز التمارين." },
+        { icon:"🗣️", title:"الإملاء واجب كل حصة", body:"ينطق المعلم حروفاً ومقاطع وكلمات، والطالب يكتب. هذا أهم تدريب على الإطلاق." },
+        { icon:"🎤", title:"النطق والتكرار", body:"كرّر بصوت عالٍ بعد المعلم، اقرأ مع زميلك، سجّل صوتك واستمع له." },
+        { icon:"⏱️", title:"٢–٣ حروف فقط في الحصة", body:"الكثير من الحروف يربك المتعلم. ركّز، طبّق، وانتقل بثقة." },
+      ]
+    : [
+        { icon:"🖼️", title:"Learn through images", body:"Every letter is anchored to a word and an object. Tie the letter to the picture, not the rule." },
+        { icon:"✍️", title:"Practice-based learning", body:"Write, say, read — practice beats theory. Do not skip the exercises." },
+        { icon:"🗣️", title:"Dictation every class", body:"The teacher says letters/syllables/words; students write what they hear. This is the most important drill." },
+        { icon:"🎤", title:"Speaking and repetition", body:"Repeat after the teacher out loud, read with a partner, record yourself and listen back." },
+        { icon:"⏱️", title:"Only 2–3 letters per class", body:"Too many letters at once overwhelms learners. Focus, apply, then move on with confidence." },
+      ];
+  return (
+    <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "كيفية استخدام الكتاب" : "How to Use This Book"}>
+      <SHead title={isAr ? "كيفية استخدام هذا الكتاب" : "How to Use This Book"} subtitle={isAr ? "خمسة مبادئ تجعل تعلّم الهانغول سريعاً وفعّالاً" : "Five principles that make learning Hangul fast and effective"} />
+      <div style={{ display:"flex", flexDirection:"column", gap:"4mm", marginBottom:"6mm" }}>
+        {items.map((it,i) => (
+          <div key={i} style={{ display:"flex", gap:"4mm", border:`1px solid ${BD}`, borderRadius:"6px", padding:"4mm 5mm", background: i===2?"#fffdf3":SBG, alignItems:"flex-start" }}>
+            <div style={{ fontSize:"32px", lineHeight:1, flexShrink:0 }}>{it.icon}</div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:"13px", fontWeight:900, color:T1, marginBottom:"2mm" }}>{it.title}</div>
+              <div style={{ fontSize:"11px", color:T2, lineHeight:1.7 }}>{it.body}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ borderLeft:`3px solid ${Y}`, padding:"4mm 5mm", background:"#fffdf3", fontSize:"11px", color:T2, lineHeight:1.7 }}>
+        {isAr
+          ? "كل درس في هذا الكتاب يتبع نفس التسلسل: تعلّم → كلمات بالصور → تطبيق الكتابة → تدريب النطق → إملاء → قراءة قصيرة → مراجعة. اتّبع التسلسل بالترتيب."
+          : "Every lesson in this book follows the same flow: Learn → Visual Words → Writing Practice → Speaking Drill → Dictation → Mini Reading → Review. Follow the steps in order."}
+      </div>
+    </Page>
+  );
+}
+
+function SpeakingDrill({ lesson, slice, lang }: LessonProps) {
+  const isAr = lang === "ar";
+  const letters = CONSONANTS.slice(...slice);
+  const syllables = letters.flatMap(c => ["ㅏ","ㅓ","ㅗ"].map(v => buildSyllable(c.char, v)));
+  return (
+    <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "تدريب النطق" : "Speaking Drill"}>
+      <SHead title={isAr ? `تدريب النطق — الدرس ${["١","٢","٣","٤","٥"][lesson-1]}` : `Speaking Drill — Lesson ${lesson}`} subtitle={isAr ? "كرّر بصوت عالٍ، ثم اقرأ مع زميلك" : "Say each one aloud, then read with a partner"} />
+      <div style={{ marginBottom:"5mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
+          {isAr ? "١. كرّر بعد المعلم" : "1. Repeat after the teacher"}
+        </div>
+        <div style={{ display:"flex", gap:"6mm", justifyContent:"center", flexWrap:"wrap", border:`1px solid ${BD}`, borderRadius:"6px", padding:"6mm", background:"#fff" }}>
+          {letters.map(c => (
+            <div key={c.char} style={{ textAlign:"center" }}>
+              <div style={{ fontSize:"56px", fontWeight:900, color:T1, lineHeight:1 }}>{c.char}</div>
+              <div style={{ fontSize:"11px", color:T3, marginTop:"2mm" }}>[{c.roman}]</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ marginBottom:"5mm" }}>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
+          {isAr ? "٢. قراءة المقاطع بصوت عالٍ" : "2. Read syllables aloud"}
+        </div>
+        <div style={{ display:"flex", gap:"4mm", flexWrap:"wrap", border:`1px solid ${BD}`, borderRadius:"6px", padding:"5mm", background:"#fff", direction:"ltr" }}>
+          {syllables.map((s,i) => (
+            <div key={i} style={{ fontSize:"32px", fontWeight:900, color:T1 }}>{s}</div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
+          {isAr ? "٣. قراءة جماعية مع زميل" : "3. Pair reading with a partner"}
+        </div>
+        <ul style={{ margin:0, paddingInlineStart:"18px", fontSize:"11px", color:T2, lineHeight:1.8 }}>
+          {(isAr
+            ? ["الطالب أ يقرأ الحرف، الطالب ب يكرّر بصوت أعلى.","تبادلوا الأدوار كل ٣٠ ثانية.","ركّز على المخارج: المعلم يصحّح النطق."]
+            : ["Student A reads the letter, Student B repeats louder.","Switch roles every 30 seconds.","Focus on pronunciation — teacher corrects mouth shape."]
+          ).map((t,i) => <li key={i}>{t}</li>)}
+        </ul>
+      </div>
+    </Page>
+  );
+}
+
+function Dictation({ lesson, slice, lang }: LessonProps) {
+  const isAr = lang === "ar";
+  const letters = CONSONANTS.slice(...slice);
+  const exampleWords = letters.flatMap(c => (c[isAr?"ar":"en"].ex || []).slice(0,1).map(w => w.k));
+  return (
+    <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "إملاء" : "Dictation"}>
+      <SHead title={isAr ? `إملاء — الدرس ${["١","٢","٣","٤","٥"][lesson-1]}` : `Dictation — Lesson ${lesson}`} subtitle={isAr ? "ينطق المعلم بصوت واضح، والطالب يكتب في المربعات" : "The teacher reads aloud; the student writes in the boxes"} />
+      <div style={{ borderLeft:`3px solid ${Y}`, padding:"3mm 5mm", background:"#fffdf3", fontSize:"11px", color:T2, lineHeight:1.7, marginBottom:"5mm" }}>
+        <strong>{isAr ? "للمعلم: " : "Teacher: "}</strong>
+        {isAr
+          ? `انطق ببطء — أولاً الحروف، ثم المقاطع، ثم الكلمات. مثال: ${letters.map(l=>l.char).join(" / ")} ... ${exampleWords.slice(0,2).join(" / ")}`
+          : `Speak slowly — letters first, then syllables, then words. Example: ${letters.map(l=>l.char).join(" / ")} ... ${exampleWords.slice(0,2).join(" / ")}`}
+      </div>
+
+      <div style={{ fontSize:"11px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
+        {isAr ? "أ. حروف منفردة (٥)" : "A. Single letters (5)"}
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"3mm", marginBottom:"5mm" }}>
+        {[1,2,3,4,5].map(n => (
+          <div key={n} style={{ border:`1px solid ${BD}`, height:"16mm", borderRadius:"4px", background:"#fff", position:"relative" }}>
+            <span style={{ position:"absolute", top:"2px", insetInlineStart:"4px", fontSize:"9px", color:T3, fontWeight:700 }}>{n}</span>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ fontSize:"11px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
+        {isAr ? "ب. مقاطع بسيطة (٥)" : "B. Simple syllables (5)"}
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"3mm", marginBottom:"5mm" }}>
+        {[1,2,3,4,5].map(n => (
+          <div key={n} style={{ border:`1px solid ${BD}`, height:"16mm", borderRadius:"4px", background:"#fff", position:"relative" }}>
+            <span style={{ position:"absolute", top:"2px", insetInlineStart:"4px", fontSize:"9px", color:T3, fontWeight:700 }}>{n}</span>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ fontSize:"11px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
+        {isAr ? "ج. كلمات بسيطة (٤)" : "C. Simple words (4)"}
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"3mm", marginBottom:"5mm" }}>
+        {[1,2,3,4].map(n => (
+          <div key={n} style={{ border:`1px solid ${BD}`, height:"18mm", borderRadius:"4px", background:"#fff", position:"relative" }}>
+            <span style={{ position:"absolute", top:"2px", insetInlineStart:"4px", fontSize:"9px", color:T3, fontWeight:700 }}>{n}</span>
+          </div>
+        ))}
+      </div>
+    </Page>
+  );
+}
+
+function MiniReading({ lesson, slice, lang }: LessonProps) {
+  const isAr = lang === "ar";
+  const letters = CONSONANTS.slice(...slice);
+  const words = letters.flatMap(c => (c[isAr?"ar":"en"].ex || []).slice(0,2));
+  return (
+    <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "قراءة قصيرة" : "Mini Reading"}>
+      <SHead title={isAr ? `قراءة قصيرة — الدرس ${["١","٢","٣","٤","٥"][lesson-1]}` : `Mini Reading — Lesson ${lesson}`} subtitle={isAr ? "كلمات بسيطة بحروف الدرس — اقرأ كل كلمة بصوت عالٍ" : "Simple words using today's letters — read each one aloud"} />
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"4mm", marginBottom:"6mm" }}>
+        {words.map((w,i) => (
+          <div key={i} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"5mm", background:"#fff", textAlign:"center", direction:"ltr" }}>
+            <div style={{ fontSize:"36px", fontWeight:900, color:T1, lineHeight:1 }}>{w.k}</div>
+            <div style={{ fontSize:"12px", color:T3, marginTop:"3mm" }}>[{w.r}]</div>
+            <div style={{ fontSize:"12px", color:T2, marginTop:"2mm", direction:isAr?"rtl":"ltr" }}>— {w.m}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ borderLeft:`3px solid ${Y}`, padding:"4mm 5mm", background:"#fffdf3", fontSize:"11px", color:T2, lineHeight:1.7 }}>
+        {isAr ? "💬 اسأل كل طالب أن يقرأ كلمة، ثم يستخدمها في جملة عربية بسيطة (مثال: عندي حقيبة)." : "💬 Ask each student to read one word and use it in a simple sentence (e.g., \"I have a bag\")."}
+      </div>
+    </Page>
+  );
+}
+
 function PictureWords({ lesson, slice, lang }: LessonProps) {
   const isAr = lang === "ar";
   const letters = CONSONANTS.slice(...slice);
@@ -3640,15 +3798,6 @@ function Homework({ lesson, slice, lang }: LessonProps) {
 
       <HwSection letter="D" title={isAr ? "تحدي صغير" : "Mini Challenge"} body={isAr ? "حاول قراءة أو كتابة كلمة كورية بسيطة باستخدام حروف اليوم." : "Try to read or write one simple Korean word using today's letters."} />
       <div style={{ height:"14mm", border:`1px dashed ${BD}`, borderRadius:"4px", marginBottom:"6mm" }} />
-
-      <HwSection letter="E" title={isAr ? "إملاء (واجب لكل حصة)" : "Dictation (every class)"} body={isAr ? "ينطق المعلم ١٠ حروف أو مقاطع، ويكتبها الطالب في المربعات." : "Teacher says 10 letters or syllables; student writes them in the boxes."} />
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"3mm", marginBottom:"6mm" }}>
-        {[1,2,3,4,5,6,7,8,9,10].map(n => (
-          <div key={n} style={{ border:`1px solid ${BD}`, height:"14mm", borderRadius:"4px", background:"#fff", position:"relative" }}>
-            <span style={{ position:"absolute", top:"2px", insetInlineStart:"4px", fontSize:"9px", color:T3, fontWeight:700 }}>{n}</span>
-          </div>
-        ))}
-      </div>
 
       <div style={{ borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
         <div style={{ fontSize:"10px", fontWeight:800, color:T1, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
@@ -4168,6 +4317,7 @@ export default function HangulBookPage() {
             <CultureAr />
             <CourseAr />
             <WelcomeAr />
+            <HowToUse lang="ar" />
             {/* WEEK 1 — Consonants Part 1 (ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ) */}
             {[
               { lesson:1, slice:[0,3] as [number,number] },
@@ -4175,9 +4325,12 @@ export default function HangulBookPage() {
             ].map(L => (
               <Fragment key={`ar-w1-l${L.lesson}`}>
                 <TeachLetters lesson={L.lesson} slice={L.slice} lang="ar" />
-                <PracticeLetters lesson={L.lesson} slice={L.slice} lang="ar" />
-                <ReviewLetters lesson={L.lesson} slice={L.slice} lang="ar" />
                 <PictureWords lesson={L.lesson} slice={L.slice} lang="ar" />
+                <PracticeLetters lesson={L.lesson} slice={L.slice} lang="ar" />
+                <SpeakingDrill lesson={L.lesson} slice={L.slice} lang="ar" />
+                <Dictation lesson={L.lesson} slice={L.slice} lang="ar" />
+                <MiniReading lesson={L.lesson} slice={L.slice} lang="ar" />
+                <ReviewLetters lesson={L.lesson} slice={L.slice} lang="ar" />
                 <Homework lesson={L.lesson} slice={L.slice} lang="ar" />
                 <DailyPractice lesson={L.lesson} lang="ar" />
               </Fragment>
@@ -4196,9 +4349,12 @@ export default function HangulBookPage() {
             ].map(L => (
               <Fragment key={`ar-w3-l${L.lesson}`}>
                 <TeachLetters lesson={L.lesson} slice={L.slice} lang="ar" />
-                <PracticeLetters lesson={L.lesson} slice={L.slice} lang="ar" />
-                <ReviewLetters lesson={L.lesson} slice={L.slice} lang="ar" />
                 <PictureWords lesson={L.lesson} slice={L.slice} lang="ar" />
+                <PracticeLetters lesson={L.lesson} slice={L.slice} lang="ar" />
+                <SpeakingDrill lesson={L.lesson} slice={L.slice} lang="ar" />
+                <Dictation lesson={L.lesson} slice={L.slice} lang="ar" />
+                <MiniReading lesson={L.lesson} slice={L.slice} lang="ar" />
+                <ReviewLetters lesson={L.lesson} slice={L.slice} lang="ar" />
                 <Homework lesson={L.lesson} slice={L.slice} lang="ar" />
                 <DailyPractice lesson={L.lesson} lang="ar" />
               </Fragment>
@@ -4208,7 +4364,6 @@ export default function HangulBookPage() {
             <SyllableAr />
             <BatchimLesson part={1} lang="ar" />
             <BatchimLesson part={2} lang="ar" />
-            <BatchimLesson part={3} lang="ar" />
             <ReadingPractice lang="ar" />
             <KdramaPageAr slice={[0,10]} page={1} />
             <KdramaPageAr slice={[10,20]} page={2} />
@@ -4218,6 +4373,7 @@ export default function HangulBookPage() {
             {/* ADVANCED / BONUS */}
             <AspiratedAr />
             <CompoundVowelsAr />
+            <BatchimLesson part={3} lang="ar" />
             <DoubleBatchimAr />
             {/* APPENDIX */}
             <PracticeAr />
@@ -4236,6 +4392,7 @@ export default function HangulBookPage() {
             <CultureEn />
             <CourseEn />
             <WelcomeEn />
+            <HowToUse lang="en" />
             {/* WEEK 1 — Consonants Part 1 (ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ) */}
             {[
               { lesson:1, slice:[0,3] as [number,number] },
@@ -4243,9 +4400,12 @@ export default function HangulBookPage() {
             ].map(L => (
               <Fragment key={`en-w1-l${L.lesson}`}>
                 <TeachLetters lesson={L.lesson} slice={L.slice} lang="en" />
-                <PracticeLetters lesson={L.lesson} slice={L.slice} lang="en" />
-                <ReviewLetters lesson={L.lesson} slice={L.slice} lang="en" />
                 <PictureWords lesson={L.lesson} slice={L.slice} lang="en" />
+                <PracticeLetters lesson={L.lesson} slice={L.slice} lang="en" />
+                <SpeakingDrill lesson={L.lesson} slice={L.slice} lang="en" />
+                <Dictation lesson={L.lesson} slice={L.slice} lang="en" />
+                <MiniReading lesson={L.lesson} slice={L.slice} lang="en" />
+                <ReviewLetters lesson={L.lesson} slice={L.slice} lang="en" />
                 <Homework lesson={L.lesson} slice={L.slice} lang="en" />
                 <DailyPractice lesson={L.lesson} lang="en" />
               </Fragment>
@@ -4264,9 +4424,12 @@ export default function HangulBookPage() {
             ].map(L => (
               <Fragment key={`en-w3-l${L.lesson}`}>
                 <TeachLetters lesson={L.lesson} slice={L.slice} lang="en" />
-                <PracticeLetters lesson={L.lesson} slice={L.slice} lang="en" />
-                <ReviewLetters lesson={L.lesson} slice={L.slice} lang="en" />
                 <PictureWords lesson={L.lesson} slice={L.slice} lang="en" />
+                <PracticeLetters lesson={L.lesson} slice={L.slice} lang="en" />
+                <SpeakingDrill lesson={L.lesson} slice={L.slice} lang="en" />
+                <Dictation lesson={L.lesson} slice={L.slice} lang="en" />
+                <MiniReading lesson={L.lesson} slice={L.slice} lang="en" />
+                <ReviewLetters lesson={L.lesson} slice={L.slice} lang="en" />
                 <Homework lesson={L.lesson} slice={L.slice} lang="en" />
                 <DailyPractice lesson={L.lesson} lang="en" />
               </Fragment>
@@ -4276,7 +4439,6 @@ export default function HangulBookPage() {
             <SyllableEn />
             <BatchimLesson part={1} lang="en" />
             <BatchimLesson part={2} lang="en" />
-            <BatchimLesson part={3} lang="en" />
             <ReadingPractice lang="en" />
             <KdramaPageEn slice={[0,10]} page={1} />
             <KdramaPageEn slice={[10,20]} page={2} />
@@ -4286,6 +4448,7 @@ export default function HangulBookPage() {
             {/* ADVANCED / BONUS */}
             <AspiratedEn />
             <CompoundVowelsEn />
+            <BatchimLesson part={3} lang="en" />
             <DoubleBatchimEn />
             {/* APPENDIX */}
             <PracticeEn />
