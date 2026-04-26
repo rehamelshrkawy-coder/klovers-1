@@ -319,8 +319,8 @@ Deno.serve(async (req) => {
       title: "Free Korean Trial Class — Klovers Academy",
       date: trialDate,
       time: start_time,
-      durationMin: 45,
-      description: `Your free trial Korean class with Klovers Academy.\nLevel: ${level || "Beginner"}\n\nhttps://kloversegy.com`,
+      durationMin: 30,
+      description: `Your free 30-min trial Korean class with Klovers Academy.\nLevel: ${level || "Beginner"}\n\nhttps://kloversegy.com`,
       timezone,
     });
 
@@ -330,7 +330,7 @@ Deno.serve(async (req) => {
         template: "trial_confirmed",
         email: normalizedEmail,
         name: finalName,
-        language: "ar",
+        language: "en",
         trial_date: trialDate,
         trial_time: start_time,
         trial_timezone: timezone,
@@ -348,7 +348,7 @@ Deno.serve(async (req) => {
           day_name: dayName,
           start_time,
           start_time_12h: formatTime12h(start_time),
-          duration_min: 45,
+          duration_min: 30,
           timezone,
           calendar_url: calendarUrl,
         },

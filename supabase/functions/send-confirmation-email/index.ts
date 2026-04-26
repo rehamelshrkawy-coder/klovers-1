@@ -631,25 +631,33 @@ function buildTrialConfirmedEmail(p: EmailPayload) {
     };
   }
   return {
-    subject: "KLovers — Your Free Trial Class is Confirmed! ✅",
+    subject: "✅ You're booked! Your free 30-min Korean trial class — KLovers",
     html: brandWrapper(`
       <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 🎉</h1>
-      <p>Your free Korean trial class has been confirmed!</p>
+      <p style="color: ${BRAND_TEXT}; font-size: 15px; margin-bottom: 4px;">Your <strong>free 30-minute Korean trial class</strong> is confirmed. We can't wait to meet you!</p>
       ${brandTable([
         ["📅 Date", p.trial_date || ""],
         ["⏰ Time", p.trial_time || ""],
         ["🌍 Timezone", tz],
         ["📚 Level", p.level || "Beginner"],
-        ["⏱ Duration", "45 minutes"],
+        ["⏱ Duration", "30 minutes"],
       ])}
       ${calBtn}
-      <h3 style="color: ${BRAND_DARK}; font-size: 16px; margin-top: 24px;">What to expect:</h3>
-      <ul style="color: ${BRAND_TEXT}; padding-left: 20px;">
-        <li>Live class with a real teacher</li>
-        <li>Personalised level assessment</li>
-        <li>Tips on how to learn Korean faster</li>
+      <h3 style="color: ${BRAND_DARK}; font-size: 16px; margin-top: 28px;">What happens in your 30 minutes?</h3>
+      <ul style="color: ${BRAND_TEXT}; padding-left: 20px; line-height: 1.9;">
+        <li>🧑‍🏫 <strong>Meet your teacher</strong> — a real live session, not a recording</li>
+        <li>📊 <strong>Level check</strong> — we figure out exactly where you are</li>
+        <li>🔤 <strong>Taste of Korean</strong> — you'll actually learn something in this class</li>
+        <li>🗺️ <strong>Your learning roadmap</strong> — we show you the fastest path to fluency</li>
       </ul>
-      <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Have questions? Message us on WhatsApp.</p>
+      <div style="background: #fffff0; border-left: 4px solid ${BRAND_YELLOW}; border-radius: 6px; padding: 14px 18px; margin: 24px 0;">
+        <p style="margin: 0; color: ${BRAND_DARK}; font-size: 14px;"><strong>No prep needed.</strong> Just show up with 30 minutes and an open mind. We'll handle the rest.</p>
+      </div>
+      <p style="color: ${BRAND_TEXT}; font-size: 14px;">The class link will be sent to you before the session. Keep an eye on your inbox!</p>
+      <div style="margin: 24px 0; text-align: center;">
+        ${brandButton("Message us on WhatsApp", "https://wa.me/201010003084")}
+      </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 12px; margin-top: 8px;">Questions? Just reply to this email or reach us on WhatsApp anytime.</p>
     `, false),
   };
 }
