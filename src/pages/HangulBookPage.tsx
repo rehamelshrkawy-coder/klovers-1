@@ -609,14 +609,14 @@ const SYLLABLES = [
 /* ══════════════════════════════════════════════════
    LAYOUT HELPERS
 ══════════════════════════════════════════════════ */
-function Page({ children, dir = "ltr", chapter }: { children: React.ReactNode; dir?: "ltr" | "rtl"; chapter?: string }) {
+function Page({ children, dir = "ltr", chapter, bgColor = "#ffffff" }: { children: React.ReactNode; dir?: "ltr" | "rtl"; chapter?: string; bgColor?: string }) {
   const isRtl = dir === "rtl";
   return (
     <div
       className="book-page"
       style={{
         width:"210mm", minHeight:"297mm", padding:"13mm 16mm 12mm",
-        boxSizing:"border-box", background:"#ffffff",
+        boxSizing:"border-box", background:bgColor,
         position:"relative",
         pageBreakAfter:"always", breakAfter:"page",
         direction: dir,
@@ -1607,96 +1607,194 @@ function SyllableAr() {
   );
 }
 
-/* ── Batchim (Single) AR ── */
-function BatchimAr() {
-  const FINAL7 = [
-    { sound:"ك", chars:["ㄱ","ㄲ","ㅋ"], ex:[{k:"국",r:"غوك",m:"حساء"},{k:"부엌",r:"بو-أوك",m:"مطبخ"}] },
-    { sound:"ن", chars:["ㄴ"],           ex:[{k:"눈",r:"نون",m:"عين/ثلج"},{k:"돈",r:"دون",m:"مال"}] },
-    { sound:"ت", chars:["ㄷ","ㅅ","ㅆ","ㅈ","ㅊ","ㅌ","ㅎ"], ex:[{k:"옷",r:"أوت",m:"ملابس"},{k:"낮",r:"نات",m:"نهار"}] },
-    { sound:"ل/ر", chars:["ㄹ"],         ex:[{k:"달",r:"دال",m:"قمر"},{k:"말",r:"مال",m:"لغة/فرس"}] },
-    { sound:"م",  chars:["ㅁ"],          ex:[{k:"봄",r:"بوم",m:"ربيع"},{k:"꿈",r:"كوم",m:"حلم"}] },
-    { sound:"ب",  chars:["ㅂ","ㅍ"],     ex:[{k:"밥",r:"باب",m:"أرز"},{k:"잎",r:"إيب",m:"ورقة"}] },
-    { sound:"نغ", chars:["ㅇ"],          ex:[{k:"강",r:"غانغ",m:"نهر"},{k:"영",r:"يونغ",m:"روح/صفر"}] },
-  ];
+/* ════════════════════════════════════════════════════════════
+   KIDS-STYLE TEXTBOOK COMPONENTS
+   Soft pastel cards, character + speech bubble, numbered pill rows.
+   Used to give the book the look of a Korean children's workbook.
+   ════════════════════════════════════════════════════════════ */
+const KIDS_PINK = "#FFF5F5";
+const KIDS_RED  = "#E94B4B";
+const KIDS_GREEN= "#3FB984";
+const KIDS_BLUE = "#4D9EE8";
+const KIDS_YELL = "#FFC93C";
+const KIDS_PURPLE="#9B6BC9";
+const KIDS_ORANGE="#FF8C42";
+
+function CharImg({ size = 110, style }: { size?: number; style?: React.CSSProperties }) {
+  return <img src="/characters/hanbok-pair.jpg" alt="" style={{ width:size, height:"auto", borderRadius:"8px", ...style }} />;
+}
+
+function SpeechBubble({ children, dir="rtl", color=KIDS_RED }:{ children:React.ReactNode; dir?:"rtl"|"ltr"; color?:string }) {
   return (
-    <Page dir="rtl">
-      <SHead title="الباتشيم (받침) — الحرف الساكن الأخير" subtitle="المقطع الكوري قد ينتهي بحرف ساكن تحت الكتلة" />
+    <div style={{
+      position:"relative", background:"#fff", border:`2px solid ${color}`,
+      borderRadius:"14px", padding:"7px 12px", fontSize:"11px", fontWeight:700,
+      color:"#333", lineHeight:1.5, direction:dir, maxWidth:"180px",
+    }}>
+      {children}
+    </div>
+  );
+}
 
-      {/* What is batchim */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"6mm" }}>
-        <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", background:SBG }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>ما هو الباتشيم؟</div>
-          <p style={{ fontSize:"10px", color:T2, lineHeight:1.8, margin:0, marginBottom:"8px" }}>
-            الباتشيم هو الحرف الساكن الذي يجلس <strong>أسفل</strong> الكتلة المقطعية.
-            ليس كل مقطع يحتاجه — لكنه ضروري في آلاف الكلمات.
-          </p>
-          <div style={{ display:"flex", gap:"10px", justifyContent:"center", direction:"ltr" }}>
-            {[
-              {top:"ㅎ", mid:"ㅏ", bot:null, label:"하 (ha)", note:"بدون باتشيم"},
-              {top:"ㅎ", mid:"ㅏ", bot:"ㄴ", label:"한 (han)", note:"مع باتشيم ㄴ"},
-            ].map((b,i)=>(
-              <div key={i} style={{ textAlign:"center" }}>
-                <div style={{ border:`1px solid ${i===1?Y:BD}`, borderRadius:"6px", padding:"8px 12px", display:"inline-flex", flexDirection:"column", alignItems:"center", width:"52px", background:i===1?YL:"#fff" }}>
-                  <div style={{ fontSize:"11px", color:T2 }}>{b.top}</div>
-                  <div style={{ fontSize:"11px", color:T2 }}>{b.mid}</div>
-                  {b.bot && <div style={{ fontSize:"11px", color:T1, fontWeight:900, borderTop:`1px solid ${BD}`, marginTop:"3px", paddingTop:"3px", width:"100%", textAlign:"center" }}>{b.bot}</div>}
-                </div>
-                <div style={{ fontSize:"10px", fontWeight:700, color:T1, marginTop:"4px" }}>{b.label}</div>
-                <div style={{ fontSize:"9px", color:T3, direction:"rtl" }}>{b.note}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+function SectionBadge({ icon, label, color=KIDS_GREEN, dir="rtl" }:{ icon:string; label:string; color?:string; dir?:"rtl"|"ltr" }) {
+  return (
+    <div style={{
+      display:"inline-flex", alignItems:"center", gap:"6px", direction:dir,
+      background:color, color:"#fff", padding:"4px 14px",
+      borderRadius:"22px", fontSize:"13px", fontWeight:900,
+      boxShadow:"0 2px 0 rgba(0,0,0,0.08)",
+    }}>
+      <span style={{ fontSize:"15px" }}>{icon}</span>
+      <span>{label}</span>
+    </div>
+  );
+}
 
-        <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", background:SBG }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>القاعدة الذهبية</div>
-          <p style={{ fontSize:"10px", color:T2, lineHeight:1.8, margin:0, marginBottom:"8px" }}>
-            رغم وجود أكثر من ١٤ حرفاً ساكناً، لا يوجد في الكورية سوى <strong>٧ أصوات نهائية فقط</strong>. كل الحروف الأخرى تُحوَّل إلى أحدها.
-          </p>
-          <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", direction:"ltr" }}>
-            {["ك","ن","ت","ل","م","ب","نغ"].map(s=>(
-              <span key={s} style={{ border:`1px solid ${BD}`, color:T1, fontWeight:900, fontSize:"13px", padding:"4px 8px", borderRadius:"4px", background:"#fff" }}>{s}</span>
-            ))}
-          </div>
+function KidsPanel({ children, color=KIDS_RED, bg=KIDS_PINK, dir="rtl" }:{ children:React.ReactNode; color?:string; bg?:string; dir?:"rtl"|"ltr" }) {
+  return (
+    <div style={{
+      border:`2px dashed ${color}`, background:bg,
+      borderRadius:"14px", padding:"12px 14px",
+      direction:dir, marginBottom:"6mm",
+    }}>
+      {children}
+    </div>
+  );
+}
+
+function NumCircle({ n, color=KIDS_RED }:{ n:number|string; color?:string }) {
+  return (
+    <div style={{
+      width:"26px", height:"26px", borderRadius:"50%",
+      background:color, color:"#fff", display:"flex",
+      alignItems:"center", justifyContent:"center",
+      fontSize:"13px", fontWeight:900, flexShrink:0,
+      boxShadow:"0 2px 0 rgba(0,0,0,0.12)",
+    }}>{n}</div>
+  );
+}
+
+function Pill({ children, bg, color="#222" }:{ children:React.ReactNode; bg:string; color?:string }) {
+  return (
+    <span style={{
+      background:bg, color, padding:"3px 12px",
+      borderRadius:"8px", fontSize:"15px", fontWeight:900,
+      direction:"ltr", display:"inline-block", letterSpacing:"1px",
+    }}>{children}</span>
+  );
+}
+
+function RuleRow({ n, ncolor, pillBg, pillChars, arrow, arabicRule, exampleK, exampleR, exRColor=KIDS_GREEN }:{
+  n:number; ncolor:string; pillBg:string; pillChars:string;
+  arrow?:string; arabicRule:string; exampleK:string; exampleR:string; exRColor?:string;
+}) {
+  return (
+    <div style={{
+      display:"grid", gridTemplateColumns:"30px 1.1fr 18px 1.4fr 1fr",
+      alignItems:"center", gap:"8px", padding:"6px 4px",
+      direction:"rtl",
+    }}>
+      <NumCircle n={n} color={ncolor} />
+      <div style={{ direction:"ltr", textAlign:"center" }}><Pill bg={pillBg}>{pillChars}</Pill></div>
+      <div style={{ color:KIDS_RED, fontSize:"18px", fontWeight:900, textAlign:"center" }}>{arrow ?? "←"}</div>
+      <div style={{ fontSize:"12px", color:"#222", fontWeight:700 }}>{arabicRule}</div>
+      <div style={{ display:"flex", alignItems:"baseline", gap:"6px", direction:"ltr", justifyContent:"flex-start" }}>
+        <span style={{ fontSize:"22px", fontWeight:900, color:"#222" }}>{exampleK}</span>
+        <span style={{ fontSize:"11px", fontWeight:700, color:exRColor }}>({exampleR})</span>
+      </div>
+    </div>
+  );
+}
+
+function KidsPage({ children, dir="rtl", chapter }:{ children:React.ReactNode; dir?:"rtl"|"ltr"; chapter?:string }) {
+  return (
+    <Page dir={dir} chapter={chapter} bgColor={KIDS_PINK}>
+      {children}
+    </Page>
+  );
+}
+
+/* ── Batchim (Single) AR — kids-style rebuild ── */
+function BatchimAr() {
+  const FINAL7: { n:number; ncolor:string; pillBg:string; pillChars:string; rule:string; exK:string; exR:string }[] = [
+    { n:1, ncolor:KIDS_RED,    pillBg:"#FFE2C0", pillChars:"ㄱ / ㄲ / ㅋ", rule:"تُنطق: ك (k)", exK:"박", exR:"bak" },
+    { n:2, ncolor:KIDS_GREEN,  pillBg:"#D7EFD0", pillChars:"ㄴ",            rule:"تُنطق: ن (n)", exK:"산", exR:"san" },
+    { n:3, ncolor:KIDS_RED,    pillBg:"#FFD7D7", pillChars:"ㄷ / ㅅ / ㅆ / ㅈ / ㅊ / ㅌ / ㅎ", rule:"تُنطق: ت (t) مقطوعة", exK:"옷", exR:"ot" },
+    { n:4, ncolor:KIDS_BLUE,   pillBg:"#D6E9F8", pillChars:"ㄹ",            rule:"تُنطق: ل (l)", exK:"달", exR:"dal" },
+    { n:5, ncolor:KIDS_PURPLE, pillBg:"#E5D8F0", pillChars:"ㅁ",            rule:"تُنطق: م (m)", exK:"밤", exR:"bam" },
+    { n:6, ncolor:KIDS_PURPLE, pillBg:"#FAD9E8", pillChars:"ㅂ / ㅍ",       rule:"تُنطق: ب (p)", exK:"밥", exR:"bap" },
+    { n:7, ncolor:KIDS_RED,    pillBg:"#FBD9D9", pillChars:"ㅇ",            rule:"تُنطق: نغ (ng) (غنة)", exK:"강", exR:"gang" },
+  ];
+
+  return (
+    <Page dir="rtl" bgColor={KIDS_PINK}>
+      {/* Title bar */}
+      <div style={{
+        background:KIDS_RED, color:"#fff", borderRadius:"30px",
+        padding:"10px 20px", display:"flex", justifyContent:"center",
+        alignItems:"center", gap:"10px", marginBottom:"6mm",
+        boxShadow:"0 4px 0 rgba(0,0,0,0.08)",
+      }}>
+        <div style={{ fontSize:"22px", fontWeight:900 }}>الباتشيم في اللغة الكورية</div>
+        <div style={{ fontSize:"18px", fontWeight:900, opacity:0.95 }}>(받침)</div>
+        <div style={{ marginInlineStart:"auto", display:"flex", flexDirection:"column", lineHeight:1 }}>
+          <span style={{ background:"#fff", color:KIDS_RED, fontSize:"10px", fontWeight:900, padding:"3px 8px", borderRadius:"4px" }}>🇰🇷</span>
         </div>
       </div>
 
-      <div style={{ fontSize:"10px", fontWeight:700, color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"4px" }}>جدول الأصوات النهائية السبعة</div>
-      <div style={{ display:"flex", flexDirection:"column", marginBottom:"6mm" }}>
-        {FINAL7.map((row,i)=>(
-          <div key={i} style={{ display:"grid", gridTemplateColumns:"36px 1fr 1fr", gap:"6px", alignItems:"center", padding:"5px 0", borderBottom:`1px solid ${BD}` }}>
-            <div style={{ border:`1px solid ${BD}`, color:T1, fontWeight:900, fontSize:"14px", textAlign:"center", borderRadius:"4px", padding:"2px", direction:"ltr", background:SBG }}>{row.sound}</div>
-            <div style={{ display:"flex", gap:"4px", flexWrap:"wrap" }}>
-              {row.chars.map(ch=>(
-                <span key={ch} style={{ border:`1px solid ${BD}`, color:T1, fontSize:"13px", fontWeight:900, padding:"1px 5px", borderRadius:"3px", direction:"ltr" }}>{ch}</span>
-              ))}
-            </div>
-            <div style={{ fontSize:"10px", color:T2, direction:"rtl" }}>
-              {row.ex.map(e=>(<span key={e.k} style={{ marginInlineEnd:"8px" }}><strong>{e.k}</strong> </span>))}
-            </div>
+      {/* Definition panel + character */}
+      <div style={{ display:"flex", gap:"10px", marginBottom:"6mm", alignItems:"flex-start" }}>
+        <KidsPanel color={KIDS_GREEN} bg="#FFF8F1">
+          <div style={{ marginBottom:"6px" }}>
+            <SectionBadge icon="📗" label="تعريف" color={KIDS_GREEN} />
           </div>
-        ))}
+          <p style={{ fontSize:"12px", color:"#222", lineHeight:1.8, margin:0, fontWeight:600 }}>
+            الباتشيم (<span style={{ color:KIDS_RED, fontWeight:900 }}>받침</span>) هو الحرف الساكن
+            الذي يأتي في نهاية المقطع الكوري، ويؤثّر بشكل كبير على النطق.
+          </p>
+        </KidsPanel>
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", flexShrink:0, gap:"4px", width:"170px" }}>
+          <SpeechBubble color={KIDS_RED}>
+            الباتشيم يؤثّر على النطق والقواعد!
+          </SpeechBubble>
+          <CharImg size={140} />
+        </div>
       </div>
 
-      <div style={{ borderTop:`1px solid ${BD}`, paddingTop:"4mm" }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"5px" }}>قاعدة الربط (연음법칙 يون-إيم)</div>
-        <p style={{ fontSize:"10px", color:T2, lineHeight:1.7, marginBottom:"6px" }}>
-          إذا جاء بعد الباتشيم مقطع يبدأ بـ <strong>ㅇ</strong> الصامت، ينتقل الباتشيم إلى ذلك المقطع ويُنطق فيه.
-        </p>
-        <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-          {[
-            {w:"먹어요",before:"موك-أو-يو ❌",after:"مو-غو-يو ✅",m:"آكل"},
-            {w:"한국어",before:"هان-غوك-أو ❌",after:"هان-غو-غو ✅",m:"كورية"},
-            {w:"없어요",before:"أوبس-أو-يو ❌",after:"أوب-سو-يو ✅",m:"لا يوجد"},
-          ].map(e=>(
-            <div key={e.w} style={{ border:`1px solid ${BD}`, borderRadius:"4px", padding:"6px 8px", direction:"ltr", background:SBG }}>
-              <div style={{ fontSize:"16px", color:T1, fontWeight:900 }}>{e.w}</div>
-              <div style={{ fontSize:"10px", color:"#aaa", marginTop:"1px" }}>{e.before}</div>
-              <div style={{ fontSize:"10px", color:"#166534", fontWeight:700 }}>{e.after}</div>
-              <div style={{ fontSize:"10px", color:T3, direction:"rtl" }}>{e.m}</div>
-            </div>
+      {/* Rule banner */}
+      <div style={{ marginBottom:"4mm" }}>
+        <SectionBadge icon="💡" label="قاعدة" color={KIDS_ORANGE} />
+      </div>
+      <p style={{ fontSize:"12px", color:"#222", textAlign:"center", marginBottom:"5mm", fontWeight:700 }}>
+        رغم وجود حروف كثيرة، إلا أن نطق الباتشيم يُختصر إلى{" "}
+        <span style={{ color:KIDS_RED, fontWeight:900, textDecoration:"underline" }}>٧ أصوات أساسية فقط.</span>
+      </p>
+
+      {/* The 7 sounds */}
+      <KidsPanel color={KIDS_BLUE} bg="#fff">
+        <div style={{ marginBottom:"6px" }}>
+          <SectionBadge icon="🔊" label="الأصوات السبعة" color={KIDS_BLUE} />
+        </div>
+        <div>
+          {FINAL7.map(r => (
+            <RuleRow key={r.n} {...r} ncolor={r.ncolor} pillBg={r.pillBg}
+              pillChars={r.pillChars} arabicRule={r.rule}
+              exampleK={r.exK} exampleR={r.exR} />
           ))}
         </div>
+      </KidsPanel>
+
+      {/* Note */}
+      <div style={{ display:"flex", gap:"10px", alignItems:"flex-start" }}>
+        <KidsPanel color={KIDS_BLUE} bg="#F5FAFE">
+          <div style={{ marginBottom:"6px" }}>
+            <SectionBadge icon="📘" label="ملاحظة" color={KIDS_BLUE} />
+          </div>
+          <p style={{ fontSize:"11.5px", color:"#222", lineHeight:1.8, margin:0, fontWeight:600 }}>
+            الباتشيم يُكتب في نهاية المقطع، لكنه لا يظهر منفصلاً.
+            ويُساعد على معرفة <span style={{ color:KIDS_RED, fontWeight:900 }}>النطق الصحيح</span> للكلمة.
+          </p>
+        </KidsPanel>
       </div>
     </Page>
   );
