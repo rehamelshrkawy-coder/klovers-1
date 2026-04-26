@@ -83,7 +83,9 @@ function getUpcomingSlotDates(slots: TrialSlot[], weeksAhead = 1): UpcomingSlot[
     for (let w = 0; w < weeksAhead; w++) {
       const d = new Date(today);
       const rawDiff = (slot.day_of_week - d.getDay() + 7) % 7;
-      const diff = (rawDiff === 0 ? 7 : rawDiff) + w * 7;
+      // Require at least 6 days lead time; if closer, push to the following week
+      const nearDiff = rawDiff === 0 ? 7 : rawDiff;
+      const diff = (nearDiff < 6 ? nearDiff + 7 : nearDiff) + w * 7;
       d.setDate(d.getDate() + diff);
       const dateStr = d.toISOString().slice(0, 10);
       const [h, m] = slot.start_time.split(":").map(Number);
