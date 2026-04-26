@@ -2698,10 +2698,8 @@ function PracticeLetters({ lesson, slice, lang }: LessonProps) {
                   for (let i = 0; i < cols; i++) fillArr.push(i < k.length ? k[i] : " ");
                   return (
                     <div key={wi} style={{ marginBottom: wi === ex.slice(0,2).length-1 ? 0 : "3mm" }}>
-                      <div style={{ fontSize:"10px", color:T2, marginBottom:"1.5mm", display:"flex", gap:"6px", alignItems:"baseline", direction: isAr ? "rtl" : "ltr" }}>
-                        <span style={{ fontSize:"14px", fontWeight:900, color:T1 }}>{w.k}</span>
-                        <span style={{ color:T3 }}>{w.r}</span>
-                        <span style={{ color:T3 }}>— {w.m}</span>
+                      <div style={{ fontSize:"14px", fontWeight:900, color:T1, marginBottom:"1.5mm", direction: isAr ? "rtl" : "ltr" }}>
+                        {w.k}
                       </div>
                       <TopikGrid rows={1} cols={cols} fillArr={fillArr} />
                     </div>
