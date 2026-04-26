@@ -2631,8 +2631,8 @@ function TeachLetters({ lesson, slice, lang }: LessonProps) {
 }
 
 // TOPIK-style manuscript-paper grid: tight uniform cells, one character per cell.
-function TopikGrid({ rows, cols = 14, fill, cellMm = 7 }: { rows: number; cols?: number; fill?: string; cellMm?: number }) {
-  const chars = (fill || "").split("");
+function TopikGrid({ rows, cols = 14, fill, fillArr, cellMm = 7 }: { rows: number; cols?: number; fill?: string; fillArr?: string[]; cellMm?: number }) {
+  const chars = fillArr ?? Array.from(fill || "");
   return (
     <div style={{
       display:"grid",
@@ -2651,7 +2651,7 @@ function TopikGrid({ rows, cols = 14, fill, cellMm = 7 }: { rows: number; cols?:
           display:"flex", alignItems:"center", justifyContent:"center",
           fontSize:`${Math.round(cellMm*2.4)}px`, fontWeight:900,
           color:"#E8E8E8", lineHeight:1,
-        }}>{chars[i] || ""}</div>
+        }}>{(chars[i] && chars[i] !== " ") ? chars[i] : ""}</div>
       ))}
     </div>
   );
@@ -2685,9 +2685,31 @@ function PracticeLetters({ lesson, slice, lang }: LessonProps) {
           </div>
 
           <div style={{ fontSize:"9px", color:T3, marginBottom:"2mm", textTransform:"uppercase", letterSpacing:"1px" }}>
-            {isAr ? "اكتبه من ذاكرتك" : "Write from memory"}
+            {isAr ? `اكتب كلمات سهلة بحرف ${c.char}` : `Write easy words using ${c.char}`}
           </div>
-          <TopikGrid rows={2} cols={14} />
+          {(() => {
+            const ex = (isAr ? c.ar : c.en).ex || [];
+            const cols = 14;
+            return (
+              <div>
+                {ex.slice(0,2).map((w, wi) => {
+                  const k = Array.from(w.k);
+                  const fillArr: string[] = [];
+                  for (let i = 0; i < cols; i++) fillArr.push(i < k.length ? k[i] : " ");
+                  return (
+                    <div key={wi} style={{ marginBottom: wi === ex.slice(0,2).length-1 ? 0 : "3mm" }}>
+                      <div style={{ fontSize:"10px", color:T2, marginBottom:"1.5mm", display:"flex", gap:"6px", alignItems:"baseline", direction: isAr ? "rtl" : "ltr" }}>
+                        <span style={{ fontSize:"14px", fontWeight:900, color:T1 }}>{w.k}</span>
+                        <span style={{ color:T3 }}>{w.r}</span>
+                        <span style={{ color:T3 }}>— {w.m}</span>
+                      </div>
+                      <TopikGrid rows={1} cols={cols} fillArr={fillArr} />
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </div>
       ))}
     </Page>
