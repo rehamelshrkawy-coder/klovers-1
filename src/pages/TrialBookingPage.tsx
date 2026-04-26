@@ -20,9 +20,76 @@ import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { track } from "@/lib/tracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
-import { CheckCircle2, CalendarPlus, CalendarClock, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2 } from "lucide-react";
+import { CheckCircle2, CalendarPlus, CalendarClock, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2, Globe } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { convertDateTimeToTimezone } from "@/lib/admin-utils";
+
+// ── Country / pricing helpers ─────────────────────────────────────────────────
+
+/** IANA timezone → country name (best-effort pre-fill) */
+const TZ_TO_COUNTRY: Record<string, string> = {
+  "Africa/Cairo": "Egypt", "Africa/Casablanca": "Morocco", "Africa/Tunis": "Tunisia",
+  "Africa/Algiers": "Algeria", "Africa/Tripoli": "Libya", "Asia/Amman": "Jordan",
+  "Asia/Beirut": "Lebanon", "Asia/Baghdad": "Iraq", "Asia/Damascus": "Syria",
+  "Africa/Khartoum": "Sudan", "Asia/Aden": "Yemen",
+  "Asia/Dubai": "UAE", "Asia/Riyadh": "Saudi Arabia", "Asia/Qatar": "Qatar",
+  "Asia/Bahrain": "Bahrain", "Asia/Muscat": "Oman", "Asia/Kuwait": "Kuwait",
+  "Asia/Kuala_Lumpur": "Malaysia", "Asia/Singapore": "Malaysia",
+  "Asia/Jakarta": "Indonesia", "Asia/Bangkok": "Thailand",
+  "Asia/Ho_Chi_Minh": "Vietnam", "Asia/Manila": "Philippines",
+  "Asia/Kolkata": "India", "Asia/Karachi": "Pakistan",
+  "America/Sao_Paulo": "Brazil", "America/Mexico_City": "Mexico",
+  "America/Bogota": "Colombia", "America/Argentina/Buenos_Aires": "Argentina",
+  "Europe/Istanbul": "Turkey",
+  "America/New_York": "United States", "America/Los_Angeles": "United States",
+  "America/Chicago": "United States", "America/Toronto": "Canada",
+  "Europe/London": "United Kingdom", "Europe/Berlin": "Germany",
+  "Europe/Paris": "France", "Australia/Sydney": "Australia",
+  "Asia/Tokyo": "Japan", "Asia/Seoul": "South Korea", "Asia/Shanghai": "China",
+};
+
+/** Country → starting group price for display on confirmation */
+const COUNTRY_PRICE: Record<string, string> = {
+  // Egypt — EGP
+  Egypt: "1,200 EGP/mo",
+  // Local Arab tier — $25
+  Morocco: "$25/mo", Tunisia: "$25/mo", Algeria: "$25/mo", Libya: "$25/mo",
+  Jordan: "$25/mo", Lebanon: "$25/mo", Iraq: "$25/mo", Syria: "$25/mo",
+  Sudan: "$25/mo", Yemen: "$25/mo",
+  // Regional tier — $40
+  Malaysia: "$40/mo", Indonesia: "$40/mo", Thailand: "$40/mo",
+  Vietnam: "$40/mo", Philippines: "$40/mo", India: "$40/mo",
+  Pakistan: "$40/mo", Brazil: "$40/mo", Mexico: "$40/mo",
+  Colombia: "$40/mo", Argentina: "$40/mo", Turkey: "$40/mo",
+  // Gulf + Western tier — $60
+  UAE: "$60/mo", "Saudi Arabia": "$60/mo", Qatar: "$60/mo",
+  Bahrain: "$60/mo", Oman: "$60/mo", Kuwait: "$60/mo",
+  "United States": "$60/mo", "United Kingdom": "$60/mo",
+  Germany: "$60/mo", France: "$60/mo", Canada: "$60/mo",
+  Australia: "$60/mo", Japan: "$60/mo", "South Korea": "$60/mo", China: "$60/mo",
+};
+
+const ALL_COUNTRIES = [
+  "Algeria","Argentina","Australia","Bahrain","Brazil","Canada","China",
+  "Colombia","Egypt","France","Germany","India","Indonesia","Iraq","Japan",
+  "Jordan","Kuwait","Lebanon","Libya","Malaysia","Mexico","Morocco","Oman",
+  "Pakistan","Philippines","Qatar","Saudi Arabia","South Korea","Sudan",
+  "Syria","Thailand","Tunisia","Turkey","UAE","United Kingdom","United States",
+  "Vietnam","Yemen",
+];
+
+function getStartingPrice(country: string): string {
+  return COUNTRY_PRICE[country] ?? "$25/mo";
+}
+
+function guessCountryFromTz(): string {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return TZ_TO_COUNTRY[tz] ?? "Egypt";
+  } catch { return "Egypt"; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface BookingResult {
   trial_date: string;
@@ -51,6 +118,7 @@ const TrialBookingPage = () => {
   const [loading, setLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
   const [rescheduling, setRescheduling] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<string>(guessCountryFromTz);
 
   useEffect(() => {
     if (!user) return;
@@ -390,7 +458,11 @@ const TrialBookingPage = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-foreground">{t("trialBooking.peekPlansTitle")}</p>
-                    <p className="text-xs text-muted-foreground">{t("trialBooking.peekPlansDesc")}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {language === "ar"
+                        ? `حصص جماعية من ${getStartingPrice(selectedCountry)} · مجموعات صغيرة`
+                        : `Group classes from ${getStartingPrice(selectedCountry)} · small groups`}
+                    </p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all shrink-0" />
                 </button>
@@ -535,6 +607,25 @@ const TrialBookingPage = () => {
                   {t("trialBooking.yourLevelIs")} <span className="font-medium text-foreground">{getLevelShortLabel(selectedLevel)}</span>
                 </p>
               )}
+
+              {/* Country selector — always shown, pre-filled from timezone */}
+              <div className="mb-6 space-y-1.5">
+                <Label htmlFor="trial-country" className="text-sm font-medium flex items-center gap-1.5">
+                  <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                  {language === "ar" ? "بلدك" : "Your country"}
+                  <span className="text-[10px] text-muted-foreground font-normal">{language === "ar" ? "(للأسعار)" : "(for pricing)"}</span>
+                </Label>
+                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                  <SelectTrigger id="trial-country">
+                    <SelectValue placeholder={language === "ar" ? "اختر بلدك" : "Select your country"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ALL_COUNTRIES.map(c => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               <TrialSlotPicker
                 onSelect={handleSlotPicked}
