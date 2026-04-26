@@ -315,13 +315,13 @@ const TrialBookingPage = () => {
                 {t("trialBooking.successDesc")}
               </p>
 
-              {/* Change date link */}
+              {/* Change date button */}
               <button
                 onClick={handleReschedule}
                 disabled={rescheduling}
-                className="mt-3 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 flex items-center gap-1 mx-auto disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 text-sm font-semibold text-foreground transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mx-auto"
               >
-                <CalendarClock className="h-3.5 w-3.5" />
+                <CalendarClock className="h-4 w-4 text-primary" />
                 {rescheduling ? t("trialBooking.rescheduling") : t("trialBooking.changeDateBtn")}
               </button>
             </div>
