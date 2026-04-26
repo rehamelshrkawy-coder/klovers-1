@@ -1,4 +1,6 @@
 import { lazy, Suspense, memo } from "react";
+import { useTranslation } from "react-i18next";
+import "@/i18n/config";
 import { cn } from "@/lib/utils";
 import { getDerivedStatusBadgeVariant } from "@/lib/badge-styles";
 import { Button } from "@/components/ui/button";
@@ -85,6 +87,7 @@ export const StudentsTab = memo(function StudentsTab({
   visibleStudentCols, toggleStudentCol, studentFilterOptions, loading,
   setAdminTab, onDeleteStudent, onManualEnroll, invalidateAll,
 }: Props) {
+  const { t } = useTranslation("admin");
   const isMobile = useIsMobile();
 
   return (
@@ -94,7 +97,7 @@ export const StudentsTab = memo(function StudentsTab({
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <CardTitle className="text-base">Users</CardTitle>
+                <CardTitle className="text-base">{t("students.title")}</CardTitle>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
                   Read-only overview of every student. For manual enrollment, packages, or legacy records use
                   <button
@@ -140,7 +143,7 @@ export const StudentsTab = memo(function StudentsTab({
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by name or email..."
+                  placeholder={t("students.searchPlaceholder")}
                   value={studentSearch}
                   onChange={(e) => setStudentSearch(e.target.value)}
                   className="pl-9"
@@ -153,7 +156,7 @@ export const StudentsTab = memo(function StudentsTab({
                   <SelectValue placeholder="All Levels" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="all">{t("students.allLevels")}</SelectItem>
                   {LEVEL_SELECT_OPTIONS.map(opt => (
                     <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                   ))}
@@ -163,7 +166,7 @@ export const StudentsTab = memo(function StudentsTab({
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size={isMobile ? "icon" : "sm"} aria-label="Toggle table columns">
                     <Columns3 className="h-4 w-4" />
-                    {!isMobile && <span className="ml-1">Columns</span>}
+                    {!isMobile && <span className="ml-1">{t("students.columns")}</span>}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
@@ -189,7 +192,7 @@ export const StudentsTab = memo(function StudentsTab({
                 );
               }}>
                 <Download className="h-4 w-4" />
-                {!isMobile && <span className="ml-1">Export CSV</span>}
+                {!isMobile && <span className="ml-1">{t("students.exportCsv")}</span>}
               </Button>
             </div>
           </div>
@@ -221,7 +224,7 @@ export const StudentsTab = memo(function StudentsTab({
                 <Search className="h-5 w-5 text-muted-foreground" />
               </div>
               <div className="space-y-1">
-                <p className="font-medium text-sm text-foreground">No students match your filters</p>
+                <p className="font-medium text-sm text-foreground">{t("students.noMatch")}</p>
                 <p className="text-xs text-muted-foreground">Try clearing filters or adjusting your search term</p>
               </div>
               <Button
@@ -229,7 +232,7 @@ export const StudentsTab = memo(function StudentsTab({
                 size="sm"
                 onClick={() => { setStudentFilter("all"); setLevelFilter("all"); setStudentSearch(""); }}
               >
-                <Eraser className="h-4 w-4 mr-1.5" /> Clear all filters
+                <Eraser className="h-4 w-4 mr-1.5" /> {t("students.clearFilters")}
               </Button>
             </div>
           ) : (
@@ -461,12 +464,12 @@ export const StudentsTab = memo(function StudentsTab({
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete student?</AlertDialogTitle>
+                                  <AlertDialogTitle>{t("students.deleteConfirmTitle")}</AlertDialogTitle>
                                   <AlertDialogDescription>This will permanently delete {u.name || u.email}'s profile. This cannot be undone.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => onDeleteStudent(u.user_id)}>Delete</AlertDialogAction>
+                                  <AlertDialogCancel>{t("students.cancel")}</AlertDialogCancel>
+                                  <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => onDeleteStudent(u.user_id)}>{t("students.delete")}</AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
