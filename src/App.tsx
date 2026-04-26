@@ -66,6 +66,7 @@ const InterviewTrainingPage = lazy(() => import("./pages/InterviewTrainingPage")
 const KoreanInterviewPage = lazy(() => import("./pages/KoreanInterviewPage"));
 const ReturningStudentsLandingPage = lazy(() => import("./pages/ReturningStudentsLandingPage"));
 const HangulBookPage = lazy(() => import("./pages/HangulBookPage"));
+const TrialBookPage = lazy(() => import("./pages/TrialBookPage"));
 const EnrollmentStatusPage = lazy(() => import("./pages/EnrollmentStatusPage"));
 const HangulStarterPage = lazy(() => import("./pages/HangulStarterPage"));
 
@@ -163,6 +164,7 @@ const App = () => (
                 <Route path="/interview-training" element={<KoreanInterviewPage />} />
                 <Route path="/welcome-back" element={<ReturningStudentsLandingPage />} />
                 <Route path="/hangul-book" element={<AuthProtectedRoute><HangulBookPage /></AuthProtectedRoute>} />
+                <Route path="/trial-book" element={<AuthProtectedRoute><TrialBookPage /></AuthProtectedRoute>} />
                 <Route path="/enrollment-status" element={<AuthProtectedRoute><EnrollmentStatusPage /></AuthProtectedRoute>} />
                 <Route path="/hangul-starter" element={<HangulStarterPage />} />
                 <Route path="/practice-interview" element={<InterviewTrainingPage />} />
