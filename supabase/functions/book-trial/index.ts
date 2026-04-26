@@ -224,19 +224,29 @@ Deno.serve(async (req) => {
     // 2. For authenticated users rebooking, remove any existing booking (TBA or
     // real) so the INSERT below succeeds. Unauthenticated path only removes TBA
     // placeholders; real bookings there hit 23505 and return a friendly message.
-    const { data: existingBooking, error: lookupError } = await supabase
-      .from("trial_bookings")
-      .select("id, start_time, trial_date, is_tba, user_id")
-      .or(
-        resolvedUserId
-          ? `email.ilike.${normalizedEmail},user_id.eq.${resolvedUserId}`
-          : `email.ilike.${normalizedEmail}`
-      )
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (lookupError) {
-      console.error("book-trial lookup error:", JSON.stringify(lookupError));
+    // Look up existing booking — prefer user_id match (reliable), fall back to email.
+    let existingBooking: { id: string; start_time: string | null; trial_date: string | null; is_tba: boolean | null } | null = null;
+    if (resolvedUserId) {
+      const { data, error: e1 } = await supabase
+        .from("trial_bookings")
+        .select("id, start_time, trial_date, is_tba")
+        .eq("user_id", resolvedUserId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (e1) console.error("book-trial lookup by user_id error:", JSON.stringify(e1));
+      existingBooking = data;
+    }
+    if (!existingBooking) {
+      const { data, error: e2 } = await supabase
+        .from("trial_bookings")
+        .select("id, start_time, trial_date, is_tba")
+        .ilike("email", normalizedEmail)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (e2) console.error("book-trial lookup by email error:", JSON.stringify(e2));
+      existingBooking = data;
     }
 
     const isTbaPlaceholder =
