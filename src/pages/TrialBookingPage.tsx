@@ -23,7 +23,6 @@ import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
 import { CheckCircle2, CalendarPlus, CalendarClock, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { convertDateTimeToTimezone } from "@/lib/admin-utils";
-import { getUserTimezone } from "@/lib/viewerTimezone";
 
 interface BookingResult {
   trial_date: string;
@@ -269,10 +268,23 @@ const TrialBookingPage = () => {
 
     const trialDateMs = new Date(bookingResult.trial_date + "T00:00:00").getTime();
     const daysUntil = Math.max(0, Math.round((trialDateMs - Date.now()) / 86400000));
-    const userTz = getUserTimezone();
-    const localized = convertDateTimeToTimezone(bookingResult.trial_date, bookingResult.start_time, bookingResult.timezone || "Africa/Cairo", userTz);
+
+    // Always use the BROWSER's real timezone — bypasses any stale localStorage value
+    // written by EnrollNowPage, so admin testing in Asia doesn't bleed into student view.
+    const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Africa/Cairo";
+
+    // All slots are defined in Cairo time — always convert FROM Cairo regardless of
+    // what bookingResult.timezone stores (it may reflect the client TZ at booking time).
+    const SLOT_TZ = "Africa/Cairo";
+    const localized = convertDateTimeToTimezone(bookingResult.trial_date, bookingResult.start_time, SLOT_TZ, userTz);
     const localDate = new Date(localized.dateStr + "T00:00:00");
-    const localFormattedDate = localDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    const localFormattedDate = localDate.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+    // Friendly city name: "Africa/Cairo" → "Cairo", "Asia/Singapore" → "Singapore"
+    const tzCity = userTz.includes("/") ? userTz.split("/").pop()!.replace(/_/g, " ") : userTz;
+
+    // Show Cairo reference line only when the user is NOT already in Cairo
+    const isInCairo = userTz === SLOT_TZ || userTz === "Africa/Cairo";
 
     return (
       <div className="min-h-screen bg-background">
@@ -290,11 +302,13 @@ const TrialBookingPage = () => {
                 <div>
                   <p className="font-bold text-foreground">{localFormattedDate}</p>
                   <p className="text-sm text-muted-foreground">
-                    {localized.timeFormatted} · {bookingResult.duration_min} {t("mySchedule.minutes")} · {userTz.replace(/_/g, " ")}
+                    {localized.timeFormatted} · {bookingResult.duration_min} {t("mySchedule.minutes")} · {tzCity}
                   </p>
-                  <p className="text-[11px] text-muted-foreground/70">
-                    ({formattedDate} {bookingResult.start_time_12h} {(bookingResult.timezone || "Africa/Cairo").replace(/_/g, " ")})
-                  </p>
+                  {!isInCairo && (
+                    <p className="text-[11px] text-muted-foreground/60">
+                      ({formattedDate} {bookingResult.start_time_12h} Cairo)
+                    </p>
+                  )}
                 </div>
               </div>
               <p className="text-muted-foreground mt-4 text-sm max-w-md mx-auto">
@@ -488,7 +502,7 @@ const TrialBookingPage = () => {
             <div className="max-w-lg mx-auto bg-card border border-border rounded-3xl p-8 shadow-xl">
               <h2 className="text-2xl font-bold text-foreground mb-1">{t("trialBooking.pickTimeTitle")}</h2>
               <p className="text-sm text-muted-foreground mb-6">
-                {t("trialBooking.pickTimeDesc")} <span className="opacity-70">({getUserTimezone().replace(/_/g, " ")})</span>
+                {t("trialBooking.pickTimeDesc")} <span className="opacity-70">({(Intl.DateTimeFormat().resolvedOptions().timeZone || "Africa/Cairo").replace(/_/g, " ")})</span>
               </p>
 
               {/* Inline level dropdown — only shown when profile/user_metadata has no level */}
