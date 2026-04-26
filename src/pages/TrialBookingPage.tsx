@@ -120,7 +120,7 @@ const TrialBookingPage = () => {
     !(profile?.level?.trim()) &&
     !((user?.user_metadata?.level as string | undefined)?.trim());
 
-  const handleSlotPicked = async (dayOfWeek: number, startTime: string) => {
+  const handleSlotPicked = async (dayOfWeek: number, startTime: string, trialDate?: string) => {
     if (!user) {
       navigate(`/signup?redirect=${encodeURIComponent("/trial-booking")}`);
       return;
@@ -174,6 +174,7 @@ const TrialBookingPage = () => {
           level: effectiveLevel || undefined,
           day_of_week: dayOfWeek,
           start_time: startTime,
+          ...(trialDate ? { trial_date: trialDate } : {}),
           referrer_id: referrerId,
           authed: true,
         },

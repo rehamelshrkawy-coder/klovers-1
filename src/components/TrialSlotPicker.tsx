@@ -25,7 +25,7 @@ interface TrialSlot {
 }
 
 interface TrialSlotPickerProps {
-  onSelect: (dayOfWeek: number, startTime: string) => void;
+  onSelect: (dayOfWeek: number, startTime: string, trialDate?: string) => void;
   onBack: () => void;
 }
 
@@ -158,7 +158,8 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
     if (!selectedKey) return;
     const [dStr, time] = selectedKey.split("|");
     const day = Number(dStr);
-    onSelect(day, time);
+    const actualDate = slotDates[selectedKey];
+    onSelect(day, time, actualDate);
   };
 
   return (
