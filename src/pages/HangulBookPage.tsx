@@ -3687,12 +3687,12 @@ function SpeakingDrill({ lesson, slice, lang }: LessonProps) {
 }
 
 const DICTATION_WORDS: Record<number, string[]> = {
-  1: ["가","나","다","너","가다","나가다"],
-  2: ["라","마","바","나무","바다","도로","두부"],
-  3: ["사","아","지","가방","나비","다리","아이","지도"],
-  4: ["차","카","토","코","키","토마토","치마"],
-  5: ["파","하","피자","한국","하나","포도","호두"],
-  6: ["가방","나비","다리","아이","지도","한국","피자","오이"],
+  1: ["가","나","다","거","너","더","가다","나가다","가나","나가","다가","가나다","나","너","다","가","거","더","가다","나가다"],
+  2: ["라","마","바","로","무","두","나무","바다","도로","두부","부모","보다","모두","나라","고모","도구","고무","머루","무","노루"],
+  3: ["사","아","지","스","이","나","가방","나비","다리","머리","아이","오이","지도","어머니","누나","사다","자다","시소","비","사자"],
+  4: ["차","카","토","코","키","치","차","카드","코","키","토마토","치마","보트","노트","마트","코트","키스","가방","나비","치마"],
+  5: ["파","하","피","호","피자","한국","하나","호두","포도","하마","피","코피","하루","하다","하늘","가방","나비","어머니","아이","한국"],
+  6: ["가방","나비","다리","머리","아이","오이","지도","어머니","나무","바다","피자","한국","하나","호두","포도","하마","차","토마토","카드","사자"],
 };
 
 function Dictation({ lesson, slice, lang }: LessonProps) {
@@ -3789,23 +3789,18 @@ const MINI_READ_WORDS: Record<number, { k:string; r:string; m_en:string; m_ar:st
   ],
 };
 
-function MiniReading({ lesson, slice, lang }: LessonProps) {
+function MiniReading({ lesson, lang }: LessonProps) {
   const isAr = lang === "ar";
-  const letters = CONSONANTS.slice(...slice);
-  // Use lesson-specific word set if available; fall back to consonant examples
-  const lessonWords = MINI_READ_WORDS[lesson];
-  const words = lessonWords
-    ? lessonWords.map(w => ({ k:w.k, r:w.r, m: isAr ? w.m_ar : w.m_en }))
-    : letters.flatMap(c => (c[isAr?"ar":"en"].ex || []).slice(0,2));
+  const words = LESSON_WORDS[lesson] || [];
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "قراءة قصيرة" : "Mini Reading"}>
-      <SHead title={isAr ? `قراءة قصيرة — الدرس ${["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1]}` : `Mini Reading — Lesson ${lesson}`} subtitle={isAr ? "كلمات بسيطة بحروف الدرس — اقرأ كل كلمة بصوت عالٍ" : "Simple words using today's letters — read each one aloud"} />
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"4mm", marginBottom:"6mm" }}>
+      <SHead title={isAr ? `قراءة قصيرة — الدرس ${["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1]}` : `Mini Reading — Lesson ${lesson}`} subtitle={isAr ? `${words.length} كلمة — كلها مكوّنة من حروف ومدّ سبق دراستها` : `${words.length} words — all built from letters and vowels you've already learned`} />
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:"3mm", marginBottom:"5mm" }}>
         {words.map((w,i) => (
-          <div key={i} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"5mm", background:"#fff", textAlign:"center", direction:"ltr" }}>
-            <div style={{ fontSize:"36px", fontWeight:900, color:T1, lineHeight:1 }}>{w.k}</div>
-            <div style={{ fontSize:"12px", color:T3, marginTop:"3mm" }}>[{w.r}]</div>
-            <div style={{ fontSize:"12px", color:T2, marginTop:"2mm", direction:isAr?"rtl":"ltr" }}>— {w.m}</div>
+          <div key={i} style={{ border:`1px solid ${BD}`, borderRadius:"5px", padding:"3mm", background:"#fff", textAlign:"center", direction:"ltr" }}>
+            <div style={{ fontSize:"22px", fontWeight:900, color:T1, lineHeight:1.1 }}>{w.k}</div>
+            <div style={{ fontSize:"9px", color:T3, marginTop:"1.5mm" }}>[{w.r}]</div>
+            <div style={{ fontSize:"9px", color:T2, marginTop:"1mm", direction:isAr?"rtl":"ltr", lineHeight:1.3 }}>— {isAr ? w.ar : w.en}</div>
           </div>
         ))}
       </div>
@@ -3849,44 +3844,106 @@ function WordIllustration({ emoji, alt, size = 36 }: { emoji: string; alt: strin
 
 const LESSON_WORDS: Record<number, LessonWord[]> = {
   1: [
-    { k:"나",   r:"na",      en:"I / me",     ar:"أنا",         emoji:"🙋" },
-    { k:"너",   r:"neo",     en:"you",        ar:"أنتَ",         emoji:"👉" },
-    { k:"가다", r:"ga-da",   en:"to go",      ar:"يذهب",        emoji:"🚶" },
-    { k:"다",   r:"da",      en:"all",        ar:"كل",          emoji:"📚" },
+    { k:"가",       r:"ga",         en:"go (root)",      ar:"يذهب (جذر)",       emoji:"➡️" },
+    { k:"나",       r:"na",         en:"I / me",         ar:"أنا",              emoji:"🙋" },
+    { k:"다",       r:"da",         en:"all",            ar:"كل",               emoji:"📚" },
+    { k:"거",       r:"geo",        en:"thing",         ar:"شيء",              emoji:"📦" },
+    { k:"너",       r:"neo",        en:"you",            ar:"أنتَ",              emoji:"👉" },
+    { k:"더",       r:"deo",        en:"more",           ar:"أكثر",             emoji:"➕" },
+    { k:"가다",     r:"ga-da",      en:"to go",          ar:"يذهب",             emoji:"🚶" },
+    { k:"나가다",   r:"na-ga-da",   en:"to go out",      ar:"يخرج",             emoji:"🚪" },
+    { k:"나가",     r:"na-ga",      en:"go out!",        ar:"اخرج!",            emoji:"👋" },
+    { k:"다가",     r:"da-ga",      en:"approaching",    ar:"يقترب",            emoji:"🤏" },
+    { k:"가나",     r:"ga-na",      en:"Ghana",          ar:"غانا",             emoji:"🌍" },
+    { k:"가나다",   r:"ga-na-da",   en:"Korean ABCs",    ar:"الأبجدية الكورية", emoji:"🔤" },
   ],
   2: [
-    { k:"나무", r:"na-mu",   en:"tree",       ar:"شجرة",        emoji:"🌳" },
-    { k:"바다", r:"ba-da",   en:"sea",        ar:"بحر",         emoji:"🌊" },
-    { k:"도로", r:"do-ro",   en:"road",       ar:"طريق",        emoji:"🛣️" },
-    { k:"두부", r:"du-bu",   en:"tofu",       ar:"توفو",        emoji:"🟦" },
-    { k:"부모", r:"bu-mo",   en:"parents",    ar:"الوالدان",     emoji:"👪" },
-    { k:"보다", r:"bo-da",   en:"to see",     ar:"يرى",         emoji:"👁️" },
+    { k:"나",       r:"na",         en:"I / me",         ar:"أنا",              emoji:"🙋" },
+    { k:"너",       r:"neo",        en:"you",            ar:"أنتَ",              emoji:"👉" },
+    { k:"더",       r:"deo",        en:"more",           ar:"أكثر",             emoji:"➕" },
+    { k:"가다",     r:"ga-da",      en:"to go",          ar:"يذهب",             emoji:"🚶" },
+    { k:"나가다",   r:"na-ga-da",   en:"to go out",      ar:"يخرج",             emoji:"🚪" },
+    { k:"나무",     r:"na-mu",      en:"tree",           ar:"شجرة",             emoji:"🌳" },
+    { k:"바다",     r:"ba-da",      en:"sea",            ar:"بحر",              emoji:"🌊" },
+    { k:"도로",     r:"do-ro",      en:"road",           ar:"طريق",             emoji:"🛣️" },
+    { k:"두부",     r:"du-bu",      en:"tofu",           ar:"توفو",             emoji:"🟦" },
+    { k:"부모",     r:"bu-mo",      en:"parents",        ar:"الوالدان",          emoji:"👪" },
+    { k:"보다",     r:"bo-da",      en:"to see",         ar:"يرى",              emoji:"👁️" },
+    { k:"모두",     r:"mo-du",      en:"everyone",       ar:"الجميع",           emoji:"👥" },
+    { k:"나라",     r:"na-ra",      en:"country",        ar:"دولة",             emoji:"🌐" },
+    { k:"고모",     r:"go-mo",      en:"aunt (paternal)", ar:"عمة",             emoji:"👵" },
+    { k:"도구",     r:"do-gu",      en:"tool",           ar:"أداة",             emoji:"🛠️" },
+    { k:"고구마",   r:"go-gu-ma",   en:"sweet potato",   ar:"بطاطا حلوة",        emoji:"🍠" },
+    { k:"고무",     r:"go-mu",      en:"rubber",         ar:"مطاط",             emoji:"🟢" },
+    { k:"머루",     r:"meo-ru",     en:"wild grape",     ar:"عنب بري",          emoji:"🍇" },
+    { k:"무",       r:"mu",         en:"radish",         ar:"فجل",              emoji:"🥕" },
+    { k:"노루",     r:"no-ru",      en:"roe deer",       ar:"غزال",             emoji:"🦌" },
   ],
   3: [
-    { k:"가방",   r:"ga-bang",   en:"bag",        ar:"حقيبة",       emoji:"🎒" },
-    { k:"나비",   r:"na-bi",     en:"butterfly",  ar:"فراشة",       emoji:"🦋" },
-    { k:"다리",   r:"da-ri",     en:"bridge / leg", ar:"جسر / ساق", emoji:"🦵" },
-    { k:"머리",   r:"meo-ri",    en:"head",       ar:"رأس",         emoji:"🧠" },
-    { k:"아이",   r:"a-i",       en:"child",      ar:"طفل",         emoji:"👶" },
-    { k:"오이",   r:"o-i",       en:"cucumber",   ar:"خيار",        emoji:"🥒" },
-    { k:"지도",   r:"ji-do",     en:"map",        ar:"خريطة",       emoji:"🗺️" },
-    { k:"어머니", r:"eo-meo-ni", en:"mother",     ar:"أم",          emoji:"👩" },
+    { k:"가방",     r:"ga-bang",    en:"bag",            ar:"حقيبة",            emoji:"🎒" },
+    { k:"나비",     r:"na-bi",      en:"butterfly",      ar:"فراشة",            emoji:"🦋" },
+    { k:"다리",     r:"da-ri",      en:"bridge / leg",   ar:"جسر / ساق",         emoji:"🦵" },
+    { k:"머리",     r:"meo-ri",     en:"head",           ar:"رأس",              emoji:"🧠" },
+    { k:"아이",     r:"a-i",        en:"child",          ar:"طفل",              emoji:"👶" },
+    { k:"오이",     r:"o-i",        en:"cucumber",       ar:"خيار",             emoji:"🥒" },
+    { k:"지도",     r:"ji-do",      en:"map",            ar:"خريطة",            emoji:"🗺️" },
+    { k:"어머니",   r:"eo-meo-ni",  en:"mother",         ar:"أم",               emoji:"👩" },
+    { k:"누나",     r:"nu-na",      en:"older sister",   ar:"الأخت الكبرى",       emoji:"👧" },
+    { k:"사다",     r:"sa-da",      en:"to buy",         ar:"يشتري",            emoji:"🛒" },
+    { k:"자다",     r:"ja-da",      en:"to sleep",       ar:"ينام",             emoji:"😴" },
+    { k:"시소",     r:"si-so",      en:"seesaw",         ar:"أرجوحة",           emoji:"🛝" },
+    { k:"비",       r:"bi",         en:"rain",           ar:"مطر",              emoji:"🌧️" },
+    { k:"자",       r:"ja",         en:"ruler",          ar:"مسطرة",            emoji:"📏" },
+    { k:"도시",     r:"do-si",      en:"city",           ar:"مدينة",            emoji:"🏙️" },
+    { k:"가구",     r:"ga-gu",      en:"furniture",      ar:"أثاث",             emoji:"🛋️" },
+    { k:"모자",     r:"mo-ja",      en:"hat",            ar:"قبعة",             emoji:"🎩" },
+    { k:"사자",     r:"sa-ja",      en:"lion",           ar:"أسد",              emoji:"🦁" },
+    { k:"나무",     r:"na-mu",      en:"tree",           ar:"شجرة",             emoji:"🌳" },
+    { k:"바다",     r:"ba-da",      en:"sea",            ar:"بحر",              emoji:"🌊" },
   ],
   4: [
-    { k:"차",     r:"cha",       en:"car / tea",  ar:"سيارة / شاي", emoji:"🚗" },
-    { k:"카드",   r:"ka-deu",    en:"card",       ar:"بطاقة",       emoji:"💳" },
-    { k:"코",     r:"ko",        en:"nose",       ar:"أنف",         emoji:"👃" },
-    { k:"키",     r:"ki",        en:"key / height", ar:"مفتاح / طول", emoji:"🔑" },
-    { k:"토마토", r:"to-ma-to",  en:"tomato",     ar:"طماطم",       emoji:"🍅" },
-    { k:"치마",   r:"chi-ma",    en:"skirt",      ar:"تنورة",       emoji:"👗" },
+    { k:"차",       r:"cha",        en:"car / tea",      ar:"سيارة / شاي",       emoji:"🚗" },
+    { k:"카드",     r:"ka-deu",     en:"card",           ar:"بطاقة",            emoji:"💳" },
+    { k:"코",       r:"ko",         en:"nose",           ar:"أنف",              emoji:"👃" },
+    { k:"키",       r:"ki",         en:"key / height",   ar:"مفتاح / طول",       emoji:"🔑" },
+    { k:"토마토",   r:"to-ma-to",   en:"tomato",         ar:"طماطم",            emoji:"🍅" },
+    { k:"치마",     r:"chi-ma",     en:"skirt",          ar:"تنورة",            emoji:"👗" },
+    { k:"보트",     r:"bo-teu",     en:"boat",           ar:"قارب",             emoji:"🚤" },
+    { k:"노트",     r:"no-teu",     en:"notebook",       ar:"دفتر",             emoji:"📓" },
+    { k:"마트",     r:"ma-teu",     en:"mart / store",   ar:"متجر",             emoji:"🏪" },
+    { k:"코트",     r:"ko-teu",     en:"coat",           ar:"معطف",             emoji:"🧥" },
+    { k:"키스",     r:"ki-seu",     en:"kiss",           ar:"قبلة",             emoji:"💋" },
+    { k:"가르치다", r:"ga-reu-chi-da", en:"to teach",     ar:"يعلّم",             emoji:"👩‍🏫" },
+    { k:"가방",     r:"ga-bang",    en:"bag",            ar:"حقيبة",            emoji:"🎒" },
+    { k:"나비",     r:"na-bi",      en:"butterfly",      ar:"فراشة",            emoji:"🦋" },
+    { k:"다리",     r:"da-ri",      en:"bridge / leg",   ar:"جسر / ساق",         emoji:"🦵" },
+    { k:"머리",     r:"meo-ri",     en:"head",           ar:"رأس",              emoji:"🧠" },
+    { k:"아이",     r:"a-i",        en:"child",          ar:"طفل",              emoji:"👶" },
+    { k:"지도",     r:"ji-do",      en:"map",            ar:"خريطة",            emoji:"🗺️" },
+    { k:"누나",     r:"nu-na",      en:"older sister",   ar:"الأخت الكبرى",       emoji:"👧" },
+    { k:"사자",     r:"sa-ja",      en:"lion",           ar:"أسد",              emoji:"🦁" },
   ],
   5: [
-    { k:"피자", r:"pi-ja",  en:"pizza",   ar:"بيتزا",  emoji:"🍕" },
-    { k:"한국", r:"han-guk", en:"Korea",  ar:"كوريا",  emoji:"🇰🇷" },
-    { k:"하나", r:"ha-na",  en:"one",     ar:"واحد",   emoji:"1️⃣" },
-    { k:"호두", r:"ho-du",  en:"walnut",  ar:"جوز",    emoji:"🥜" },
-    { k:"포도", r:"po-do",  en:"grape",   ar:"عنب",    emoji:"🍇" },
-    { k:"하마", r:"ha-ma",  en:"hippo",   ar:"فرس النهر", emoji:"🦛" },
+    { k:"피자",     r:"pi-ja",      en:"pizza",          ar:"بيتزا",            emoji:"🍕" },
+    { k:"한국",     r:"han-guk",    en:"Korea",          ar:"كوريا",            emoji:"🇰🇷" },
+    { k:"하나",     r:"ha-na",      en:"one",            ar:"واحد",             emoji:"1️⃣" },
+    { k:"호두",     r:"ho-du",      en:"walnut",         ar:"جوز",              emoji:"🥜" },
+    { k:"포도",     r:"po-do",      en:"grape",          ar:"عنب",              emoji:"🍇" },
+    { k:"하마",     r:"ha-ma",      en:"hippo",          ar:"فرس النهر",         emoji:"🦛" },
+    { k:"피",       r:"pi",         en:"blood",          ar:"دم",               emoji:"🩸" },
+    { k:"코피",     r:"ko-pi",      en:"nose bleed / coffee", ar:"رعاف / قهوة", emoji:"☕" },
+    { k:"하루",     r:"ha-ru",      en:"one day",        ar:"يوم واحد",         emoji:"📅" },
+    { k:"하다",     r:"ha-da",      en:"to do",          ar:"يفعل",             emoji:"✅" },
+    { k:"하늘",     r:"ha-neul",    en:"sky",            ar:"سماء",             emoji:"☁️" },
+    { k:"가방",     r:"ga-bang",    en:"bag",            ar:"حقيبة",            emoji:"🎒" },
+    { k:"나비",     r:"na-bi",      en:"butterfly",      ar:"فراشة",            emoji:"🦋" },
+    { k:"다리",     r:"da-ri",      en:"bridge / leg",   ar:"جسر / ساق",         emoji:"🦵" },
+    { k:"어머니",   r:"eo-meo-ni",  en:"mother",         ar:"أم",               emoji:"👩" },
+    { k:"아이",     r:"a-i",        en:"child",          ar:"طفل",              emoji:"👶" },
+    { k:"지도",     r:"ji-do",      en:"map",            ar:"خريطة",            emoji:"🗺️" },
+    { k:"차",       r:"cha",        en:"car / tea",      ar:"سيارة / شاي",       emoji:"🚗" },
+    { k:"토마토",   r:"to-ma-to",   en:"tomato",         ar:"طماطم",            emoji:"🍅" },
+    { k:"카드",     r:"ka-deu",     en:"card",           ar:"بطاقة",            emoji:"💳" },
   ],
 };
 
@@ -3995,15 +4052,15 @@ function PictureWords({ lesson, lang }: LessonProps) {
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "كلمات بالصور" : "Picture Words"}>
       <SHead title={isAr ? `كلمات بالصور — الدرس ${["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1]}` : `Picture Words — Lesson ${lesson}`} subtitle={isAr ? "كل كلمة هنا مكوّنة فقط من الحروف ومدّ الصوت التي درستَها حتى الآن" : "Every word below uses only consonants and vowels you have already learned"} />
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"5mm", marginBottom:"6mm" }}>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:"3mm", marginBottom:"5mm" }}>
         {words.map((w, i) => (
-          <div key={`${w.k}-${i}`} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"4mm", background:"#fff", direction:isAr?"rtl":"ltr" }}>
-            <div style={{ border:`1px solid ${BD}`, borderRadius:"4px", background:"#fff", height:"28mm", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"3mm" }}>
-              <WordIllustration emoji={w.emoji} alt={isAr ? w.ar : w.en} size={64} />
+          <div key={`${w.k}-${i}`} style={{ border:`1px solid ${BD}`, borderRadius:"5px", padding:"2.5mm", background:"#fff", direction:isAr?"rtl":"ltr", textAlign:"center" }}>
+            <div style={{ height:"15mm", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"1.5mm" }}>
+              <WordIllustration emoji={w.emoji} alt={isAr ? w.ar : w.en} size={40} />
             </div>
-            <div style={{ fontSize:"26px", fontWeight:900, color:T1, lineHeight:1.1, direction:"ltr" }}>{w.k}</div>
-            <div style={{ fontSize:"10px", color:T3, marginTop:"1mm", direction:"ltr" }}>[{w.r}]</div>
-            <div style={{ fontSize:"11px", color:T2, marginTop:"1mm" }}>— {isAr ? w.ar : w.en}</div>
+            <div style={{ fontSize:"17px", fontWeight:900, color:T1, lineHeight:1.1, direction:"ltr" }}>{w.k}</div>
+            <div style={{ fontSize:"8px", color:T3, marginTop:"1mm", direction:"ltr" }}>[{w.r}]</div>
+            <div style={{ fontSize:"9px", color:T2, marginTop:"0.5mm", lineHeight:1.3 }}>{isAr ? w.ar : w.en}</div>
           </div>
         ))}
       </div>
