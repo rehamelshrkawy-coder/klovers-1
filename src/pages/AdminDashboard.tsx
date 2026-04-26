@@ -2201,11 +2201,60 @@ const AdminDashboard = () => {
 
             {/* BOOKS TAB */}
             <TabsContent value="books">
-              <TabErrorBoundary name="Books">
-                <Suspense fallback={<TabLoader />}>
-                  <BookAssignmentManager />
-                </Suspense>
-              </TabErrorBoundary>
+              <div className="space-y-4">
+                {/* Trial Class Book */}
+                <Card className="rounded-2xl border-amber-200 bg-amber-50/40">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-amber-500" /> Trial Class Book — دليل الحصة التجريبية
+                    </CardTitle>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      30-minute presentation sheet for trial classes. Use this during a trial session to walk students through how classes work, the 6 levels, and a taste of Korean. Admin preview only.
+                    </p>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Admin only</span>
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">⏱ 30 min · 8 pages · AR + EN</span>
+                      <div className="ml-auto flex gap-2">
+                        <button
+                          className="text-xs px-3 py-1.5 border rounded-lg hover:bg-muted transition-colors flex items-center gap-1.5"
+                          onClick={() => window.open("/trial-book", "_blank")}
+                        >
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                          Preview
+                        </button>
+                        <button
+                          className="text-xs px-3 py-1.5 border rounded-lg hover:bg-muted transition-colors flex items-center gap-1.5"
+                          onClick={() => { const w = window.open("/trial-book", "_blank"); if (w) w.addEventListener("load", () => w.print()); }}
+                        >
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                          Download PDF
+                        </button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Hangul Book 1 Assignments */}
+                <Card className="rounded-2xl">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-amber-500" /> Book Assignments
+                    </CardTitle>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      Assign the Hangul Book 1 to students who purchased a class. Set an unlock date — default is 1 week after assignment. Students see a locked card until their date arrives.
+                    </p>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <TabErrorBoundary name="Book Assignments">
+                      <Suspense fallback={<TabLoader />}>
+                        <BookAssignmentManager />
+                      </Suspense>
+                    </TabErrorBoundary>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             {/* SALES ANALYTICS TAB */}
