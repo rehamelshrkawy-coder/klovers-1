@@ -1351,16 +1351,23 @@ function KidsCover({ lang }: { lang: "ar" | "en" }) {
         );
       })}
 
-      {/* Top brand bar */}
+      {/* Top brand bar with real Klovers logo */}
       <div style={{
         display:"flex", justifyContent:"space-between", alignItems:"center",
         marginBottom:"6mm", direction: isAr ? "rtl" : "ltr",
       }}>
         <div style={{
-          background:KIDS_RED, color:"#fff",
-          fontSize:"11px", fontWeight:900, letterSpacing:"3px",
-          padding:"6px 14px", borderRadius:"22px",
-        }}>KLOVERS · 클로버스</div>
+          background:"#fff", borderRadius:"22px",
+          padding:"4px 14px 4px 4px", display:"flex", alignItems:"center", gap:"8px",
+          border:`2px solid ${KIDS_RED}`, boxShadow:"0 3px 0 rgba(0,0,0,0.05)",
+        }}>
+          <img src="/klovers-logo.jpg" alt="Klovers"
+            style={{ width:"34px", height:"34px", borderRadius:"50%", objectFit:"cover", display:"block" }} />
+          <div style={{ display:"flex", flexDirection:"column", lineHeight:1 }}>
+            <span style={{ fontSize:"13px", fontWeight:900, color:KIDS_RED, letterSpacing:"2px" }}>KLOVERS</span>
+            <span style={{ fontSize:"9px", fontWeight:700, color:"#888", letterSpacing:"1.5px", marginTop:"2px" }}>클로버스 · KOREAN</span>
+          </div>
+        </div>
         <div style={{
           background:"#fff", border:`2px solid ${GOLD}`, color:GOLD,
           fontSize:"10px", fontWeight:900, padding:"5px 12px",
@@ -1385,6 +1392,12 @@ function KidsCover({ lang }: { lang: "ar" | "en" }) {
           padding:"3px 10px", borderRadius:"14px",
           fontSize:"15px",
         }}>🇰🇷</div>
+
+        {/* Klovers mascot peeking from corner */}
+        <img src="/klovers-mascot.png" alt=""
+          style={{ position:"absolute", top:"-18px", insetInlineStart:"18px",
+            width:"56px", height:"56px", objectFit:"contain",
+            filter:"drop-shadow(0 4px 6px rgba(0,0,0,0.15))" }} />
 
         <div style={{
           fontSize:"150px", fontWeight:900, lineHeight:0.9,
