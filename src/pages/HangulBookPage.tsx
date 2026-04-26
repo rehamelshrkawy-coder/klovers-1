@@ -4183,6 +4183,86 @@ function HwSection({ letter, title, body }: { letter:string; title:string; body:
   );
 }
 
+function SyllableWritingGrid({ vowels, consonants, fillFirstRow = true, color = "#7ED957" }:{
+  vowels: string[]; consonants: string[]; fillFirstRow?: boolean; color?: string;
+}) {
+  return (
+    <div style={{
+      display:"grid",
+      gridTemplateColumns:`56px repeat(${vowels.length}, 1fr)`,
+      border:`2px solid #fff`,
+      background:color,
+      borderRadius:"6px",
+      overflow:"hidden",
+      direction:"ltr",
+    }}>
+      {/* Top-left empty corner */}
+      <div style={{ background:color, borderRight:"2px solid #fff", borderBottom:"2px solid #fff", height:"34px" }} />
+      {/* Vowel header row */}
+      {vowels.map(v => (
+        <div key={"vh-"+v} style={{
+          display:"flex", alignItems:"center", justifyContent:"center",
+          height:"34px", fontSize:"22px", fontWeight:900, color:"#111",
+          borderRight:"2px solid #fff", borderBottom:"2px solid #fff",
+        }}>{v}</div>
+      ))}
+      {/* Body rows */}
+      {consonants.map((c, ci) => (
+        <Fragment key={"row-"+c}>
+          <div style={{
+            display:"flex", alignItems:"center", justifyContent:"center",
+            height:"34px", fontSize:"22px", fontWeight:900, color:"#111",
+            borderRight:"2px solid #fff", borderBottom:"2px solid #fff",
+          }}>{c}</div>
+          {vowels.map(v => (
+            <div key={"cell-"+c+v} style={{
+              display:"flex", alignItems:"center", justifyContent:"center",
+              height:"34px", fontSize:"20px", fontWeight:900, color:"#111",
+              borderRight:"2px solid #fff", borderBottom:"2px solid #fff",
+              background: ci === 0 && fillFirstRow ? "#A8E690" : color,
+            }}>{ci === 0 && fillFirstRow ? buildSyllable(c, v) : ""}</div>
+          ))}
+        </Fragment>
+      ))}
+    </div>
+  );
+}
+
+function SyllableWritingPage({ lang, mode }:{ lang:"ar"|"en"; mode:"basic"|"compound" }) {
+  const isAr = lang === "ar";
+  const consonants = ["ㄱ","ㄴ","ㄷ","ㄹ","ㅇ","ㅁ","ㅂ","ㅅ","ㅈ","ㅎ"];
+  const basicVowels = ["ㅏ","ㅑ","ㅓ","ㅕ","ㅗ","ㅛ","ㅜ","ㅠ","ㅡ","ㅣ"];
+  const compoundVowels = ["ㅐ","ㅔ","ㅒ","ㅖ","ㅚ","ㅟ","ㅢ","ㅘ","ㅝ","ㅙ","ㅞ"];
+  const vowels = mode === "basic" ? basicVowels : compoundVowels;
+  const titleAr = mode === "basic" ? "음절 — اجمع المد مع الحروف الساكنة" : "اجمع المد المُركَّب مع الحروف الساكنة";
+  const titleEn = mode === "basic" ? "음절 — Combine the vowels and consonants" : "Combine the compound vowels and consonants";
+  const instructAr = mode === "basic"
+    ? "الصف الأول مكتمل كمثال. أكمل المربعات الفارغة بدمج الحرف الساكن مع حرف المد."
+    : "الصف الأول مكتمل كمثال. أكمل المربعات الفارغة بدمج الحرف الساكن مع حرف المد المُركَّب.";
+  const instructEn = mode === "basic"
+    ? "Row 1 is filled in as an example. Complete the blank cells by combining each consonant with each vowel."
+    : "Row 1 is filled in as an example. Complete the blank cells by combining each consonant with each compound vowel.";
+  return (
+    <Page dir={isAr ? "rtl" : "ltr"} bgColor={KIDS_PINK}>
+      <div style={{
+        background:KIDS_RED, color:"#fff", borderRadius:"30px",
+        padding:"10px 20px", display:"flex", justifyContent:"center",
+        alignItems:"center", gap:"10px", marginBottom:"5mm",
+        boxShadow:"0 4px 0 rgba(0,0,0,0.08)",
+      }}>
+        <div style={{ fontSize:"20px", fontWeight:900 }}>{isAr ? titleAr : titleEn}</div>
+      </div>
+      <div style={{ marginBottom:"4mm" }}>
+        <SectionBadge icon="✍️" label={isAr ? "تدريب الكتابة" : "Writing Practice"} color={KIDS_GREEN} dir={isAr?"rtl":"ltr"} />
+      </div>
+      <p style={{ fontSize:"12px", color:"#222", fontWeight:700, marginBottom:"5mm", direction: isAr ? "rtl" : "ltr" }}>
+        {isAr ? instructAr : instructEn}
+      </p>
+      <SyllableWritingGrid vowels={vowels} consonants={consonants} />
+    </Page>
+  );
+}
+
 function buildSyllable(c: string, v: string): string {
   const cI = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"].indexOf(c);
   const vI = ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"].indexOf(v);
@@ -4780,9 +4860,11 @@ export default function HangulBookPage() {
             {/* LESSON 6 — Full Review + Reading + Dictation */}
             <LessonReviewAll lang="ar" />
             <SyllableAr />
+            <SyllableWritingPage lang="ar" mode="basic" />
             <ReadingPractice lang="ar" />
             {/* LESSON 7 — Compound Vowels */}
             <CompoundVowelsAr />
+            <SyllableWritingPage lang="ar" mode="compound" />
             {/* LESSON 8 — Batchim (simplified) */}
             <BatchimLesson part={1} lang="ar" />
             <BatchimLesson part={2} lang="ar" />
@@ -4852,9 +4934,11 @@ export default function HangulBookPage() {
             {/* LESSON 6 — Full Review + Reading + Dictation */}
             <LessonReviewAll lang="en" />
             <SyllableEn />
+            <SyllableWritingPage lang="en" mode="basic" />
             <ReadingPractice lang="en" />
             {/* LESSON 7 — Compound Vowels */}
             <CompoundVowelsEn />
+            <SyllableWritingPage lang="en" mode="compound" />
             {/* LESSON 8 — Batchim (simplified) */}
             <BatchimLesson part={1} lang="en" />
             <BatchimLesson part={2} lang="en" />
