@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,7 +50,7 @@ interface Props {
   invalidateAll: () => void;
 }
 
-export function EnrollmentsTab({
+export const EnrollmentsTab = memo(function EnrollmentsTab({
   enrollments, loading, enrollmentSearch, setEnrollmentSearch,
   debouncedEnrollmentSearch, enrollmentPage, setEnrollmentPage,
   selectedEnrollmentIds, setSelectedEnrollmentIds, bulkApproving, handleBulkApprove,
@@ -326,4 +327,4 @@ export function EnrollmentsTab({
       )}
     </>
   );
-}
+});

@@ -1120,7 +1120,7 @@ const StudentDashboard = () => {
               {/* ── Progress Report + Certificate ── */}
               <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => window.open(`/progress-report?uid=${userId}`, '_blank')}
+                  onClick={() => window.open(`/progress-report?uid=${userId}`, '_blank', 'noopener,noreferrer')}
                   className="flex flex-col items-center gap-2 bg-card border border-border rounded-2xl p-4 hover:border-amber-300 hover:bg-amber-50 transition-all text-center"
                 >
                   <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center border border-black/10">
@@ -1130,7 +1130,7 @@ const StudentDashboard = () => {
                   <span className="text-xs text-muted-foreground">Download PDF</span>
                 </button>
                 <button
-                  onClick={() => window.open(`/certificate?uid=${userId}&level=${encodeURIComponent(profileLevel || 'A0')}`, '_blank')}
+                  onClick={() => window.open(`/certificate?uid=${userId}&level=${encodeURIComponent(profileLevel || 'A0')}`, '_blank', 'noopener,noreferrer')}
                   className="flex flex-col items-center gap-2 bg-card border border-border rounded-2xl p-4 hover:border-amber-300 hover:bg-amber-50 transition-all text-center"
                 >
                   <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center border border-black/10">

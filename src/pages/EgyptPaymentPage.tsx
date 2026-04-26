@@ -470,7 +470,7 @@ const EgyptPaymentPage = () => {
     try {
       const { data, error } = await supabase.storage.from("receipts").createSignedUrl(enrollment.receipt_url, 600);
       if (error || !data?.signedUrl) throw error ?? new Error("Could not generate link");
-      window.open(data.signedUrl, "_blank", "noreferrer");
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
     } catch {
       toast({ title: t("payment.error"), description: t("payment.couldNotOpen"), variant: "destructive" });
     } finally {

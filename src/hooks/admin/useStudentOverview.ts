@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { OverviewRow } from "@/types/admin";
+export { buildOverviewByEmail } from "@/lib/overview-utils";
 
 const PAGE_SIZE = 500;
 
@@ -45,11 +46,3 @@ export function useStudentOverview() {
   });
 }
 
-/** Build a lookup map by email for lead status enrichment. */
-export function buildOverviewByEmail(rows: OverviewRow[]): Record<string, OverviewRow> {
-  const map: Record<string, OverviewRow> = {};
-  for (const r of rows) {
-    if (r.email) map[r.email.toLowerCase()] = r;
-  }
-  return map;
-}

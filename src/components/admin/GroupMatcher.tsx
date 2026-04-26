@@ -551,7 +551,7 @@ const GroupMatcher = () => {
       return;
     }
     if (receiptUrl.startsWith("http")) {
-      window.open(receiptUrl, "_blank");
+      window.open(receiptUrl, "_blank", "noopener,noreferrer");
       return;
     }
     const { data, error } = await supabase.storage.from("receipts").createSignedUrl(receiptUrl, 600);
@@ -559,7 +559,7 @@ const GroupMatcher = () => {
       toast({ title: "Could not open receipt", description: error?.message || "Failed to generate link.", variant: "destructive" });
       return;
     }
-    window.open(data.signedUrl, "_blank");
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   };
 
   useEffect(() => {

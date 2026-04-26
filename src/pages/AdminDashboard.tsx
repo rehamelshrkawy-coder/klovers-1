@@ -1,13 +1,11 @@
 import { Component, ReactNode, lazy, Suspense, useEffect, useState, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import "@/i18n/config";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { getDerivedStatusBadgeVariant } from "@/lib/badge-styles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -26,14 +24,12 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Search, Download, Trash2, Check, X, Eye, Undo2, AlertCircle, Bell, ChevronLeft, ChevronRight, Pencil, Mail, Eraser, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Copy, Clock, Tag, UserPlus, Loader2, Image, Trophy, TrendingUp, Link } from "lucide-react";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { LogOut, Eye, AlertCircle, Bell, Mail, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Clock, Tag, Loader2, Image, Trophy, TrendingUp, Link } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Columns3, Package } from "lucide-react";
+import { ChevronDown, Package } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -128,7 +124,7 @@ class TabErrorBoundary extends Component<
 
 import { normalizeLevel, LEVEL_SELECT_OPTIONS } from "@/constants/levels";
 import type { Lead, Enrollment, AttendanceReq, OverviewRow } from "@/types/admin";
-import { formatTime, ADMIN_PAGE_SIZE as PAGE_SIZE, MAX_UNIT_PRICE, AT_RISK_SESSION_THRESHOLD, exportCSV } from "@/lib/admin-utils";
+import { formatTime, ADMIN_PAGE_SIZE as PAGE_SIZE, MAX_UNIT_PRICE } from "@/lib/admin-utils";
 import type { ProfileEntry } from "@/hooks/admin/useProfiles";
 import { StudentsTab } from "@/components/admin/tabs/StudentsTab";
 import { EnrollmentsTab } from "@/components/admin/tabs/EnrollmentsTab";
@@ -139,10 +135,9 @@ import { useAttendanceRequests } from "@/hooks/admin/useAttendanceRequests";
 import { useReferralStats } from "@/hooks/admin/useReferralStats";
 import { useTrialStats } from "@/hooks/admin/useTrialStats";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { formatMoney, formatDate } from "@/lib/format";
-import { EnrollmentCard } from "@/components/admin/EnrollmentCard";
 
 const AdminDashboard = () => {
+  const { t } = useTranslation("admin");
   const queryClient = useQueryClient();
 
   // ── React Query: shared data (cached, deduplicated) ───────────────────────
@@ -528,6 +523,12 @@ const AdminDashboard = () => {
 
   const handleSendClassLink = async () => {
     if (!classLinkTarget || !classLinkUrl.trim()) return;
+    // Reject javascript: and data: URLs to prevent XSS/phishing
+    const urlLower = classLinkUrl.trim().toLowerCase();
+    if (urlLower.startsWith("javascript:") || urlLower.startsWith("data:")) {
+      toast({ title: "Invalid URL", description: "Please enter a valid https:// link.", variant: "destructive" });
+      return;
+    }
     setIsSendingClassLink(true);
 
     const recipients: { email: string; name: string; language?: string }[] = [];
@@ -955,20 +956,20 @@ const AdminDashboard = () => {
                 <Sparkles className="h-4.5 w-4.5" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-base md:text-lg font-bold text-foreground leading-tight truncate">Admin Dashboard</h1>
-                <p className="text-[11px] text-muted-foreground hidden sm:block">Manage students, enrollments & content</p>
+                <h1 className="text-base md:text-lg font-bold text-foreground leading-tight truncate">{t("dashboard.title")}</h1>
+                <p className="text-[11px] text-muted-foreground hidden sm:block">{t("dashboard.subtitle")}</p>
               </div>
             </div>
             <div className="flex items-center gap-1.5 md:gap-2">
               <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={refreshing} className="gap-2" aria-label="Refresh dashboard data">
                 <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-                <span className="hidden sm:inline">{refreshing ? "Refreshing…" : "Refresh"}</span>
+                <span className="hidden sm:inline">{refreshing ? t("dashboard.refreshing") : t("dashboard.refresh")}</span>
               </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/admin/marketing")} className="gap-2" aria-label="Open marketing dashboard">
-                <Sparkles className="h-4 w-4" /> <span className="hidden sm:inline">Marketing</span>
+                <Sparkles className="h-4 w-4" /> <span className="hidden sm:inline">{t("dashboard.marketing")}</span>
               </Button>
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2" aria-label="Log out">
-                <LogOut className="h-4 w-4" /> <span className="hidden sm:inline">Logout</span>
+                <LogOut className="h-4 w-4" /> <span className="hidden sm:inline">{t("dashboard.logout")}</span>
               </Button>
             </div>
           </div>
@@ -979,7 +980,7 @@ const AdminDashboard = () => {
             <div role="alert" className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               <span className="mt-0.5 shrink-0">⚠️</span>
               <div className="flex-1">
-                <p className="font-medium">Data load error</p>
+                <p className="font-medium">{t("common.dataLoadError")}</p>
                 <p className="text-xs mt-0.5 opacity-80">{leadsError}</p>
               </div>
               <button
@@ -1715,7 +1716,7 @@ const AdminDashboard = () => {
             {receiptModal?.isPdf ? (
               <div className="text-center space-y-3 p-6">
                 <p className="text-muted-foreground text-sm">PDF receipt — cannot preview inline.</p>
-                <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank")}>
+                <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank", "noopener,noreferrer")}>
                   <Eye className="h-4 w-4 mr-2" /> Open PDF
                 </Button>
               </div>
@@ -1729,7 +1730,7 @@ const AdminDashboard = () => {
           </div>
           <DialogFooter className="gap-2">
             {receiptModal && !receiptModal.isPdf && (
-              <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank")}>
+              <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank", "noopener,noreferrer")}>
                 <Eye className="h-4 w-4 mr-2" /> Open full size
               </Button>
             )}

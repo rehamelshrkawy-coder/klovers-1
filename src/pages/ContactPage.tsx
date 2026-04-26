@@ -28,7 +28,7 @@ const ContactPage = () => {
     toast({ title: "Thank you!", description: "Please continue in our Telegram group." });
     setForm({ name: "", email: "", subject: "", message: "" });
     setTimeout(() => {
-      window.open("https://t.me/+Fu5T7d4wLMsxNDY9", "_blank");
+      window.open("https://t.me/+Fu5T7d4wLMsxNDY9", "_blank", "noopener,noreferrer");
     }, 1500);
   };
 

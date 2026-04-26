@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, memo } from "react";
 import { cn } from "@/lib/utils";
 import { getDerivedStatusBadgeVariant } from "@/lib/badge-styles";
 import { Button } from "@/components/ui/button";
@@ -77,7 +77,7 @@ interface Props {
   invalidateAll: () => void;
 }
 
-export function StudentsTab({
+export const StudentsTab = memo(function StudentsTab({
   overviewRows, filteredUsers, sortedUsers, pagedUsers, totalPages,
   studentPage, setStudentPage, studentFilter, setStudentFilter,
   levelFilter, setLevelFilter, studentSearch, setStudentSearch,
@@ -521,4 +521,4 @@ export function StudentsTab({
       })()}
     </>
   );
-}
+});
