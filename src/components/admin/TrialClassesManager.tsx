@@ -146,6 +146,8 @@ const TrialClassesManager = () => {
     queryClient.invalidateQueries({ queryKey: ["admin", "trial-bookings"] });
     queryClient.invalidateQueries({ queryKey: ["admin", "trial-slots"] });
     queryClient.invalidateQueries({ queryKey: ["admin", "trial-stats"] });
+    // Clear stale slot selections so re-confirms always use fresh upcoming slots.
+    setTrialSlotMap({});
   };
 
   const handleConfirm = async (booking: TrialBooking, slotValue: string) => {
