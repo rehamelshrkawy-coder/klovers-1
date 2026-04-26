@@ -2630,6 +2630,33 @@ function TeachLetters({ lesson, slice, lang }: LessonProps) {
   );
 }
 
+// TOPIK-style manuscript-paper grid: tight uniform cells, one character per cell.
+function TopikGrid({ rows, cols = 14, fill, cellMm = 7 }: { rows: number; cols?: number; fill?: string; cellMm?: number }) {
+  const chars = (fill || "").split("");
+  return (
+    <div style={{
+      display:"grid",
+      gridTemplateColumns:`repeat(${cols}, 1fr)`,
+      border:`1px solid ${T2}`,
+      borderRight:"none",
+      borderBottom:"none",
+      direction:"ltr",
+      background:"#fff",
+    }}>
+      {Array(rows*cols).fill(null).map((_, i) => (
+        <div key={i} style={{
+          height:`${cellMm}mm`,
+          borderRight:`1px solid ${T2}`,
+          borderBottom:`1px solid ${T2}`,
+          display:"flex", alignItems:"center", justifyContent:"center",
+          fontSize:`${Math.round(cellMm*2.4)}px`, fontWeight:900,
+          color:"#E8E8E8", lineHeight:1,
+        }}>{chars[i] || ""}</div>
+      ))}
+    </div>
+  );
+}
+
 function PracticeLetters({ lesson, slice, lang }: LessonProps) {
   const isAr = lang === "ar";
   const letters = CONSONANTS.slice(...slice);
@@ -2653,22 +2680,14 @@ function PracticeLetters({ lesson, slice, lang }: LessonProps) {
           <div style={{ fontSize:"9px", color:T3, marginBottom:"2mm", textTransform:"uppercase", letterSpacing:"1px" }}>
             {isAr ? "تتبّع" : "Trace"}
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:"5mm", marginBottom:"5mm" }}>
-            {Array(4).fill(null).map((_, i) => (
-              <div key={i} style={{ border:`1px solid ${BD}`, height:"24mm", display:"flex", alignItems:"center", justifyContent:"center", borderRadius:"4px", background:"#fff" }}>
-                <span style={{ fontSize:"56px", color:"#E8E8E8", fontWeight:900, lineHeight:1 }}>{c.char}</span>
-              </div>
-            ))}
+          <div style={{ marginBottom:"4mm" }}>
+            <TopikGrid rows={2} cols={14} fill={c.char.repeat(28)} />
           </div>
 
           <div style={{ fontSize:"9px", color:T3, marginBottom:"2mm", textTransform:"uppercase", letterSpacing:"1px" }}>
             {isAr ? "اكتبه من ذاكرتك" : "Write from memory"}
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:"5mm" }}>
-            {Array(4).fill(null).map((_, i) => (
-              <div key={i} style={{ border:`1px solid ${BD}`, height:"24mm", borderRadius:"4px", background:"#fff" }} />
-            ))}
-          </div>
+          <TopikGrid rows={2} cols={14} />
         </div>
       ))}
     </Page>
@@ -3710,36 +3729,24 @@ function Dictation({ lesson, slice, lang }: LessonProps) {
       </div>
 
       <div style={{ fontSize:"11px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
-        {isAr ? "أ. حروف منفردة (٥)" : "A. Single letters (5)"}
+        {isAr ? "أ. حروف منفردة" : "A. Single letters"}
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"3mm", marginBottom:"5mm" }}>
-        {[1,2,3,4,5].map(n => (
-          <div key={n} style={{ border:`1px solid ${BD}`, height:"16mm", borderRadius:"4px", background:"#fff", position:"relative" }}>
-            <span style={{ position:"absolute", top:"2px", insetInlineStart:"4px", fontSize:"9px", color:T3, fontWeight:700 }}>{n}</span>
-          </div>
-        ))}
+      <div style={{ marginBottom:"5mm" }}>
+        <TopikGrid rows={1} cols={14} />
       </div>
 
       <div style={{ fontSize:"11px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
-        {isAr ? "ب. مقاطع بسيطة (٥)" : "B. Simple syllables (5)"}
+        {isAr ? "ب. مقاطع بسيطة" : "B. Simple syllables"}
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"3mm", marginBottom:"5mm" }}>
-        {[1,2,3,4,5].map(n => (
-          <div key={n} style={{ border:`1px solid ${BD}`, height:"16mm", borderRadius:"4px", background:"#fff", position:"relative" }}>
-            <span style={{ position:"absolute", top:"2px", insetInlineStart:"4px", fontSize:"9px", color:T3, fontWeight:700 }}>{n}</span>
-          </div>
-        ))}
+      <div style={{ marginBottom:"5mm" }}>
+        <TopikGrid rows={2} cols={14} />
       </div>
 
       <div style={{ fontSize:"11px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
-        {isAr ? "ج. كلمات بسيطة (٤)" : "C. Simple words (4)"}
+        {isAr ? "ج. كلمات بسيطة" : "C. Simple words"}
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"3mm", marginBottom:"5mm" }}>
-        {[1,2,3,4].map(n => (
-          <div key={n} style={{ border:`1px solid ${BD}`, height:"18mm", borderRadius:"4px", background:"#fff", position:"relative" }}>
-            <span style={{ position:"absolute", top:"2px", insetInlineStart:"4px", fontSize:"9px", color:T3, fontWeight:700 }}>{n}</span>
-          </div>
-        ))}
+      <div style={{ marginBottom:"5mm" }}>
+        <TopikGrid rows={3} cols={14} />
       </div>
     </Page>
   );
