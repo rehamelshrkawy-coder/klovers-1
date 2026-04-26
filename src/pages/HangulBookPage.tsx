@@ -3687,12 +3687,12 @@ function SpeakingDrill({ lesson, slice, lang }: LessonProps) {
 }
 
 const DICTATION_WORDS: Record<number, string[]> = {
-  1: ["가","나","다","가방","나비","다리"],
-  2: ["라","마","바","라면","물","밥"],
-  3: ["사","아","자","사과","아이","지도"],
-  4: ["차","카","토","차","카메라","토마토"],
-  5: ["파","하","피자","한국","하나"],
-  6: ["가방","나비","다리","라면","물","밥","사과","아이","지도","한국"],
+  1: ["가","나","다","너","가다","나가다"],
+  2: ["라","마","바","나무","바다","도로","두부"],
+  3: ["사","아","지","가방","나비","다리","아이","지도"],
+  4: ["차","카","토","코","키","토마토","치마"],
+  5: ["파","하","피자","한국","하나","포도","호두"],
+  6: ["가방","나비","다리","아이","지도","한국","피자","오이"],
 };
 
 function Dictation({ lesson, slice, lang }: LessonProps) {
@@ -3748,44 +3748,44 @@ function Dictation({ lesson, slice, lang }: LessonProps) {
 // Mini-reading word sets — only words built from letters taught so far
 const MINI_READ_WORDS: Record<number, { k:string; r:string; m_en:string; m_ar:string }[]> = {
   1: [
-    { k:"가", r:"ga", m_en:"(the letter)", m_ar:"(الحرف)" },
-    { k:"나", r:"na", m_en:"I / me", m_ar:"أنا" },
-    { k:"다", r:"da", m_en:"all / done", m_ar:"كل شيء / تمام" },
-    { k:"가방", r:"ga-bang", m_en:"bag", m_ar:"حقيبة" },
-    { k:"나비", r:"na-bi", m_en:"butterfly", m_ar:"فراشة" },
-    { k:"다리", r:"da-ri", m_en:"leg / bridge", m_ar:"ساق / جسر" },
+    { k:"가",   r:"ga",     m_en:"go (root)",   m_ar:"يذهب (جذر)" },
+    { k:"나",   r:"na",     m_en:"I / me",      m_ar:"أنا" },
+    { k:"다",   r:"da",     m_en:"all",         m_ar:"كل" },
+    { k:"너",   r:"neo",    m_en:"you",         m_ar:"أنتَ" },
+    { k:"가다", r:"ga-da",  m_en:"to go",       m_ar:"يذهب" },
+    { k:"나가다", r:"na-ga-da", m_en:"to go out", m_ar:"يخرج" },
   ],
   2: [
-    { k:"라면", r:"ra-myeon", m_en:"ramen", m_ar:"رامن" },
-    { k:"물", r:"mul", m_en:"water", m_ar:"ماء" },
-    { k:"밥", r:"bap", m_en:"rice", m_ar:"أرز" },
-    { k:"바나나", r:"ba-na-na", m_en:"banana", m_ar:"موز" },
-    { k:"나라", r:"na-ra", m_en:"country", m_ar:"دولة" },
-    { k:"우유", r:"u-yu", m_en:"milk", m_ar:"حليب" },
+    { k:"나무", r:"na-mu",  m_en:"tree",        m_ar:"شجرة" },
+    { k:"바다", r:"ba-da",  m_en:"sea",         m_ar:"بحر" },
+    { k:"도로", r:"do-ro",  m_en:"road",        m_ar:"طريق" },
+    { k:"두부", r:"du-bu",  m_en:"tofu",        m_ar:"توفو" },
+    { k:"부모", r:"bu-mo",  m_en:"parents",     m_ar:"الوالدان" },
+    { k:"보다", r:"bo-da",  m_en:"to see",      m_ar:"يرى" },
   ],
   3: [
-    { k:"사과", r:"sa-gwa", m_en:"apple", m_ar:"تفاح" },
-    { k:"아이", r:"a-i", m_en:"child", m_ar:"طفل" },
-    { k:"지도", r:"ji-do", m_en:"map", m_ar:"خريطة" },
-    { k:"소나무", r:"so-na-mu", m_en:"pine tree", m_ar:"شجرة صنوبر" },
-    { k:"이가", r:"i-ga", m_en:"(this/tooth + particle)", m_ar:"(سن / هذا)" },
-    { k:"시소", r:"si-so", m_en:"seesaw", m_ar:"أرجوحة" },
+    { k:"가방",   r:"ga-bang",   m_en:"bag",       m_ar:"حقيبة" },
+    { k:"나비",   r:"na-bi",     m_en:"butterfly", m_ar:"فراشة" },
+    { k:"다리",   r:"da-ri",     m_en:"bridge / leg", m_ar:"جسر / ساق" },
+    { k:"아이",   r:"a-i",       m_en:"child",     m_ar:"طفل" },
+    { k:"지도",   r:"ji-do",     m_en:"map",       m_ar:"خريطة" },
+    { k:"어머니", r:"eo-meo-ni", m_en:"mother",    m_ar:"أم" },
   ],
   4: [
-    { k:"차", r:"cha", m_en:"tea / car", m_ar:"شاي / سيارة" },
-    { k:"카메라", r:"ka-me-ra", m_en:"camera", m_ar:"كاميرا" },
-    { k:"토마토", r:"to-ma-to", m_en:"tomato", m_ar:"طماطم" },
-    { k:"사다", r:"sa-da", m_en:"to buy", m_ar:"يشتري" },
-    { k:"바다", r:"ba-da", m_en:"sea / ocean", m_ar:"بحر" },
-    { k:"가수", r:"ga-su", m_en:"singer", m_ar:"مغنٍّ" },
+    { k:"차",     r:"cha",       m_en:"car / tea", m_ar:"سيارة / شاي" },
+    { k:"카드",   r:"ka-deu",    m_en:"card",      m_ar:"بطاقة" },
+    { k:"코",     r:"ko",        m_en:"nose",      m_ar:"أنف" },
+    { k:"키",     r:"ki",        m_en:"key / height", m_ar:"مفتاح / طول" },
+    { k:"토마토", r:"to-ma-to",  m_en:"tomato",    m_ar:"طماطم" },
+    { k:"치마",   r:"chi-ma",    m_en:"skirt",     m_ar:"تنورة" },
   ],
   5: [
-    { k:"피자", r:"pi-ja", m_en:"pizza", m_ar:"بيتزا" },
-    { k:"한국", r:"han-guk", m_en:"Korea", m_ar:"كوريا" },
-    { k:"하나", r:"ha-na", m_en:"one", m_ar:"واحد" },
-    { k:"나비", r:"na-bi", m_en:"butterfly", m_ar:"فراشة" },
-    { k:"다리", r:"da-ri", m_en:"leg / bridge", m_ar:"ساق / جسر" },
-    { k:"아이", r:"a-i", m_en:"child", m_ar:"طفل" },
+    { k:"피자", r:"pi-ja",  m_en:"pizza",   m_ar:"بيتزا" },
+    { k:"한국", r:"han-guk", m_en:"Korea",  m_ar:"كوريا" },
+    { k:"하나", r:"ha-na",  m_en:"one",     m_ar:"واحد" },
+    { k:"호두", r:"ho-du",  m_en:"walnut",  m_ar:"جوز" },
+    { k:"포도", r:"po-do",  m_en:"grape",   m_ar:"عنب" },
+    { k:"하마", r:"ha-ma",  m_en:"hippo",   m_ar:"فرس النهر" },
   ],
 };
 
@@ -3820,6 +3820,61 @@ const LESSON_VOWEL_INDICES: Record<number, [number, number]> = {
   1: [0, 2],  // ㅏ ㅓ
   2: [2, 4],  // ㅗ ㅜ
   3: [4, 6],  // ㅡ ㅣ
+};
+
+type LessonWord = { k: string; r: string; en: string; ar: string; emoji: string };
+
+const LESSON_WORDS: Record<number, LessonWord[]> = {
+  1: [
+    { k:"나",   r:"na",      en:"I / me",     ar:"أنا",         emoji:"🙋" },
+    { k:"너",   r:"neo",     en:"you",        ar:"أنتَ",         emoji:"👉" },
+    { k:"가다", r:"ga-da",   en:"to go",      ar:"يذهب",        emoji:"🚶" },
+    { k:"다",   r:"da",      en:"all",        ar:"كل",          emoji:"📚" },
+  ],
+  2: [
+    { k:"나무", r:"na-mu",   en:"tree",       ar:"شجرة",        emoji:"🌳" },
+    { k:"바다", r:"ba-da",   en:"sea",        ar:"بحر",         emoji:"🌊" },
+    { k:"도로", r:"do-ro",   en:"road",       ar:"طريق",        emoji:"🛣️" },
+    { k:"두부", r:"du-bu",   en:"tofu",       ar:"توفو",        emoji:"🟦" },
+    { k:"부모", r:"bu-mo",   en:"parents",    ar:"الوالدان",     emoji:"👪" },
+    { k:"보다", r:"bo-da",   en:"to see",     ar:"يرى",         emoji:"👁️" },
+  ],
+  3: [
+    { k:"가방",   r:"ga-bang",   en:"bag",        ar:"حقيبة",       emoji:"🎒" },
+    { k:"나비",   r:"na-bi",     en:"butterfly",  ar:"فراشة",       emoji:"🦋" },
+    { k:"다리",   r:"da-ri",     en:"bridge / leg", ar:"جسر / ساق", emoji:"🦵" },
+    { k:"머리",   r:"meo-ri",    en:"head",       ar:"رأس",         emoji:"🧠" },
+    { k:"아이",   r:"a-i",       en:"child",      ar:"طفل",         emoji:"👶" },
+    { k:"오이",   r:"o-i",       en:"cucumber",   ar:"خيار",        emoji:"🥒" },
+    { k:"지도",   r:"ji-do",     en:"map",        ar:"خريطة",       emoji:"🗺️" },
+    { k:"어머니", r:"eo-meo-ni", en:"mother",     ar:"أم",          emoji:"👩" },
+  ],
+  4: [
+    { k:"차",     r:"cha",       en:"car / tea",  ar:"سيارة / شاي", emoji:"🚗" },
+    { k:"카드",   r:"ka-deu",    en:"card",       ar:"بطاقة",       emoji:"💳" },
+    { k:"코",     r:"ko",        en:"nose",       ar:"أنف",         emoji:"👃" },
+    { k:"키",     r:"ki",        en:"key / height", ar:"مفتاح / طول", emoji:"🔑" },
+    { k:"토마토", r:"to-ma-to",  en:"tomato",     ar:"طماطم",       emoji:"🍅" },
+    { k:"치마",   r:"chi-ma",    en:"skirt",      ar:"تنورة",       emoji:"👗" },
+  ],
+  5: [
+    { k:"피자", r:"pi-ja",  en:"pizza",   ar:"بيتزا",  emoji:"🍕" },
+    { k:"한국", r:"han-guk", en:"Korea",  ar:"كوريا",  emoji:"🇰🇷" },
+    { k:"하나", r:"ha-na",  en:"one",     ar:"واحد",   emoji:"1️⃣" },
+    { k:"호두", r:"ho-du",  en:"walnut",  ar:"جوز",    emoji:"🥜" },
+    { k:"포도", r:"po-do",  en:"grape",   ar:"عنب",    emoji:"🍇" },
+    { k:"하마", r:"ha-ma",  en:"hippo",   ar:"فرس النهر", emoji:"🦛" },
+  ],
+};
+
+// Cumulative dictation lists — only letters taught up to and including the lesson
+const LESSON_DICTATION: Record<number, { letters: string[]; words: string[] }> = {
+  1: { letters:["ㄱ","ㄴ","ㄷ","ㅏ","ㅓ"],         words:["가","나","다","너","가다"] },
+  2: { letters:["ㄹ","ㅁ","ㅂ","ㅗ","ㅜ"],         words:["나무","바다","도로","두부"] },
+  3: { letters:["ㅅ","ㅇ","ㅈ","ㅡ","ㅣ"],         words:["가방","나비","다리","아이","지도"] },
+  4: { letters:["ㅊ","ㅋ","ㅌ"],                   words:["차","카드","코","토마토"] },
+  5: { letters:["ㅍ","ㅎ"],                         words:["피자","한국","하나","포도"] },
+  6: { letters:[],                                  words:["가방","나비","다리","아이","지도","한국","피자","오이"] },
 };
 
 function LessonVowels({ lesson, lang }: { lesson: number; lang: Lang }) {
@@ -3911,34 +3966,29 @@ function LessonReviewAll({ lang }: { lang: Lang }) {
   );
 }
 
-function PictureWords({ lesson, slice, lang }: LessonProps) {
+function PictureWords({ lesson, lang }: LessonProps) {
   const isAr = lang === "ar";
-  const letters = CONSONANTS.slice(...slice);
+  const words = LESSON_WORDS[lesson] || [];
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "كلمات بالصور" : "Picture Words"}>
-      <SHead title={isAr ? `كلمات بالصور — الدرس ${["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1]}` : `Picture Words — Lesson ${lesson}`} subtitle={isAr ? "اربط كل حرف بكلمة وصورة لتثبيت الحفظ" : "Anchor each letter to an object and a Korean word"} />
+      <SHead title={isAr ? `كلمات بالصور — الدرس ${["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1]}` : `Picture Words — Lesson ${lesson}`} subtitle={isAr ? "كل كلمة هنا مكوّنة فقط من الحروف ومدّ الصوت التي درستَها حتى الآن" : "Every word below uses only consonants and vowels you have already learned"} />
       <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"5mm", marginBottom:"6mm" }}>
-        {letters.flatMap(c => (c[isAr?"ar":"en"].ex || []).slice(0,2).map((w,wi) => ({ c, w, wi }))).map(({c,w,wi}, i) => (
-          <div key={`${c.char}-${wi}-${i}`} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"4mm", background:"#fff", direction:isAr?"rtl":"ltr" }}>
-            {/* Image placeholder */}
+        {words.map((w, i) => (
+          <div key={`${w.k}-${i}`} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"4mm", background:"#fff", direction:isAr?"rtl":"ltr" }}>
             <div style={{ border:`1px dashed ${BD}`, borderRadius:"4px", background:"#f9f9f9", height:"22mm", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"3mm", flexDirection:"column", gap:"2px" }}>
-              <div style={{ fontSize:"36px", lineHeight:1 }}>{c.emoji}</div>
+              <div style={{ fontSize:"36px", lineHeight:1 }}>{w.emoji}</div>
               <div style={{ fontSize:"8px", color:T3, letterSpacing:"1px" }}>{isAr ? "صورة توضيحية" : "illustration"}</div>
             </div>
-            <div style={{ display:"flex", alignItems:"baseline", gap:"6px", marginBottom:"1mm", direction:"ltr" }}>
-              <span style={{ fontSize:"10px", color:T3, fontWeight:800 }}>{isAr ? "حرف" : "Letter"}:</span>
-              <span style={{ color:T1, fontSize:"18px", fontWeight:900 }}>{c.char}</span>
-            </div>
-            <div style={{ fontSize:"24px", fontWeight:900, color:T1, lineHeight:1.1, direction:"ltr" }}>{w.k}</div>
+            <div style={{ fontSize:"26px", fontWeight:900, color:T1, lineHeight:1.1, direction:"ltr" }}>{w.k}</div>
             <div style={{ fontSize:"10px", color:T3, marginTop:"1mm", direction:"ltr" }}>[{w.r}]</div>
-            <div style={{ fontSize:"11px", color:T2, marginTop:"1mm" }}>— {w.m}</div>
+            <div style={{ fontSize:"11px", color:T2, marginTop:"1mm" }}>— {isAr ? w.ar : w.en}</div>
           </div>
         ))}
       </div>
       <div style={{ borderLeft:`3px solid ${Y}`, padding:"4mm 5mm", background:"#fffdf3", fontSize:"11px", color:T2, lineHeight:1.7 }}>
         {isAr
-          ? "✍️ اطلب من الطلاب رسم الصورة في المربع الفارغ أو في كرّاسهم — الصورة تثبّت الحرف في الذاكرة أسرع من أي قاعدة."
-          : "✍️ Ask students to draw the object in the placeholder box or in their notebook — a picture anchors the letter faster than any rule."}
+          ? "✍️ اطلب من الطلاب رسم الصورة في المربع الفارغ — كل الحروف ومدّ الصوت في هذه الكلمات سبق شرحها، فلا توجد مفاجآت."
+          : "✍️ Ask students to draw the object in the placeholder box — every consonant and vowel here has already been taught, so nothing is unfamiliar."}
       </div>
     </Page>
   );
