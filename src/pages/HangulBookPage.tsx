@@ -3824,6 +3824,29 @@ const LESSON_VOWEL_INDICES: Record<number, [number, number]> = {
 
 type LessonWord = { k: string; r: string; en: string; ar: string; emoji: string };
 
+// Convert an emoji to its Twemoji SVG URL — Twitter's open-source emoji set.
+// Renders consistently across platforms and prints crisply at any size.
+function emojiToTwemojiUrl(emoji: string): string {
+  const codepoints = Array.from(emoji)
+    .map(ch => ch.codePointAt(0)!.toString(16))
+    .filter(cp => cp !== "fe0f")
+    .join("-");
+  return `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${codepoints}.svg`;
+}
+
+function WordIllustration({ emoji, alt, size = 36 }: { emoji: string; alt: string; size?: number }) {
+  return (
+    <img
+      src={emojiToTwemojiUrl(emoji)}
+      alt={alt}
+      width={size}
+      height={size}
+      loading="lazy"
+      style={{ display:"block", objectFit:"contain" }}
+    />
+  );
+}
+
 const LESSON_WORDS: Record<number, LessonWord[]> = {
   1: [
     { k:"나",   r:"na",      en:"I / me",     ar:"أنا",         emoji:"🙋" },
@@ -3975,9 +3998,8 @@ function PictureWords({ lesson, lang }: LessonProps) {
       <div style={{ display:"grid", gridTemplateColumns:"repeat(2, 1fr)", gap:"5mm", marginBottom:"6mm" }}>
         {words.map((w, i) => (
           <div key={`${w.k}-${i}`} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"4mm", background:"#fff", direction:isAr?"rtl":"ltr" }}>
-            <div style={{ border:`1px dashed ${BD}`, borderRadius:"4px", background:"#f9f9f9", height:"22mm", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"3mm", flexDirection:"column", gap:"2px" }}>
-              <div style={{ fontSize:"36px", lineHeight:1 }}>{w.emoji}</div>
-              <div style={{ fontSize:"8px", color:T3, letterSpacing:"1px" }}>{isAr ? "صورة توضيحية" : "illustration"}</div>
+            <div style={{ border:`1px solid ${BD}`, borderRadius:"4px", background:"#fff", height:"28mm", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"3mm" }}>
+              <WordIllustration emoji={w.emoji} alt={isAr ? w.ar : w.en} size={64} />
             </div>
             <div style={{ fontSize:"26px", fontWeight:900, color:T1, lineHeight:1.1, direction:"ltr" }}>{w.k}</div>
             <div style={{ fontSize:"10px", color:T3, marginTop:"1mm", direction:"ltr" }}>[{w.r}]</div>
