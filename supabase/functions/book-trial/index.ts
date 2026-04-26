@@ -221,22 +221,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 2. If this email already has a TBA (unscheduled) placeholder booking from
-    // the rebook-email flow, drop it so the INSERT below can proceed without
-    // tripping the per-email unique index. Real (non-TBA) bookings are left
-    // alone — the INSERT will hit 23505 and we return a friendly message.
+    // 2. For authenticated users rebooking, remove any existing booking (TBA or
+    // real) so the INSERT below succeeds. Unauthenticated path only removes TBA
+    // placeholders; real bookings there hit 23505 and return a friendly message.
     const { data: existingBooking, error: lookupError } = await supabase
       .from("trial_bookings")
-      .select("id, start_time, trial_date, is_tba")
-      .ilike("email", normalizedEmail)
+      .select("id, start_time, trial_date, is_tba, user_id")
+      .or(
+        resolvedUserId
+          ? `email.ilike.${normalizedEmail},user_id.eq.${resolvedUserId}`
+          : `email.ilike.${normalizedEmail}`
+      )
+      .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
     if (lookupError) {
       console.error("book-trial lookup error:", JSON.stringify(lookupError));
     }
 
-    // `is_tba` is the source of truth; NULL date/time and legacy sentinels
-    // are defensive fallbacks for any row that predates the sync trigger.
     const isTbaPlaceholder =
       !!existingBooking &&
       (existingBooking.is_tba === true ||
@@ -244,13 +246,17 @@ Deno.serve(async (req) => {
         existingBooking.start_time === "TBA" ||
         existingBooking.trial_date === "2099-12-31");
 
-    if (isTbaPlaceholder && existingBooking) {
+    // Authenticated rebook: remove previous booking (any kind) to allow slot change.
+    // Unauthenticated: only remove TBA placeholders.
+    const shouldDelete = existingBooking && (authed || isTbaPlaceholder);
+
+    if (shouldDelete) {
       const { error: deleteError } = await supabase
         .from("trial_bookings")
         .delete()
         .eq("id", existingBooking.id);
       if (deleteError) {
-        console.error("book-trial delete TBA placeholder error:", JSON.stringify(deleteError));
+        console.error("book-trial delete existing booking error:", JSON.stringify(deleteError));
         throw deleteError;
       }
     }
