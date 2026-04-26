@@ -797,8 +797,6 @@ function ConsCard({ c, lang }: { c: typeof CONSONANTS[0]; lang: Lang }) {
           {d.ex.map((ex, i) => (
             <div key={i} style={{ fontSize:"10.5px", color:T2 }}>
               <span style={{ fontSize:"14px", fontWeight:900, color:T1, direction:"ltr", display:"inline-block" }}>{ex.k}</span>
-              <span style={{ color:T3 }}> {ex.r}</span>
-              <span style={{ color:T2 }}> — {ex.m}</span>
             </div>
           ))}
         </div>
@@ -986,7 +984,7 @@ function AspiratedAr() {
             <div style={{ display:"flex", gap:"4px", flexWrap:"wrap", direction:"ltr" }}>
               {a.ar.ex.map((ex, i) => (
                 <span key={i} style={{ fontSize:"10px", color:T2 }}>
-                  <strong style={{ color:T1 }}>{ex.k}</strong> ({ex.r}) — {ex.m}
+                  <strong style={{ color:T1 }}>{ex.k}</strong>
                 </span>
               ))}
             </div>
@@ -1521,8 +1519,6 @@ function MiniReadingStripAr() {
         {words.map(w => (
           <div key={w.k} style={{ textAlign:"center" }}>
             <div style={{ fontSize:"22px", fontWeight:900, color:T1 }}>{w.k}</div>
-            <div style={{ fontSize:"9px", color:T3 }}>{w.r}</div>
-            <div style={{ fontSize:"9px", color:T2, direction:"rtl" }}>{w.m}</div>
           </div>
         ))}
       </div>
@@ -1545,8 +1541,6 @@ function MiniReadingStripEn() {
         {words.map(w => (
           <div key={w.k} style={{ textAlign:"center" }}>
             <div style={{ fontSize:"22px", fontWeight:900, color:T1 }}>{w.k}</div>
-            <div style={{ fontSize:"9px", color:T3 }}>{w.r}</div>
-            <div style={{ fontSize:"9px", color:T2 }}>{w.m}</div>
           </div>
         ))}
       </div>
@@ -1606,8 +1600,6 @@ function SyllableAr() {
           <div key={s.b} style={{ border:`1px solid ${BD}`, borderRadius:"4px", padding:"6px 3px", textAlign:"center", background:SBG }}>
             <div style={{ fontSize:"9px", color:T3, direction:"ltr" }}>{s.c}+{s.v}</div>
             <div style={{ fontSize:"30px", fontWeight:900, color:T1, lineHeight:1.1 }}>{s.b}</div>
-            <div style={{ fontSize:"9px", color:T3 }}>{s.r}</div>
-            <div style={{ fontSize:"9px", color:T2 }}>{s.ar}</div>
           </div>
         ))}
       </div>
@@ -1680,7 +1672,7 @@ function BatchimAr() {
               ))}
             </div>
             <div style={{ fontSize:"10px", color:T2, direction:"rtl" }}>
-              {row.ex.map(e=>(<span key={e.k}><strong>{e.k}</strong> {e.r} — {e.m}  </span>))}
+              {row.ex.map(e=>(<span key={e.k} style={{ marginInlineEnd:"8px" }}><strong>{e.k}</strong> </span>))}
             </div>
           </div>
         ))}
@@ -1825,7 +1817,6 @@ function KdramaPageAr({ slice, page }: { slice:[number,number]; page:number }) {
             <div style={{ fontSize:"22px" }}>{v.emoji}</div>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:"22px", fontWeight:900, color:T1, background:Y, display:"inline-block", padding:"1px 8px", borderRadius:"4px", marginBottom:"2px", direction:"ltr" }}>{v.k}</div>
-              <div style={{ fontSize:"11px", fontWeight:700, color:T3, direction:"ltr" }}>{v.r}</div>
               <div style={{ fontSize:"11px", color:T1, fontWeight:700 }}>{v.m}</div>
               <div style={{ fontSize:"11px", color:T3, fontStyle:"italic" }}>{v.note}</div>
             </div>
@@ -2339,7 +2330,7 @@ function AspiratedEn() {
             <div style={{ display:"flex", gap:"4px", flexWrap:"wrap" }}>
               {a.en.ex.map((ex, i) => (
                 <span key={i} style={{ fontSize:"10px", color:T2 }}>
-                  <strong style={{ color:T1 }}>{ex.k}</strong> ({ex.r}) — {ex.m}
+                  <strong style={{ color:T1 }}>{ex.k}</strong>
                 </span>
               ))}
             </div>
@@ -2619,8 +2610,6 @@ function TeachLetters({ lesson, slice, lang }: LessonProps) {
               </div>
               <div style={{ display:"flex", gap:"10px", alignItems:"baseline", direction:"ltr" }}>
                 <div style={{ fontSize:"22px", fontWeight:900, color:T1 }}>{d.ex[0].k}</div>
-                <div style={{ fontSize:"11px", color:T3 }}>[{d.ex[0].r}]</div>
-                <div style={{ fontSize:"11px", color:T2, direction: isAr?"rtl":"ltr" }}>— {d.ex[0].m}</div>
               </div>
             </div>
           </div>
@@ -2833,8 +2822,6 @@ function SyllableEn() {
           <div key={s.b} style={{ border:`1px solid ${BD}`, borderRadius:"4px", padding:"6px 3px", textAlign:"center", background:SBG }}>
             <div style={{ fontSize:"9px", color:T3 }}>{s.c}+{s.v}</div>
             <div style={{ fontSize:"30px", fontWeight:900, color:T1, lineHeight:1.1 }}>{s.b}</div>
-            <div style={{ fontSize:"9px", color:T3 }}>{s.r}</div>
-            <div style={{ fontSize:"9px", color:T2 }}>{s.en}</div>
           </div>
         ))}
       </div>
@@ -2910,7 +2897,7 @@ function BatchimEn() {
             <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
               {row.ex.map(e=>(
                 <span key={e.k} style={{ fontSize:"11px", color:T2 }}>
-                  <span style={{fontWeight:800, color:T1}}>{e.k}</span> [{e.r}] {e.m}
+                  <span style={{fontWeight:800, color:T1}}>{e.k}</span>
                 </span>
               ))}
             </div>
@@ -3057,7 +3044,6 @@ function KdramaPageEn({ slice, page }: { slice:[number,number]; page:number }) {
             <div style={{ fontSize:"22px" }}>{v.emoji}</div>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:"22px", fontWeight:900, color:T1, background:Y, display:"inline-block", padding:"1px 8px", borderRadius:"4px", marginBottom:"2px" }}>{v.k}</div>
-              <div style={{ fontSize:"11px", fontWeight:700, color:T3 }}>{v.r}</div>
               <div style={{ fontSize:"11px", color:T1, fontWeight:700 }}>{v.m}</div>
               <div style={{ fontSize:"11px", color:T3, fontStyle:"italic" }}>{v.note}</div>
             </div>
@@ -3453,7 +3439,6 @@ function VocabAppendixAr() {
           }}>
             <div style={{ fontSize:"9px", color: w.freq <= 10 ? T3 : T3, marginBottom:"1px" }}>#{w.freq}</div>
             <div style={{ fontSize:"16px", fontWeight:900, color: T1, lineHeight:1 }}>{w.k}</div>
-            <div style={{ fontSize:"9px", color: T3, marginTop:"1px" }}>{w.r}</div>
             <div style={{ fontSize:"9px", color: T2, marginTop:"1px" }}>{w.m}</div>
           </div>
         ))}
@@ -3530,7 +3515,6 @@ function VocabAppendixEn() {
           }}>
             <div style={{ fontSize:"9px", color: T3, marginBottom:"1px" }}>#{w.freq}</div>
             <div style={{ fontSize:"16px", fontWeight:900, color: T1, lineHeight:1 }}>{w.k}</div>
-            <div style={{ fontSize:"9px", color: T3, marginTop:"1px" }}>{w.r}</div>
             <div style={{ fontSize:"9px", color: T2, marginTop:"1px" }}>{w.m}</div>
           </div>
         ))}
@@ -3826,8 +3810,6 @@ function MiniReading({ lesson, lang }: LessonProps) {
         {words.map((w,i) => (
           <div key={i} style={{ border:`1px solid ${BD}`, borderRadius:"5px", padding:"3mm", background:"#fff", textAlign:"center", direction:"ltr" }}>
             <div style={{ fontSize:"22px", fontWeight:900, color:T1, lineHeight:1.1 }}>{w.k}</div>
-            <div style={{ fontSize:"9px", color:T3, marginTop:"1.5mm" }}>[{w.r}]</div>
-            <div style={{ fontSize:"9px", color:T2, marginTop:"1mm", direction:isAr?"rtl":"ltr", lineHeight:1.3 }}>— {isAr ? w.ar : w.en}</div>
           </div>
         ))}
       </div>
@@ -4037,8 +4019,6 @@ function LessonVowels({ lesson, lang }: { lesson: number; lang: Lang }) {
               </div>
               <div style={{ display:"flex", gap:"10px", alignItems:"baseline", direction:"ltr" }}>
                 <div style={{ fontSize:"22px", fontWeight:900, color:T1 }}>{d.ex[0].k}</div>
-                <div style={{ fontSize:"11px", color:T3 }}>[{d.ex[0].r}]</div>
-                <div style={{ fontSize:"11px", color:T2, direction: isAr?"rtl":"ltr" }}>— {d.ex[0].m}</div>
               </div>
             </div>
           </div>
@@ -4367,8 +4347,6 @@ function ReadingPractice({ lang }: { lang: Lang }) {
         {words.map(w => (
           <div key={w.k} style={{ border:`1px solid ${BD}`, borderRadius:"4px", padding:"4mm 5mm", background:"#fff", direction:"ltr" }}>
             <div style={{ fontSize:"30px", fontWeight:900, color:T1, lineHeight:1 }}>{w.k}</div>
-            <div style={{ fontSize:"11px", color:T3, marginTop:"2mm" }}>[{w.r}]</div>
-            <div style={{ fontSize:"11px", color:T2, marginTop:"1mm", direction:isAr?"rtl":"ltr" }}>— {w.m}</div>
           </div>
         ))}
       </div>
