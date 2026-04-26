@@ -124,6 +124,10 @@ class TabErrorBoundary extends Component<
 
 import { normalizeLevel, LEVEL_SELECT_OPTIONS } from "@/constants/levels";
 import type { Lead, Enrollment, AttendanceReq, OverviewRow } from "@/types/admin";
+import { ClassLinkDialog } from "@/components/admin/dialogs/ClassLinkDialog";
+import { ReceiptModal } from "@/components/admin/dialogs/ReceiptModal";
+import { RejectEnrollmentDialog } from "@/components/admin/dialogs/RejectEnrollmentDialog";
+import { ManualEnrollDialog } from "@/components/admin/dialogs/ManualEnrollDialog";
 import { formatTime, ADMIN_PAGE_SIZE as PAGE_SIZE, MAX_UNIT_PRICE } from "@/lib/admin-utils";
 import type { ProfileEntry } from "@/hooks/admin/useProfiles";
 import { StudentsTab } from "@/components/admin/tabs/StudentsTab";
@@ -1639,287 +1643,53 @@ const AdminDashboard = () => {
         </div>
       </div>
       {/* Send Class Link dialog */}
-      <Dialog open={!!classLinkTarget} onOpenChange={(open) => { if (!open) { setClassLinkTarget(null); setClassLinkUrl(""); setClassLinkSendToGroup(false); setClassLinkSlotDay(""); setClassLinkSlotTime(""); setClassLinkSlotTimezone("Africa/Cairo"); setClassLinkFirstClassDate(""); } }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Link className="h-4 w-4" /> Send Class Link
-            </DialogTitle>
-            <DialogDescription>
-              {classLinkTarget && (
-                <span>
-                  Sending to: <strong>{classLinkTarget.profiles?.name || classLinkTarget.profiles?.email || "Unknown"}</strong>
-                  {classLinkSendToGroup && " and their entire group"}
-                </span>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="class-link-url">Meeting Link (Zoom / Google Meet)</Label>
-              <Input
-                id="class-link-url"
-                placeholder="https://zoom.us/j/... or https://meet.google.com/..."
-                value={classLinkUrl}
-                onChange={(e) => setClassLinkUrl(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="send-to-group"
-                checked={classLinkSendToGroup}
-                onCheckedChange={(v) => setClassLinkSendToGroup(!!v)}
-              />
-              <Label htmlFor="send-to-group" className="cursor-pointer font-normal">
-                Send to entire group (all active members)
-              </Label>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label htmlFor="slot-day" className="text-xs text-muted-foreground">Day of week (optional)</Label>
-                <Input id="slot-day" placeholder="e.g. Monday" value={classLinkSlotDay} onChange={(e) => setClassLinkSlotDay(e.target.value)} className="h-8 text-sm" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="slot-time" className="text-xs text-muted-foreground">Time (optional)</Label>
-                <Input id="slot-time" placeholder="e.g. 7:00 PM" value={classLinkSlotTime} onChange={(e) => setClassLinkSlotTime(e.target.value)} className="h-8 text-sm" />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="first-class-date" className="text-xs text-muted-foreground">First class date/time — for pre-class reminder (optional)</Label>
-              <Input id="first-class-date" type="datetime-local" value={classLinkFirstClassDate} onChange={(e) => setClassLinkFirstClassDate(e.target.value)} className="h-8 text-sm" />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setClassLinkTarget(null); setClassLinkUrl(""); setClassLinkSendToGroup(false); }}>
-              Cancel
-            </Button>
-            <Button
-              disabled={!classLinkUrl.trim() || isSendingClassLink}
-              onClick={handleSendClassLink}
-            >
-              {isSendingClassLink ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending…</> : <><Link className="h-4 w-4 mr-2" /> Send Link</>}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ClassLinkDialog
+        target={classLinkTarget}
+        classLinkUrl={classLinkUrl}
+        setClassLinkUrl={setClassLinkUrl}
+        sendToGroup={classLinkSendToGroup}
+        setSendToGroup={setClassLinkSendToGroup}
+        slotDay={classLinkSlotDay}
+        setSlotDay={setClassLinkSlotDay}
+        slotTime={classLinkSlotTime}
+        setSlotTime={setClassLinkSlotTime}
+        slotTimezone={classLinkSlotTimezone}
+        setSlotTimezone={setClassLinkSlotTimezone}
+        firstClassDate={classLinkFirstClassDate}
+        setFirstClassDate={setClassLinkFirstClassDate}
+        isSending={isSendingClassLink}
+        onSend={handleSendClassLink}
+        onClose={() => { setClassLinkTarget(null); setClassLinkUrl(""); setClassLinkSendToGroup(false); setClassLinkSlotDay(""); setClassLinkSlotTime(""); setClassLinkSlotTimezone("Africa/Cairo"); setClassLinkFirstClassDate(""); }}
+      />
 
       {/* Receipt preview modal */}
-      <Dialog open={!!receiptModal} onOpenChange={(open) => { if (!open) setReceiptModal(null); }}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Eye className="h-4 w-4" /> Receipt — {receiptModal?.studentName}
-            </DialogTitle>
-            <DialogDescription>Payment receipt uploaded by the student.</DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center justify-center min-h-[300px] bg-muted/30 rounded-lg overflow-hidden">
-            {receiptModal?.isPdf ? (
-              <div className="text-center space-y-3 p-6">
-                <p className="text-muted-foreground text-sm">PDF receipt — cannot preview inline.</p>
-                <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank", "noopener,noreferrer")}>
-                  <Eye className="h-4 w-4 mr-2" /> Open PDF
-                </Button>
-              </div>
-            ) : receiptModal ? (
-              <img
-                src={receiptModal.url}
-                alt={`Receipt for ${receiptModal.studentName}`}
-                className="max-w-full max-h-[60vh] object-contain rounded"
-              />
-            ) : null}
-          </div>
-          <DialogFooter className="gap-2">
-            {receiptModal && !receiptModal.isPdf && (
-              <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank", "noopener,noreferrer")}>
-                <Eye className="h-4 w-4 mr-2" /> Open full size
-              </Button>
-            )}
-            <Button onClick={() => setReceiptModal(null)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ReceiptModal
+        receiptModal={receiptModal}
+        onClose={() => setReceiptModal(null)}
+      />
 
       {/* Rejection reason dialog — uses proper Dialog for focus trap + Escape handling */}
-      <Dialog open={!!rejectTarget} onOpenChange={(open) => { if (!open) setRejectTarget(null); }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Reject Enrollment</DialogTitle>
-            <DialogDescription>
-              {rejectTarget?.profiles?.name || "Unknown"} — {rejectTarget?.profiles?.email}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Reason *</p>
-              <div className="space-y-2">
-                {([
-                  { value: "payment_not_received", label: "💳 Payment not received", desc: "We couldn't confirm the transfer." },
-                  { value: "time_slots_unavailable", label: "📅 Time slots unavailable", desc: "Student gets a link to pick new available slots." },
-                  { value: "other", label: "✏️ Other", desc: "Provide a note below." },
-                ] as const).map(opt => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setRejectReason(opt.value)}
-                    className={`w-full text-left p-3 rounded-lg border-2 transition-all ${rejectReason === opt.value ? "border-destructive bg-destructive/5" : "border-border hover:border-destructive/40"}`}
-                  >
-                    <p className="text-sm font-medium text-foreground">{opt.label}</p>
-                    <p className="text-xs text-muted-foreground">{opt.desc}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Additional note (optional)</p>
-              <Textarea
-                placeholder="e.g. Please re-enroll with a clearer receipt."
-                value={rejectNote}
-                onChange={ev => setRejectNote(ev.target.value)}
-                maxLength={300}
-                className="h-20 resize-none"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectTarget(null)} disabled={rejecting}>Cancel</Button>
-            <Button variant="destructive" onClick={handleConfirmReject} disabled={rejecting}>
-              {rejecting ? "Rejecting…" : "Confirm Reject & Notify"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <RejectEnrollmentDialog
+        target={rejectTarget}
+        reason={rejectReason}
+        setReason={setRejectReason}
+        note={rejectNote}
+        setNote={setRejectNote}
+        rejecting={rejecting}
+        onConfirm={handleConfirmReject}
+        onClose={() => setRejectTarget(null)}
+      />
       {/* Manual Enroll Dialog */}
-      <Dialog open={manualEnrollOpen} onOpenChange={setManualEnrollOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Manually Enroll — {enrollTarget?.name}</DialogTitle>
-            <DialogDescription>{enrollTarget?.email}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-
-            {/* Plan type */}
-            <div className="space-y-1">
-              <Label>Plan Type</Label>
-              <div className="flex gap-2">
-                {(["group", "private"] as const).map(pt => (
-                  <button
-                    key={pt}
-                    onClick={() => setEnrollForm(f => ({ ...f, plan_type: pt, group_id: "" }))}
-                    className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                      enrollForm.plan_type === pt
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    {pt === "group" ? "👥 Group" : "👤 Private"}
-                  </button>
-                ))}
-              </div>
-              {enrollForm.plan_type === "private" && (
-                <p className="text-xs text-muted-foreground">Private enrollment — assign a slot via the Matcher after saving.</p>
-              )}
-            </div>
-
-            {/* Duration + Sessions */}
-            <div className="flex gap-3">
-              <div className="flex-1 space-y-1">
-                <Label>Duration</Label>
-                <Select
-                  value={enrollForm.duration}
-                  onValueChange={v => setEnrollForm(f => ({ ...f, duration: v, sessions: SESSIONS_BY_DURATION[v] ?? f.sessions }))}
-                >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1 month</SelectItem>
-                    <SelectItem value="3">3 months</SelectItem>
-                    <SelectItem value="6">6 months</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex-1 space-y-1">
-                <Label>Sessions</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={enrollForm.sessions}
-                  onChange={e => setEnrollForm(f => ({ ...f, sessions: e.target.value }))}
-                />
-              </div>
-            </div>
-
-            {/* Amount + Currency */}
-            <div className="flex gap-3">
-              <div className="flex-1 space-y-1">
-                <Label>Amount paid</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  placeholder="Enter amount..."
-                  value={enrollForm.amount}
-                  onChange={e => setEnrollForm(f => ({ ...f, amount: e.target.value }))}
-                />
-              </div>
-              <div className="w-28 space-y-1">
-                <Label>Currency</Label>
-                <Select value={enrollForm.currency} onValueChange={v => setEnrollForm(f => ({ ...f, currency: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EGP">EGP</SelectItem>
-                    <SelectItem value="USD">USD</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Group — only for group plan */}
-            {enrollForm.plan_type === "group" && (
-              <div className="space-y-1">
-                <Label>Group *</Label>
-                <Select value={enrollForm.group_id} onValueChange={v => setEnrollForm(f => ({ ...f, group_id: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Select group..." /></SelectTrigger>
-                  <SelectContent>
-                    {pkgGroups.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {/* Level */}
-            <div className="space-y-1">
-              <Label>Level</Label>
-              <Select value={enrollForm.level || "__none__"} onValueChange={v => setEnrollForm(f => ({ ...f, level: v === "__none__" ? "" : v }))}>
-                <SelectTrigger><SelectValue placeholder="Select level..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">— Not set —</SelectItem>
-                  {LEVEL_SELECT_OPTIONS.map((l) => (
-                    <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
-                  ))}
-                  <SelectItem value="A2 Elementary">A2 Elementary</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Notes */}
-            <div className="space-y-1">
-              <Label>Notes (optional)</Label>
-              <Textarea value={enrollForm.notes} onChange={e => setEnrollForm(f => ({ ...f, notes: e.target.value }))} rows={2} placeholder="Payment reference, special notes..." />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setManualEnrollOpen(false)}>Cancel</Button>
-            <Button
-              onClick={handleManualEnroll}
-              disabled={enrollSaving || (enrollForm.plan_type === "group" && !enrollForm.group_id) || !enrollForm.amount}
-            >
-              {enrollSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <UserPlus className="h-4 w-4 mr-2" />}
-              Enroll
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ManualEnrollDialog
+        open={manualEnrollOpen}
+        onOpenChange={setManualEnrollOpen}
+        enrollTarget={enrollTarget}
+        enrollForm={enrollForm}
+        setEnrollForm={setEnrollForm}
+        pkgGroups={pkgGroups}
+        enrollSaving={enrollSaving}
+        onEnroll={handleManualEnroll}
+      />
     </TooltipProvider>
   );
 };

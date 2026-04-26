@@ -1,4 +1,6 @@
 import { memo } from "react";
+import { useTranslation } from "react-i18next";
+import "@/i18n/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,6 +63,7 @@ export const EnrollmentsTab = memo(function EnrollmentsTab({
   onRevert, onDelete, onViewReceipt, onRequestResubmission, onSendClassLink,
   setAdminTab, leadsByEmail, invalidateAll,
 }: Props) {
+  const { t } = useTranslation("admin");
   const isMobile = useIsMobile();
 
   return (
@@ -68,7 +71,7 @@ export const EnrollmentsTab = memo(function EnrollmentsTab({
       <Card className="rounded-2xl">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <CardTitle className="text-base">Enrollments</CardTitle>
+            <CardTitle className="text-base">{t("enrollments.title")}</CardTitle>
             <div className="flex items-center gap-2">
               <label className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer">
                 <input
@@ -77,7 +80,7 @@ export const EnrollmentsTab = memo(function EnrollmentsTab({
                   onChange={(e) => setShowLegacyEnrollments(e.target.checked)}
                   className="rounded"
                 />
-                Show Legacy ({legacyEnrollmentCount})
+                {t("enrollments.showLegacy")} ({legacyEnrollmentCount})
               </label>
               <Button
                 variant="outline"
@@ -94,7 +97,7 @@ export const EnrollmentsTab = memo(function EnrollmentsTab({
                   }
                 }}
               >
-                Backfill Missing
+                {t("enrollments.backfill")}
               </Button>
             </div>
           </div>
@@ -150,7 +153,7 @@ export const EnrollmentsTab = memo(function EnrollmentsTab({
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by name, email or plan…"
+                    placeholder={t("enrollments.searchPlaceholder")}
                     value={enrollmentSearch}
                     onChange={(e) => setEnrollmentSearch(e.target.value)}
                     className="pl-9"
@@ -165,7 +168,7 @@ export const EnrollmentsTab = memo(function EnrollmentsTab({
                   className="shrink-0 gap-1.5"
                 >
                   <AlertCircle className="h-3.5 w-3.5" />
-                  {!isMobile && "Overdue only"}
+                  {!isMobile && t("enrollments.overdueOnly")}
                 </Button>
               </div>
               {(() => {
@@ -191,14 +194,14 @@ export const EnrollmentsTab = memo(function EnrollmentsTab({
               })()}
               <TabsList className="flex gap-2 overflow-x-auto whitespace-nowrap pb-3 h-auto bg-transparent p-0 w-full">
                 {[
-                  { value: "under_review", label: "Under Review", count: enrollments.filter(e => e.approval_status === "UNDER_REVIEW").length },
-                  { value: "pending_payment", label: "Pending Payment", count: enrollments.filter(e => e.approval_status === "PENDING_PAYMENT").length },
-                  { value: "pending", label: "Pending", count: enrollments.filter(e => e.approval_status === "PENDING").length },
-                  { value: "approved", label: "Approved", count: enrollments.filter(e => e.approval_status === "APPROVED").length },
-                  { value: "rejected", label: "Rejected", count: enrollments.filter(e => e.approval_status === "REJECTED").length },
-                ].map(t => (
-                  <TabsTrigger key={t.value} value={t.value} className="shrink-0 rounded-full px-4 py-2 text-xs border border-border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary bg-background gap-1.5">
-                    {t.label} ({t.count})
+                  { value: "under_review", label: t("enrollments.underReview"), count: enrollments.filter(e => e.approval_status === "UNDER_REVIEW").length },
+                  { value: "pending_payment", label: t("enrollments.pendingPayment"), count: enrollments.filter(e => e.approval_status === "PENDING_PAYMENT").length },
+                  { value: "pending", label: t("enrollments.pending"), count: enrollments.filter(e => e.approval_status === "PENDING").length },
+                  { value: "approved", label: t("enrollments.approved"), count: enrollments.filter(e => e.approval_status === "APPROVED").length },
+                  { value: "rejected", label: t("enrollments.rejected"), count: enrollments.filter(e => e.approval_status === "REJECTED").length },
+                ].map(tab => (
+                  <TabsTrigger key={tab.value} value={tab.value} className="shrink-0 rounded-full px-4 py-2 text-xs border border-border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary bg-background gap-1.5">
+                    {tab.label} ({tab.count})
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -318,10 +321,10 @@ export const EnrollmentsTab = memo(function EnrollmentsTab({
             {selectedEnrollmentIds.size} enrollment{selectedEnrollmentIds.size > 1 ? "s" : ""} selected
           </p>
           <Button size="sm" onClick={handleBulkApprove} disabled={bulkApproving}>
-            {bulkApproving ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Approving…</> : <><Check className="h-4 w-4 mr-1.5" /> Approve All</>}
+            {bulkApproving ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> {t("enrollments.approving")}</> : <><Check className="h-4 w-4 mr-1.5" /> {t("enrollments.bulkApprove")}</>}
           </Button>
           <Button size="sm" variant="outline" onClick={() => setSelectedEnrollmentIds(() => new Set())}>
-            <X className="h-4 w-4 mr-1.5" /> Clear
+            <X className="h-4 w-4 mr-1.5" /> {t("enrollments.clear")}
           </Button>
         </div>
       )}

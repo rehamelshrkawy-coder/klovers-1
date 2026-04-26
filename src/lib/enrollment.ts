@@ -58,6 +58,7 @@ export function getApprovalBlockReason(input: ApprovalGuardInput): ApprovalBlock
   return null;
 }
 
+/** Returns true when no approval block reason exists for the given enrollment. */
 export function canApproveEnrollment(input: ApprovalGuardInput): boolean {
   return getApprovalBlockReason(input) === null;
 }
@@ -69,6 +70,7 @@ export interface PriceValidationResult {
   reason?: string;
 }
 
+/** Validates that a per-session unit price is a positive number within the allowed range. */
 export function validateUnitPrice(price: number): PriceValidationResult {
   if (isNaN(price)) return { valid: false, reason: "Unit price must be a valid number." };
   if (price <= 0) return { valid: false, reason: "Unit price must be greater than zero." };
@@ -78,11 +80,13 @@ export function validateUnitPrice(price: number): PriceValidationResult {
 
 // ── Session calculations ──────────────────────────────────────────────────────
 
+/** Calculates the attendance percentage as sessions attended / sessions total. Returns null when sessionsTotal is zero. */
 export function calcAttendancePct(sessionsTotal: number, sessionsRemaining: number): number | null {
   if (sessionsTotal <= 0) return null;
   return Math.round(((sessionsTotal - sessionsRemaining) / sessionsTotal) * 100);
 }
 
+/** Returns true when an active student is within the at-risk session threshold. */
 export function isAtRisk(sessionsRemaining: number, derivedStatus: string): boolean {
   return (
     derivedStatus === "ACTIVE" &&
@@ -91,10 +95,12 @@ export function isAtRisk(sessionsRemaining: number, derivedStatus: string): bool
   );
 }
 
+/** Returns true when a student's remaining sessions are at or below the locked threshold. */
 export function isLocked(sessionsRemaining: number): boolean {
   return sessionsRemaining <= LOCKED_SESSION_THRESHOLD;
 }
 
+/** Derives enrollment status from remaining sessions: LOCKED → COMPLETED → ACTIVE. */
 export function derivedStatusFromRemaining(sessionsRemaining: number): "ACTIVE" | "COMPLETED" | "LOCKED" {
   if (sessionsRemaining <= LOCKED_SESSION_THRESHOLD) return "LOCKED";
   if (sessionsRemaining <= 0) return "COMPLETED";
@@ -125,6 +131,7 @@ export function calcReferralBonus({ conversions, clicks }: ReferralBonusInput): 
 
 export type ReceiptKind = "stripe" | "url" | "storage" | "manual" | "none";
 
+/** Detects the kind of receipt stored — Stripe, external URL, Supabase storage path, manual, or none. */
 export function detectReceiptKind(receiptUrl: string | null | undefined): ReceiptKind {
   if (!receiptUrl || receiptUrl.trim() === "") return "none";
   if (receiptUrl === "manual") return "manual";
