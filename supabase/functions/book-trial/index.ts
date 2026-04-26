@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { name, email, phone, country, level, goal, day_of_week, start_time, trial_date: bodyTrialDate, referrer_id, authed } = body;
+    const { name, email, phone, country, level, goal, day_of_week, start_time, trial_date: bodyTrialDate, class_language, referrer_id, authed } = body;
 
     // ── Authenticated path: derive identity from JWT, skip placeholder hacks ──
     // When the client passes `authed: true` AND a valid Authorization bearer
@@ -286,6 +286,7 @@ Deno.serve(async (req) => {
         start_time,
         trial_date: trialDate,
         timezone,
+        class_language: class_language === "arabic" ? "arabic" : "english",
         status: "confirmed",
         confirmed_at: new Date().toISOString(),
         ...(resolvedUserId ? { user_id: resolvedUserId } : {}),

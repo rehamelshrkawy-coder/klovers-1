@@ -89,6 +89,18 @@ function guessCountryFromTz(): string {
   } catch { return "Egypt"; }
 }
 
+/** Countries whose trial classes are taught in Arabic */
+const ARABIC_COUNTRIES = new Set([
+  "Egypt","Morocco","Tunisia","Algeria","Libya","Jordan","Lebanon",
+  "Iraq","Syria","Sudan","Yemen","UAE","Saudi Arabia","Qatar",
+  "Bahrain","Oman","Kuwait",
+]);
+
+/** Auto-detect class language from country */
+function defaultLanguageForCountry(country: string): "arabic" | "english" {
+  return ARABIC_COUNTRIES.has(country) ? "arabic" : "english";
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface BookingResult {
@@ -119,6 +131,15 @@ const TrialBookingPage = () => {
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
   const [rescheduling, setRescheduling] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>(guessCountryFromTz);
+  const [classLanguage, setClassLanguage] = useState<"arabic" | "english">(() =>
+    defaultLanguageForCountry(guessCountryFromTz())
+  );
+
+  // Keep class language in sync when user changes country
+  const handleCountryChange = (country: string) => {
+    setSelectedCountry(country);
+    setClassLanguage(defaultLanguageForCountry(country));
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -188,7 +209,7 @@ const TrialBookingPage = () => {
     !(profile?.level?.trim()) &&
     !((user?.user_metadata?.level as string | undefined)?.trim());
 
-  const handleSlotPicked = async (dayOfWeek: number, startTime: string, trialDate?: string) => {
+  const handleSlotPicked = async (dayOfWeek: number, startTime: string, trialDate: string) => {
     if (!user) {
       navigate(`/signup?redirect=${encodeURIComponent("/trial-booking")}`);
       return;
@@ -242,7 +263,9 @@ const TrialBookingPage = () => {
           level: effectiveLevel || undefined,
           day_of_week: dayOfWeek,
           start_time: startTime,
-          ...(trialDate ? { trial_date: trialDate } : {}),
+          trial_date: trialDate,           // always concrete — slot picker guarantees this
+          class_language: classLanguage,
+          country: selectedCountry,
           referrer_id: referrerId,
           authed: true,
         },
@@ -399,7 +422,7 @@ const TrialBookingPage = () => {
                 <span className="text-xs text-muted-foreground">
                   {language === "ar" ? "بلدك:" : "Your country:"}
                 </span>
-                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                <Select value={selectedCountry} onValueChange={handleCountryChange}>
                   <SelectTrigger className="h-7 text-xs w-auto min-w-[130px] border-dashed">
                     <SelectValue />
                   </SelectTrigger>
@@ -412,6 +435,37 @@ const TrialBookingPage = () => {
                 <span className="text-[11px] text-muted-foreground/70">
                   → {getStartingPrice(selectedCountry)}
                 </span>
+              </div>
+
+              {/* Class language badge on confirmation */}
+              <div className="mt-3 flex items-center justify-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  {language === "ar" ? "لغة الحصة:" : "Class language:"}
+                </span>
+                <div className="flex gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setClassLanguage("arabic")}
+                    className={`px-2.5 py-1 rounded-md border text-xs font-medium transition-all ${
+                      classLanguage === "arabic"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    🇸🇦 {language === "ar" ? "عربي" : "Arabic"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setClassLanguage("english")}
+                    className={`px-2.5 py-1 rounded-md border text-xs font-medium transition-all ${
+                      classLanguage === "english"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    🇺🇸 {language === "ar" ? "إنجليزي" : "English"}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -630,13 +684,13 @@ const TrialBookingPage = () => {
               )}
 
               {/* Country selector — always shown, pre-filled from timezone */}
-              <div className="mb-6 space-y-1.5">
+              <div className="mb-4 space-y-1.5">
                 <Label htmlFor="trial-country" className="text-sm font-medium flex items-center gap-1.5">
                   <Globe className="h-3.5 w-3.5 text-muted-foreground" />
                   {language === "ar" ? "بلدك" : "Your country"}
                   <span className="text-[10px] text-muted-foreground font-normal">{language === "ar" ? "(للأسعار)" : "(for pricing)"}</span>
                 </Label>
-                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                <Select value={selectedCountry} onValueChange={handleCountryChange}>
                   <SelectTrigger id="trial-country">
                     <SelectValue placeholder={language === "ar" ? "اختر بلدك" : "Select your country"} />
                   </SelectTrigger>
@@ -646,6 +700,42 @@ const TrialBookingPage = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Class language — auto-detected from country, user can override */}
+              <div className="mb-6 space-y-1.5">
+                <Label className="text-sm font-medium">
+                  {language === "ar" ? "لغة الحصة" : "Class language"}
+                </Label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setClassLanguage("arabic")}
+                    className={`flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                      classLanguage === "arabic"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    🇸🇦 {language === "ar" ? "عربي" : "Arabic"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setClassLanguage("english")}
+                    className={`flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                      classLanguage === "english"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    🇺🇸 {language === "ar" ? "إنجليزي" : "English"}
+                  </button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  {language === "ar"
+                    ? "اخترنا هذا تلقائيًا حسب بلدك — يمكنك تغييره"
+                    : "Auto-selected based on your country — you can change it"}
+                </p>
               </div>
 
               <TrialSlotPicker
