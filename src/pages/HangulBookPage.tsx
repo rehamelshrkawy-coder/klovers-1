@@ -609,7 +609,7 @@ const SYLLABLES = [
 /* ══════════════════════════════════════════════════
    LAYOUT HELPERS
 ══════════════════════════════════════════════════ */
-function Page({ children, dir = "ltr", chapter, bgColor = "#ffffff" }: { children: React.ReactNode; dir?: "ltr" | "rtl"; chapter?: string; bgColor?: string }) {
+function Page({ children, dir = "ltr", chapter, bgColor = "#FFF5F5" }: { children: React.ReactNode; dir?: "ltr" | "rtl"; chapter?: string; bgColor?: string }) {
   const isRtl = dir === "rtl";
   return (
     <div
@@ -2929,103 +2929,85 @@ function SyllableEn() {
 
 /* ── Batchim (Single) EN ── */
 function BatchimEn() {
-  const FINAL7 = [
-    { sound:"k",  chars:["ㄱ","ㄲ","ㅋ"], ex:[{k:"국",r:"guk",m:"soup"},{k:"부엌",r:"bu-eok",m:"kitchen"}] },
-    { sound:"n",  chars:["ㄴ"],           ex:[{k:"눈",r:"nun",m:"eye/snow"},{k:"돈",r:"don",m:"money"}] },
-    { sound:"t",  chars:["ㄷ","ㅅ","ㅆ","ㅈ","ㅊ","ㅌ","ㅎ"], ex:[{k:"옷",r:"ot",m:"clothes"},{k:"낮",r:"nat",m:"daytime"}] },
-    { sound:"l",  chars:["ㄹ"],          ex:[{k:"달",r:"dal",m:"moon"},{k:"말",r:"mal",m:"language/horse"}] },
-    { sound:"m",  chars:["ㅁ"],          ex:[{k:"봄",r:"bom",m:"spring"},{k:"꿈",r:"kkum",m:"dream"}] },
-    { sound:"p",  chars:["ㅂ","ㅍ"],     ex:[{k:"밥",r:"bap",m:"rice"},{k:"잎",r:"ip",m:"leaf"}] },
-    { sound:"ng", chars:["ㅇ"],          ex:[{k:"강",r:"gang",m:"river"},{k:"영",r:"yeong",m:"spirit/zero"}] },
+  const FINAL7: { n:number; ncolor:string; pillBg:string; pillChars:string; rule:string; exK:string; exR:string }[] = [
+    { n:1, ncolor:KIDS_RED,    pillBg:"#FFE2C0", pillChars:"ㄱ / ㄲ / ㅋ", rule:"Pronounced: k", exK:"박", exR:"bak" },
+    { n:2, ncolor:KIDS_GREEN,  pillBg:"#D7EFD0", pillChars:"ㄴ",            rule:"Pronounced: n", exK:"산", exR:"san" },
+    { n:3, ncolor:KIDS_RED,    pillBg:"#FFD7D7", pillChars:"ㄷ / ㅅ / ㅆ / ㅈ / ㅊ / ㅌ / ㅎ", rule:"Pronounced: hard t (no release)", exK:"옷", exR:"ot" },
+    { n:4, ncolor:KIDS_BLUE,   pillBg:"#D6E9F8", pillChars:"ㄹ",            rule:"Pronounced: l", exK:"달", exR:"dal" },
+    { n:5, ncolor:KIDS_PURPLE, pillBg:"#E5D8F0", pillChars:"ㅁ",            rule:"Pronounced: m", exK:"밤", exR:"bam" },
+    { n:6, ncolor:KIDS_PURPLE, pillBg:"#FAD9E8", pillChars:"ㅂ / ㅍ",       rule:"Pronounced: p", exK:"밥", exR:"bap" },
+    { n:7, ncolor:KIDS_RED,    pillBg:"#FBD9D9", pillChars:"ㅇ",            rule:"Pronounced: ng (nasal)", exK:"강", exR:"gang" },
   ];
   return (
-    <Page dir="ltr">
-      <SHead title="Batchim (받침) — The Final Consonant" subtitle="A syllable block can end with a consonant sitting below" />
+    <Page dir="ltr" bgColor={KIDS_PINK}>
+      <div style={{
+        background:KIDS_RED, color:"#fff", borderRadius:"30px",
+        padding:"10px 20px", display:"flex", justifyContent:"center",
+        alignItems:"center", gap:"10px", marginBottom:"6mm",
+        boxShadow:"0 4px 0 rgba(0,0,0,0.08)",
+      }}>
+        <div style={{ fontSize:"22px", fontWeight:900 }}>Batchim in Korean</div>
+        <div style={{ fontSize:"18px", fontWeight:900, opacity:0.95 }}>(받침)</div>
+      </div>
 
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
-        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"12px", background:SBG }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>What is Batchim?</div>
-          <div style={{ fontSize:"11px", color:T2, lineHeight:1.9 }}>
-            Batchim is the consonant that sits <strong>underneath</strong> the syllable block. Not every syllable has one — but it appears in thousands of Korean words.
+      <div style={{ display:"flex", gap:"10px", marginBottom:"6mm", alignItems:"flex-start" }}>
+        <KidsPanel color={KIDS_GREEN} bg="#FFF8F1" dir="ltr">
+          <div style={{ marginBottom:"6px" }}>
+            <SectionBadge icon="📗" label="Definition" color={KIDS_GREEN} dir="ltr" />
           </div>
-          <div style={{ display:"flex", gap:"10px", justifyContent:"center", marginTop:"10px" }}>
-            {[
-              {top:"ㅎ", mid:"ㅏ", bot:null, label:"하 (ha)", note:"No batchim"},
-              {top:"ㅎ", mid:"ㅏ", bot:"ㄴ", label:"한 (han)", note:"Batchim = ㄴ"},
-            ].map((b,i)=>(
-              <div key={i} style={{ textAlign:"center" }}>
-                <div style={{ background: i===1?Y:SBG, borderRadius:"6px", padding:"10px 14px", border:`1px solid ${BD}`, display:"inline-flex", flexDirection:"column", alignItems:"center", width:"60px" }}>
-                  <div style={{ fontSize:"11px", color:T2 }}>{b.top}</div>
-                  <div style={{ fontSize:"11px", color:T2 }}>{b.mid}</div>
-                  {b.bot && <div style={{ fontSize:"11px", color:T1, fontWeight:900, borderTop:`1px solid ${BD}`, marginTop:"3px", paddingTop:"3px", width:"100%", textAlign:"center" }}>{b.bot}</div>}
-                </div>
-                <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginTop:"5px" }}>{b.label}</div>
-                <div style={{ fontSize:"10px", color:T3 }}>{b.note}</div>
+          <p style={{ fontSize:"12px", color:"#222", lineHeight:1.8, margin:0, fontWeight:600 }}>
+            Batchim (<span style={{ color:KIDS_RED, fontWeight:900 }}>받침</span>) is the final
+            consonant at the end of a Korean syllable block — and it strongly affects how the word is pronounced.
+          </p>
+        </KidsPanel>
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", flexShrink:0, gap:"4px", width:"170px" }}>
+          <SpeechBubble dir="ltr" color={KIDS_RED}>
+            Batchim shapes pronunciation and grammar!
+          </SpeechBubble>
+          <CharImg size={140} />
+        </div>
+      </div>
+
+      <div style={{ marginBottom:"4mm" }}>
+        <SectionBadge icon="💡" label="Rule" color={KIDS_ORANGE} dir="ltr" />
+      </div>
+      <p style={{ fontSize:"12px", color:"#222", textAlign:"center", marginBottom:"5mm", fontWeight:700 }}>
+        Many consonants exist, but batchim collapses them into{" "}
+        <span style={{ color:KIDS_RED, fontWeight:900, textDecoration:"underline" }}>just 7 final sounds.</span>
+      </p>
+
+      <KidsPanel color={KIDS_BLUE} bg="#fff" dir="ltr">
+        <div style={{ marginBottom:"6px" }}>
+          <SectionBadge icon="🔊" label="The 7 Sounds" color={KIDS_BLUE} dir="ltr" />
+        </div>
+        <div style={{ direction:"ltr" }}>
+          {FINAL7.map(r => (
+            <div key={r.n} style={{
+              display:"grid", gridTemplateColumns:"30px 1.1fr 18px 1.4fr 1fr",
+              alignItems:"center", gap:"8px", padding:"6px 4px",
+            }}>
+              <NumCircle n={r.n} color={r.ncolor} />
+              <div style={{ textAlign:"center" }}><Pill bg={r.pillBg}>{r.pillChars}</Pill></div>
+              <div style={{ color:KIDS_RED, fontSize:"18px", fontWeight:900, textAlign:"center" }}>→</div>
+              <div style={{ fontSize:"12px", color:"#222", fontWeight:700 }}>{r.rule}</div>
+              <div style={{ display:"flex", alignItems:"baseline", gap:"6px" }}>
+                <span style={{ fontSize:"22px", fontWeight:900, color:"#222" }}>{r.exK}</span>
+                <span style={{ fontSize:"11px", fontWeight:700, color:KIDS_GREEN }}>({r.exR})</span>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"12px", background:SBG }}>
-          <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>The Golden Rule 🥇</div>
-          <div style={{ fontSize:"11px", color:T2, lineHeight:1.9 }}>
-            Even though there are 14+ consonants, only <strong>7 final sounds</strong> can be pronounced in batchim position. Every other consonant reduces to one of these seven.
-          </div>
-          <div style={{ padding:"8px", marginTop:"8px", textAlign:"center" }}>
-            <div style={{ display:"flex", gap:"6px", justifyContent:"center", flexWrap:"wrap" }}>
-              {["k","n","t","l","m","p","ng"].map(s=>(
-                <span key={s} style={{ border:`1px solid ${BD}`, color:T1, fontWeight:900, fontSize:"13px", padding:"4px 8px", borderRadius:"4px", background:"#fff" }}>{s}</span>
-              ))}
             </div>
-            <div style={{ fontSize:"10px", color:T3, marginTop:"5px" }}>The 7 final sounds</div>
-          </div>
+          ))}
         </div>
-      </div>
+      </KidsPanel>
 
-      <div style={{ fontWeight:800, fontSize:"11px", color:T1, marginBottom:"6px" }}>The 7 Final Sound Groups</div>
-      <div style={{ display:"flex", flexDirection:"column", gap:"0", marginBottom:"10px" }}>
-        {FINAL7.map((row,i)=>(
-          <div key={i} style={{ display:"grid", gridTemplateColumns:"36px 1fr 1fr", gap:"6px", alignItems:"center", padding:"6px 0", borderBottom:`1px solid ${BD}` }}>
-            <div style={{ border:`1px solid ${BD}`, color:T1, fontWeight:900, fontSize:"14px", textAlign:"center", borderRadius:"4px", padding:"4px", background:SBG }}>{row.sound}</div>
-            <div style={{ display:"flex", gap:"5px", flexWrap:"wrap" }}>
-              {row.chars.map(ch=>(
-                <span key={ch} style={{ border:`1px solid ${BD}`, color:T1, fontSize:"15px", fontWeight:900, padding:"2px 7px", borderRadius:"4px", background:"#fff" }}>{ch}</span>
-              ))}
-            </div>
-            <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
-              {row.ex.map(e=>(
-                <span key={e.k} style={{ fontSize:"11px", color:T2 }}>
-                  <span style={{fontWeight:800, color:T1}}>{e.k}</span>
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ borderTop:`3px solid ${Y}`, paddingTop:"8px", display:"flex", gap:"12px", alignItems:"flex-start" }}>
-        <KoreanLanternIcon size={36} color={T3} />
-        <div>
-          <div style={{ fontSize:"12px", fontWeight:800, color:T1, marginBottom:"5px" }}>Linking Rule — 연음법칙 (Yeon-eum)</div>
-          <div style={{ fontSize:"11px", color:T2, lineHeight:1.9, marginBottom:"6px" }}>
-            When batchim is followed by a syllable starting with <strong>ㅇ</strong> (silent), the batchim <strong>moves</strong> to that next syllable and is pronounced there.
-          </div>
-          <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-            {[
-              {w:"먹어요",wrong:"meok-eo-yo ❌",right:"meo-geo-yo ✅",m:"I eat"},
-              {w:"한국어",wrong:"han-guk-eo ❌",right:"han-gu-geo ✅",m:"Korean language"},
-              {w:"없어요",wrong:"eops-eo-yo ❌",right:"eop-seo-yo ✅",m:"There isn't"},
-            ].map(e=>(
-              <div key={e.w} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"8px 10px", background:"#fff" }}>
-                <div style={{ fontSize:"16px", color:T1, fontWeight:900 }}>{e.w}</div>
-                <div style={{ fontSize:"11px", color:T3, marginTop:"2px" }}>{e.wrong}</div>
-                <div style={{ fontSize:"11px", color:"#166534", fontWeight:700 }}>{e.right}</div>
-                <div style={{ fontSize:"10px", color:T3 }}>{e.m}</div>
-              </div>
-            ))}
-          </div>
+      <KidsPanel color={KIDS_BLUE} bg="#F5FAFE" dir="ltr">
+        <div style={{ marginBottom:"6px" }}>
+          <SectionBadge icon="📘" label="Note" color={KIDS_BLUE} dir="ltr" />
         </div>
-      </div>
+        <p style={{ fontSize:"11.5px", color:"#222", lineHeight:1.8, margin:0, fontWeight:600 }}>
+          Batchim is written at the bottom of the syllable block but is not separated as a standalone letter.
+          It is the key to <span style={{ color:KIDS_RED, fontWeight:900 }}>correct pronunciation</span> of Korean words.
+        </p>
+      </KidsPanel>
     </Page>
   );
 }
