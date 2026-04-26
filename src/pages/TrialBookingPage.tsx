@@ -392,6 +392,27 @@ const TrialBookingPage = () => {
                 <CalendarClock className="h-4 w-4 text-primary" />
                 {rescheduling ? t("trialBooking.rescheduling") : t("trialBooking.changeDateBtn")}
               </button>
+
+              {/* Inline country selector — updates pricing below in real time */}
+              <div className="mt-5 flex items-center justify-center gap-2 flex-wrap">
+                <Globe className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span className="text-xs text-muted-foreground">
+                  {language === "ar" ? "بلدك:" : "Your country:"}
+                </span>
+                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                  <SelectTrigger className="h-7 text-xs w-auto min-w-[130px] border-dashed">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ALL_COUNTRIES.map(c => (
+                      <SelectItem key={c} value={c} className="text-xs">{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span className="text-[11px] text-muted-foreground/70">
+                  → {getStartingPrice(selectedCountry)}
+                </span>
+              </div>
             </div>
 
             {/* While-you-wait — single hero CTA. Previous 3-button panel
