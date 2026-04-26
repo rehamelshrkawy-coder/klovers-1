@@ -3819,25 +3819,38 @@ const LESSON_VOWEL_INDICES: Record<number, [number, number]> = {
 
 type LessonWord = { k: string; r: string; en: string; ar: string; emoji: string };
 
-// Convert an emoji to its Twemoji SVG URL — Twitter's open-source emoji set.
-// Renders consistently across platforms and prints crisply at any size.
-function emojiToTwemojiUrl(emoji: string): string {
-  const codepoints = Array.from(emoji)
-    .map(ch => ch.codePointAt(0)!.toString(16))
-    .filter(cp => cp !== "fe0f")
-    .join("-");
-  return `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${codepoints}.svg`;
+// Map each English word/phrase to a single safe-search keyword for the photo CDN.
+// LoremFlickr serves CC-licensed Flickr photos by keyword — no API key needed.
+function photoKeyword(en: string): string {
+  return en
+    .split("/")[0]            // "car / tea" -> "car "
+    .split("(")[0]            // "go (root)" -> "go "
+    .replace(/[^a-zA-Z\s]/g, "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)              // keep keyword short for better matches
+    .join(",");
 }
 
-function WordIllustration({ emoji, alt, size = 36 }: { emoji: string; alt: string; size?: number }) {
+function WordIllustration({ emoji, alt, en, size = 64 }: { emoji: string; alt: string; en: string; size?: number }) {
+  const kw = photoKeyword(en);
+  const photo = `https://loremflickr.com/${size*3}/${size*3}/${kw || "object"}?lock=${Math.abs([...kw].reduce((a,c)=>a+c.charCodeAt(0),0))}`;
   return (
     <img
-      src={emojiToTwemojiUrl(emoji)}
+      src={photo}
       alt={alt}
       width={size}
       height={size}
       loading="lazy"
-      style={{ display:"block", objectFit:"contain" }}
+      onError={(e) => {
+        // graceful fallback to a styled emoji span if photo CDN is blocked
+        const parent = (e.currentTarget as HTMLImageElement).parentElement;
+        if (parent && !parent.dataset.fallback) {
+          parent.dataset.fallback = "1";
+          parent.innerHTML = `<span style="font-size:${size*0.7}px;line-height:1">${emoji}</span>`;
+        }
+      }}
+      style={{ display:"block", objectFit:"cover", borderRadius:"4px", width:`${size}px`, height:`${size}px` }}
     />
   );
 }
@@ -4056,7 +4069,7 @@ function PictureWords({ lesson, lang }: LessonProps) {
         {words.map((w, i) => (
           <div key={`${w.k}-${i}`} style={{ border:`1px solid ${BD}`, borderRadius:"5px", padding:"2.5mm", background:"#fff", direction:isAr?"rtl":"ltr", textAlign:"center" }}>
             <div style={{ height:"15mm", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"1.5mm" }}>
-              <WordIllustration emoji={w.emoji} alt={isAr ? w.ar : w.en} size={40} />
+              <WordIllustration emoji={w.emoji} en={w.en} alt={isAr ? w.ar : w.en} size={56} />
             </div>
             <div style={{ fontSize:"17px", fontWeight:900, color:T1, lineHeight:1.1, direction:"ltr" }}>{w.k}</div>
             <div style={{ fontSize:"8px", color:T3, marginTop:"1mm", direction:"ltr" }}>[{w.r}]</div>
