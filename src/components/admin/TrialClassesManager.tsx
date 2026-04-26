@@ -75,24 +75,25 @@ interface UpcomingSlot {
   start_time: string;
 }
 
-function getUpcomingSlotDates(slots: TrialSlot[], weeksAhead = 1): UpcomingSlot[] {
-  const results: UpcomingSlot[] = [];
+function getActualUpcomingGroups(bookings: TrialBooking[]): UpcomingSlot[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  for (const slot of slots) {
-    for (let w = 0; w < weeksAhead; w++) {
-      const d = new Date(today);
-      const rawDiff = (slot.day_of_week - d.getDay() + 7) % 7;
-      // Never show today — always at least 1 day ahead (mirrors edge function logic)
-      const diff = (rawDiff === 0 ? 7 : rawDiff) + w * 7;
-      d.setDate(d.getDate() + diff);
-      const dateStr = d.toISOString().slice(0, 10);
-      const [h, m] = slot.start_time.split(":").map(Number);
-      const ampm = h >= 12 ? "PM" : "AM";
-      const h12 = h % 12 || 12;
-      const label = `${DAY_NAMES[slot.day_of_week]} ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${h12}:${String(m).padStart(2, "0")} ${ampm}`;
-      results.push({ value: `${dateStr}|${slot.day_of_week}|${slot.start_time}`, label, date: dateStr, day_of_week: slot.day_of_week, start_time: slot.start_time });
-    }
+  const todayStr = today.toISOString().slice(0, 10);
+  const seen = new Set<string>();
+  const results: UpcomingSlot[] = [];
+  for (const b of bookings) {
+    if (!b.trial_date || !b.start_time || b.is_tba || b.start_time === "TBA") continue;
+    if (b.trial_date < todayStr || b.status === "cancelled") continue;
+    const key = `${b.trial_date}|${b.day_of_week}|${b.start_time}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const d = new Date(b.trial_date + "T00:00:00");
+    const dow = b.day_of_week ?? d.getDay();
+    const [h, m] = b.start_time.split(":").map(Number);
+    const ampm = h >= 12 ? "PM" : "AM";
+    const h12 = h % 12 || 12;
+    const label = `${DAY_NAMES[dow]} ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+    results.push({ value: key, label, date: b.trial_date, day_of_week: dow, start_time: b.start_time });
   }
   results.sort((a, b) => a.date.localeCompare(b.date));
   return results;
@@ -137,7 +138,7 @@ const TrialClassesManager = () => {
   });
 
   const loading = loadingBookings || loadingSlots;
-  const upcomingSlots = useMemo(() => getUpcomingSlotDates(activeSlots), [activeSlots]);
+  const upcomingSlots = useMemo(() => getActualUpcomingGroups(bookings), [bookings]);
 
   const fetchData = () => {
     // Invalidate trials-related caches so both the local table and the
