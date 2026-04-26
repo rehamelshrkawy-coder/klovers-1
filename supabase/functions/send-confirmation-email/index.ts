@@ -25,7 +25,7 @@ interface EmailPayload {
   alert_items?: Array<{ name: string; email: string; days_waiting: number }>;
   unsubscribe_token?: string;
   rebook_url?: string;
-  available_slots?: Array<{ day_of_week: number; start_time: string; timezone?: string }>;
+  available_slots?: Array<{ day_of_week: number; start_time: string; timezone?: string; date?: string }>;
   enrollment_id?: string;
   rejection_reason?: "payment_not_received" | "time_slots_unavailable" | "other";
   rejection_note?: string;
@@ -686,7 +686,11 @@ function buildTrialRebookEmail(p: EmailPayload) {
         ${slots.map((s) => {
           const day = isAr ? dayNamesAr[s.day_of_week] : dayNamesEn[s.day_of_week];
           const tz = (s.timezone || "Africa/Cairo").replace(/_/g, " ");
-          return `<li style="margin-bottom: 6px;"><strong>${day}</strong> — ${formatTime12(s.start_time, isAr)} <span style="color:${BRAND_MUTED}; font-size: 12px;">(${tz})</span></li>`;
+          const dateLabel = s.date
+            ? new Date(s.date + "T00:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric" })
+            : "";
+          const dayPart = dateLabel ? `<strong>${day}, ${dateLabel}</strong>` : `<strong>${day}</strong>`;
+          return `<li style="margin-bottom: 6px;">${dayPart} — ${formatTime12(s.start_time, isAr)} <span style="color:${BRAND_MUTED}; font-size: 12px;">(${tz})</span></li>`;
         }).join("")}
       </ul>`
     : "";
