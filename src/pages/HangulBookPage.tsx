@@ -1407,43 +1407,21 @@ function Spine() {
       boxSizing:"border-box",
       display:"flex", flexDirection:"column",
       alignItems:"center",
-      padding:"10mm 0",
+      padding:0,
+      justifyContent:"center", gap:"8mm",
     }}>
-      {/* K circle */}
       <div style={{
-        width:"38px", height:"38px", borderRadius:"50%",
-        background:BK, display:"flex", alignItems:"center", justifyContent:"center",
-        flexShrink:0,
-      }}>
-        <span style={{ fontSize:"17px", fontWeight:900, color:"#fff" }}>K</span>
-      </div>
-
-      {/* Spine text */}
+        writingMode:"vertical-rl", transform:"rotate(180deg)",
+        fontSize:"16px", fontWeight:900, color:BK,
+        letterSpacing:"4px", textTransform:"uppercase",
+        fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+      }}>KLOVERS HANGUL</div>
       <div style={{
-        flex:1, display:"flex", flexDirection:"column",
-        alignItems:"center", justifyContent:"center", gap:"6mm",
-      }}>
-        <div style={{
-          writingMode:"vertical-rl", transform:"rotate(180deg)",
-          fontSize:"18px", fontWeight:900, color:BK,
-          letterSpacing:"3px", textTransform:"uppercase",
-          fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
-        }}>KLOVERS HANGUL</div>
-        <div style={{
-          writingMode:"vertical-rl", transform:"rotate(180deg)",
-          fontSize:"10px", fontWeight:700, color:BK,
-          letterSpacing:"2px", textTransform:"uppercase",
-          fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
-        }}>REHAM ELSHRKAWY</div>
-      </div>
-
-      {/* 01 box */}
-      <div style={{
-        width:"36px", height:"40px", background:BK, borderRadius:"4px",
-        display:"flex", alignItems:"center", justifyContent:"center",
-      }}>
-        <span style={{ fontSize:"16px", fontWeight:900, color:"#fff" }}>01</span>
-      </div>
+        writingMode:"vertical-rl", transform:"rotate(180deg)",
+        fontSize:"10px", fontWeight:600, color:BK,
+        letterSpacing:"3px", textTransform:"uppercase",
+        fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+      }}>REHAM ELSHRKAWY</div>
     </div>
   );
 }
