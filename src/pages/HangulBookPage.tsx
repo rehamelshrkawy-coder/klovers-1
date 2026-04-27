@@ -1288,186 +1288,187 @@ function CourseAr() {
   );
 }
 
-function KidsCover({ lang }: { lang: "ar" | "en" }) {
+function EdCover({ lang }: { lang: "ar" | "en" }) {
   const isAr = lang === "ar";
-  const decoChars = ["ㄱ","ㅏ","ㄴ","ㅓ","ㄷ","ㅗ","ㄹ","ㅜ","ㅁ","ㅡ","ㅂ","ㅣ","ㅅ","ㅎ"];
-  const features = isAr
-    ? [
-        { icon:"📖", label:"٧ دروس متدرجة" },
-        { icon:"✍️", label:"تدريبات كتابة TOPIK" },
-        { icon:"🎬", label:"كلمات مسلسلات + كيبوب" },
-        { icon:"🇰🇷", label:"عربي ⇄ كوري" },
-      ]
-    : [
-        { icon:"📖", label:"7 Structured Lessons" },
-        { icon:"✍️", label:"TOPIK-style Writing" },
-        { icon:"🎬", label:"K-Drama + K-Pop Vocab" },
-        { icon:"🇰🇷", label:"Bilingual AR ⇄ EN" },
-      ];
-  const title = isAr ? "اقرأ الكورية" : "Read Korean";
-  const titleSub = isAr ? "في ٧ أيام" : "in 7 Days";
-  const subtitle = isAr
-    ? "دليل المبتدئين لتعلّم الهانغول من الصفر — مستوحى من المسلسلات والكيبوب"
-    : "The beginner's guide to Hangul — inspired by K-drama and K-pop";
-  const levelLabel = isAr ? "المستوى ١ · مبتدئ" : "Level 1 · Beginner";
-  const academy = isAr ? "أكاديمية كلوفرز للغة الكورية" : "Klovers Korean Academy";
-  const bookOf = isAr ? "كتاب رقم ١" : "Book One";
+  const bullets = isAr ? [
+    { title:"دروس متدرجة عبر ٤ حصص", desc:"الحروف المتحركة، الساكنة، المقاطع، الباتشيم — الأبجدية كاملة." },
+    { title:"تدريبات الكتابة بأسلوب TOPIK", desc:"تدريبات ترتيب الخطوط وتمارين الاستدعاء بعد كل حصة." },
+    { title:"مفردات من المسلسلات والكيبوب", desc:"+١٠٠ عبارة من المسلسلات والأغاني التي تحبها." },
+    { title:"عربي ← كوري طوال الكتاب", desc:"ترجمة جنباً إلى جنب حتى لا يضيع شيء في الترجمة." },
+  ] : [
+    { title:"Step-by-step lessons across 4 classes", desc:"Vowels, consonants, syllable blocks, batchim — the full alphabet." },
+    { title:"TOPIK-style writing drills", desc:"Stroke-order practice and recall exercises after every lesson." },
+    { title:"K-drama and K-pop vocabulary", desc:"100+ phrases pulled from the shows and songs you already love." },
+    { title:"English → Korean throughout", desc:"Side-by-side translation so nothing gets lost in translation." },
+  ];
+  const badge       = isAr ? "كتاب مبتدئين · كتاب ٠١" : "BEGINNER WORKBOOK · BOOK 01";
+  const seriesLabel = isAr ? "كلوفرز · سلسلة الكورية · الكتاب ٠١" : "K-LOVERS · KOREAN SERIES · BOOK 01";
+  const headLine1   = isAr ? "اقرأ الهانغول قبل" : "Read Hangul before";
+  const headLine2   = isAr ? "مسلسلك الكوري التالي." : "your next K-drama.";
+  const bodyText    = isAr
+    ? "إذا سبق وتوقفت مسلسلاً كورياً لتحدّق في لافتة، أو أعدت مقاطع أغنية كيبوب لتحاكي كلماتها — هذا الكتاب لك. في ٦ ساعات فقط، انتقل من الصفر إلى قراءة وكتابة الهانغول."
+    : "If you've ever paused a K-drama to stare at a sign, or rewound a K-pop chorus to mouth the words — this workbook is for you. In just 6 hours, go from zero to reading and writing Hangul.";
+  const insideLabel = isAr ? "محتويات الكتاب" : "INSIDE THIS WORKBOOK";
+  const authorLabel = isAr ? "عن المؤلفة" : "ABOUT THE AUTHOR";
+  const authorName  = isAr ? "رهام الشرقاوي" : "REHAM ELSHRKAWY";
+  const authorBio   = isAr
+    ? "مؤسِّسة أكاديمية كلوفرز. تُدرّس اللغة الكورية للمتعلمين الناطقين بالعربية من خلال المسلسلات والكيبوب."
+    : "Founder of Klovers Academy. Teaching Korean to Arabic-speaking learners through K-drama and K-pop.";
+  const footer      = isAr
+    ? "أكاديمية كلوفرز · KLOVERSEGY.COM · ISBN 978-0-00-000001"
+    : "KLOVERS ACADEMY · KLOVERSEGY.COM · ISBN 978-0-00-000001";
 
   return (
-    <div className="book-page" style={{
+    <div className="book-page cover-dark" style={{
       width:"210mm", minHeight:"297mm",
-      background:`linear-gradient(160deg, #FFE5E5 0%, ${KIDS_PINK} 50%, #FFF1E0 100%)`,
       pageBreakAfter:"always", breakAfter:"page",
       position:"relative", overflow:"hidden", boxSizing:"border-box",
       direction: isAr ? "rtl" : "ltr",
       fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
-      padding:"14mm 14mm",
+      padding:"14mm 16mm",
+      display:"flex", flexDirection:"column",
     }}>
-      {/* Decorative scattered hangul characters */}
-      {decoChars.map((ch, i) => {
-        const positions = [
-          { top:"6%",  left:"4%",  size:30, op:0.10 },
-          { top:"3%",  left:"22%", size:22, op:0.12 },
-          { top:"8%",  left:"82%", size:28, op:0.10 },
-          { top:"14%", left:"94%", size:20, op:0.12 },
-          { top:"42%", left:"2%",  size:26, op:0.10 },
-          { top:"50%", left:"96%", size:24, op:0.10 },
-          { top:"68%", left:"6%",  size:22, op:0.12 },
-          { top:"75%", left:"92%", size:30, op:0.10 },
-          { top:"88%", left:"14%", size:24, op:0.12 },
-          { top:"92%", left:"78%", size:26, op:0.10 },
-          { top:"22%", left:"8%",  size:20, op:0.12 },
-          { top:"30%", left:"90%", size:18, op:0.12 },
-          { top:"58%", left:"3%",  size:18, op:0.12 },
-          { top:"82%", left:"50%", size:18, op:0.10 },
-        ];
-        const p = positions[i % positions.length];
-        return (
-          <div key={i} style={{
-            position:"absolute", top:p.top, left:p.left,
-            fontSize:`${p.size}px`, fontWeight:900,
-            color:KIDS_RED, opacity:p.op, pointerEvents:"none",
-          }}>{ch}</div>
-        );
-      })}
 
-      {/* Top brand bar with real Klovers logo */}
+      {/* Top row: badge + K logo */}
       <div style={{
         display:"flex", justifyContent:"space-between", alignItems:"center",
-        marginBottom:"6mm", direction: isAr ? "rtl" : "ltr",
+        marginBottom:"8mm",
       }}>
         <div style={{
-          background:"#fff", borderRadius:"22px",
-          padding:"4px 14px 4px 4px", display:"flex", alignItems:"center", gap:"8px",
-          border:`2px solid ${KIDS_RED}`, boxShadow:"0 3px 0 rgba(0,0,0,0.05)",
+          border:`2px solid ${Y}`, color:Y,
+          fontSize:"10px", fontWeight:900, padding:"5px 14px",
+          borderRadius:"20px", letterSpacing:"2px",
+        }}>{badge}</div>
+        <div style={{
+          width:"52px", height:"52px", borderRadius:"50%",
+          background:Y, display:"flex", flexDirection:"column",
+          alignItems:"center", justifyContent:"center", flexShrink:0,
         }}>
-          <img src="/klovers-logo.jpg" alt="Klovers"
-            style={{ width:"34px", height:"34px", borderRadius:"50%", objectFit:"cover", display:"block" }} />
-          <div style={{ display:"flex", flexDirection:"column", lineHeight:1 }}>
-            <span style={{ fontSize:"13px", fontWeight:900, color:KIDS_RED, letterSpacing:"2px" }}>KLOVERS</span>
-            <span style={{ fontSize:"9px", fontWeight:700, color:"#888", letterSpacing:"1.5px", marginTop:"2px" }}>클로버스 · KOREAN</span>
-          </div>
+          <span style={{ fontSize:"22px", fontWeight:900, color:BK, lineHeight:1 }}>K</span>
+          <span style={{ fontSize:"9px", fontWeight:700, color:BK, lineHeight:1, marginTop:"1px" }}>Lovers</span>
         </div>
-        <div style={{
-          background:"#fff", border:`2px solid ${GOLD}`, color:GOLD,
-          fontSize:"10px", fontWeight:900, padding:"5px 12px",
-          borderRadius:"22px", letterSpacing:"1.5px",
-        }}>{levelLabel}</div>
       </div>
 
-      {/* Hero hangul + title */}
-      <div style={{
-        background:"#fff", borderRadius:"24px",
-        border:`3px dashed ${KIDS_RED}`,
-        padding:"16mm 8mm 10mm",
-        textAlign:"center",
-        boxShadow:"0 8px 0 rgba(0,0,0,0.04)",
-        marginBottom:"6mm",
-        position:"relative",
-      }}>
-        {/* Korean flag corner */}
+      {/* Series label with yellow underline accent */}
+      <div style={{ marginBottom:"6mm" }}>
         <div style={{
-          position:"absolute", top:"-12px", insetInlineEnd:"20px",
-          background:"#fff", border:`2px solid ${KIDS_RED}`,
-          padding:"3px 10px", borderRadius:"14px",
-          fontSize:"15px",
-        }}>🇰🇷</div>
-
-        {/* Klovers mascot peeking from corner */}
-        <img src="/klovers-mascot.png" alt=""
-          style={{ position:"absolute", top:"-18px", insetInlineStart:"18px",
-            width:"56px", height:"56px", objectFit:"contain",
-            filter:"drop-shadow(0 4px 6px rgba(0,0,0,0.15))" }} />
-
-        <div style={{
-          fontSize:"150px", fontWeight:900, lineHeight:0.9,
-          color:KIDS_RED, letterSpacing:"-4px",
-          textShadow:`6px 6px 0 ${GOLD}, 12px 12px 0 rgba(212,175,55,0.2)`,
-          marginBottom:"8mm",
-        }}>한글</div>
-
-        <div style={{
-          fontSize:"36px", fontWeight:900, color:"#222", lineHeight:1.1,
-          marginBottom:"3mm",
-        }}>{title}</div>
-        <div style={{
-          fontSize:"42px", fontWeight:900, color:KIDS_RED, lineHeight:1,
-          marginBottom:"6mm",
-        }}>{titleSub}</div>
-
-        <div style={{
-          fontSize:"13px", color:"#444", fontWeight:600,
-          lineHeight:1.6, maxWidth:"140mm", margin:"0 auto",
-        }}>{subtitle}</div>
+          fontSize:"11px", color:Y, fontWeight:700,
+          letterSpacing:"3px", textTransform:"uppercase", marginBottom:"3px",
+        }}>{seriesLabel}</div>
+        <div style={{ width:"40px", height:"2px", background:Y }} />
       </div>
 
-      {/* Character + features */}
+      {/* Main headline */}
+      <div style={{ marginBottom:"6mm" }}>
+        <div style={{ fontSize:"44px", fontWeight:900, color:"#fff", lineHeight:1.05 }}>{headLine1}</div>
+        <div style={{ fontSize:"44px", fontWeight:900, color:Y, lineHeight:1.05 }}>{headLine2}</div>
+      </div>
+
+      {/* Body paragraph */}
+      <div style={{ fontSize:"13px", color:"#aaa", lineHeight:1.7, marginBottom:"6mm", maxWidth:"160mm" }}>
+        {bodyText}
+      </div>
+
+      {/* Divider */}
+      <div style={{ borderTop:"1px solid #333", marginBottom:"6mm" }} />
+
+      {/* Inside this workbook */}
       <div style={{
-        display:"flex", gap:"8mm", alignItems:"center",
-        marginBottom:"6mm", direction: isAr ? "rtl" : "ltr",
-      }}>
-        <img src="/characters/hanbok-pair.jpg" alt=""
-          style={{ width:"75mm", height:"auto", borderRadius:"14px",
-            boxShadow:"0 6px 0 rgba(0,0,0,0.06)" }} />
-        <div style={{ flex:1, display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6px" }}>
-          {features.map((f, i) => (
-            <div key={i} style={{
-              background:"#fff", border:`2px solid ${KIDS_GREEN}`,
-              borderRadius:"12px", padding:"8px 10px",
-              display:"flex", alignItems:"center", gap:"8px",
-              boxShadow:"0 3px 0 rgba(0,0,0,0.04)",
-            }}>
-              <span style={{ fontSize:"22px" }}>{f.icon}</span>
-              <span style={{ fontSize:"11px", fontWeight:800, color:"#222", lineHeight:1.3 }}>{f.label}</span>
+        fontSize:"10px", color:Y, fontWeight:700,
+        letterSpacing:"3px", textTransform:"uppercase", marginBottom:"5mm",
+      }}>{insideLabel}</div>
+
+      {/* 4 bullet points */}
+      <div style={{ display:"flex", flexDirection:"column", gap:"5mm", marginBottom:"6mm" }}>
+        {bullets.map((b, i) => (
+          <div key={i} style={{ display:"flex", gap:"8mm", alignItems:"flex-start" }}>
+            <div style={{
+              width:"8px", height:"8px", borderRadius:"50%",
+              background:Y, flexShrink:0, marginTop:"4px",
+            }} />
+            <div>
+              <div style={{ fontSize:"13px", fontWeight:800, color:"#fff", marginBottom:"2px" }}>{b.title}</div>
+              <div style={{ fontSize:"12px", color:"#888", lineHeight:1.5 }}>{b.desc}</div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
-      {/* Bottom strip: book number + brand + QR */}
+      {/* Divider */}
+      <div style={{ borderTop:"1px solid #333", marginBottom:"6mm" }} />
+
+      {/* About the author */}
       <div style={{
-        background:"#fff", border:`2px solid ${KIDS_BLUE}`,
-        borderRadius:"14px", padding:"8px 14px",
-        display:"flex", justifyContent:"space-between", alignItems:"center",
-        direction: isAr ? "rtl" : "ltr",
+        fontSize:"9px", color:"#666", fontWeight:700,
+        letterSpacing:"2.5px", textTransform:"uppercase", marginBottom:"3mm",
+      }}>{authorLabel}</div>
+      <div style={{ fontSize:"22px", fontWeight:900, color:"#fff", marginBottom:"3mm" }}>{authorName}</div>
+      <div style={{ fontSize:"12px", color:"#888", lineHeight:1.6, marginBottom:"6mm" }}>{authorBio}</div>
+
+      {/* Footer */}
+      <div style={{
+        marginTop:"auto",
+        display:"flex", justifyContent:"space-between", alignItems:"flex-end",
       }}>
-        <div>
-          <div style={{ fontSize:"10px", color:KIDS_BLUE, fontWeight:900, letterSpacing:"2px" }}>{bookOf}</div>
-          <div style={{ fontSize:"13px", fontWeight:900, color:"#222" }}>{academy}</div>
-          <div style={{ fontSize:"10px", color:"#666", fontWeight:600, marginTop:"2px" }}>kloversegy.com</div>
+        <div style={{ fontSize:"9px", color:"#555", letterSpacing:"1px" }}>{footer}</div>
+        <div style={{ background:"#fff", padding:"6px", borderRadius:"4px" }}>
+          <BarcodeIcon />
         </div>
-        <div style={{
-          width:"40px", height:"40px", background:"#fff",
-          border:`2px solid ${KIDS_RED}`, borderRadius:"6px",
-          display:"flex", alignItems:"center", justifyContent:"center",
-          fontSize:"22px",
-        }}>📱</div>
       </div>
     </div>
   );
 }
 
-function CoverAr() { return <KidsCover lang="ar" />; }
+function Spine() {
+  return (
+    <div className="book-page cover-yellow" style={{
+      width:"25mm", minHeight:"297mm",
+      pageBreakAfter:"always", breakAfter:"page",
+      boxSizing:"border-box",
+      display:"flex", flexDirection:"column",
+      alignItems:"center",
+      padding:"10mm 0",
+    }}>
+      {/* K circle */}
+      <div style={{
+        width:"38px", height:"38px", borderRadius:"50%",
+        background:BK, display:"flex", alignItems:"center", justifyContent:"center",
+        flexShrink:0,
+      }}>
+        <span style={{ fontSize:"17px", fontWeight:900, color:"#fff" }}>K</span>
+      </div>
+
+      {/* Spine text */}
+      <div style={{
+        flex:1, display:"flex", flexDirection:"column",
+        alignItems:"center", justifyContent:"center", gap:"6mm",
+      }}>
+        <div style={{
+          writingMode:"vertical-rl", transform:"rotate(180deg)",
+          fontSize:"18px", fontWeight:900, color:BK,
+          letterSpacing:"3px", textTransform:"uppercase",
+          fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+        }}>KLOVERS HANGUL</div>
+        <div style={{
+          writingMode:"vertical-rl", transform:"rotate(180deg)",
+          fontSize:"10px", fontWeight:700, color:BK,
+          letterSpacing:"2px", textTransform:"uppercase",
+          fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+        }}>REHAM ELSHRKAWY</div>
+      </div>
+
+      {/* 01 box */}
+      <div style={{
+        width:"36px", height:"40px", background:BK, borderRadius:"4px",
+        display:"flex", alignItems:"center", justifyContent:"center",
+      }}>
+        <span style={{ fontSize:"16px", fontWeight:900, color:"#fff" }}>01</span>
+      </div>
+    </div>
+  );
+}
+
+function CoverAr() { return <EdCover lang="ar" />; }
 
 function WelcomeAr() {
   const plan = [
@@ -2414,7 +2415,7 @@ function CourseEn() {
   );
 }
 
-function CoverEn() { return <KidsCover lang="en" />; }
+function CoverEn() { return <EdCover lang="en" />; }
 
 function StudyPlanEn() {
   const days = [
@@ -3329,83 +3330,76 @@ function AnswerEn() {
 function BackCoverAr() {
   return (
     <div className="book-page" style={{
-      width:"210mm", minHeight:"297mm", background:BK,
+      width:"210mm", minHeight:"297mm",
       pageBreakAfter:"always", breakAfter:"page",
-      position:"relative", overflow:"hidden", boxSizing:"border-box",
+      boxSizing:"border-box",
       display:"flex", flexDirection:"column",
-      padding:"16mm 16mm 12mm", direction:"rtl",
+      overflow:"hidden",
     }}>
-      <div style={{ position:"absolute", top:0, left:0, right:0, height:"14px", background:Y }} />
-      <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"14px", background:Y }} />
-      <div style={{ position:"absolute", top:"14px", bottom:"14px", left:0, width:"8px", background:Y }} />
-      <div style={{ position:"absolute", top:"14px", bottom:"14px", right:0, width:"8px", background:Y }} />
+      {/* Top yellow section */}
+      <div style={{
+        background:Y, flex:"0 0 55%",
+        position:"relative",
+        padding:"10mm 14mm 8mm",
+        display:"flex", flexDirection:"column",
+        alignItems:"center", justifyContent:"flex-end",
+        direction:"ltr",
+      }}>
+        {/* KLOVERS circle logo top right */}
+        <div style={{
+          position:"absolute", top:"10mm", right:"14mm",
+          width:"52px", height:"52px", borderRadius:"50%",
+          border:"2px solid #111", background:"#fff",
+          display:"flex", flexDirection:"column",
+          alignItems:"center", justifyContent:"center", gap:"1px",
+        }}>
+          <div style={{ fontSize:"8px", fontWeight:900, color:BK, letterSpacing:"1px" }}>KLOVERS</div>
+          <MugunghwaIcon size={13} color={BK} />
+          <div style={{ fontSize:"7px", fontWeight:700, color:BK, letterSpacing:"1px" }}>KOREAN</div>
+        </div>
 
-      {/* Logo */}
-      <div style={{ display:"flex", justifyContent:"center", marginTop:"4mm", marginBottom:"6mm" }}>
-        <img src="/klovers-logo.jpg" alt="Klovers" style={{ height:"52px", objectFit:"contain", borderRadius:"8px" }} />
-      </div>
-
-      <DancheongBorder />
-
-      {/* Book description */}
-      <div style={{ color:"#ccc", fontSize:"12px", lineHeight:1.9, marginBottom:"7mm" }}>
-        <div style={{ color:Y, fontWeight:900, fontSize:"15px", marginBottom:"8px" }}>كتاب الهانغول الرسمي — المستوى الأول</div>
-        ابدأ رحلتك في تعلم الكورية مع <strong style={{color:Y}}>Klovers</strong> — الكتاب الأول في سلسلة من ٦ كتب تأخذك من الصفر إلى الطلاقة.
-        ستتعلم الأبجدية الكورية كاملةً، قواعد القراءة، وأكثر الكلمات شيوعاً في المسلسلات الكورية والحياة اليومية.
-        كل حرف مع صورة ذهنية تُثبّته في ذاكرتك!
-      </div>
-
-      {/* What you'll learn */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"7px", marginBottom:"7mm" }}>
-        {[
-          { icon:"🔤", text:"١٤ حرفاً ساكناً + أصواتها وأمثلتها" },
-          { icon:"🗣️", text:"١٠ حروف مد + الكتل المقطعية" },
-          { icon:"⬇️", text:"قواعد الباتشيم — الحرف الأخير" },
-          { icon:"🎬", text:"مفردات أساسية من المسلسلات الكورية" },
-        ].map((item, i) => (
-          <div key={i} style={{ display:"flex", alignItems:"center", gap:"8px", background:"#1a1a1a", borderRadius:"8px", padding:"9px 12px" }}>
-            <span style={{ fontSize:"16px" }}>{item.icon}</span>
-            <span style={{ fontSize:"11px", color:"#ddd" }}>{item.text}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Series strip */}
-      <div style={{ marginBottom:"8mm" }}>
-        <div style={{ fontSize:"11px", color:"#777", marginBottom:"6px" }}>سلسلة Klovers الكاملة — ٦ كتب من الصفر للطلاقة:</div>
-        <div style={{ display:"flex", gap:"5px", flexWrap:"wrap" }}>
-          {["① الهانغول","② التحيات","③ الأرقام","④ القواعد","⑤ المحادثة","⑥ الطلاقة"].map((b, i) => (
-            <div key={i} style={{
-              background: i===0 ? Y : "#222",
-              color: i===0 ? BK : "#666",
-              fontSize:"11px", fontWeight:700,
-              padding:"5px 11px", borderRadius:"20px",
-              border:`1px solid ${i===0?Y:"#444"}`,
-            }}>{b}</div>
-          ))}
+        {/* Big Korean chars */}
+        <div style={{
+          fontSize:"150px", fontWeight:900, color:BK, lineHeight:0.85,
+          fontFamily:"'Noto Sans KR', sans-serif",
+          letterSpacing:"-4px", textAlign:"center",
+          marginBottom:"4mm",
+        }}>한글</div>
+        <div style={{ fontSize:"26px", fontWeight:900, color:BK, letterSpacing:"2px", textAlign:"center", marginBottom:"3mm" }}>
+          KLOVERS HANGUL
+        </div>
+        <div style={{ fontSize:"13px", color:BK, textAlign:"center", marginBottom:"5mm" }}>
+          اقرأ وأكتب الكورية — خطوة بخطوة
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:"6px" }}>
+          <div style={{ width:"40px", height:"1px", background:BK }} />
+          <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:BK }} />
+          <div style={{ width:"40px", height:"1px", background:BK }} />
         </div>
       </div>
 
-      {/* Cialdini: social proof testimonial */}
-      <div style={{ background:"#1a1a1a", borderRadius:"10px", padding:"12px 14px", marginBottom:"6mm" }}>
-        <div style={{ fontSize:"22px", color:Y, lineHeight:1 }}>"</div>
-        <div style={{ fontSize:"11px", color:"#ddd", lineHeight:1.8, fontStyle:"italic", marginTop:"-4px" }}>
-          في أسبوع واحد بس كنت أقدر أقرأ اسمي بالكورية وأفهم كلمات من المسلسلات — مش صدقت نفسي!
+      {/* Bottom black section */}
+      <div style={{
+        background:BK, flex:1,
+        padding:"10mm 14mm 8mm",
+        display:"flex", flexDirection:"column",
+        direction:"rtl",
+      }}>
+        <div style={{ width:"30px", height:"4px", background:Y, marginBottom:"6mm" }} />
+        <div style={{ fontSize:"19px", fontWeight:900, color:Y, letterSpacing:"2px", marginBottom:"4mm" }}>
+          اقرأ الكورية في ٦ ساعات فقط
         </div>
-        <div style={{ fontSize:"10px", color:Y, fontWeight:700, marginTop:"6px" }}>— سارة م. | القاهرة ⭐⭐⭐⭐⭐</div>
-      </div>
-
-      {/* Bottom: QR + website + barcode */}
-      <div style={{ marginTop:"auto", display:"flex", justifyContent:"space-between", alignItems:"flex-end", gap:"12px" }}>
-        <QRPlaceholder size={72} label="للصوت والنطق" />
-        <div style={{ textAlign:"center" }}>
-          <div style={{ fontSize:"14px", color:Y, fontWeight:900 }}>klovers.academy</div>
-          <div style={{ fontSize:"11px", color:"#555", marginTop:"4px" }}>تعلّم الكورية مجاناً</div>
-          <div style={{ fontSize:"10px", color:"#444", marginTop:"8px" }}>© 2025 Klovers Korean Academy</div>
-          <div style={{ fontSize:"10px", color:"#444", marginTop:"2px" }}>رسومات أصلية — حقوق النشر محفوظة لـ Klovers</div>
+        <div style={{ width:"100%", height:"1px", background:"#333", marginBottom:"5mm" }} />
+        <div style={{ fontSize:"13px", color:"#fff", lineHeight:1.6, marginBottom:"2mm" }}>
+          كتاب الأبجدية الكورية للمبتدئين تماماً.
         </div>
-        <div style={{ background:"#fff", padding:"8px", borderRadius:"8px" }}>
-          <BarcodeIcon />
+        <div style={{ fontSize:"13px", color:"#888", fontStyle:"italic", lineHeight:1.6, marginBottom:"7mm" }}>
+          مستوحى من المسلسلات الكورية والكيبوب.
+        </div>
+        <div style={{ width:"60px", height:"2px", background:Y, marginBottom:"5mm" }} />
+        <div style={{ fontSize:"18px", fontWeight:900, color:"#fff", marginBottom:"auto" }}>رهام الشرقاوي</div>
+        <div style={{ fontSize:"9px", color:"#555", letterSpacing:"1px", marginTop:"6mm" }}>
+          KLOVERS ACADEMY · KLOVERSEGY.COM · ISBN 978-0-00-000000-0
         </div>
       </div>
     </div>
@@ -3416,83 +3410,74 @@ function BackCoverAr() {
 function BackCoverEn() {
   return (
     <div className="book-page" style={{
-      width:"210mm", minHeight:"297mm", background:BK,
+      width:"210mm", minHeight:"297mm",
       pageBreakAfter:"always", breakAfter:"page",
-      position:"relative", overflow:"hidden", boxSizing:"border-box",
+      boxSizing:"border-box",
       display:"flex", flexDirection:"column",
-      padding:"16mm 16mm 12mm",
+      overflow:"hidden",
     }}>
-      <div style={{ position:"absolute", top:0, left:0, right:0, height:"14px", background:Y }} />
-      <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"14px", background:Y }} />
-      <div style={{ position:"absolute", top:"14px", bottom:"14px", left:0, width:"8px", background:Y }} />
-      <div style={{ position:"absolute", top:"14px", bottom:"14px", right:0, width:"8px", background:Y }} />
+      {/* Top yellow section */}
+      <div style={{
+        background:Y, flex:"0 0 55%",
+        position:"relative",
+        padding:"10mm 14mm 8mm",
+        display:"flex", flexDirection:"column",
+        alignItems:"center", justifyContent:"flex-end",
+      }}>
+        {/* KLOVERS circle logo top right */}
+        <div style={{
+          position:"absolute", top:"10mm", right:"14mm",
+          width:"52px", height:"52px", borderRadius:"50%",
+          border:"2px solid #111", background:"#fff",
+          display:"flex", flexDirection:"column",
+          alignItems:"center", justifyContent:"center", gap:"1px",
+        }}>
+          <div style={{ fontSize:"8px", fontWeight:900, color:BK, letterSpacing:"1px" }}>KLOVERS</div>
+          <MugunghwaIcon size={13} color={BK} />
+          <div style={{ fontSize:"7px", fontWeight:700, color:BK, letterSpacing:"1px" }}>KOREAN</div>
+        </div>
 
-      {/* Logo */}
-      <div style={{ display:"flex", justifyContent:"center", marginTop:"4mm", marginBottom:"6mm" }}>
-        <img src="/klovers-logo.jpg" alt="Klovers" style={{ height:"52px", objectFit:"contain", borderRadius:"8px" }} />
-      </div>
-
-      <DancheongBorder />
-
-      {/* Book description */}
-      <div style={{ color:"#ccc", fontSize:"12px", lineHeight:1.9, marginBottom:"7mm" }}>
-        <div style={{ color:Y, fontWeight:900, fontSize:"15px", marginBottom:"8px" }}>Official Hangul Starter Book — Level 1</div>
-        Begin your Korean journey with <strong style={{color:Y}}>Klovers</strong> — Book 1 in a 6-book series that takes you from zero to fluency.
-        Learn the complete Korean alphabet, reading rules, and the most common words from K-dramas and daily life.
-        Every letter comes with a visual mnemonic to lock it in your memory!
-      </div>
-
-      {/* What you'll learn */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"7px", marginBottom:"7mm" }}>
-        {[
-          { icon:"🔤", text:"14 consonants with sounds and examples" },
-          { icon:"🗣️", text:"10 vowels + how syllable blocks work" },
-          { icon:"⬇️", text:"Batchim rules — final consonants" },
-          { icon:"🎬", text:"Essential K-drama vocabulary" },
-        ].map((item, i) => (
-          <div key={i} style={{ display:"flex", alignItems:"center", gap:"8px", background:"#1a1a1a", borderRadius:"8px", padding:"9px 12px" }}>
-            <span style={{ fontSize:"16px" }}>{item.icon}</span>
-            <span style={{ fontSize:"11px", color:"#ddd" }}>{item.text}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Series strip */}
-      <div style={{ marginBottom:"8mm" }}>
-        <div style={{ fontSize:"11px", color:"#777", marginBottom:"6px" }}>The complete Klovers Series — 6 books from zero to fluency:</div>
-        <div style={{ display:"flex", gap:"5px", flexWrap:"wrap" }}>
-          {["① Hangul","② Greetings","③ Numbers","④ Grammar","⑤ Conversation","⑥ Fluency"].map((b, i) => (
-            <div key={i} style={{
-              background: i===0 ? Y : "#222",
-              color: i===0 ? BK : "#666",
-              fontSize:"11px", fontWeight:700,
-              padding:"5px 11px", borderRadius:"20px",
-              border:`1px solid ${i===0?Y:"#444"}`,
-            }}>{b}</div>
-          ))}
+        {/* Big Korean chars */}
+        <div style={{
+          fontSize:"150px", fontWeight:900, color:BK, lineHeight:0.85,
+          fontFamily:"'Noto Sans KR', sans-serif",
+          letterSpacing:"-4px", textAlign:"center",
+          marginBottom:"4mm",
+        }}>한글</div>
+        <div style={{ fontSize:"26px", fontWeight:900, color:BK, letterSpacing:"2px", textAlign:"center", marginBottom:"3mm" }}>
+          KLOVERS HANGUL
+        </div>
+        <div style={{ fontSize:"13px", color:BK, textAlign:"center", marginBottom:"5mm" }}>
+          Read and Write Korean — Step by Step
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:"6px" }}>
+          <div style={{ width:"40px", height:"1px", background:BK }} />
+          <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:BK }} />
+          <div style={{ width:"40px", height:"1px", background:BK }} />
         </div>
       </div>
 
-      {/* Cialdini: social proof testimonial */}
-      <div style={{ background:"#1a1a1a", borderRadius:"10px", padding:"12px 14px", marginBottom:"6mm" }}>
-        <div style={{ fontSize:"22px", color:Y, lineHeight:1 }}>"</div>
-        <div style={{ fontSize:"11px", color:"#ddd", lineHeight:1.8, fontStyle:"italic", marginTop:"-4px" }}>
-          In just one week I could read my name in Korean and recognize words from K-dramas. I couldn't believe it!
+      {/* Bottom black section */}
+      <div style={{
+        background:BK, flex:1,
+        padding:"10mm 14mm 8mm",
+        display:"flex", flexDirection:"column",
+      }}>
+        <div style={{ width:"30px", height:"4px", background:Y, marginBottom:"6mm" }} />
+        <div style={{ fontSize:"19px", fontWeight:900, color:Y, letterSpacing:"2px", marginBottom:"4mm" }}>
+          READ KOREAN IN JUST 6 HOURS
         </div>
-        <div style={{ fontSize:"10px", color:Y, fontWeight:700, marginTop:"6px" }}>— Sara M., Cairo ⭐⭐⭐⭐⭐</div>
-      </div>
-
-      {/* Bottom: QR + website + barcode */}
-      <div style={{ marginTop:"auto", display:"flex", justifyContent:"space-between", alignItems:"flex-end", gap:"12px" }}>
-        <QRPlaceholder size={72} label="Scan for audio" />
-        <div style={{ textAlign:"center" }}>
-          <div style={{ fontSize:"14px", color:Y, fontWeight:900 }}>klovers.academy</div>
-          <div style={{ fontSize:"11px", color:"#555", marginTop:"4px" }}>Learn Korean Free Online</div>
-          <div style={{ fontSize:"10px", color:"#444", marginTop:"8px" }}>© 2025 Klovers Korean Academy</div>
-          <div style={{ fontSize:"10px", color:"#444", marginTop:"2px" }}>Original illustrations — © Klovers Korean Academy</div>
+        <div style={{ width:"100%", height:"1px", background:"#333", marginBottom:"5mm" }} />
+        <div style={{ fontSize:"13px", color:"#fff", lineHeight:1.6, marginBottom:"2mm" }}>
+          The Korean Alphabet Workbook for Complete Beginners.
         </div>
-        <div style={{ background:"#fff", padding:"8px", borderRadius:"8px" }}>
-          <BarcodeIcon />
+        <div style={{ fontSize:"13px", color:"#888", fontStyle:"italic", lineHeight:1.6, marginBottom:"7mm" }}>
+          Inspired by K-drama and K-pop.
+        </div>
+        <div style={{ width:"60px", height:"2px", background:Y, marginBottom:"5mm" }} />
+        <div style={{ fontSize:"18px", fontWeight:900, color:"#fff", marginBottom:"auto" }}>REHAM ELSHRKAWY</div>
+        <div style={{ fontSize:"9px", color:"#555", letterSpacing:"1px", marginTop:"6mm" }}>
+          KLOVERS ACADEMY · KLOVERSEGY.COM · ISBN 978-0-00-000000-0
         </div>
       </div>
     </div>
@@ -4787,6 +4772,9 @@ export default function HangulBookPage() {
           background: #fffdf8 !important;
         }
 
+        .book-page.cover-dark   { background: #111111 !important; }
+        .book-page.cover-yellow { background: #FFFF00 !important; }
+
         /* Override white backgrounds on page content */
         .book-page > div[style*="background:#fff"],
         .book-page > div[style*='background: #fff'] {
@@ -4862,6 +4850,7 @@ export default function HangulBookPage() {
         {isAr ? (
           <>
             <CoverAr />
+            <Spine />
             <StoryPageAr />
             <TocAr />
             <CoursePlan lang="ar" />
@@ -4936,6 +4925,7 @@ export default function HangulBookPage() {
         ) : (
           <>
             <CoverEn />
+            <Spine />
             <StoryPageEn />
             <TocEn />
             <CoursePlan lang="en" />
