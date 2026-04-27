@@ -88,6 +88,10 @@ KLovers Academy — kloversegy.com`;
   </style>
 </head>
 <body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Tahoma,Arial,sans-serif;">
+<!-- Preheader: shown in inbox preview, hidden in email body -->
+<div style="display:none;font-size:1px;color:#f3f4f6;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+  Book a free live Korean class — limited spots, no credit card. احجز كلاسك المجاني الآن! 🎓
+</div>
 <table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:40px 20px;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;">
@@ -241,6 +245,9 @@ serve(async (req) => {
     const dry_run: boolean = body.dry_run !== false;
     // broadcast_key defaults to today's date so the same admin can't fire twice in a day
     const broadcast_key: string = body.broadcast_key ?? `trial_broadcast_${new Date().toISOString().slice(0, 10)}`;
+    // Optional level segmentation: only send to profiles with this level value.
+    // E.g. body.level_filter = "beginner" targets only beginners.
+    const level_filter: string | null = body.level_filter ?? null;
 
     // ── Idempotency check ─────────────────────────────────────────────────────
     if (!dry_run) {
@@ -260,14 +267,21 @@ serve(async (req) => {
     }
 
     // ── Fetch profiles ────────────────────────────────────────────────────────
-    const { data: profiles, error: profileErr } = await supabase
+    let profilesQuery = supabase
       .from("profiles")
-      .select("user_id, name, email, email_unsubscribed, unsubscribe_token")
+      .select("user_id, name, email, email_unsubscribed, unsubscribe_token, level")
       .not("email", "is", null)
       .neq("email_unsubscribed", true);
 
+    // Apply level segmentation filter if provided
+    if (level_filter) {
+      profilesQuery = profilesQuery.eq("level", level_filter);
+    }
+
+    const { data: profiles, error: profileErr } = await profilesQuery;
+
     if (profileErr) throw profileErr;
-    if (!profiles?.length) return ok({ dry_run, sent: 0, skipped: 0, total: 0 });
+    if (!profiles?.length) return ok({ dry_run, sent: 0, skipped: 0, total: 0, level_filter });
 
     // ── Dry run ───────────────────────────────────────────────────────────────
     if (dry_run) {
@@ -276,6 +290,7 @@ serve(async (req) => {
         sent: 0,
         skipped: profiles.length,
         total: profiles.length,
+        level_filter,
         preview_subject: buildBroadcastEmail("Student", null).subject,
         recipients: profiles.map((p) => p.email),
       });

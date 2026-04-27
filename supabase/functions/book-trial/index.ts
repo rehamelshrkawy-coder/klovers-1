@@ -6,17 +6,34 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Rate limiter
-const rateLimitMap = new Map<string, number[]>();
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = rateLimitMap.get(ip) || [];
-  const recent = timestamps.filter((t) => now - t < 60_000);
-  rateLimitMap.set(ip, recent);
-  if (recent.length >= 5) return true;
-  recent.push(now);
-  rateLimitMap.set(ip, recent);
-  return false;
+// DB-backed rate limiter — survives Edge Function cold starts.
+// Uses the trial_rate_limits table with 1-hour windows.
+// Max RATE_LIMIT_MAX attempts per identifier per window.
+const RATE_LIMIT_MAX = 5;
+
+async function checkRateLimit(
+  supabase: ReturnType<typeof createClient>,
+  identifier: string,
+  action = "book",
+): Promise<boolean> {
+  // Truncate to the current hour bucket
+  const windowStart = new Date();
+  windowStart.setMinutes(0, 0, 0);
+
+  // UPSERT: increment counter; if it exceeds the limit, we're rate-limited.
+  const { data, error } = await supabase.rpc("upsert_trial_rate_limit", {
+    p_identifier: identifier,
+    p_action: action,
+    p_window_start: windowStart.toISOString(),
+    p_max_attempts: RATE_LIMIT_MAX,
+  });
+  if (error) {
+    // Fail open — don't block legitimate requests if the table/function is missing.
+    console.warn("[book-trial] rate limit check error:", error.message);
+    return false;
+  }
+  // Returns true if the caller is rate-limited (attempt_count > max)
+  return data === true;
 }
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -85,13 +102,6 @@ Deno.serve(async (req) => {
       req.headers.get("cf-connecting-ip") ||
       "unknown";
 
-    if (isRateLimited(ip)) {
-      return new Response(
-        JSON.stringify({ error: "Too many submissions. Please try again later." }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
     const body = await req.json();
     const { name, email, phone, country, level, goal, day_of_week, start_time, referrer_id, authed } = body;
 
@@ -102,6 +112,14 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // ── DB-backed rate limiting (survives cold starts) ─────────────────────
+    if (await checkRateLimit(supabase, ip)) {
+      return new Response(
+        JSON.stringify({ error: "Too many submissions. Please try again later." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     let resolvedUserId: string | null = null;
     let resolvedEmail: string | null = null;

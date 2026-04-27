@@ -20,7 +20,7 @@ import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { track } from "@/lib/tracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
-import { CheckCircle2, CalendarPlus, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag } from "lucide-react";
+import { CheckCircle2, CalendarPlus, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Link2, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BookingResult {
@@ -198,12 +198,18 @@ const TrialBookingPage = () => {
     }
   };
 
+  // Referral share link for invite-a-friend CTA on success screen
+  const [referralCopied, setReferralCopied] = useState(false);
+  const referralShareUrl = user
+    ? `https://kloversegy.com/free-trial?ref=${user.id}`
+    : "https://kloversegy.com/free-trial";
+
   // Fire once when success state renders: funnel + Meta Pixel + GA4
   useEffect(() => {
     if (bookingResult) {
       track.custom("post_trial_screen_shown", { trial_date: bookingResult.trial_date });
-      // Meta Pixel Lead event — signals a qualified conversion for paid ads
-      track.lead({ content_name: "trial_booked", trial_date: bookingResult.trial_date });
+      // Meta Pixel Lead event with LTV signal for paid ads optimisation
+      track.lead({ content_name: "trial_booked", trial_date: bookingResult.trial_date, value: 3, currency: "USD" });
       // Log funnel event for acquisition attribution
       logLeadEvent({
         source_type: "free_trial",
@@ -287,6 +293,39 @@ const TrialBookingPage = () => {
                 {t("trialBooking.findLevelTitle")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
+            </div>
+
+            {/* Invite-a-friend card — referral growth loop */}
+            <div className="border border-border rounded-2xl p-5 mb-4 bg-muted/30">
+              <p className="text-sm font-bold text-foreground mb-1 flex items-center gap-1.5">
+                <Link2 className="h-4 w-4 text-primary" />
+                Got a friend who loves K-dramas?
+              </p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Share your personal link — they get a free class, you help grow the community 🙌
+              </p>
+              <div className="flex gap-2">
+                <input
+                  readOnly
+                  value={referralShareUrl}
+                  className="flex-1 text-xs bg-background border border-border rounded-lg px-3 py-2 text-muted-foreground truncate"
+                  aria-label="Your referral link"
+                />
+                <button
+                  onClick={async () => {
+                    try { await navigator.clipboard.writeText(referralShareUrl); } catch {}
+                    setReferralCopied(true);
+                    track.custom("referral_link_copied", { from: "success_screen" });
+                    logLeadEvent({ source_type: "free_trial", cta_label: "referral_link_copied" });
+                    setTimeout(() => setReferralCopied(false), 2000);
+                  }}
+                  className="flex-shrink-0 flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold px-3 py-2 rounded-lg transition-colors"
+                  aria-label="Copy referral link"
+                >
+                  {referralCopied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+                  {referralCopied ? "Copied!" : "Copy"}
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
