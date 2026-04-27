@@ -1290,129 +1290,107 @@ function CourseAr() {
 
 function EdCover({ lang }: { lang: "ar" | "en" }) {
   const isAr = lang === "ar";
-  const bullets = isAr ? [
-    { title:"دروس متدرجة عبر ٤ حصص", desc:"الحروف المتحركة، الساكنة، المقاطع، الباتشيم — الأبجدية كاملة." },
-    { title:"تدريبات الكتابة بأسلوب TOPIK", desc:"تدريبات ترتيب الخطوط وتمارين الاستدعاء بعد كل حصة." },
-    { title:"مفردات من المسلسلات والكيبوب", desc:"+١٠٠ عبارة من المسلسلات والأغاني التي تحبها." },
-    { title:"عربي ← كوري طوال الكتاب", desc:"ترجمة جنباً إلى جنب حتى لا يضيع شيء في الترجمة." },
-  ] : [
-    { title:"Step-by-step lessons across 4 classes", desc:"Vowels, consonants, syllable blocks, batchim — the full alphabet." },
-    { title:"TOPIK-style writing drills", desc:"Stroke-order practice and recall exercises after every lesson." },
-    { title:"K-drama and K-pop vocabulary", desc:"100+ phrases pulled from the shows and songs you already love." },
-    { title:"English → Korean throughout", desc:"Side-by-side translation so nothing gets lost in translation." },
-  ];
-  const badge       = isAr ? "كتاب مبتدئين · كتاب ٠١" : "BEGINNER WORKBOOK · BOOK 01";
-  const seriesLabel = isAr ? "كلوفرز · سلسلة الكورية · الكتاب ٠١" : "K-LOVERS · KOREAN SERIES · BOOK 01";
-  const headLine1   = isAr ? "اقرأ الهانغول قبل" : "Read Hangul before";
-  const headLine2   = isAr ? "مسلسلك الكوري التالي." : "your next K-drama.";
-  const bodyText    = isAr
-    ? "إذا سبق وتوقفت مسلسلاً كورياً لتحدّق في لافتة، أو أعدت مقاطع أغنية كيبوب لتحاكي كلماتها — هذا الكتاب لك. في ٦ ساعات فقط، انتقل من الصفر إلى قراءة وكتابة الهانغول."
-    : "If you've ever paused a K-drama to stare at a sign, or rewound a K-pop chorus to mouth the words — this workbook is for you. In just 6 hours, go from zero to reading and writing Hangul.";
-  const insideLabel = isAr ? "محتويات الكتاب" : "INSIDE THIS WORKBOOK";
-  const authorLabel = isAr ? "عن المؤلفة" : "ABOUT THE AUTHOR";
-  const authorName  = isAr ? "رهام الشرقاوي" : "REHAM ELSHRKAWY";
-  const authorBio   = isAr
-    ? "مؤسِّسة أكاديمية كلوفرز. تُدرّس اللغة الكورية للمتعلمين الناطقين بالعربية من خلال المسلسلات والكيبوب."
-    : "Founder of Klovers Academy. Teaching Korean to Arabic-speaking learners through K-drama and K-pop.";
-  const footer      = isAr
-    ? "أكاديمية كلوفرز · KLOVERSEGY.COM · ISBN 978-0-00-000001"
-    : "KLOVERS ACADEMY · KLOVERSEGY.COM · ISBN 978-0-00-000001";
+  const badge    = isAr ? "كتاب مبتدئين · كتاب ٠١" : "BEGINNER WORKBOOK · BOOK 01";
+  const subtitle = isAr ? "اقرأ وأكتب الكورية — خطوة بخطوة" : "Read and Write Korean — Step by Step";
+  const headline = isAr ? "اقرأ الكورية في ٦ ساعات فقط" : "READ KOREAN IN JUST 6 HOURS";
+  const body1    = isAr ? "كتاب الأبجدية الكورية للمبتدئين تماماً." : "The Korean Alphabet Workbook for Complete Beginners.";
+  const body2    = isAr ? "مستوحى من المسلسلات الكورية والكيبوب." : "Inspired by K-drama and K-pop.";
+  const author   = isAr ? "رهام الشرقاوي" : "REHAM ELSHRKAWY";
 
   return (
-    <div className="book-page cover-dark" style={{
+    <div className="book-page" style={{
       width:"210mm", minHeight:"297mm",
       pageBreakAfter:"always", breakAfter:"page",
-      position:"relative", overflow:"hidden", boxSizing:"border-box",
-      direction: isAr ? "rtl" : "ltr",
-      fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
-      padding:"14mm 16mm",
+      boxSizing:"border-box",
       display:"flex", flexDirection:"column",
+      overflow:"hidden",
     }}>
-
-      {/* Top row: badge + K logo */}
+      {/* Top yellow section */}
       <div style={{
-        display:"flex", justifyContent:"space-between", alignItems:"center",
-        marginBottom:"8mm",
+        background:Y, flex:"0 0 55%",
+        position:"relative",
+        padding:"10mm 14mm 8mm",
+        display:"flex", flexDirection:"column",
+        alignItems:"center", justifyContent:"flex-end",
+        direction: isAr ? "rtl" : "ltr",
       }}>
+        {/* Badge top-left (or top-right for AR) */}
         <div style={{
-          border:`2px solid ${Y}`, color:Y,
+          position:"absolute", top:"10mm",
+          ...(isAr ? { right:"14mm" } : { left:"14mm" }),
+          border:`2px solid ${BK}`, color:BK,
           fontSize:"10px", fontWeight:900, padding:"5px 14px",
           borderRadius:"20px", letterSpacing:"2px",
         }}>{badge}</div>
+
+        {/* KLOVERS circle logo top-right (or top-left for AR) */}
         <div style={{
-          width:"52px", height:"52px", borderRadius:"50%",
-          background:Y, display:"flex", flexDirection:"column",
-          alignItems:"center", justifyContent:"center", flexShrink:0,
+          position:"absolute", top:"10mm",
+          ...(isAr ? { left:"14mm" } : { right:"14mm" }),
+          width:"56px", height:"56px", borderRadius:"50%",
+          border:"2px solid #111", background:"#fff",
+          display:"flex", flexDirection:"column",
+          alignItems:"center", justifyContent:"center", gap:"1px",
         }}>
-          <span style={{ fontSize:"22px", fontWeight:900, color:BK, lineHeight:1 }}>K</span>
-          <span style={{ fontSize:"9px", fontWeight:700, color:BK, lineHeight:1, marginTop:"1px" }}>Lovers</span>
+          <div style={{ fontSize:"8px", fontWeight:900, color:BK, letterSpacing:"1px" }}>KLOVERS</div>
+          <MugunghwaIcon size={14} color={BK} />
+          <div style={{ fontSize:"7px", fontWeight:700, color:BK, letterSpacing:"1px" }}>KOREAN</div>
+        </div>
+
+        {/* Large Korean characters */}
+        <div style={{
+          fontSize:"160px", fontWeight:900, color:BK, lineHeight:0.85,
+          fontFamily:"'Noto Sans KR', sans-serif",
+          letterSpacing:"-6px", textAlign:"center",
+          marginBottom:"5mm",
+        }}>한글</div>
+
+        <div style={{
+          fontSize:"28px", fontWeight:900, color:BK,
+          letterSpacing:"3px", textAlign:"center", marginBottom:"3mm",
+          fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+        }}>KLOVERS HANGUL</div>
+
+        <div style={{
+          fontSize:"13px", color:BK, textAlign:"center",
+          marginBottom:"6mm", fontWeight:500,
+          fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+        }}>{subtitle}</div>
+
+        {/* — ● — divider */}
+        <div style={{ display:"flex", alignItems:"center", gap:"6px" }}>
+          <div style={{ width:"44px", height:"1px", background:BK }} />
+          <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:BK }} />
+          <div style={{ width:"44px", height:"1px", background:BK }} />
         </div>
       </div>
 
-      {/* Series label with yellow underline accent */}
-      <div style={{ marginBottom:"6mm" }}>
-        <div style={{
-          fontSize:"11px", color:Y, fontWeight:700,
-          letterSpacing:"3px", textTransform:"uppercase", marginBottom:"3px",
-        }}>{seriesLabel}</div>
-        <div style={{ width:"40px", height:"2px", background:Y }} />
-      </div>
-
-      {/* Main headline */}
-      <div style={{ marginBottom:"6mm" }}>
-        <div style={{ fontSize:"44px", fontWeight:900, color:"#fff", lineHeight:1.05 }}>{headLine1}</div>
-        <div style={{ fontSize:"44px", fontWeight:900, color:Y, lineHeight:1.05 }}>{headLine2}</div>
-      </div>
-
-      {/* Body paragraph */}
-      <div style={{ fontSize:"13px", color:"#aaa", lineHeight:1.7, marginBottom:"6mm", maxWidth:"160mm" }}>
-        {bodyText}
-      </div>
-
-      {/* Divider */}
-      <div style={{ borderTop:"1px solid #333", marginBottom:"6mm" }} />
-
-      {/* Inside this workbook */}
+      {/* Bottom black section */}
       <div style={{
-        fontSize:"10px", color:Y, fontWeight:700,
-        letterSpacing:"3px", textTransform:"uppercase", marginBottom:"5mm",
-      }}>{insideLabel}</div>
-
-      {/* 4 bullet points */}
-      <div style={{ display:"flex", flexDirection:"column", gap:"5mm", marginBottom:"6mm" }}>
-        {bullets.map((b, i) => (
-          <div key={i} style={{ display:"flex", gap:"8mm", alignItems:"flex-start" }}>
-            <div style={{
-              width:"8px", height:"8px", borderRadius:"50%",
-              background:Y, flexShrink:0, marginTop:"4px",
-            }} />
-            <div>
-              <div style={{ fontSize:"13px", fontWeight:800, color:"#fff", marginBottom:"2px" }}>{b.title}</div>
-              <div style={{ fontSize:"12px", color:"#888", lineHeight:1.5 }}>{b.desc}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Divider */}
-      <div style={{ borderTop:"1px solid #333", marginBottom:"6mm" }} />
-
-      {/* About the author */}
-      <div style={{
-        fontSize:"9px", color:"#666", fontWeight:700,
-        letterSpacing:"2.5px", textTransform:"uppercase", marginBottom:"3mm",
-      }}>{authorLabel}</div>
-      <div style={{ fontSize:"22px", fontWeight:900, color:"#fff", marginBottom:"3mm" }}>{authorName}</div>
-      <div style={{ fontSize:"12px", color:"#888", lineHeight:1.6, marginBottom:"6mm" }}>{authorBio}</div>
-
-      {/* Footer */}
-      <div style={{
-        marginTop:"auto",
-        display:"flex", justifyContent:"space-between", alignItems:"flex-end",
+        background:BK, flex:1,
+        padding:"10mm 14mm 8mm",
+        display:"flex", flexDirection:"column",
+        direction: isAr ? "rtl" : "ltr",
+        fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
       }}>
-        <div style={{ fontSize:"9px", color:"#555", letterSpacing:"1px" }}>{footer}</div>
-        <div style={{ background:"#fff", padding:"6px", borderRadius:"4px" }}>
-          <BarcodeIcon />
+        <div style={{ width:"32px", height:"4px", background:Y, marginBottom:"6mm" }} />
+
+        <div style={{
+          fontSize:"20px", fontWeight:900, color:Y,
+          letterSpacing:"1.5px", marginBottom:"4mm",
+        }}>{headline}</div>
+
+        <div style={{ width:"100%", height:"1px", background:"#2a2a2a", marginBottom:"5mm" }} />
+
+        <div style={{ fontSize:"13px", color:"#fff", lineHeight:1.6, marginBottom:"2mm" }}>{body1}</div>
+        <div style={{ fontSize:"13px", color:"#888", fontStyle:"italic", lineHeight:1.6, marginBottom:"8mm" }}>{body2}</div>
+
+        <div style={{ width:"64px", height:"2px", background:Y, marginBottom:"6mm" }} />
+
+        <div style={{ fontSize:"19px", fontWeight:900, color:"#fff", marginBottom:"auto" }}>{author}</div>
+
+        <div style={{ fontSize:"9px", color:"#555", letterSpacing:"1.5px", marginTop:"6mm" }}>
+          KLOVERS ACADEMY · KLOVERSEGY.COM · ISBN 978-0-00-000000-0
         </div>
       </div>
     </div>
