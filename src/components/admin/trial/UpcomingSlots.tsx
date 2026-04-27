@@ -1,6 +1,7 @@
 import { AdminTrialSlotOccurrence } from '@/types/trial-admin';
 import { convertDateTimeToTimezone } from '@/lib/admin-utils';
 import { getAdminTimezone } from '@/lib/viewerTimezone';
+import AddTrialClassDialog from './AddTrialClassDialog';
 
 function StatusBadge({ slot }: { slot: AdminTrialSlotOccurrence }) {
   if (slot.is_full) {
@@ -33,11 +34,14 @@ export default function UpcomingSlots({
 }) {
   return (
     <section className="space-y-3">
-      <header className="flex items-baseline justify-between">
-        <h2 className="text-lg font-semibold">Upcoming Trial Slots</h2>
-        <span className="text-xs text-muted-foreground">
-          Rolling window from today. Retired slots are not shown here.
-        </span>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Upcoming Trial Slots</h2>
+          <p className="text-xs text-muted-foreground">
+            Fixed-date classes. Past dates auto-disappear; nothing auto-generates.
+          </p>
+        </div>
+        <AddTrialClassDialog />
       </header>
 
       {slots.length === 0 ? (
