@@ -1307,16 +1307,17 @@ function EdCover({ lang }: { lang: "ar" | "en" }) {
     }}>
       {/* Top yellow section */}
       <div style={{
-        background:Y, flex:"0 0 56%",
+        background:Y, flex:"0 0 57%",
         position:"relative",
-        padding:"22mm 14mm 10mm",
         display:"flex", flexDirection:"column",
         alignItems:"center", justifyContent:"center",
         direction: isAr ? "rtl" : "ltr",
+        paddingTop:"26mm", paddingBottom:"8mm",
+        paddingLeft:"14mm", paddingRight:"14mm",
       }}>
-        {/* Badge top-left (or top-right for AR) */}
+        {/* Badge top-left */}
         <div style={{
-          position:"absolute", top:"8mm",
+          position:"absolute", top:"9mm",
           ...(isAr ? { right:"14mm" } : { left:"14mm" }),
           border:`2px solid ${BK}`, color:BK,
           fontSize:"10px", fontWeight:900, padding:"5px 14px",
@@ -1324,9 +1325,9 @@ function EdCover({ lang }: { lang: "ar" | "en" }) {
           whiteSpace:"nowrap",
         }}>{badge}</div>
 
-        {/* KLOVERS circle logo top-right (or top-left for AR) */}
+        {/* KLOVERS circle logo top-right */}
         <div style={{
-          position:"absolute", top:"6mm",
+          position:"absolute", top:"7mm",
           ...(isAr ? { left:"14mm" } : { right:"14mm" }),
           width:"54px", height:"54px", borderRadius:"50%",
           border:"2px solid #111", background:"#fff",
@@ -1338,11 +1339,11 @@ function EdCover({ lang }: { lang: "ar" | "en" }) {
           <div style={{ fontSize:"7px", fontWeight:700, color:BK, letterSpacing:"1px" }}>KOREAN</div>
         </div>
 
-        {/* Large Korean characters */}
+        {/* Large Korean characters — lineHeight≥1 prevents glyph clipping */}
         <div style={{
-          fontSize:"140px", fontWeight:900, color:BK, lineHeight:0.88,
+          fontSize:"130px", fontWeight:900, color:BK, lineHeight:1,
           fontFamily:"'Noto Sans KR', sans-serif",
-          letterSpacing:"-4px", textAlign:"center",
+          letterSpacing:"-3px", textAlign:"center",
           marginBottom:"4mm",
         }}>한글</div>
 
