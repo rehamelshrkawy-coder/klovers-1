@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshCw, TrendingUp, MousePointerClick, Users, UserPlus, Eye, ChevronLeft, ChevronRight, Download, Mail } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -67,7 +68,7 @@ const PAGE_SIZE = 30;
 const LeadFunnelPanel: React.FC = () => {
   const [range, setRange] = useState<"7" | "30" | "90" | "all">("30");
   const [eventsPage, setEventsPage] = useState(0);
-  const [activeView, setActiveView] = useState<"funnel" | "events" | "sources">("funnel");
+  const [activeView, setActiveView] = useState<"funnel" | "events" | "sources" | "enrollments">("funnel");
 
   const rangeDate = useMemo(() => {
     if (range === "all") return null;
@@ -137,7 +138,35 @@ const LeadFunnelPanel: React.FC = () => {
     enabled: range !== "all",
   });
 
-  const refresh = () => { refetchEvents(); refetchFunnel(); };
+  // ── Enrollment sources query ─────────────────────────────────────────────
+  interface EnrollmentRow {
+    id: string;
+    user_id: string | null;
+    status: string | null;
+    acquisition_source: string | null;
+    created_at: string | null;
+  }
+
+  const {
+    data: enrollments = [],
+    isLoading: enrollmentsLoading,
+    refetch: refetchEnrollments,
+  } = useQuery({
+    queryKey: ["enrollments_sources", range],
+    queryFn: async () => {
+      let q = supabase
+        .from("enrollments")
+        .select("id, user_id, status, acquisition_source, created_at")
+        .order("created_at", { ascending: false })
+        .limit(2000);
+      if (rangeDate) q = q.gte("created_at", rangeDate);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as EnrollmentRow[];
+    },
+  });
+
+  const refresh = () => { refetchEvents(); refetchFunnel(); refetchEnrollments(); };
 
   // ── Computed stats ──────────────────────────────────────────────────────
 
@@ -201,6 +230,40 @@ const LeadFunnelPanel: React.FC = () => {
       .map(([source, count]) => ({ source, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 15);
+  }, [events]);
+
+  // Enrollment acquisition source breakdown
+  const enrollmentSourceBreakdown = useMemo(() => {
+    const map = new Map<string, { total: number; approved: number }>();
+    for (const e of enrollments) {
+      const src = e.acquisition_source ?? "unknown";
+      const entry = map.get(src) ?? { total: 0, approved: 0 };
+      entry.total++;
+      if (e.status === "APPROVED") entry.approved++;
+      map.set(src, entry);
+    }
+    return Array.from(map.entries())
+      .map(([source, v]) => ({ source, ...v, convRate: v.total === 0 ? 0 : Math.round((v.approved / v.total) * 100) }))
+      .sort((a, b) => b.total - a.total);
+  }, [enrollments]);
+
+  // Daily event volume trend (last 14 days) — for the trend bar chart
+  const dailyEventTrend = useMemo(() => {
+    const map = new Map<string, number>();
+    const today = new Date();
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      map.set(d.toISOString().slice(0, 10), 0);
+    }
+    for (const e of events) {
+      const day = e.created_at.slice(0, 10);
+      if (map.has(day)) map.set(day, (map.get(day) ?? 0) + 1);
+    }
+    return Array.from(map.entries()).map(([date, count]) => ({
+      date: date.slice(5), // MM-DD
+      count,
+    }));
   }, [events]);
 
   // Paginated events
@@ -296,8 +359,8 @@ const LeadFunnelPanel: React.FC = () => {
       </div>
 
       {/* View toggle */}
-      <div className="flex gap-1 border rounded-lg p-0.5 w-fit">
-        {(["funnel", "events", "sources"] as const).map((v) => (
+      <div className="flex gap-1 border rounded-lg p-0.5 w-fit flex-wrap">
+        {(["funnel", "events", "sources", "enrollments"] as const).map((v) => (
           <button
             key={v}
             onClick={() => { setActiveView(v); setEventsPage(0); }}
@@ -307,7 +370,7 @@ const LeadFunnelPanel: React.FC = () => {
                 : "hover:bg-muted"
             }`}
           >
-            {v === "funnel" ? "Funnel Sessions" : v === "events" ? "Raw Events" : "Source Breakdown"}
+            {v === "funnel" ? "Funnel Sessions" : v === "events" ? "Raw Events" : v === "sources" ? "Source Breakdown" : "Enrollment Sources"}
           </button>
         ))}
       </div>
@@ -528,6 +591,104 @@ const LeadFunnelPanel: React.FC = () => {
                     <TableRow>
                       <TableCell colSpan={2} className="text-center text-muted-foreground py-6">No data</TableCell>
                     </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ── Enrollment sources view ────────────────────────────────────────── */}
+      {activeView === "enrollments" && (
+        <div className="space-y-4">
+          {/* Daily event volume trend */}
+          <Card className="rounded-xl">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Daily Lead Event Volume — Last 14 Days</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {eventsLoading ? (
+                <Skeleton className="h-40 w-full" />
+              ) : (
+                <ResponsiveContainer width="100%" height={160}>
+                  <BarChart data={dailyEventTrend} margin={{ top: 4, right: 8, left: -24, bottom: 0 }}>
+                    <XAxis dataKey="date" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+                    <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                      formatter={(value: number) => [value, "Events"]}
+                    />
+                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Enrollment acquisition source breakdown */}
+          <Card className="rounded-xl overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">
+                Enrollment Acquisition Sources ({enrollments.length} enrollments)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs">Acquisition Source</TableHead>
+                    <TableHead className="text-xs text-right">Total</TableHead>
+                    <TableHead className="text-xs text-right">Approved</TableHead>
+                    <TableHead className="text-xs text-right">Conv. Rate</TableHead>
+                    <TableHead className="text-xs text-right">Share</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {enrollmentsLoading ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <TableRow key={i}>
+                        {Array.from({ length: 5 }).map((_, j) => (
+                          <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : enrollmentSourceBreakdown.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                        No enrollment data in this period.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    enrollmentSourceBreakdown.map((s) => (
+                      <TableRow key={s.source}>
+                        <TableCell>
+                          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${SOURCE_COLORS[s.source] ?? "bg-gray-100 text-gray-700"}`}>
+                            {s.source}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right text-sm font-semibold tabular-nums">{s.total}</TableCell>
+                        <TableCell className="text-right text-sm tabular-nums">{s.approved}</TableCell>
+                        <TableCell className="text-right text-sm tabular-nums">
+                          <span className={s.convRate >= 50 ? "text-green-600 font-semibold" : s.convRate >= 25 ? "text-amber-600" : "text-muted-foreground"}>
+                            {s.convRate}%
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-primary rounded-full"
+                                style={{ width: `${pct(s.total, enrollments.length)}` }}
+                              />
+                            </div>
+                            <span className="text-[10px] text-muted-foreground tabular-nums">
+                              {pct(s.total, enrollments.length)}
+                            </span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
                   )}
                 </TableBody>
               </Table>

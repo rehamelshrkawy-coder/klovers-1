@@ -87,7 +87,7 @@ async function dispatchStage(
   // Exclude TBA placeholders and anyone with an APPROVED enrollment.
   const { data: bookings, error } = await supabase
     .from("trial_bookings")
-    .select(`id, name, email, trial_date, user_id, level, followup_prep_sent_at, followup_day1_sent_at, followup_day3_sent_at`)
+    .select(`id, name, email, trial_date, user_id, level, followup_prep_sent_at, followup_day1_sent_at, followup_day3_sent_at, followup_day7_sent_at`)
     .eq("trial_date", targetDate)
     .is(column, null)
     .not("is_tba", "is", true)

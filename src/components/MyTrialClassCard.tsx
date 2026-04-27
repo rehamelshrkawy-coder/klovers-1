@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, CalendarPlus, Clock, Loader2 } from "lucide-react";
+import { CalendarDays, CalendarPlus, Clock, Loader2, Clock3 } from "lucide-react";
 import { buildGoogleCalendarUrl, formatTime12h } from "@/lib/calendarUrl";
 import { convertDateTimeToTimezone } from "@/lib/admin-utils";
 import { getUserTimezone } from "@/lib/viewerTimezone";
@@ -14,6 +14,7 @@ interface TrialBookingRow {
   timezone: string | null;
   level: string | null;
   status: "pending" | "confirmed";
+  is_tba: boolean | null;
 }
 
 const TRIAL_DURATION_MIN = 45;
@@ -43,7 +44,7 @@ const MyTrialClassCard = () => {
 
       const { data } = await supabase
         .from("trial_bookings")
-        .select("id, trial_date, start_time, timezone, level, status")
+        .select("id, trial_date, start_time, timezone, level, status, is_tba")
         .eq("user_id", session.user.id)
         .in("status", ["pending", "confirmed"])
         .order("trial_date", { ascending: true })
@@ -67,6 +68,33 @@ const MyTrialClassCard = () => {
   }
 
   if (!booking) return null;
+
+  // TBA placeholder — user is on waitlist, no confirmed date yet
+  if (booking.is_tba) {
+    return (
+      <Card className="border-amber-300/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Clock3 className="h-4 w-4 text-amber-500" />
+            My Trial Class
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-foreground text-base leading-tight">You're on the waitlist!</p>
+                <p className="text-sm text-amber-700 dark:text-amber-400 mt-1 leading-relaxed">
+                  We're assigning you to the next available session. You'll receive an email with your confirmed date and class link within 24 hours.
+                </p>
+              </div>
+              <Badge className="bg-amber-500 flex-shrink-0">Waitlist</Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const isConfirmed = booking.status === "confirmed";
   const timezone = booking.timezone || "Africa/Cairo";
@@ -108,6 +136,7 @@ const MyTrialClassCard = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-3 inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-4 py-2 rounded-lg shadow transition-all text-sm"
+                  aria-label="Add trial class to Google Calendar"
                 >
                   <CalendarPlus className="h-4 w-4" />
                   Add to Google Calendar

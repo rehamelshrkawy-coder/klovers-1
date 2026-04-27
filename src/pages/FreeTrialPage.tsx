@@ -72,6 +72,14 @@ const FreeTrialPage = () => {
     el.textContent = JSON.stringify([
       {
         "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kloversegy.com" },
+          { "@type": "ListItem", "position": 2, "name": "Free Korean Trial Class", "item": "https://kloversegy.com/free-trial" },
+        ],
+      },
+      {
+        "@context": "https://schema.org",
         "@type": "Course",
         "name": "Free Trial Korean Class",
         "description": "30-minute live Korean class with a real teacher. Free, no credit card required.",
@@ -79,6 +87,23 @@ const FreeTrialPage = () => {
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "category": "Free Trial" },
         "inLanguage": "ko",
         "url": "https://kloversegy.com/free-trial",
+        "hasCourseInstance": [
+          { "@type": "CourseInstance", "courseMode": "online", "courseSchedule": { "@type": "Schedule", "byDay": "Saturday",  "startTime": "16:00", "repeatFrequency": "P1W", "scheduleTimezone": "Africa/Cairo" } },
+          { "@type": "CourseInstance", "courseMode": "online", "courseSchedule": { "@type": "Schedule", "byDay": "Sunday",    "startTime": "18:30", "repeatFrequency": "P1W", "scheduleTimezone": "Africa/Cairo" } },
+          { "@type": "CourseInstance", "courseMode": "online", "courseSchedule": { "@type": "Schedule", "byDay": "Wednesday", "startTime": "17:30", "repeatFrequency": "P1W", "scheduleTimezone": "Africa/Cairo" } },
+        ],
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "Free Korean Trial Class — Klovers Academy",
+        "description": "Join a 30-minute live Korean class with a real teacher. Free, no credit card needed.",
+        "url": "https://kloversegy.com/free-trial",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+        "organizer": { "@type": "Organization", "name": "Klovers Korean Academy", "url": "https://kloversegy.com" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "validFrom": new Date().toISOString() },
+        "location": { "@type": "VirtualLocation", "url": "https://kloversegy.com/free-trial" },
       },
       {
         "@context": "https://schema.org",
@@ -109,6 +134,25 @@ const FreeTrialPage = () => {
       .select("id", { count: "exact", head: true })
       .in("status", ["confirmed", "completed"])
       .then(({ count }) => { if (count !== null) setBookedCount(count); });
+  }, []);
+
+  // Live spots remaining across all upcoming slots (summed) + nearest deadline
+  const [spotsRemaining, setSpotsRemaining] = useState<number | null>(null);
+  const [daysToDeadline, setDaysToDeadline] = useState<number | null>(null);
+  useEffect(() => {
+    supabase.rpc("get_trial_availability").then(({ data }) => {
+      if (!data || data.length === 0) return;
+      const total = (data as { booked_count: number; capacity: number; next_trial_date: string }[])
+        .reduce((sum, row) => sum + (row.capacity - row.booked_count), 0);
+      setSpotsRemaining(total);
+      // Deadline = earliest next_trial_date minus 1 day (booking cutoff)
+      const earliest = data[0].next_trial_date as string;
+      if (earliest) {
+        const deadlineMs = new Date(earliest + "T00:00:00Z").getTime() - 86_400_000;
+        const days = Math.max(0, Math.ceil((deadlineMs - Date.now()) / 86_400_000));
+        setDaysToDeadline(days);
+      }
+    });
   }, []);
 
   // Guest inline booking state
@@ -230,6 +274,7 @@ const FreeTrialPage = () => {
                       size="lg"
                       onClick={handleBookCta}
                       className="gap-2 text-base font-bold h-14 px-8 shadow-xl hover:scale-[1.02] transition-transform"
+                      aria-label="Book your free Korean trial class"
                     >
                       {t("freeTrial.cta")}
                       <ArrowRight className="h-5 w-5" />
@@ -254,6 +299,28 @@ const FreeTrialPage = () => {
                     <p className="text-xs text-muted-foreground text-center md:text-start">
                       {t("freeTrial.noteSignedIn")}
                     </p>
+                  )}
+
+                  {/* Live availability chips */}
+                  {(spotsRemaining !== null || daysToDeadline !== null) && (
+                    <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start">
+                      {spotsRemaining !== null && spotsRemaining <= 15 && (
+                        <span className="inline-flex items-center gap-1 bg-red-100 dark:bg-red-950/40 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                          {spotsRemaining} {spotsRemaining === 1 ? "spot" : "spots"} left
+                        </span>
+                      )}
+                      {daysToDeadline !== null && (
+                        <span className="inline-flex items-center gap-1 bg-orange-100 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-400 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                          <Clock className="h-3 w-3" />
+                          {daysToDeadline === 0
+                            ? "Booking closes today"
+                            : daysToDeadline === 1
+                            ? "Booking closes tomorrow"
+                            : `Booking closes in ${daysToDeadline} days`}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -380,6 +447,7 @@ const FreeTrialPage = () => {
               size="lg"
               onClick={handleBookCta}
               className="w-full gap-2 text-base font-bold h-14 shadow-xl hover:scale-[1.01] transition-transform"
+              aria-label="Book your free Korean trial class"
             >
               {t("freeTrial.ctaSecondary")}
               <ArrowRight className="h-5 w-5" />
