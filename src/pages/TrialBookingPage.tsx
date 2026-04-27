@@ -448,7 +448,7 @@ const TrialBookingPage = () => {
                     onClick={() => setClassLanguage("arabic")}
                     className={`px-2.5 py-1 rounded-md border text-xs font-medium transition-all ${
                       classLanguage === "arabic"
-                        ? "border-primary bg-primary/10 text-primary"
+                        ? "border-gray-800 bg-gray-800 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
                         : "border-border text-muted-foreground hover:border-primary/40"
                     }`}
                   >
@@ -459,7 +459,7 @@ const TrialBookingPage = () => {
                     onClick={() => setClassLanguage("english")}
                     className={`px-2.5 py-1 rounded-md border text-xs font-medium transition-all ${
                       classLanguage === "english"
-                        ? "border-primary bg-primary/10 text-primary"
+                        ? "border-gray-800 bg-gray-800 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
                         : "border-border text-muted-foreground hover:border-primary/40"
                     }`}
                   >
@@ -713,7 +713,7 @@ const TrialBookingPage = () => {
                     onClick={() => setClassLanguage("arabic")}
                     className={`flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
                       classLanguage === "arabic"
-                        ? "border-primary bg-primary/10 text-primary"
+                        ? "border-gray-800 bg-gray-800 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
                         : "border-border bg-card text-muted-foreground hover:border-primary/40"
                     }`}
                   >
@@ -724,7 +724,7 @@ const TrialBookingPage = () => {
                     onClick={() => setClassLanguage("english")}
                     className={`flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
                       classLanguage === "english"
-                        ? "border-primary bg-primary/10 text-primary"
+                        ? "border-gray-800 bg-gray-800 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
                         : "border-border bg-card text-muted-foreground hover:border-primary/40"
                     }`}
                   >
