@@ -1307,53 +1307,54 @@ function EdCover({ lang }: { lang: "ar" | "en" }) {
     }}>
       {/* Top yellow section */}
       <div style={{
-        background:Y, flex:"0 0 55%",
+        background:Y, flex:"0 0 56%",
         position:"relative",
-        padding:"10mm 14mm 8mm",
+        padding:"22mm 14mm 10mm",
         display:"flex", flexDirection:"column",
-        alignItems:"center", justifyContent:"flex-end",
+        alignItems:"center", justifyContent:"center",
         direction: isAr ? "rtl" : "ltr",
       }}>
         {/* Badge top-left (or top-right for AR) */}
         <div style={{
-          position:"absolute", top:"10mm",
+          position:"absolute", top:"8mm",
           ...(isAr ? { right:"14mm" } : { left:"14mm" }),
           border:`2px solid ${BK}`, color:BK,
           fontSize:"10px", fontWeight:900, padding:"5px 14px",
           borderRadius:"20px", letterSpacing:"2px",
+          whiteSpace:"nowrap",
         }}>{badge}</div>
 
         {/* KLOVERS circle logo top-right (or top-left for AR) */}
         <div style={{
-          position:"absolute", top:"10mm",
+          position:"absolute", top:"6mm",
           ...(isAr ? { left:"14mm" } : { right:"14mm" }),
-          width:"56px", height:"56px", borderRadius:"50%",
+          width:"54px", height:"54px", borderRadius:"50%",
           border:"2px solid #111", background:"#fff",
           display:"flex", flexDirection:"column",
           alignItems:"center", justifyContent:"center", gap:"1px",
         }}>
           <div style={{ fontSize:"8px", fontWeight:900, color:BK, letterSpacing:"1px" }}>KLOVERS</div>
-          <MugunghwaIcon size={14} color={BK} />
+          <MugunghwaIcon size={13} color={BK} />
           <div style={{ fontSize:"7px", fontWeight:700, color:BK, letterSpacing:"1px" }}>KOREAN</div>
         </div>
 
         {/* Large Korean characters */}
         <div style={{
-          fontSize:"160px", fontWeight:900, color:BK, lineHeight:0.85,
+          fontSize:"140px", fontWeight:900, color:BK, lineHeight:0.88,
           fontFamily:"'Noto Sans KR', sans-serif",
-          letterSpacing:"-6px", textAlign:"center",
-          marginBottom:"5mm",
+          letterSpacing:"-4px", textAlign:"center",
+          marginBottom:"4mm",
         }}>한글</div>
 
         <div style={{
-          fontSize:"28px", fontWeight:900, color:BK,
+          fontSize:"26px", fontWeight:900, color:BK,
           letterSpacing:"3px", textAlign:"center", marginBottom:"3mm",
           fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
         }}>KLOVERS HANGUL</div>
 
         <div style={{
-          fontSize:"13px", color:BK, textAlign:"center",
-          marginBottom:"6mm", fontWeight:500,
+          fontSize:"12px", color:BK, textAlign:"center",
+          marginBottom:"5mm", fontWeight:500,
           fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
         }}>{subtitle}</div>
 
