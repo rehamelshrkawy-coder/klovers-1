@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Eye, AlertCircle, Bell, Mail, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Clock, Tag, Loader2, Image, Trophy, TrendingUp, Link } from "lucide-react";
+import { LogOut, Eye, AlertCircle, Bell, Mail, Sparkles, Settings, BarChart3, RefreshCw, Users, FileCheck, Clock, Tag, Loader2, Image, Trophy, TrendingUp, Link, BookOpen } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, Package } from "lucide-react";
 import {
@@ -59,6 +59,8 @@ const ImageAuditPanel = lazy(() => import("@/components/admin/ImageAuditPanel"))
 const LeadsPanel = lazy(() => import("@/components/admin/LeadsPanel").catch(() => import("@/components/admin/LeadsPanel")));
 const LeagueUsersPanel = lazy(() => import("@/components/admin/LeagueUsersPanel"));
 const LeadFunnelPanel = lazy(() => import("@/components/admin/LeadFunnelPanel"));
+const BookAssignmentManager = lazy(() => import("@/components/admin/BookAssignmentManager"));
+const TrialClassesTab = lazy(() => import("@/components/admin/TrialClassesTab"));
 
 const TabLoader = () => (
   <div className="flex items-center justify-center py-20">
@@ -912,7 +914,7 @@ const AdminDashboard = () => {
 
   const TAB_GROUPS: { id: string; label: string; icon: typeof Users; tabs: string[] }[] = [
     { id: "ops",     label: "Operations", icon: BarChart3, tabs: ["students", "enrollments", "leads", "trials", "lead-funnel", "manage", "sales", "promos"] },
-    { id: "learn",   label: "Learning",   icon: Users,     tabs: ["group-attendance", "group-matcher", "placement-tests", "session-attendance", "preferences", "league-users"] },
+    { id: "learn",   label: "Learning",   icon: Users,     tabs: ["group-attendance", "group-matcher", "placement-tests", "session-attendance", "preferences", "league-users", "books", "trial-books"] },
     { id: "content", label: "Content",    icon: Sparkles,  tabs: ["blog", "seo-orchestration", "image-audit", "campaigns"] },
     { id: "config",  label: "Config",     icon: Settings,  tabs: ["notifications", "scheduling", "availability", "settings"] },
   ];
@@ -1298,6 +1300,16 @@ const AdminDashboard = () => {
                     <Trophy className="h-3.5 w-3.5" /> Leagues
                   </TabsTrigger>
                 )}
+                {inActiveGroup("books") && (
+                  <TabsTrigger value="books" className={TAB_CLS}>
+                    <BookOpen className="h-3.5 w-3.5" /> Books
+                  </TabsTrigger>
+                )}
+                {inActiveGroup("trial-books") && (
+                  <TabsTrigger value="trial-books" className={TAB_CLS}>
+                    <Clock className="h-3.5 w-3.5" /> Trial Books
+                  </TabsTrigger>
+                )}
                 {inActiveGroup("blog") && (
                   <TabsTrigger value="blog" className={TAB_CLS}>Blog</TabsTrigger>
                 )}
@@ -1616,6 +1628,24 @@ const AdminDashboard = () => {
               <TabErrorBoundary name="League Users">
                 <Suspense fallback={<TabLoader />}>
                   <LeagueUsersPanel />
+                </Suspense>
+              </TabErrorBoundary>
+            </TabsContent>
+
+            {/* BOOKS TAB */}
+            <TabsContent value="books">
+              <TabErrorBoundary name="Book Assignments">
+                <Suspense fallback={<TabLoader />}>
+                  <BookAssignmentManager />
+                </Suspense>
+              </TabErrorBoundary>
+            </TabsContent>
+
+            {/* TRIAL BOOKS TAB */}
+            <TabsContent value="trial-books">
+              <TabErrorBoundary name="Trial Books">
+                <Suspense fallback={<TabLoader />}>
+                  <TrialClassesTab />
                 </Suspense>
               </TabErrorBoundary>
             </TabsContent>
