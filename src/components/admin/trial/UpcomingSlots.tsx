@@ -1,6 +1,7 @@
 import { AdminTrialSlotOccurrence } from '@/types/trial-admin';
 import { convertDateTimeToTimezone } from '@/lib/admin-utils';
 import { getAdminTimezone } from '@/lib/viewerTimezone';
+// trigger redeploy
 import AddTrialClassDialog from './AddTrialClassDialog';
 
 function StatusBadge({ slot }: { slot: AdminTrialSlotOccurrence }) {
