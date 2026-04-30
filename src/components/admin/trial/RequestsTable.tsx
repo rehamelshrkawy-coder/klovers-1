@@ -111,6 +111,9 @@ export default function RequestsTable({ bookings }: { bookings: AdminTrialBookin
               <th className="px-3 py-2 text-left font-medium">Selected Slot</th>
               <th className="px-3 py-2 text-left font-medium">Slot State</th>
               <th className="px-3 py-2 text-left font-medium">Status</th>
+              <th className="px-3 py-2 text-left font-medium">📧 Sent</th>
+              <th className="px-3 py-2 text-left font-medium">👁 Opened</th>
+              <th className="px-3 py-2 text-left font-medium">✅ RSVP</th>
               <th className="px-3 py-2 text-left font-medium">Phase</th>
               <th className="px-3 py-2 text-left font-medium">Requested</th>
             </tr>
@@ -163,6 +166,34 @@ export default function RequestsTable({ bookings }: { bookings: AdminTrialBookin
                     {b.status}
                   </span>
                 </td>
+                {/* Email sent */}
+                <td className="px-3 py-2 text-xs text-center">
+                  {b.email_sent_at
+                    ? <span title={b.email_sent_at} className="text-green-600 font-medium">✓</span>
+                    : <span className="text-muted-foreground">—</span>}
+                </td>
+                {/* Email opened */}
+                <td className="px-3 py-2 text-xs text-center">
+                  {b.email_opened_at
+                    ? <span title={b.email_opened_at} className="text-blue-500 font-medium">✓</span>
+                    : <span className="text-muted-foreground">—</span>}
+                </td>
+                {/* RSVP */}
+                <td className="px-3 py-2 text-xs text-center">
+                  {b.attendance_response === 'yes' && (
+                    <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-200">
+                      ✅ Yes
+                    </span>
+                  )}
+                  {b.attendance_response === 'no' && (
+                    <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200">
+                      ❌ No
+                    </span>
+                  )}
+                  {!b.attendance_response && (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </td>
                 <td className="px-3 py-2 text-xs text-muted-foreground">
                   {b.program_phase === 'pre_launch' ? 'pre-launch' : 'active program'}
                 </td>
@@ -173,7 +204,7 @@ export default function RequestsTable({ bookings }: { bookings: AdminTrialBookin
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-3 py-6 text-center text-sm text-muted-foreground">
+                <td colSpan={10} className="px-3 py-6 text-center text-sm text-muted-foreground">
                   No requests match the current filters.
                 </td>
               </tr>

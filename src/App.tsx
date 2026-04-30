@@ -71,6 +71,7 @@ const HangulBookPage = lazy(() => import("./pages/HangulBookPage"));
 const TrialBookPage = lazy(() => import("./pages/TrialBookPage"));
 const EnrollmentStatusPage = lazy(() => import("./pages/EnrollmentStatusPage"));
 const HangulStarterPage = lazy(() => import("./pages/HangulStarterPage"));
+const RsvpConfirmationPage = lazy(() => import("./pages/RsvpConfirmationPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -182,6 +183,7 @@ const App = () => (
                 <Route path="/profile" element={<AuthProtectedRoute><ProfilePage /></AuthProtectedRoute>} />
                 <Route path="/complete-profile" element={<CompleteProfilePage />} />
                 <Route path="/free-trial" element={<FreeTrialPage />} />
+                <Route path="/rsvp" element={<RsvpConfirmationPage />} />
                 <Route path="/trial-booking" element={<AuthProtectedRoute><TrialBookingPage /></AuthProtectedRoute>} />
                 <Route path="/progress-report" element={<AuthProtectedRoute><ProgressReportPage /></AuthProtectedRoute>} />
                 <Route path="/certificate" element={<AuthProtectedRoute><CertificatePage /></AuthProtectedRoute>} />

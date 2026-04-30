@@ -43,6 +43,12 @@ export interface AdminTrialBooking {
   // derived
   time_bucket: TrialTimeBucket;
   program_phase: TrialProgramPhase;
+
+  // email tracking
+  email_sent_at: string | null;
+  email_opened_at: string | null;
+  attendance_response: 'yes' | 'no' | null;
+  attendance_responded_at: string | null;
 }
 
 // v_trial_slots_admin — one row per (slot, upcoming occurrence)
