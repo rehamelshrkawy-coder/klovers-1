@@ -16,7 +16,7 @@ import { LeaguePromotionModal, BadgeUnlockToast, StreakCelebration, XpFloatAnima
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Gamepad2, Brain, Layers, Hash, Palette, BookOpen, MessageCircle, ArrowLeftRight, PenLine, Shuffle, Calculator, Tv, Clock, Trophy, Zap, Flame, Lock, X, Keyboard, Volume2, CreditCard, Zap as ZapIcon, MousePointerClick, BookOpenCheck, Headphones } from "lucide-react";
-import { toast } from "sonner";
+import { toast as sonnerToast } from "sonner";
 
 const SentenceBuilderGame = lazy(() => import("@/components/games/SentenceBuilderGame"));
 const NumbersGame = lazy(() => import("@/components/games/NumbersGame"));
@@ -111,7 +111,7 @@ const GamesPage = () => {
       const xp = await awardGameXp(gameId, score, totalRounds);
       if (xp && xp > 0) {
         setXpFloat(xp);
-        toast.success(`🎮 +${xp} XP!`, { description: `${league.emoji} ${league.name}` });
+        sonnerToast.success(`🎮 +${xp} XP!`, { description: `${league.emoji} ${league.name}` });
       }
       // Show perfect score overlay
       if (score === totalRounds && totalRounds > 0) {

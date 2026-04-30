@@ -195,6 +195,43 @@ export function useGamification() {
     return xp;
   }, [userId, progress.totalXp, progress.badges, updateStreak, fetchProgress]);
 
+  const checkBadges = useCallback(async () => {
+    if (!userId) return;
+
+    const { data: allProgress } = await supabase
+      .from("student_lesson_progress")
+      .select("*")
+      .eq("user_id", userId);
+
+    if (!allProgress) return;
+
+    const vocabCount = allProgress.filter((p: any) => p.vocab_done).length;
+    const grammarCount = allProgress.filter((p: any) => p.grammar_done).length;
+    const dialogueCount = allProgress.filter((p: any) => p.dialogue_done).length;
+    const chapterCount = allProgress.filter((p: any) => p.chapter_completed).length;
+
+    const lesson1 = allProgress.find((p: any) => p.lesson_id === 1);
+    if (lesson1?.chapter_completed) {
+      await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "hangul_master" }, { onConflict: "user_id,badge_key" });
+    }
+
+    if (vocabCount >= 100) {
+      await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "first_100_words" }, { onConflict: "user_id,badge_key" });
+    }
+    if (grammarCount >= 5) {
+      await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "grammar_starter" }, { onConflict: "user_id,badge_key" });
+    }
+    if (dialogueCount >= 5) {
+      await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "conversation_beginner" }, { onConflict: "user_id,badge_key" });
+    }
+    if (chapterCount >= 5) {
+      await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "five_chapters" }, { onConflict: "user_id,badge_key" });
+    }
+    if (chapterCount >= 45) {
+      await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "topik_ready" }, { onConflict: "user_id,badge_key" });
+    }
+  }, [userId]);
+
   const markSectionDone = useCallback(async (
     lessonId: number,
     section: "vocab_done" | "grammar_done" | "dialogue_done" | "exercises_done" | "reading_done" | "writing_done"
@@ -265,43 +302,6 @@ export function useGamification() {
     ]);
     // awardXp already calls fetchProgress internally; no extra re-fetch needed
   }, [userId, awardXp, checkBadges, fetchProgress]);
-
-  const checkBadges = useCallback(async () => {
-    if (!userId) return;
-
-    const { data: allProgress } = await supabase
-      .from("student_lesson_progress")
-      .select("*")
-      .eq("user_id", userId);
-
-    if (!allProgress) return;
-
-    const vocabCount = allProgress.filter((p: any) => p.vocab_done).length;
-    const grammarCount = allProgress.filter((p: any) => p.grammar_done).length;
-    const dialogueCount = allProgress.filter((p: any) => p.dialogue_done).length;
-    const chapterCount = allProgress.filter((p: any) => p.chapter_completed).length;
-
-    const lesson1 = allProgress.find((p: any) => p.lesson_id === 1);
-    if (lesson1?.chapter_completed) {
-      await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "hangul_master" }, { onConflict: "user_id,badge_key" });
-    }
-
-    if (vocabCount >= 100) {
-      await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "first_100_words" }, { onConflict: "user_id,badge_key" });
-    }
-    if (grammarCount >= 5) {
-      await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "grammar_starter" }, { onConflict: "user_id,badge_key" });
-    }
-    if (dialogueCount >= 5) {
-      await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "conversation_beginner" }, { onConflict: "user_id,badge_key" });
-    }
-    if (chapterCount >= 5) {
-      await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "five_chapters" }, { onConflict: "user_id,badge_key" });
-    }
-    if (chapterCount >= 45) {
-      await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "topik_ready" }, { onConflict: "user_id,badge_key" });
-    }
-  }, [userId]);
 
   const awardGameXp = useCallback(async (gameId: string, score: number, totalRounds: number) => {
     if (!userId || score <= 0) return 0;
