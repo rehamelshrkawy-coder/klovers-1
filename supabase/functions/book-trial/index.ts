@@ -1,10 +1,29 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+// Restrict CORS to the production origin + local dev.
+// Wildcard (*) would allow any site to POST to the booking endpoint.
+const ALLOWED_ORIGINS = new Set([
+  "https://kloversegy.com",
+  "https://www.kloversegy.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
+]);
+
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") ?? "";
+  const allowedOrigin = ALLOWED_ORIGINS.has(origin) ? origin : "https://kloversegy.com";
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "Vary": "Origin",
+  };
+}
+
+// Allowed start_time values — validated against trial_slots table values.
+// If a new slot is added, this list must be updated too. Consider replacing
+// with a DB lookup if the slot list changes frequently.
+const ALLOWED_START_TIMES = new Set(["16:00", "18:30", "17:30"]);
 
 // DB-backed rate limiter — survives Edge Function cold starts.
 // Uses the trial_rate_limits table with 1-hour windows.
@@ -85,6 +104,8 @@ function formatTime12h(time: string): string {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -128,32 +149,42 @@ Deno.serve(async (req) => {
     if (authed) {
       const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
       const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-      if (token) {
-        const { data: userData } = await supabase.auth.getUser(token);
-        if (userData?.user) {
-          resolvedUserId = userData.user.id;
-          resolvedEmail = userData.user.email ?? null;
-          // Capture level from user_metadata as a fallback for email-confirmation
-          // signups where the profile row hasn't been updated yet.
-          const metaLevel = (userData.user.user_metadata?.level as string | undefined)?.trim();
-          if (metaLevel) resolvedLevel = metaLevel;
-          // Pull the name + level from profiles for nicer display
-          const { data: profileRow } = await supabase
-            .from("profiles")
-            .select("name, email, level")
-            .eq("user_id", resolvedUserId)
-            .maybeSingle();
-          if (profileRow) {
-            resolvedName = profileRow.name ?? null;
-            if (!resolvedEmail && profileRow.email) resolvedEmail = profileRow.email;
-            const profileLevel = (profileRow.level as string | undefined)?.trim();
-            if (profileLevel) resolvedLevel = profileLevel;
-          }
-        }
+      // If caller says authed:true but provides no valid JWT, reject rather than
+      // silently falling through to the guest path (prevents auth bypass).
+      if (!token) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized — JWT required when authed:true" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const { data: userData, error: jwtErr } = await supabase.auth.getUser(token);
+      if (jwtErr || !userData?.user) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized — invalid or expired token" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      resolvedUserId = userData.user.id;
+      resolvedEmail = userData.user.email ?? null;
+      // Capture level from user_metadata as a fallback for email-confirmation
+      // signups where the profile row hasn't been updated yet.
+      const metaLevel = (userData.user.user_metadata?.level as string | undefined)?.trim();
+      if (metaLevel) resolvedLevel = metaLevel;
+      // Pull the name + level from profiles for nicer display
+      const { data: profileRow } = await supabase
+        .from("profiles")
+        .select("name, email, level")
+        .eq("user_id", resolvedUserId)
+        .maybeSingle();
+      if (profileRow) {
+        resolvedName = profileRow.name ?? null;
+        if (!resolvedEmail && profileRow.email) resolvedEmail = profileRow.email;
+        const profileLevel = (profileRow.level as string | undefined)?.trim();
+        if (profileLevel) resolvedLevel = profileLevel;
       }
     }
 
-    // Validation — accept email from JWT in the authed path
+    // ── Input validation ───────────────────────────────────────────────────
     const effectiveEmail = resolvedEmail ?? email;
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     if (!effectiveEmail || !emailRegex.test(effectiveEmail)) {
@@ -170,7 +201,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (!start_time || typeof start_time !== "string") {
+    // Validate start_time against known slot values — prevents arbitrary time injection
+    if (!start_time || typeof start_time !== "string" || !ALLOWED_START_TIMES.has(start_time)) {
       return new Response(
         JSON.stringify({ error: "Invalid start_time." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }

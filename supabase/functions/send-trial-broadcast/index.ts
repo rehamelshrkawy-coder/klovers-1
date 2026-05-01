@@ -12,13 +12,18 @@ const FROM_EMAIL = "KLovers <noreply@kloversegy.com>";
 const SITE_URL = "https://kloversegy.com";
 
 // Resend batch API — sends up to 100 emails per call (well within our 59-user list)
-async function sendBatch(emails: { to: string; subject: string; html: string; text: string }[]) {
+async function sendBatch(emails: { to: string; subject: string; html: string; text: string; unsubscribeUrl: string }[]) {
   const payload = emails.map((e) => ({
     from: FROM_EMAIL,
     to: [e.to],
     subject: e.subject,
     html: e.html,
     text: e.text,
+    headers: {
+      // RFC 8058 one-click unsubscribe — required by Gmail/Yahoo bulk sender guidelines
+      "List-Unsubscribe": `<${e.unsubscribeUrl}>`,
+      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    },
   }));
   const res = await fetch("https://api.resend.com/emails/batch", {
     method: "POST",
@@ -307,8 +312,11 @@ serve(async (req) => {
       const emails = chunk
         .filter((p) => p.email)
         .map((p) => {
+          const unsubscribeUrl = p.unsubscribe_token
+            ? `${SITE_URL}/unsubscribe?token=${p.unsubscribe_token}`
+            : `${SITE_URL}/unsubscribe`;
           const { subject, html, text } = buildBroadcastEmail(p.name, p.unsubscribe_token);
-          return { to: p.email as string, subject, html, text };
+          return { to: p.email as string, subject, html, text, unsubscribeUrl };
         });
 
       try {
