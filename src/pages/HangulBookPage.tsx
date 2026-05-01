@@ -4826,7 +4826,6 @@ export default function HangulBookPage() {
         {isAr ? (
           <>
             <CoverAr />
-            <Spine />
             <StoryPageAr />
             <TocAr />
             <CoursePlan lang="ar" />
@@ -4901,7 +4900,6 @@ export default function HangulBookPage() {
         ) : (
           <>
             <CoverEn />
-            <Spine />
             <StoryPageEn />
             <TocEn />
             <CoursePlan lang="en" />
