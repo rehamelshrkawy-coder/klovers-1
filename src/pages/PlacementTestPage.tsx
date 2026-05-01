@@ -1418,8 +1418,38 @@ const PlacementTestPage = () => {
       <main id="main-content" className="flex-1 px-4 py-8 max-w-3xl mx-auto w-full">
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-1">{isAr ? "اختبار تحديد المستوى" : "Placement Test"}</h1>
-          <p className="text-muted-foreground text-sm">{isAr ? "أجب أو تخطَّ كل سؤال — اضغط 1–4 للاختيار ثم انتقل للتالي." : "Answer or skip each question — press 1–4 to select, then move to the next."}</p>
+          <p className="text-muted-foreground text-sm">{isAr ? "5 دقائق · أجب أو تخطَّ كل سؤال — اضغط 1–4 للاختيار." : "5 minutes · answer or skip each question — press 1–4 to select."}</p>
         </div>
+
+        {/* Absolute-beginner shortcut. Mid-quiz abandonment data showed a
+            ~67% drop between band 1 and band 2 — many users probably
+            arrive without any Korean and feel stuck. Give them a one-click
+            exit straight to the trial booking with level=hangul instead
+            of forcing them to skip 30 questions. */}
+        {totalAnswered === 0 && page === 0 && (
+          <div className="mb-5 flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3">
+            <span className="text-2xl shrink-0">🌱</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground leading-tight">
+                {isAr ? "تماماً مبتدئ؟" : "Total beginner?"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {isAr ? "تخطَّ الاختبار واحجز حصتك التجريبية مباشرةً." : "Skip the test and book your free trial directly."}
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="shrink-0 font-semibold"
+              onClick={() => {
+                logLeadEvent({ source_type: "placement_test", cta_label: "skip_to_trial_beginner" });
+                navigate("/free-trial?level=hangul");
+              }}
+            >
+              {isAr ? "احجز التجربة" : "Book trial"} <ArrowRight className="h-3 w-3 ml-1" />
+            </Button>
+          </div>
+        )}
 
         {/* Progress */}
         <div className="mb-4 space-y-2">
