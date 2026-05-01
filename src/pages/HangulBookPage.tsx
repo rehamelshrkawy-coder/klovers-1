@@ -615,7 +615,7 @@ function Page({ children, dir = "ltr", chapter, bgColor = "#FFF5F5" }: { childre
     <div
       className="book-page"
       style={{
-        width:"210mm", minHeight:"297mm", padding:"13mm 16mm 12mm",
+        width:"210mm", minHeight:"297mm", padding:"4mm 16mm 12mm",
         boxSizing:"border-box", background:bgColor,
         position:"relative",
         pageBreakAfter:"always", breakAfter:"page",
@@ -623,29 +623,47 @@ function Page({ children, dir = "ltr", chapter, bgColor = "#FFF5F5" }: { childre
         fontFamily:"'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
       }}
     >
-      {/* Running header */}
+      {/* Running header — editorial black/yellow brand */}
       <div style={{
-        position:"absolute", top:"7mm",
-        left:"16mm", right:"16mm",
-        display:"flex", justifyContent: isRtl ? "flex-end" : "flex-start",
-        alignItems:"center", gap:"6px",
-        borderBottom:`1px solid ${BD}`, paddingBottom:"2.5mm",
+        position:"absolute", top:0,
+        left:0, right:0,
         direction: isRtl ? "rtl" : "ltr",
       }}>
-        <div style={{ width:"4px", height:"4px", borderRadius:"50%", background:Y, flexShrink:0 }} />
-        <span style={{ fontSize:"8px", color:T3, letterSpacing:"1.5px", textTransform:"uppercase", fontWeight:600 }}>
-          Klovers Hangul Book 1
-        </span>
-        {chapter && (
-          <>
-            <span style={{ fontSize:"8px", color:BD }}>·</span>
-            <span style={{ fontSize:"8px", color:T3 }}>{chapter}</span>
-          </>
-        )}
+        {/* Yellow top stripe */}
+        <div style={{ height:"3px", background:Y, width:"100%" }} />
+        {/* Header row */}
+        <div style={{
+          display:"flex",
+          justifyContent:"space-between",
+          alignItems:"center",
+          padding:"2.5mm 16mm 2.5mm",
+          borderBottom:`1px solid ${BD}`,
+          background:"#fff",
+        }}>
+          {/* Brand mark */}
+          <div style={{ display:"flex", alignItems:"center", gap:"5px" }}>
+            <div style={{
+              width:"18px", height:"18px", borderRadius:"50%",
+              background:BK, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0
+            }}>
+              <MugunghwaIcon size={12} color={Y} />
+            </div>
+            <span style={{ fontSize:"8px", fontWeight:900, color:BK, letterSpacing:"2px", textTransform:"uppercase" }}>KLOVERS</span>
+            <span style={{ fontSize:"8px", color:BD, margin:"0 2px" }}>|</span>
+            <span style={{ fontSize:"8px", fontWeight:600, color:T3, letterSpacing:"1.5px", textTransform:"uppercase" }}>Hangul Book 1</span>
+          </div>
+          {/* Chapter label */}
+          {chapter && (
+            <div style={{ display:"flex", alignItems:"center", gap:"5px" }}>
+              <div style={{ width:"20px", height:"2px", background:Y }} />
+              <span style={{ fontSize:"8px", color:T2, fontWeight:700, letterSpacing:"1px", textTransform:"uppercase" }}>{chapter}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content area */}
-      <div style={{ marginTop:"9mm" }}>{children}</div>
+      <div style={{ marginTop:"10mm" }}>{children}</div>
 
       {/* Footer */}
       <div style={{
