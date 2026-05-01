@@ -312,7 +312,41 @@ Deno.serve(async (req) => {
       .select("id")
       .single();
 
-    if (bookingError || !booking) {
+    // Foreign-key on level → course_levels. If the client passed a level
+    // not in course_levels (e.g. legacy "Beginner" string from old
+    // profiles), retry the insert with level=null instead of 500'ing.
+    let recoveredBooking: { id: string } | null = null;
+    if (bookingError?.code === "23503" && bookingError?.message?.includes("level")) {
+      console.warn("book-trial: FK violation on level, retrying without level. Original level:", level);
+      const { data: retry, error: retryErr } = await supabase
+        .from("trial_bookings")
+        .insert({
+          name: finalName,
+          email: normalizedEmail,
+          phone: phone?.trim() || null,
+          level: null,
+          goal: goal?.trim() || null,
+          day_of_week,
+          start_time,
+          trial_date: trialDate,
+          timezone,
+          class_language: class_language === "arabic" ? "arabic" : "english",
+          status: "confirmed",
+          confirmed_at: new Date().toISOString(),
+          ...(resolvedUserId ? { user_id: resolvedUserId } : {}),
+        })
+        .select("id")
+        .single();
+      if (!retryErr && retry) {
+        recoveredBooking = retry as { id: string };
+      } else if (retryErr) {
+        console.error("book-trial level-fallback retry failed:", JSON.stringify(retryErr));
+      }
+    }
+
+    const finalBooking = booking ?? recoveredBooking;
+
+    if ((bookingError && !recoveredBooking) || !finalBooking) {
       // Unique constraint: user has a real booking — return a friendly 200
       // with ok:false so the frontend's `if (data?.error)` handler runs
       // instead of throwing a FunctionsHttpError on non-2xx.
@@ -333,6 +367,20 @@ Deno.serve(async (req) => {
             ok: false,
             success: false,
             error: "This trial time overlaps with one of your existing classes. Please pick a different slot or contact us on WhatsApp.",
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      // FK on level (couldn't be auto-recovered above) — return a friendly
+      // 200 so the user can pick a slot manually rather than seeing a
+      // generic "Edge Function returned a non-2xx" error.
+      if (bookingError?.code === "23503") {
+        console.error("book-trial FK violation:", JSON.stringify(bookingError));
+        return new Response(
+          JSON.stringify({
+            ok: false,
+            success: false,
+            error: "Could not save your level — please refresh and try again. If this persists, message us on WhatsApp.",
           }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
@@ -376,7 +424,7 @@ Deno.serve(async (req) => {
       JSON.stringify({
         success: true,
         booking: {
-          id: booking.id,
+          id: finalBooking.id,
           trial_date: trialDate,
           day_name: dayName,
           start_time,
