@@ -107,3 +107,11 @@ verify_jwt = false
 
 [functions.resend-recovery-webhook]
 verify_jwt = false
+
+# Cron-triggered + service-role only — must NOT verify user JWT, otherwise
+# pg_cron's Bearer <service_role_key> is rejected and the function never runs.
+[functions.send-trial-followups]
+verify_jwt = false
+
+[functions.recover-silent-trials]
+verify_jwt = false
