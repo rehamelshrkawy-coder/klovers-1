@@ -101,7 +101,27 @@ async function dispatchStage(
   let skipped = 0;
   const errors: string[] = [];
 
-  // Collect user_ids to check enrollment status in one round trip.
+  if (rows.length === 0) return { stage, attempted: 0, sent: 0, skipped: 0, errors: [] };
+
+  // ── Bulk pre-flight checks ──────────────────────────────────────────────────
+  // 1. Collect emails to check unsubscribe status (CAN-SPAM / GDPR compliance).
+  //    Follow-up emails must NOT be sent to users who have opted out.
+  const emails = rows.map(r => r.email).filter((e): e is string => Boolean(e));
+  const { data: unsubProfiles } = await supabase
+    .from("profiles")
+    .select("email, email_unsubscribed, unsubscribe_token")
+    .in("email", emails);
+  const unsubscribedEmails = new Set(
+    (unsubProfiles ?? [])
+      .filter(p => p.email_unsubscribed === true)
+      .map(p => (p.email as string).toLowerCase()),
+  );
+  // Build token map for unsubscribe links in follow-up emails
+  const tokenByEmail = new Map(
+    (unsubProfiles ?? []).map(p => [(p.email as string).toLowerCase(), p.unsubscribe_token as string | null]),
+  );
+
+  // 2. Collect user_ids to check enrollment status in one round trip.
   const userIds = rows.map(r => r.user_id).filter((u): u is string => Boolean(u));
   let approvedUsers = new Set<string>();
   if (userIds.length > 0) {
@@ -114,6 +134,14 @@ async function dispatchStage(
   }
 
   for (const b of rows) {
+    // Skip unsubscribed users — legal requirement
+    if (b.email && unsubscribedEmails.has(b.email.toLowerCase())) {
+      // Mark column so we don't re-query this row on the next hourly run
+      await supabase.from("trial_bookings").update({ [column]: new Date().toISOString() }).eq("id", b.id);
+      skipped++;
+      continue;
+    }
+
     if (b.user_id && approvedUsers.has(b.user_id)) {
       // Already a paying student — mark the column so we stop re-querying this row.
       await supabase.from("trial_bookings").update({ [column]: new Date().toISOString() }).eq("id", b.id);
@@ -122,16 +150,20 @@ async function dispatchStage(
     }
     if (!b.email) { skipped++; continue; }
 
-    // For day-7, include a referral share link from the profile
+    // For day-7, include referral share link + unsubscribe token
     let referralUrl: string | undefined;
+    let unsubscribeToken: string | null = tokenByEmail.get(b.email.toLowerCase()) ?? null;
     if (stage === "day7" && b.user_id) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("unsubscribe_token")
-        .eq("user_id", b.user_id)
-        .maybeSingle();
+      // If the profile lookup above didn't find the token, do a direct fetch
+      if (!unsubscribeToken) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("unsubscribe_token")
+          .eq("user_id", b.user_id)
+          .maybeSingle();
+        unsubscribeToken = profile?.unsubscribe_token ?? null;
+      }
       referralUrl = `https://kloversegy.com/free-trial?ref=${b.user_id}`;
-      void profile; // unsubscribe_token fetched but handled in send-confirmation-email
     }
 
     try {
@@ -143,6 +175,7 @@ async function dispatchStage(
           template: STAGE_TEMPLATE[stage],
           level: b.level,
           ...(referralUrl ? { referral_url: referralUrl } : {}),
+          ...(unsubscribeToken ? { unsubscribe_token: unsubscribeToken } : {}),
         },
       });
       if (sendErr) throw new Error(sendErr.message);
@@ -156,6 +189,11 @@ async function dispatchStage(
   return { stage, attempted: rows.length, sent, skipped, errors };
 }
 
+// Secret shared between pg_cron and this function to prevent
+// unauthenticated callers from triggering mass follow-up sends.
+// Set CRON_SECRET in Supabase Edge Function secrets.
+const CRON_SECRET = Deno.env.get("CRON_SECRET") ?? "";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -163,10 +201,41 @@ Deno.serve(async (req) => {
     if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
       throw new Error("SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set");
     }
+
+    // ── Auth guard: require cron secret or valid admin JWT ─────────────────
+    // pg_cron passes the secret in the Authorization header.
+    // Manual admin triggers pass a JWT. Both are accepted.
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const isCronCall = CRON_SECRET && authHeader === `Bearer ${CRON_SECRET}`;
+    if (!isCronCall) {
+      // Fall back to JWT admin check for manual invocations
+      const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+      if (!token) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      // Lightweight check: verify token is a valid Supabase JWT (no role check for this internal function)
+      const adminSupabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+      const { error: authErr } = await adminSupabase.auth.getUser(token);
+      if (authErr) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-    const results = await Promise.all(
+    // Use allSettled so one stage failure doesn't abort the others
+    const settled = await Promise.allSettled(
       (["prep", "day1", "day3", "day7"] as Stage[]).map(s => dispatchStage(supabase, s)),
+    );
+
+    const results = settled.map(r =>
+      r.status === "fulfilled"
+        ? r.value
+        : { stage: "unknown", attempted: 0, sent: 0, skipped: 0, errors: [r.reason?.message ?? String(r.reason)] }
     );
 
     console.log("trial-followups:", JSON.stringify(results));

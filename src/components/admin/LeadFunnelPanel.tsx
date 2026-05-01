@@ -103,13 +103,15 @@ const LeadFunnelPanel: React.FC = () => {
     isLoading: funnelLoading,
     refetch: refetchFunnel,
   } = useQuery({
-    queryKey: ["lead_funnel"],
+    queryKey: ["lead_funnel", range],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("lead_funnel")
         .select("*")
         .order("first_seen", { ascending: false })
         .limit(5000);
+      if (rangeDate) q = q.gte("first_seen", rangeDate);
+      const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as FunnelRow[];
     },

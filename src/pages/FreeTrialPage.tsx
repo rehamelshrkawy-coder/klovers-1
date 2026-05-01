@@ -15,9 +15,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import TrialSlotPicker from "@/components/TrialSlotPicker";
 
 const Stars = ({ count = 5 }: { count?: number }) => (
-  <div className="flex gap-0.5">
+  <div className="flex gap-0.5" role="img" aria-label={`${count} out of 5 stars`}>
     {Array.from({ length: count }).map((_, i) => (
-      <Star key={i} className="h-3.5 w-3.5 fill-primary text-primary" />
+      <Star key={i} className="h-3.5 w-3.5 fill-primary text-primary" aria-hidden="true" />
     ))}
   </div>
 );
@@ -305,7 +305,7 @@ const FreeTrialPage = () => {
 
                   {/* Live availability chips */}
                   {(spotsRemaining !== null || daysToDeadline !== null) && (
-                    <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start">
+                    <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start" aria-live="polite" aria-atomic="false">
                       {spotsRemaining !== null && spotsRemaining <= 15 && (
                         <span className="inline-flex items-center gap-1 bg-red-100 dark:bg-red-950/40 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 text-[11px] font-bold px-2.5 py-1 rounded-full">
                           <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
