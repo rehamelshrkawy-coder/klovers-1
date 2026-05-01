@@ -43,12 +43,16 @@ BEGIN
     RAISE LOG 'trigger_trial_followups: service key not set, skipping';
     RETURN;
   END IF;
+  -- pg_net default timeout is 5s. send-trial-followups makes one HTTP
+  -- call per booking (each ~1.5s through Resend), so 8 bookings → 12s+.
+  -- Bump to 60s so the response (and dedup column writes) come back.
   PERFORM net.http_post(
     url     := 'https://ewtdgpbybkceokfohhyg.supabase.co/functions/v1/send-trial-followups',
     headers := jsonb_build_object(
                  'Content-Type', 'application/json',
                  'Authorization', 'Bearer ' || v_key),
-    body    := '{}'::jsonb
+    body    := '{}'::jsonb,
+    timeout_milliseconds := 60000
   );
   RAISE LOG 'trigger_trial_followups fired at %', now();
 END;
