@@ -20,7 +20,7 @@ export default function OverviewCards({ metrics }: { metrics: TrialOverviewMetri
         <div
           key={c.key}
           className="rounded-lg border bg-card p-4 shadow-sm"
-          role="group"
+          role="article"
           aria-label={c.label}
         >
           <div className="text-xs text-muted-foreground">{c.label}</div>

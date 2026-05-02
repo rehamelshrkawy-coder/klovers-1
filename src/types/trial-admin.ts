@@ -31,6 +31,7 @@ export interface AdminTrialBooking {
   created_at: string | null;
   user_id: string | null;
   timezone: string | null;
+  confirmation_email_failed_at: string | null;
 
   // joined slot metadata (null if slot no longer exists)
   slot_id: string | null;

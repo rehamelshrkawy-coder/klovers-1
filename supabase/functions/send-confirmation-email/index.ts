@@ -65,8 +65,11 @@ const SITE_URL = "https://kloversegy.com";
 const FUNCTION_BASE = "https://ewtdgpbybkceokfohhyg.supabase.co/functions/v1";
 
 function unsubscribeFooter(token: string | undefined, isAr: boolean): string {
-  if (!token) return "";
-  const url = `${FUNCTION_BASE}/unsubscribe-email?token=${token}&lang=${isAr ? "ar" : "en"}`;
+  // Always include an unsubscribe link — required by CAN-SPAM / PDPL.
+  // If no token is available (guest booking), fall back to a contact-based unsubscribe page.
+  const url = token
+    ? `${FUNCTION_BASE}/unsubscribe-email?token=${token}&lang=${isAr ? "ar" : "en"}`
+    : `${SITE_URL}/unsubscribe`;
   return isAr
     ? `<p style="text-align:center;margin-top:24px;font-size:11px;color:#999">لا تريد استلام هذه الرسائل؟ <a href="${url}" style="color:#999">إلغاء الاشتراك</a></p>`
     : `<p style="text-align:center;margin-top:24px;font-size:11px;color:#999">Don't want these emails? <a href="${url}" style="color:#999">Unsubscribe</a></p>`;

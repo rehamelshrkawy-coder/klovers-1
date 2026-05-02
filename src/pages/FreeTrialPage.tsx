@@ -480,7 +480,7 @@ const FreeTrialPage = () => {
                     {t("trialBooking.successTitle") || "You're booked! 🎉"}
                   </h2>
                   <p className="text-muted-foreground mb-8 max-w-sm mx-auto text-sm">
-                    {t("trialBooking.successDesc") || "Check your email for confirmation. We'll send you the Zoom link before the class."}
+                    {t("trialBooking.successDesc") || "Check your email for confirmation. We'll send you the Google Meet link before the class."}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Button

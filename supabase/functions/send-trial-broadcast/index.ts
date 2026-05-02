@@ -38,7 +38,7 @@ function buildBroadcastEmail(
     ? `${SITE_URL}/unsubscribe?token=${unsubscribeToken}`
     : `${SITE_URL}/unsubscribe`;
 
-  const subject = "🎓 Free Trial Class — Book Your Spot Now! | كلاس تجريبي مجاني — احجز مكانك!";
+  const subject = "Free Korean Class — احجز مجاناً 🎓";
 
   // Plain-text version (deliverability + accessibility)
   const text = `Hi ${displayName},

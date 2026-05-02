@@ -42,6 +42,28 @@ Deno.serve(async (req) => {
     }
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
+    // ── Admin JWT required (this function is manually invoked only) ──────────
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!token) {
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized — admin JWT required" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
+    if (authErr || !user) {
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: roleRow } = await supabase.from("user_roles").select("role")
+      .eq("user_id", user.id).eq("role", "admin").maybeSingle();
+    if (!roleRow) {
+      return new Response(JSON.stringify({ ok: false, error: "Forbidden — admin role required" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     let body: { mode?: "dry_run" | "live"; days?: number; limit?: number } = {};
     try { body = await req.json(); } catch { /* empty body is fine */ }
 

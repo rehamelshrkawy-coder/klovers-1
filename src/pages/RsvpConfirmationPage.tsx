@@ -65,7 +65,7 @@ export default function RsvpConfirmationPage() {
 
         {/* Footer */}
         <div className="border-t border-[#2a2a2a] pt-5 mt-2">
-          <p className="text-[#666] text-[13px]">— The Klovers Team 🇰🇷</p>
+          <p className="text-[#999] text-[13px]">— The Klovers Team 🇰🇷</p>
           <a
             href="https://kloversegy.com"
             className="text-[#FFFF00] text-[12px] hover:underline mt-1 inline-block"

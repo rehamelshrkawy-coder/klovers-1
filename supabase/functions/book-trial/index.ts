@@ -262,7 +262,7 @@ Deno.serve(async (req) => {
       const { data, error: e2 } = await supabase
         .from("trial_bookings")
         .select("id, start_time, trial_date, is_tba")
-        .ilike("email", normalizedEmail)
+        .eq("email", normalizedEmail)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -281,41 +281,28 @@ Deno.serve(async (req) => {
     // Unauthenticated: only remove TBA placeholders.
     const shouldDelete = existingBooking && (authed || isTbaPlaceholder);
 
-    if (shouldDelete) {
-      const { error: deleteError } = await supabase
-        .from("trial_bookings")
-        .delete()
-        .eq("id", existingBooking.id);
-      if (deleteError) {
-        console.error("book-trial delete existing booking error:", JSON.stringify(deleteError));
-        throw deleteError;
-      }
-    }
+    // Atomic delete + insert via Postgres RPC (prevents orphaned bookings on crash)
+    const { data: newBookingId, error: bookingError } = await supabase.rpc("upsert_trial_booking", {
+      p_delete_id:   shouldDelete ? existingBooking!.id : null,
+      p_name:        finalName,
+      p_email:       normalizedEmail,
+      p_phone:       phone?.trim() || null,
+      p_level:       level?.trim() || null,
+      p_goal:        goal?.trim() || null,
+      p_day_of_week: day_of_week,
+      p_start_time:  start_time,
+      p_trial_date:  trialDate,
+      p_timezone:    timezone,
+      p_language:    class_language === "arabic" ? "arabic" : "english",
+      p_user_id:     resolvedUserId || null,
+      p_status:      "confirmed",
+    });
 
-    const { data: booking, error: bookingError } = await supabase
-      .from("trial_bookings")
-      .insert({
-        name: finalName,
-        email: normalizedEmail,
-        phone: phone?.trim() || null,
-        level: level?.trim() || null,
-        goal: goal?.trim() || null,
-        day_of_week,
-        start_time,
-        trial_date: trialDate,
-        timezone,
-        class_language: class_language === "arabic" ? "arabic" : "english",
-        status: "confirmed",
-        confirmed_at: new Date().toISOString(),
-        ...(resolvedUserId ? { user_id: resolvedUserId } : {}),
-      })
-      .select("id")
-      .single();
+    // Wrap result in same shape the rest of the function expects
+    const booking = newBookingId ? { id: newBookingId as string } : null;
 
     if (bookingError || !booking) {
-      // Unique constraint: user has a real booking — return a friendly 200
-      // with ok:false so the frontend's `if (data?.error)` handler runs
-      // instead of throwing a FunctionsHttpError on non-2xx.
+      // Unique constraint: user has a real booking
       if (bookingError?.code === "23505") {
         return new Response(
           JSON.stringify({
@@ -357,7 +344,7 @@ Deno.serve(async (req) => {
       timezone,
     });
 
-    // 5. Send trial confirmation email (auto-confirmed — no admin step)
+    // 5. Send trial confirmation email — track failures in DB for admin visibility
     supabase.functions.invoke("send-confirmation-email", {
       body: {
         template: "trial_confirmed",
@@ -370,7 +357,15 @@ Deno.serve(async (req) => {
         level: level?.trim() || "",
         calendar_url: calendarUrl,
       },
-    }).catch((e) => console.warn("trial_confirmed email failed:", e));
+    }).catch(async (e) => {
+      console.warn("trial_confirmed email failed:", e);
+      // Mark failure so admin can see it in the dashboard and manually resend
+      await supabase
+        .from("trial_bookings")
+        .update({ confirmation_email_failed_at: new Date().toISOString() })
+        .eq("id", booking.id)
+        .catch(() => {});
+    });
 
     return new Response(
       JSON.stringify({

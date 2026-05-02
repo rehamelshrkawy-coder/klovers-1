@@ -156,6 +156,27 @@ async function dispatchStage(
   return { stage, attempted: rows.length, sent, skipped, errors };
 }
 
+// ── Auth helper ──────────────────────────────────────────────────────────────
+// Accepts either:
+//   a) An admin JWT (Authorization: Bearer <token>) — for manual invocations
+//   b) A shared cron secret (x-cron-secret: <CRON_SECRET>) — for pg_cron
+async function isAuthorised(req: Request, supabase: ReturnType<typeof createClient>): Promise<boolean> {
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  if (cronSecret && req.headers.get("x-cron-secret") === cronSecret) return true;
+
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!token) return false;
+
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) return false;
+
+  const { data: roleRow } = await supabase
+    .from("user_roles").select("role")
+    .eq("user_id", user.id).eq("role", "admin").maybeSingle();
+  return !!roleRow;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -165,12 +186,22 @@ Deno.serve(async (req) => {
     }
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-    const results = await Promise.all(
+    if (!(await isAuthorised(req, supabase))) {
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Run each stage independently so one failure doesn't block others
+    const results = await Promise.allSettled(
       (["prep", "day1", "day3", "day7"] as Stage[]).map(s => dispatchStage(supabase, s)),
     );
+    const settled = results.map(r =>
+      r.status === "fulfilled" ? r.value : { stage: "unknown", error: r.reason?.message ?? String(r.reason) }
+    );
 
-    console.log("trial-followups:", JSON.stringify(results));
-    return new Response(JSON.stringify({ ok: true, results }), {
+    console.log("trial-followups:", JSON.stringify(settled));
+    return new Response(JSON.stringify({ ok: true, results: settled }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

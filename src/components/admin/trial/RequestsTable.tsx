@@ -111,9 +111,9 @@ export default function RequestsTable({ bookings }: { bookings: AdminTrialBookin
               <th className="px-3 py-2 text-left font-medium">Selected Slot</th>
               <th className="px-3 py-2 text-left font-medium">Slot State</th>
               <th className="px-3 py-2 text-left font-medium">Status</th>
-              <th className="px-3 py-2 text-left font-medium">📧 Sent</th>
-              <th className="px-3 py-2 text-left font-medium">👁 Opened</th>
-              <th className="px-3 py-2 text-left font-medium">✅ RSVP</th>
+              <th className="px-3 py-2 text-left font-medium" aria-label="Confirmation email sent"><span aria-hidden="true">📧</span> Sent</th>
+              <th className="px-3 py-2 text-left font-medium" aria-label="Email opened by student"><span aria-hidden="true">👁</span> Opened</th>
+              <th className="px-3 py-2 text-left font-medium" aria-label="RSVP attendance response"><span aria-hidden="true">✅</span> RSVP</th>
               <th className="px-3 py-2 text-left font-medium">Phase</th>
               <th className="px-3 py-2 text-left font-medium">Requested</th>
             </tr>
@@ -134,7 +134,7 @@ export default function RequestsTable({ bookings }: { bookings: AdminTrialBookin
                 <td className="px-3 py-2 font-mono">
                   {(() => {
                     const adminTz = getAdminTimezone();
-                    const srcTz = (b as any).timezone || 'Africa/Cairo';
+                    const srcTz = b.timezone || 'Africa/Cairo';
                     const lcl = convertDateTimeToTimezone(b.trial_date, b.start_time, srcTz, adminTz);
                     return (
                       <>
@@ -170,7 +170,9 @@ export default function RequestsTable({ bookings }: { bookings: AdminTrialBookin
                 <td className="px-3 py-2 text-xs text-center">
                   {b.email_sent_at
                     ? <span title={b.email_sent_at} className="text-green-600 font-medium">✓</span>
-                    : <span className="text-muted-foreground">—</span>}
+                    : b.confirmation_email_failed_at
+                      ? <span title={`Failed: ${b.confirmation_email_failed_at}`} className="text-red-500 font-medium cursor-help">✗</span>
+                      : <span className="text-muted-foreground">—</span>}
                 </td>
                 {/* Email opened */}
                 <td className="px-3 py-2 text-xs text-center">
