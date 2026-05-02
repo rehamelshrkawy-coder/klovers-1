@@ -25,7 +25,7 @@ const cors = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface RowEntry { first_source: string | null; sessions: number; signups: number; conv_pct: number }
+interface RowEntry { first_source: string | null; sessions: number; signups: number; booked: number; paid: number; conv_pct: number; paid_pct: number }
 interface FunnelStep { label: string; sessions: number }
 interface Failure { reason: string; sessions: number }
 
@@ -52,7 +52,7 @@ function buildHtml(data: {
   const mtPct = pct(data.multiTouch, data.sessions);
 
   const entryRows = data.byEntry.map((r) =>
-    `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;">${r.first_source ?? "(direct)"}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;">${r.sessions}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;">${r.signups}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;font-weight:bold;">${r.conv_pct}%</td></tr>`
+    `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;">${r.first_source ?? "(direct)"}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;">${r.sessions}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;">${r.signups}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;color:#666;">${r.booked}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;font-weight:bold;color:#070;">${r.paid}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;">${r.paid_pct}%</td></tr>`
   ).join("");
 
   const funnelRows = data.trialFunnel.map((s, i, arr) => {
@@ -84,8 +84,8 @@ function buildHtml(data: {
 
     <h3 style="margin:0 0 8px;font-size:14px;border-bottom:2px solid #FFFF00;display:inline-block;padding-bottom:2px;">Conversion by entry point</h3>
     <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;margin-bottom:24px;">
-      <tr style="background:#fafafa;"><th style="padding:6px 10px;text-align:left;">Source</th><th style="padding:6px 10px;text-align:right;">Sessions</th><th style="padding:6px 10px;text-align:right;">Signups</th><th style="padding:6px 10px;text-align:right;">Conv %</th></tr>
-      ${entryRows || `<tr><td colspan="4" style="padding:10px;color:#666;text-align:center;">No sessions yesterday</td></tr>`}
+      <tr style="background:#fafafa;"><th style="padding:6px 10px;text-align:left;">Source</th><th style="padding:6px 10px;text-align:right;">Sessions</th><th style="padding:6px 10px;text-align:right;">Signups</th><th style="padding:6px 10px;text-align:right;">Booked</th><th style="padding:6px 10px;text-align:right;">Paid</th><th style="padding:6px 10px;text-align:right;">Paid %</th></tr>
+      ${entryRows || `<tr><td colspan="6" style="padding:10px;color:#666;text-align:center;">No sessions yesterday</td></tr>`}
     </table>
 
     <h3 style="margin:0 0 8px;font-size:14px;border-bottom:2px solid #FFFF00;display:inline-block;padding-bottom:2px;">Trial form funnel</h3>
@@ -143,24 +143,34 @@ Deno.serve(async (req) => {
 
     const { data: lf } = await supabase
       .from("lead_funnel")
-      .select("session_id, first_source, signup_completed, touchpoints")
+      .select("session_id, first_source, signup_completed, touchpoints, booked_trial, enrolled_paid")
       .gte("first_seen", since)
       .lt("first_seen", until);
     const sessions = lf?.length ?? 0;
     const signups = lf?.filter(r => r.signup_completed).length ?? 0;
     const multiTouch = lf?.filter(r => Array.isArray(r.touchpoints) && r.touchpoints.length >= 2).length ?? 0;
 
-    const byEntryMap = new Map<string, { sessions: number; signups: number }>();
+    const byEntryMap = new Map<string, { sessions: number; signups: number; booked: number; paid: number }>();
     for (const r of (lf ?? [])) {
       const k = (r.first_source as string | null) ?? "(direct)";
-      const e = byEntryMap.get(k) ?? { sessions: 0, signups: 0 };
+      const e = byEntryMap.get(k) ?? { sessions: 0, signups: 0, booked: 0, paid: 0 };
       e.sessions++;
       if (r.signup_completed) e.signups++;
+      if ((r as { booked_trial?: boolean }).booked_trial) e.booked++;
+      if ((r as { enrolled_paid?: boolean }).enrolled_paid) e.paid++;
       byEntryMap.set(k, e);
     }
     const byEntry: RowEntry[] = [...byEntryMap.entries()]
-      .map(([k, v]) => ({ first_source: k, sessions: v.sessions, signups: v.signups, conv_pct: v.sessions ? Math.round(100 * v.signups / v.sessions) : 0 }))
-      .sort((a, b) => b.sessions - a.sessions);
+      .map(([k, v]) => ({
+        first_source: k,
+        sessions: v.sessions,
+        signups: v.signups,
+        booked: v.booked,
+        paid: v.paid,
+        conv_pct: v.sessions ? Math.round(100 * v.signups / v.sessions) : 0,
+        paid_pct: v.sessions ? Math.round(100 * v.paid / v.sessions) : 0,
+      }))
+      .sort((a, b) => b.paid - a.paid || b.sessions - a.sessions);
 
     // ── Trial funnel ────────────────────────────────────────────────────────
     const labelOrder: { key: string[]; label: string }[] = [
@@ -223,6 +233,15 @@ Deno.serve(async (req) => {
     const formStart = trialFunnel.find(s => s.label.startsWith("1."))?.sessions ?? 0;
     const formEnd = trialFunnel.find(s => s.label.startsWith("4."))?.sessions ?? 0;
     if (formStart >= 5 && (formEnd / formStart) < 0.20) flags.push(`Trial form completion under 20% (${formEnd}/${formStart})`);
+
+    // Book-to-paid leak: bookings yesterday vs APPROVED enrollments same/next-day.
+    // Forensic showed ~5% trial-to-paid which is the biggest unfixed leak — the
+    // operations layer needs to know about this every day.
+    const totalBooked = byEntry.reduce((s, r) => s + r.booked, 0);
+    const totalPaid = byEntry.reduce((s, r) => s + r.paid, 0);
+    if (totalBooked >= 3 && (totalPaid / totalBooked) < 0.10) {
+      flags.push(`Book-to-paid under 10% (${totalPaid}/${totalBooked} bookings) — sales follow-up needed`);
+    }
 
     const html = buildHtml({
       yesterday: yLabel,
