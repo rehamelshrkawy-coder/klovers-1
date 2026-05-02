@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import StickyEnrollBar from "@/components/StickyEnrollBar";
 import ReturningStudentBanner from "@/components/ReturningStudentBanner";
 import InterviewBannerChip from "@/components/InterviewBannerChip";
+import HomeExitNudge from "@/components/HomeExitNudge";
 
 // Lazy-load below-fold sections for faster initial paint
 const MeetTeacher = lazy(() => import("@/components/MeetTeacher"));
@@ -282,6 +283,7 @@ const Index = () => {
       </main>
       <Footer />
       <StickyEnrollBar />
+      <HomeExitNudge />
     </div>
   );
 };

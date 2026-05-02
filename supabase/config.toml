@@ -115,3 +115,6 @@ verify_jwt = false
 
 [functions.recover-silent-trials]
 verify_jwt = false
+
+[functions.funnel-digest]
+verify_jwt = false
