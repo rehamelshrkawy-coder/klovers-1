@@ -1,29 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// Restrict CORS to the production origin + local dev.
-// Wildcard (*) would allow any site to POST to the booking endpoint.
-const ALLOWED_ORIGINS = new Set([
-  "https://kloversegy.com",
-  "https://www.kloversegy.com",
-  "http://localhost:5173",
-  "http://localhost:3000",
-]);
-
-function getCorsHeaders(req: Request): Record<string, string> {
-  const origin = req.headers.get("origin") ?? "";
-  const allowedOrigin = ALLOWED_ORIGINS.has(origin) ? origin : "https://kloversegy.com";
-  return {
-    "Access-Control-Allow-Origin": allowedOrigin,
-    "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-    "Vary": "Origin",
-  };
-}
-
-// Allowed start_time values — validated against trial_slots table values.
-// If a new slot is added, this list must be updated too. Consider replacing
-// with a DB lookup if the slot list changes frequently.
-const ALLOWED_START_TIMES = new Set(["16:00", "18:30", "17:30"]);
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
 
 // DB-backed rate limiter — survives Edge Function cold starts.
 // Uses the trial_rate_limits table with 1-hour windows.
@@ -104,8 +85,6 @@ function formatTime12h(time: string): string {
 }
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
-
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -149,42 +128,32 @@ Deno.serve(async (req) => {
     if (authed) {
       const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
       const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-      // If caller says authed:true but provides no valid JWT, reject rather than
-      // silently falling through to the guest path (prevents auth bypass).
-      if (!token) {
-        return new Response(
-          JSON.stringify({ error: "Unauthorized — JWT required when authed:true" }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      const { data: userData, error: jwtErr } = await supabase.auth.getUser(token);
-      if (jwtErr || !userData?.user) {
-        return new Response(
-          JSON.stringify({ error: "Unauthorized — invalid or expired token" }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      resolvedUserId = userData.user.id;
-      resolvedEmail = userData.user.email ?? null;
-      // Capture level from user_metadata as a fallback for email-confirmation
-      // signups where the profile row hasn't been updated yet.
-      const metaLevel = (userData.user.user_metadata?.level as string | undefined)?.trim();
-      if (metaLevel) resolvedLevel = metaLevel;
-      // Pull the name + level from profiles for nicer display
-      const { data: profileRow } = await supabase
-        .from("profiles")
-        .select("name, email, level")
-        .eq("user_id", resolvedUserId)
-        .maybeSingle();
-      if (profileRow) {
-        resolvedName = profileRow.name ?? null;
-        if (!resolvedEmail && profileRow.email) resolvedEmail = profileRow.email;
-        const profileLevel = (profileRow.level as string | undefined)?.trim();
-        if (profileLevel) resolvedLevel = profileLevel;
+      if (token) {
+        const { data: userData } = await supabase.auth.getUser(token);
+        if (userData?.user) {
+          resolvedUserId = userData.user.id;
+          resolvedEmail = userData.user.email ?? null;
+          // Capture level from user_metadata as a fallback for email-confirmation
+          // signups where the profile row hasn't been updated yet.
+          const metaLevel = (userData.user.user_metadata?.level as string | undefined)?.trim();
+          if (metaLevel) resolvedLevel = metaLevel;
+          // Pull the name + level from profiles for nicer display
+          const { data: profileRow } = await supabase
+            .from("profiles")
+            .select("name, email, level")
+            .eq("user_id", resolvedUserId)
+            .maybeSingle();
+          if (profileRow) {
+            resolvedName = profileRow.name ?? null;
+            if (!resolvedEmail && profileRow.email) resolvedEmail = profileRow.email;
+            const profileLevel = (profileRow.level as string | undefined)?.trim();
+            if (profileLevel) resolvedLevel = profileLevel;
+          }
+        }
       }
     }
 
-    // ── Input validation ───────────────────────────────────────────────────
+    // Validation — accept email from JWT in the authed path
     const effectiveEmail = resolvedEmail ?? email;
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     if (!effectiveEmail || !emailRegex.test(effectiveEmail)) {
@@ -201,8 +170,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate start_time against known slot values — prevents arbitrary time injection
-    if (!start_time || typeof start_time !== "string" || !ALLOWED_START_TIMES.has(start_time)) {
+    if (!start_time || typeof start_time !== "string") {
       return new Response(
         JSON.stringify({ error: "Invalid start_time." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -294,7 +262,7 @@ Deno.serve(async (req) => {
       const { data, error: e2 } = await supabase
         .from("trial_bookings")
         .select("id, start_time, trial_date, is_tba")
-        .ilike("email", normalizedEmail)
+        .eq("email", normalizedEmail)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -313,75 +281,28 @@ Deno.serve(async (req) => {
     // Unauthenticated: only remove TBA placeholders.
     const shouldDelete = existingBooking && (authed || isTbaPlaceholder);
 
-    if (shouldDelete) {
-      const { error: deleteError } = await supabase
-        .from("trial_bookings")
-        .delete()
-        .eq("id", existingBooking.id);
-      if (deleteError) {
-        console.error("book-trial delete existing booking error:", JSON.stringify(deleteError));
-        throw deleteError;
-      }
-    }
+    // Atomic delete + insert via Postgres RPC (prevents orphaned bookings on crash)
+    const { data: newBookingId, error: bookingError } = await supabase.rpc("upsert_trial_booking", {
+      p_delete_id:   shouldDelete ? existingBooking!.id : null,
+      p_name:        finalName,
+      p_email:       normalizedEmail,
+      p_phone:       phone?.trim() || null,
+      p_level:       level?.trim() || null,
+      p_goal:        goal?.trim() || null,
+      p_day_of_week: day_of_week,
+      p_start_time:  start_time,
+      p_trial_date:  trialDate,
+      p_timezone:    timezone,
+      p_language:    class_language === "arabic" ? "arabic" : "english",
+      p_user_id:     resolvedUserId || null,
+      p_status:      "confirmed",
+    });
 
-    const { data: booking, error: bookingError } = await supabase
-      .from("trial_bookings")
-      .insert({
-        name: finalName,
-        email: normalizedEmail,
-        phone: phone?.trim() || null,
-        level: level?.trim() || null,
-        goal: goal?.trim() || null,
-        day_of_week,
-        start_time,
-        trial_date: trialDate,
-        timezone,
-        class_language: class_language === "arabic" ? "arabic" : "english",
-        status: "confirmed",
-        confirmed_at: new Date().toISOString(),
-        ...(resolvedUserId ? { user_id: resolvedUserId } : {}),
-      })
-      .select("id")
-      .single();
+    // Wrap result in same shape the rest of the function expects
+    const booking = newBookingId ? { id: newBookingId as string } : null;
 
-    // Foreign-key on level → course_levels. If the client passed a level
-    // not in course_levels (e.g. legacy "Beginner" string from old
-    // profiles), retry the insert with level=null instead of 500'ing.
-    let recoveredBooking: { id: string } | null = null;
-    if (bookingError?.code === "23503" && bookingError?.message?.includes("level")) {
-      console.warn("book-trial: FK violation on level, retrying without level. Original level:", level);
-      const { data: retry, error: retryErr } = await supabase
-        .from("trial_bookings")
-        .insert({
-          name: finalName,
-          email: normalizedEmail,
-          phone: phone?.trim() || null,
-          level: null,
-          goal: goal?.trim() || null,
-          day_of_week,
-          start_time,
-          trial_date: trialDate,
-          timezone,
-          class_language: class_language === "arabic" ? "arabic" : "english",
-          status: "confirmed",
-          confirmed_at: new Date().toISOString(),
-          ...(resolvedUserId ? { user_id: resolvedUserId } : {}),
-        })
-        .select("id")
-        .single();
-      if (!retryErr && retry) {
-        recoveredBooking = retry as { id: string };
-      } else if (retryErr) {
-        console.error("book-trial level-fallback retry failed:", JSON.stringify(retryErr));
-      }
-    }
-
-    const finalBooking = booking ?? recoveredBooking;
-
-    if ((bookingError && !recoveredBooking) || !finalBooking) {
-      // Unique constraint: user has a real booking — return a friendly 200
-      // with ok:false so the frontend's `if (data?.error)` handler runs
-      // instead of throwing a FunctionsHttpError on non-2xx.
+    if (bookingError || !booking) {
+      // Unique constraint: user has a real booking
       if (bookingError?.code === "23505") {
         return new Response(
           JSON.stringify({
@@ -399,20 +320,6 @@ Deno.serve(async (req) => {
             ok: false,
             success: false,
             error: "This trial time overlaps with one of your existing classes. Please pick a different slot or contact us on WhatsApp.",
-          }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      // FK on level (couldn't be auto-recovered above) — return a friendly
-      // 200 so the user can pick a slot manually rather than seeing a
-      // generic "Edge Function returned a non-2xx" error.
-      if (bookingError?.code === "23503") {
-        console.error("book-trial FK violation:", JSON.stringify(bookingError));
-        return new Response(
-          JSON.stringify({
-            ok: false,
-            success: false,
-            error: "Could not save your level — please refresh and try again. If this persists, message us on WhatsApp.",
           }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
@@ -437,7 +344,7 @@ Deno.serve(async (req) => {
       timezone,
     });
 
-    // 5. Send trial confirmation email (auto-confirmed — no admin step)
+    // 5. Send trial confirmation email — track failures in DB for admin visibility
     supabase.functions.invoke("send-confirmation-email", {
       body: {
         template: "trial_confirmed",
@@ -450,13 +357,21 @@ Deno.serve(async (req) => {
         level: level?.trim() || "",
         calendar_url: calendarUrl,
       },
-    }).catch((e) => console.warn("trial_confirmed email failed:", e));
+    }).catch(async (e) => {
+      console.warn("trial_confirmed email failed:", e);
+      // Mark failure so admin can see it in the dashboard and manually resend
+      await supabase
+        .from("trial_bookings")
+        .update({ confirmation_email_failed_at: new Date().toISOString() })
+        .eq("id", booking.id)
+        .catch(() => {});
+    });
 
     return new Response(
       JSON.stringify({
         success: true,
         booking: {
-          id: finalBooking.id,
+          id: booking.id,
           trial_date: trialDate,
           day_name: dayName,
           start_time,
