@@ -23,6 +23,7 @@ import HistoricalBookings from './trial/HistoricalBookings';
 import RequestsTable from './trial/RequestsTable';
 import SuggestedSlots from './trial/SuggestedSlots';
 import TrialSettingsPanel from './trial/TrialSettings';
+import BroadcastTrackingTable from './trial/BroadcastTrackingTable';
 
 type SubTab =
   | 'overview'
@@ -30,7 +31,8 @@ type SubTab =
   | 'requests'
   | 'historical'
   | 'suggestions'
-  | 'settings';
+  | 'settings'
+  | 'broadcasts';
 
 const SUBTABS: { key: SubTab; label: string }[] = [
   { key: 'overview', label: 'Overview' },
@@ -39,6 +41,7 @@ const SUBTABS: { key: SubTab; label: string }[] = [
   { key: 'historical', label: 'Previous Trial Classes' },
   { key: 'suggestions', label: 'Suggested New Slots' },
   { key: 'settings', label: 'Trial Settings' },
+  { key: 'broadcasts', label: '📣 Broadcasts' },
 ];
 
 export default function TrialClassesTab() {
@@ -134,6 +137,7 @@ export default function TrialClassesTab() {
             <SuggestedSlots suggestions={suggestions} fullSlotsCount={overview.fullSlots} />
           )}
           {sub === 'settings' && <TrialSettingsPanel settings={settings} />}
+          {sub === 'broadcasts' && <BroadcastTrackingTable />}
         </>
       )}
     </section>
