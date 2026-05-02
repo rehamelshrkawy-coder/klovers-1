@@ -55,11 +55,14 @@ Deno.serve(async (req) => {
     const todayCairo = new Date(nowCairoMs).toISOString().slice(0, 10);
     const cutoffCairo = new Date(nowCairoMs - days * 86400000).toISOString().slice(0, 10);
 
+    // .lt (not .lte) so we only target trials that have already happened.
+    // Otherwise we'd email today's trial bookers before they attend, which
+    // is the opposite of "silent" — they're about to be very-much-attending.
     const { data: bookings, error } = await supabase
       .from("trial_bookings")
       .select("id, name, email, trial_date, user_id, level, created_at")
       .gte("trial_date", cutoffCairo)
-      .lte("trial_date", todayCairo)
+      .lt("trial_date", todayCairo)
       .is("followup_day3_sent_at", null)
       .not("is_tba", "is", true)
       .not("email", "is", null)
