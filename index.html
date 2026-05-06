@@ -21,6 +21,10 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
 
+    <!-- OG locale — primary EN, alternate AR for bilingual audience -->
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ar_EG" />
+
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Klovers | Korean Lovers Academy" />
@@ -43,6 +47,11 @@
     <link rel="dns-prefetch" href="https://ewtdgpbybkceokfohhyg.supabase.co" />
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
     <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://connect.facebook.net" crossorigin />
+    <link rel="dns-prefetch" href="https://connect.facebook.net" />
+
+    <!-- LCP hero image — preloaded from stable public path to avoid render-blocking discovery -->
+    <link rel="preload" as="image" href="/hero-korean.jpg" fetchpriority="high" />
 
     <!-- Fonts: system font stack used globally; marketing fonts loaded on-demand by Creator Hub -->
 
@@ -98,6 +107,8 @@
       },
       "image": "https://kloversegy.com/klovers-logo.jpg",
       "description": "Korean Lovers Academy offering interactive online lessons, certified teachers, placement tests, and gamified learning for all levels.",
+      "foundingDate": "2022",
+      "inLanguage": ["ar", "en"],
       "priceRange": "$$",
       "currenciesAccepted": "EGP, USD",
       "paymentAccepted": "Credit Card, Online Payment",
@@ -142,6 +153,11 @@
             }
           }
         ]
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "EG",
+        "addressRegion": "Cairo"
       },
       "email": "koreanlovers.net@gmail.com",
       "telephone": "+601121777560",
