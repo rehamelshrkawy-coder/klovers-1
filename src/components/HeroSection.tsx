@@ -2,7 +2,7 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Gift, Users, Star, Globe, MessageCircle, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
-import heroPoster from "@/assets/hero-korean.jpg";
+const heroPoster = "/hero-korean.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
@@ -97,6 +97,7 @@ const HeroSection = () => {
           loop
           muted
           playsInline
+          aria-hidden="true"
           onCanPlay={() => setVideoReady(true)}
           className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ${
             videoReady ? "opacity-100" : "opacity-0"
