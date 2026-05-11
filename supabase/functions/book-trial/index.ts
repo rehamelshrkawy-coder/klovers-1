@@ -324,8 +324,16 @@ Deno.serve(async (req) => {
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      console.error("book-trial insert error:", JSON.stringify(bookingError));
-      throw bookingError ?? new Error("Failed to insert trial booking");
+      // Surface the real DB error in the response body instead of throwing a
+      // generic 500 — this lets the UI show a meaningful message and lets us
+      // see the error code/message without needing server-side log access.
+      const errMsg = bookingError?.message ?? "Failed to insert trial booking";
+      const errCode = bookingError?.code ?? "unknown";
+      console.error("book-trial insert error:", errCode, errMsg, JSON.stringify(bookingError));
+      return new Response(
+        JSON.stringify({ ok: false, success: false, error: errMsg, error_code: errCode }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // 3. Notify admin
