@@ -344,6 +344,15 @@ Deno.serve(async (req) => {
       timezone,
     });
 
+    // Fetch meeting URL from the matching trial slot (if set by admin)
+    const { data: slotRow } = await supabase
+      .from("trial_slots")
+      .select("meeting_url")
+      .eq("trial_date", trialDate)
+      .eq("start_time", start_time)
+      .maybeSingle();
+    const meetingUrl: string | null = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
+
     // 5. Send trial confirmation email — track failures in DB for admin visibility
     supabase.functions.invoke("send-confirmation-email", {
       body: {
@@ -356,6 +365,7 @@ Deno.serve(async (req) => {
         trial_timezone: timezone,
         level: level?.trim() || "",
         calendar_url: calendarUrl,
+        ...(meetingUrl ? { class_link_url: meetingUrl } : {}),
       },
     }).catch(async (e) => {
       console.warn("trial_confirmed email failed:", e);
