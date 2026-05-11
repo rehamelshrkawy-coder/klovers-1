@@ -623,6 +623,12 @@ function buildTrialConfirmedEmail(p: EmailPayload) {
           ["⏱ المدة", "45 دقيقة"],
         ])}
         ${calBtn}
+        ${p.class_link_url
+          ? `<div style="margin:24px 0;text-align:center;">
+              <a href="${p.class_link_url}" style="display:inline-block;background:#000000;color:#FFFF00;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;">🎓 انضم للكلاس</a>
+            </div>`
+          : ""
+        }
         <h3 style="color: ${BRAND_DARK}; font-size: 16px; margin-top: 24px;">ماذا تتوقع:</h3>
         <ul style="color: ${BRAND_TEXT}; padding-right: 20px;">
           <li>حصة مباشرة مع مدرس حقيقي</li>
@@ -656,7 +662,12 @@ function buildTrialConfirmedEmail(p: EmailPayload) {
       <div style="background: #fffff0; border-left: 4px solid ${BRAND_YELLOW}; border-radius: 6px; padding: 14px 18px; margin: 24px 0;">
         <p style="margin: 0; color: ${BRAND_DARK}; font-size: 14px;"><strong>No prep needed.</strong> Just show up with 30 minutes and an open mind. We'll handle the rest.</p>
       </div>
-      <p style="color: ${BRAND_TEXT}; font-size: 14px;">The class link will be sent to you before the session. Keep an eye on your inbox!</p>
+      ${p.class_link_url
+        ? `<div style="margin:24px 0;text-align:center;">
+            <a href="${p.class_link_url}" style="display:inline-block;background:#000000;color:#FFFF00;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;">🎓 Join the Class</a>
+          </div>`
+        : `<p style="color: ${BRAND_TEXT}; font-size: 14px;">The class link will be sent to you before the session. Keep an eye on your inbox!</p>`
+      }
       <div style="margin: 24px 0; text-align: center;">
         ${brandButton("Message us on WhatsApp", "https://wa.me/201010003084")}
       </div>
