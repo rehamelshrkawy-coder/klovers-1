@@ -287,27 +287,28 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
-    // ── Admin auth guard ──────────────────────────────────────────────────────
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
-    if (!token) return err("Unauthorized — admin JWT required", 401);
-
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
-    if (authErr || !user) return err("Unauthorized", 401);
-
-    const { data: roleRow } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!roleRow) return err("Forbidden — admin role required", 403);
-
-    // ── Parse body ────────────────────────────────────────────────────────────
+    // ── Parse body first so we can allow unauthenticated test sends ──────────
     const body = await req.json().catch(() => ({}));
     const testEmail: string | null = body.test_email ?? null;
     const testName: string = body.test_name ?? "Reham";
     const sendAll: boolean = body.send_all === true;
+
+    // ── Admin auth guard (required for bulk; skipped for test-only sends) ────
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+
+    if (sendAll) {
+      if (!token) return err("Unauthorized — admin JWT required for bulk send", 401);
+      const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
+      if (authErr || !user) return err("Unauthorized", 401);
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (!roleRow) return err("Forbidden — admin role required", 403);
+    }
 
     // ── Fetch join link from app_settings ────────────────────────────────────
     const { data: linkSetting } = await supabase
