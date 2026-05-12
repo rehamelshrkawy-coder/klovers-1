@@ -356,9 +356,16 @@ const AdminDashboard = () => {
   const loading = leadsLoading || enrollmentsLoading || overviewLoading || attendanceLoading;
   const leadsError = leadsQueryError?.message ?? null;
 
-  /** Targeted refetch — replaces the old monolithic invalidateAll(). */
+  /** Targeted refetch — invalidates all admin query key families. */
   const invalidateAll = useCallback(() => {
-    return queryClient.invalidateQueries({ queryKey: ["admin"] });
+    return Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["admin"] }),
+      queryClient.invalidateQueries({ queryKey: ["trial-admin"] }),
+      queryClient.invalidateQueries({ queryKey: ["lead_events"] }),
+      queryClient.invalidateQueries({ queryKey: ["lead_funnel"] }),
+      queryClient.invalidateQueries({ queryKey: ["lead_funnel_prev"] }),
+      queryClient.invalidateQueries({ queryKey: ["enrollments_sources"] }),
+    ]);
   }, [queryClient]);
 
   // ── Local UI state ────────────────────────────────────────────────────────
