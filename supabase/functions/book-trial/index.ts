@@ -392,10 +392,11 @@ Deno.serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
-    console.error("book-trial error:", err);
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.error("book-trial outer error:", errMsg, err);
     return new Response(
-      JSON.stringify({ error: "An unexpected error occurred." }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ ok: false, success: false, error: errMsg }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
