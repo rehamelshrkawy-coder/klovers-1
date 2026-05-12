@@ -42,6 +42,7 @@ interface TrialBooking {
   start_time: string | null;
   trial_date: string | null;
   timezone: string;
+  language?: string | null;
   status: string;
   confirmed_at: string | null;
   created_at: string;
@@ -166,7 +167,31 @@ const TrialClassesManager = () => {
         } as any)
         .eq("id", booking.id);
       if (error) throw error;
-      toast({ title: "Confirmed", description: `${booking.name || booking.email} → ${date} at ${time}` });
+
+      // Fetch meeting URL for this specific session date
+      const { data: slotRow } = await supabase
+        .from("trial_slots")
+        .select("meeting_url")
+        .eq("trial_date", date)
+        .eq("start_time", time)
+        .maybeSingle();
+      const meetingUrl = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
+
+      // Send confirmation email with join link to the student
+      const emailBody: Record<string, unknown> = {
+        template: "trial_confirmed",
+        email: booking.email,
+        name: booking.name || booking.email,
+        language: booking.language || "en",
+        trial_date: date,
+        trial_time: time,
+        trial_timezone: "Africa/Cairo",
+        level: booking.level?.trim() || "",
+      };
+      if (meetingUrl) emailBody.class_link_url = meetingUrl;
+      await supabase.functions.invoke("send-confirmation-email", { body: emailBody });
+
+      toast({ title: "Confirmed & email sent", description: `${booking.name || booking.email} → ${date} at ${time}` });
       fetchData();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
