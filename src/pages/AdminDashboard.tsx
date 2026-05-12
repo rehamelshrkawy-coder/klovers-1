@@ -358,7 +358,7 @@ const AdminDashboard = () => {
 
   /** Targeted refetch — replaces the old monolithic invalidateAll(). */
   const invalidateAll = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ["admin"] });
+    return queryClient.invalidateQueries({ queryKey: ["admin"] });
   }, [queryClient]);
 
   // ── Local UI state ────────────────────────────────────────────────────────
