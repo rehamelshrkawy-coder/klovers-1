@@ -337,10 +337,12 @@ Deno.serve(async (req) => {
     }
 
     // 3. Notify admin
-    await supabase.from("admin_notifications").insert({
-      message: `New trial booking: ${finalName} (${normalizedEmail}) — ${dayName} ${formatTime12h(start_time)}, Level: ${level || "Unknown"}`,
-      type: "trial",
-    }).catch(() => {}); // non-critical
+    try {
+      await supabase.from("admin_notifications").insert({
+        message: `New trial booking: ${finalName} (${normalizedEmail}) — ${dayName} ${formatTime12h(start_time)}, Level: ${level || "Unknown"}`,
+        type: "trial",
+      });
+    } catch { /* non-critical */ }
 
     // 4. Build calendar URL for the response
     const calendarUrl = buildCalendarUrl({
@@ -375,14 +377,15 @@ Deno.serve(async (req) => {
         calendar_url: calendarUrl,
         ...(meetingUrl ? { class_link_url: meetingUrl } : {}),
       },
-    }).catch(async (e) => {
+    }).then(null, async (e) => {
       console.warn("trial_confirmed email failed:", e);
       // Mark failure so admin can see it in the dashboard and manually resend
-      await supabase
-        .from("trial_bookings")
-        .update({ confirmation_email_failed_at: new Date().toISOString() })
-        .eq("id", booking.id)
-        .catch(() => {});
+      try {
+        await supabase
+          .from("trial_bookings")
+          .update({ confirmation_email_failed_at: new Date().toISOString() })
+          .eq("id", booking.id);
+      } catch { /* non-critical */ }
     });
 
     return new Response(
