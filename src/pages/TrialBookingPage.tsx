@@ -780,6 +780,7 @@ const TrialBookingPage = () => {
               <TrialSlotPicker
                 onSelect={handleSlotPicked}
                 onBack={() => navigate("/free-trial")}
+                classLanguage={classLanguage}
               />
 
               {loading && (

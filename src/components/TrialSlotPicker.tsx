@@ -41,23 +41,27 @@ interface TrialSlot {
 interface TrialSlotPickerProps {
   onSelect: (dayOfWeek: number, startTime: string, trialDate: string) => void;
   onBack: () => void;
+  classLanguage?: "arabic" | "english";
 }
 
 // Only used when the backend row somehow omits capacity (shouldn't happen in prod).
 const DEFAULT_CAPACITY = 6;
 
-const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
+const TrialSlotPicker = ({ onSelect, onBack, classLanguage }: TrialSlotPickerProps) => {
   const [slots, setSlots] = useState<TrialSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedKey, setSelectedKey] = useState<string>("");
 
   useEffect(() => {
+    setSelectedKey(""); // reset selection when language changes
     const fetchSlots = async () => {
       setLoading(true);
       setError(null);
       try {
-        const { data, error: rpcError } = await supabase.rpc("get_trial_availability" as any);
+        const { data, error: rpcError } = await supabase.rpc("get_trial_availability" as any, {
+          p_language: classLanguage ?? null,
+        });
         if (rpcError) throw rpcError;
         const rows = (data || []) as any[];
         const normalised: TrialSlot[] = rows.map((s) => ({
@@ -79,7 +83,7 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
       }
     };
     fetchSlots();
-  }, []);
+  }, [classLanguage]);
 
   // RPC already filters full slots server-side; keep defensive client filter too.
   const availableSlots = slots.filter((s) => {
