@@ -178,23 +178,28 @@ const TrialBookingPage = () => {
         .eq("user_id", user.id)
         .in("status", ["pending", "confirmed"])
         .gte("trial_date", todayCairo)
+        .neq("trial_date", "2099-12-31")
         .order("trial_date", { ascending: true })
         .limit(1)
         .maybeSingle();
       if (data && data.trial_date) {
         const d = new Date(data.trial_date + "T00:00:00");
         const day_name = d.toLocaleDateString("en-US", { weekday: "long" });
+        const timeStr = data.start_time as string | null;
+        const timeMatch = timeStr?.match(/^(\d{1,2}):(\d{2})$/);
+        const start_time_12h = timeMatch
+          ? (() => {
+              const h = Number(timeMatch[1]);
+              const m = Number(timeMatch[2]);
+              const ap = h >= 12 ? "PM" : "AM";
+              return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${ap}`;
+            })()
+          : "";
         setBookingResult({
           trial_date: data.trial_date,
           day_name,
-          start_time: data.start_time || "",
-          start_time_12h: data.start_time
-            ? (() => {
-                const [h, m] = (data.start_time as string).split(":").map(Number);
-                const ap = h >= 12 ? "PM" : "AM";
-                return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${ap}`;
-              })()
-            : "",
+          start_time: timeStr || "",
+          start_time_12h,
           duration_min: data.duration_min || 45,
           timezone: data.timezone || "Africa/Cairo",
           calendar_url: data.calendar_url || "",
