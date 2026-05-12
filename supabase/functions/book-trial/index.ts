@@ -215,7 +215,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (existingLead) {
-      await supabase
+      const { error: updateError } = await supabase
         .from("leads")
         .update({
           name: finalName,
@@ -228,8 +228,11 @@ Deno.serve(async (req) => {
           ...(resolvedUserId ? { user_id: resolvedUserId } : {}),
         })
         .eq("id", existingLead.id);
+      if (updateError) {
+        console.warn("Failed to update existing lead:", updateError);
+      }
     } else {
-      await supabase.from("leads").insert({
+      const { error: insertError } = await supabase.from("leads").insert({
         name: finalName,
         email: normalizedEmail,
         country: country?.trim() || "Unknown",
@@ -240,6 +243,9 @@ Deno.serve(async (req) => {
         status: "trial_booked",
         ...(resolvedUserId ? { user_id: resolvedUserId } : {}),
       });
+      if (insertError) {
+        console.warn("Failed to insert new lead:", insertError);
+      }
     }
 
     // 2. For authenticated users rebooking, remove any existing booking (TBA or
@@ -338,11 +344,16 @@ Deno.serve(async (req) => {
 
     // 3. Notify admin
     try {
-      await supabase.from("admin_notifications").insert({
+      const { error: notifyError } = await supabase.from("admin_notifications").insert({
         message: `New trial booking: ${finalName} (${normalizedEmail}) — ${dayName} ${formatTime12h(start_time)}, Level: ${level || "Unknown"}`,
         type: "trial",
       });
-    } catch { /* non-critical */ }
+      if (notifyError) {
+        console.warn("Failed to insert admin notification:", notifyError);
+      }
+    } catch (e) {
+      console.warn("Error notifying admin:", e);
+    }
 
     // 4. Build calendar URL for the response
     const calendarUrl = buildCalendarUrl({
@@ -364,29 +375,34 @@ Deno.serve(async (req) => {
     const meetingUrl: string | null = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
 
     // 5. Send trial confirmation email — track failures in DB for admin visibility
-    supabase.functions.invoke("send-confirmation-email", {
-      body: {
-        template: "trial_confirmed",
-        email: normalizedEmail,
-        name: finalName,
-        language: "en",
-        trial_date: trialDate,
-        trial_time: start_time,
-        trial_timezone: timezone,
-        level: level?.trim() || "",
-        calendar_url: calendarUrl,
-        ...(meetingUrl ? { class_link_url: meetingUrl } : {}),
-      },
-    }).then(null, async (e) => {
-      console.warn("trial_confirmed email failed:", e);
-      // Mark failure so admin can see it in the dashboard and manually resend
+    (async () => {
       try {
-        await supabase
-          .from("trial_bookings")
-          .update({ confirmation_email_failed_at: new Date().toISOString() })
-          .eq("id", booking.id);
-      } catch { /* non-critical */ }
-    });
+        const { error: emailError } = await supabase.functions.invoke("send-confirmation-email", {
+          body: {
+            template: "trial_confirmed",
+            email: normalizedEmail,
+            name: finalName,
+            language: "en",
+            trial_date: trialDate,
+            trial_time: start_time,
+            trial_timezone: timezone,
+            level: level?.trim() || "",
+            calendar_url: calendarUrl,
+            ...(meetingUrl ? { class_link_url: meetingUrl } : {}),
+          },
+        });
+        if (emailError) {
+          console.warn("trial_confirmed email failed:", emailError);
+          // Mark failure so admin can see it in the dashboard and manually resend
+          await supabase
+            .from("trial_bookings")
+            .update({ confirmation_email_failed_at: new Date().toISOString() })
+            .eq("id", booking.id);
+        }
+      } catch (e) {
+        console.warn("Error sending trial confirmation email:", e);
+      }
+    })();
 
     return new Response(
       JSON.stringify({
