@@ -159,6 +159,7 @@ const FreeTrialPage = () => {
   const [guestMode, setGuestMode] = useState(false);
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
   const [guestNameError, setGuestNameError] = useState("");
   const [guestEmailError, setGuestEmailError] = useState("");
   const [guestLoading, setGuestLoading] = useState(false);
@@ -210,7 +211,7 @@ const FreeTrialPage = () => {
       logLeadEvent({ source_type: "free_trial", cta_label: "trial_booking_guest_confirm", metadata: { day_of_week: dayOfWeek, start_time: startTime } });
       const referrerId = (() => { try { return localStorage.getItem("referrer_id") || undefined; } catch { return undefined; } })();
       const { data, error } = await supabase.functions.invoke("book-trial", {
-        body: { name: guestName.trim(), email: guestEmail.trim(), day_of_week: dayOfWeek, start_time: startTime, authed: false, referrer_id: referrerId },
+        body: { name: guestName.trim(), email: guestEmail.trim(), phone: guestPhone.trim() || undefined, day_of_week: dayOfWeek, start_time: startTime, authed: false, referrer_id: referrerId },
       });
       if (error || data?.error) throw new Error(error?.message || data?.error);
       setGuestDone(true);
@@ -514,7 +515,7 @@ const FreeTrialPage = () => {
                   </p>
 
                   {/* Name + Email */}
-                  <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                  <div className="grid sm:grid-cols-2 gap-4 mb-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="guest-name">{t("freeTrial.guestName") || "Your name"}</Label>
                       <Input
@@ -538,6 +539,19 @@ const FreeTrialPage = () => {
                       />
                       {guestEmailError && <p className="text-xs text-destructive">{guestEmailError}</p>}
                     </div>
+                  </div>
+
+                  {/* WhatsApp number */}
+                  <div className="space-y-1.5 mb-6">
+                    <Label htmlFor="guest-phone">WhatsApp number (optional)</Label>
+                    <Input
+                      id="guest-phone"
+                      type="tel"
+                      placeholder="+20 100 000 0000"
+                      value={guestPhone}
+                      onChange={(e) => setGuestPhone(e.target.value)}
+                    />
+                    <p className="text-[11px] text-muted-foreground">So we can reach you before the class</p>
                   </div>
 
                   <TrialSlotPicker onSelect={handleGuestSlotPicked} onBack={() => setGuestMode(false)} />

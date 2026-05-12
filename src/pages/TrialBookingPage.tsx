@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -130,6 +131,7 @@ const TrialBookingPage = () => {
   const [loading, setLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
   const [rescheduling, setRescheduling] = useState(false);
+  const [phone, setPhone] = useState("");
   const [selectedCountry, setSelectedCountry] = useState<string>(guessCountryFromTz);
   const [classLanguage, setClassLanguage] = useState<"arabic" | "english">(() =>
     defaultLanguageForCountry(guessCountryFromTz())
@@ -260,6 +262,7 @@ const TrialBookingPage = () => {
           // for the first few sessions until book-trial is fully migrated.
           name: profile?.name || user.email?.split("@")[0] || "Student",
           email: user.email,
+          phone: phone.trim() || undefined,
           level: effectiveLevel || undefined,
           day_of_week: dayOfWeek,
           start_time: startTime,
@@ -777,9 +780,27 @@ const TrialBookingPage = () => {
                 </p>
               </div>
 
+              {/* WhatsApp number — stored in trial_bookings.phone for admin */}
+              <div className="mb-6 space-y-1.5">
+                <Label htmlFor="trial-phone" className="text-sm font-medium">
+                  {language === "ar" ? "رقم واتساب (اختياري)" : "WhatsApp number (optional)"}
+                </Label>
+                <Input
+                  id="trial-phone"
+                  type="tel"
+                  placeholder="+20 100 000 0000"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  {language === "ar" ? "للتواصل معك قبل الحصة" : "So we can reach you before the class"}
+                </p>
+              </div>
+
               <TrialSlotPicker
                 onSelect={handleSlotPicked}
                 onBack={() => navigate("/free-trial")}
+                classLanguage={classLanguage}
               />
 
               {loading && (
