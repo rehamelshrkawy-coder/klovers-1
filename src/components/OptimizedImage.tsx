@@ -71,7 +71,7 @@ const OptimizedImage = ({
       `}
     >
       <div className="text-center">
-        {imgError ? (
+        {imgError && !isCard ? (
           <>
             <AlertCircle className="h-12 w-12 mx-auto text-destructive/50 mb-2" />
             <p className="text-xs text-muted-foreground">Image unavailable</p>
