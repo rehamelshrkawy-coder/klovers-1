@@ -1,11 +1,1 @@
-# Old URL redirects
-/trial /free-trial 301
-/book-trial /trial-booking 301
-/my-dashboard /dashboard 301
-/admin /admin-dashboard 301
-/courses /dashboard/courses 301
-/lessons /dashboard/lessons 301
-/progress /dashboard/progress 301
-
-# Catch-all for SPA routing
 /*  /index.html  200
