@@ -367,7 +367,12 @@ const AdminDashboard = () => {
   const adminTab = searchParams.get("tab") ?? "students";
   const setAdminTab = useCallback((tab: string) => {
     setSearchParams({ tab }, { replace: true });
-  }, [setSearchParams]);
+    // Immediately re-fetch trial stats when navigating to trials tab
+    // so the badge reflects the live DB count without waiting for staleTime.
+    if (tab === "trials") {
+      queryClient.invalidateQueries({ queryKey: ["admin", "trial-stats"] });
+    }
+  }, [setSearchParams, queryClient]);
   const [editingUnitPrice, setEditingUnitPrice] = useState<Record<string, string>>({});
   const [sendingReminder, setSendingReminder] = useState<Set<string>>(new Set());
   const [rejectTarget, setRejectTarget] = useState<Enrollment | null>(null);
@@ -1381,7 +1386,7 @@ const AdminDashboard = () => {
                 {inActiveGroup("trials") && (
                   <TabsTrigger value="trials" className={TAB_CLS}>
                     <Users className="h-3.5 w-3.5" /> Trial Classes
-                    {trialStats.pending > 0 && (
+                    {trialStats.pending > 0 && adminTab !== "trials" && (
                       <span className="relative inline-flex">
                         <Badge variant="destructive" className="h-4 min-w-4 px-1 text-[9px] rounded-full">{trialStats.pending}</Badge>
                         <span className="absolute inset-0 rounded-full bg-destructive/60 animate-ping" />
