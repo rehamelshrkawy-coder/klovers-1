@@ -124,7 +124,7 @@ const TrialBookingPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [profile, setProfile] = useState<{ name: string | null; email: string | null; level: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ name: string | null; email: string | null; level: string | null; country: string | null } | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState("");
   const [loading, setLoading] = useState(false);
@@ -144,19 +144,23 @@ const TrialBookingPage = () => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("name, email, level")
+      .select("name, email, level, country")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) setProfile(data as any);
-        // Fall back to level captured at signup (user_metadata) if profile is empty —
-        // covers the email-confirmation flow where signup couldn't write to profiles.
         const profileLevel = (data as any)?.level?.trim();
         const metaLevel = (user.user_metadata?.level as string | undefined)?.trim();
         if (profileLevel) {
           setSelectedLevel(profileLevel);
         } else if (metaLevel) {
           setSelectedLevel(metaLevel);
+        }
+        // Pre-fill country from profile if available — avoids asking the user again
+        const profileCountry = (data as any)?.country?.trim();
+        if (profileCountry && ALL_COUNTRIES.includes(profileCountry)) {
+          setSelectedCountry(profileCountry);
+          setClassLanguage(defaultLanguageForCountry(profileCountry));
         }
         setProfileLoaded(true);
       });
@@ -703,24 +707,26 @@ const TrialBookingPage = () => {
                 </p>
               )}
 
-              {/* Country selector — always shown, pre-filled from timezone */}
-              <div className="mb-4 space-y-1.5">
-                <Label htmlFor="trial-country" className="text-sm font-medium flex items-center gap-1.5">
-                  <Globe className="h-3.5 w-3.5 text-muted-foreground" />
-                  {language === "ar" ? "بلدك" : "Your country"}
-                  <span className="text-[10px] text-muted-foreground font-normal">{language === "ar" ? "(للأسعار)" : "(for pricing)"}</span>
-                </Label>
-                <Select value={selectedCountry} onValueChange={handleCountryChange}>
-                  <SelectTrigger id="trial-country">
-                    <SelectValue placeholder={language === "ar" ? "اختر بلدك" : "Select your country"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ALL_COUNTRIES.map(c => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Country selector — hidden when profile already has a country */}
+              {!(profile?.country?.trim() && ALL_COUNTRIES.includes(profile.country.trim())) && (
+                <div className="mb-4 space-y-1.5">
+                  <Label htmlFor="trial-country" className="text-sm font-medium flex items-center gap-1.5">
+                    <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                    {language === "ar" ? "بلدك" : "Your country"}
+                    <span className="text-[10px] text-muted-foreground font-normal">{language === "ar" ? "(للأسعار)" : "(for pricing)"}</span>
+                  </Label>
+                  <Select value={selectedCountry} onValueChange={handleCountryChange}>
+                    <SelectTrigger id="trial-country">
+                      <SelectValue placeholder={language === "ar" ? "اختر بلدك" : "Select your country"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALL_COUNTRIES.map(c => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Class language — auto-detected from country, user can override */}
               <div className="mb-6 space-y-1.5">
