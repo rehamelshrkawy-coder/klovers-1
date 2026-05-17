@@ -20,8 +20,8 @@ export function useTrialStats() {
       const weekIso = weekAhead.toISOString().slice(0, 10);
 
       const [pendingRes, upcomingRes, weekRes, totalRes] = await Promise.all([
-        // Only count non-TBA pending bookings (students who need to confirm a real slot)
-        supabase.from("trial_bookings").select("id", { count: "exact", head: true }).eq("status", "pending").eq("is_tba", false),
+        // Only count future non-TBA pending bookings
+        supabase.from("trial_bookings").select("id", { count: "exact", head: true }).eq("status", "pending").eq("is_tba", false).gte("trial_date", todayIso),
         supabase.from("trial_bookings").select("id", { count: "exact", head: true }).gte("trial_date", todayIso).in("status", ["pending", "confirmed"]),
         supabase.from("trial_bookings").select("id", { count: "exact", head: true }).gte("trial_date", todayIso).lt("trial_date", weekIso).in("status", ["pending", "confirmed"]),
         supabase.from("trial_bookings").select("id", { count: "exact", head: true }),
