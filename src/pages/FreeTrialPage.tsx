@@ -40,11 +40,25 @@ const FreeTrialPage = () => {
     { icon: Sparkles,      num: "3", text: t("trialBooking.expectItem3") },
   ];
 
-  const SLOT_HIGHLIGHTS = [
-    { day: t("freeTrial.daySaturday"),  time: "4:00 PM" },
-    { day: t("freeTrial.daySunday"),    time: "6:30 PM" },
-    { day: t("freeTrial.dayWednesday"), time: "5:30 PM" },
+  /** 4 official trial class timestamps (MYT / UTC+8). */
+  const TRIAL_INSTANTS_MYT = [
+    "2026-05-29T01:00:00+08:00",
+    "2026-05-30T23:00:00+08:00",
+    "2026-06-02T23:00:00+08:00",
+    "2026-06-07T09:00:00+08:00",
   ];
+
+  const userTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return "Asia/Kuala_Lumpur"; } })();
+
+  const SLOT_HIGHLIGHTS = TRIAL_INSTANTS_MYT
+    .map((iso) => {
+      const d = new Date(iso);
+      if (d.getTime() <= Date.now()) return null;
+      const day = d.toLocaleDateString(isAr ? "ar-EG" : "en-US", { weekday: "long", month: "short", day: "numeric", timeZone: userTz });
+      const time = d.toLocaleTimeString(isAr ? "ar-EG" : "en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: userTz });
+      return { day, time };
+    })
+    .filter(Boolean) as { day: string; time: string }[];
 
   const TESTIMONIALS: { quote: string; name: string; role: string }[] = [
     {
@@ -88,9 +102,10 @@ const FreeTrialPage = () => {
         "inLanguage": "ko",
         "url": "https://kloversegy.com/free-trial",
         "hasCourseInstance": [
-          { "@type": "CourseInstance", "courseMode": "online", "courseSchedule": { "@type": "Schedule", "byDay": "Saturday",  "startTime": "16:00", "repeatFrequency": "P1W", "scheduleTimezone": "Africa/Cairo" } },
-          { "@type": "CourseInstance", "courseMode": "online", "courseSchedule": { "@type": "Schedule", "byDay": "Sunday",    "startTime": "18:30", "repeatFrequency": "P1W", "scheduleTimezone": "Africa/Cairo" } },
-          { "@type": "CourseInstance", "courseMode": "online", "courseSchedule": { "@type": "Schedule", "byDay": "Wednesday", "startTime": "17:30", "repeatFrequency": "P1W", "scheduleTimezone": "Africa/Cairo" } },
+          { "@type": "CourseInstance", "courseMode": "online", "startDate": "2026-05-29T01:00:00+08:00", "endDate": "2026-05-29T01:30:00+08:00" },
+          { "@type": "CourseInstance", "courseMode": "online", "startDate": "2026-05-30T23:00:00+08:00", "endDate": "2026-05-30T23:30:00+08:00" },
+          { "@type": "CourseInstance", "courseMode": "online", "startDate": "2026-06-02T23:00:00+08:00", "endDate": "2026-06-02T23:30:00+08:00" },
+          { "@type": "CourseInstance", "courseMode": "online", "startDate": "2026-06-07T09:00:00+08:00", "endDate": "2026-06-07T09:30:00+08:00" },
         ],
       },
       {
@@ -111,7 +126,7 @@ const FreeTrialPage = () => {
         "mainEntity": [
           { "@type": "Question", "name": "Is the trial class really free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — completely free, no credit card required. You attend a 30-minute live class with a real teacher." } },
           { "@type": "Question", "name": "What level do I need to be?", "acceptedAnswer": { "@type": "Answer", "text": "Any level is welcome. Most students start from zero (Hangul). The teacher will assess your level during the class." } },
-          { "@type": "Question", "name": "When are the trial classes?", "acceptedAnswer": { "@type": "Answer", "text": "Every Saturday at 4:00 PM, Sunday at 6:30 PM, and Wednesday at 5:30 PM Cairo time." } },
+          { "@type": "Question", "name": "When are the trial classes?", "acceptedAnswer": { "@type": "Answer", "text": "Upcoming sessions: May 29, May 30, June 2, and June 7 2026. All times are automatically shown in your local timezone when you visit the booking page." } },
           { "@type": "Question", "name": "How do I book?", "acceptedAnswer": { "@type": "Answer", "text": "Click 'Book My Free Class', choose a day, and confirm. You'll receive an email with the class link and a Google Calendar invite." } },
           { "@type": "Question", "name": "What happens after the trial?", "acceptedAnswer": { "@type": "Answer", "text": "After your trial you'll receive a level recommendation and pricing options if you'd like to continue with a full course." } },
         ],
@@ -412,11 +427,11 @@ const FreeTrialPage = () => {
               <p className="text-sm text-muted-foreground">{t("freeTrial.slotsSubtitle")}</p>
             </div>
 
-            {/* Ticket cards — 1-col mobile, 3-col desktop */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-              {SLOT_HIGHLIGHTS.map((s) => (
+            {/* Ticket cards — 1-col mobile, 2-col / 4-col desktop */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+              {SLOT_HIGHLIGHTS.map((s, i) => (
                 <div
-                  key={s.day}
+                  key={i}
                   className="border-2 border-foreground rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_black] hover:shadow-[2px_2px_0px_0px_black] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150 cursor-default"
                 >
                   {/* Header */}

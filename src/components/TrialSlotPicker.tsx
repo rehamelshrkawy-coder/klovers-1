@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CalendarDays } from "lucide-react";
-import { convertSlotToTimezone } from "@/lib/admin-utils";
+import { convertDateTimeToTimezone } from "@/lib/admin-utils";
 
 /**
  * Fallback: next UTC occurrence of dayOfWeek — mirrors the edge function
@@ -129,30 +129,27 @@ const TrialSlotPicker = ({ onSelect, onBack, classLanguage }: TrialSlotPickerPro
     );
   }
 
-  // Always read from browser — bypasses stale localStorage values that bleed
-  // from admin sessions (the old getUserTimezone() read localStorage first).
-  const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Africa/Cairo";
+  // Always read from browser — bypasses stale localStorage values.
+  const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kuala_Lumpur";
 
   const sessionDateFor = (s: TrialSlot): string =>
     s.next_trial_date ?? nextDateForDayUTC(s.day_of_week);
 
   const labelFor = (s: TrialSlot) => {
-    const srcTz = s.timezone || "Africa/Cairo";
-    const local = convertSlotToTimezone(s.day_of_week, s.start_time, srcTz, userTz);
+    const srcTz = s.timezone || "Asia/Kuala_Lumpur";
+    const sessionDate = sessionDateFor(s);
+    // Use convertDateTimeToTimezone for specific-dated slots (accurate DST handling)
+    const { dateStr: localDateStr, timeFormatted, weekday } = convertDateTimeToTimezone(sessionDate, s.start_time, srcTz, userTz);
+    const [ly, lm, ld] = localDateStr.split("-").map(Number);
+    const dateLabel = new Date(ly, lm - 1, ld).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     const cap = s.capacity ?? DEFAULT_CAPACITY;
     const spotsLeft = cap - s.booked_count;
-    const sessionDate = sessionDateFor(s);
-    const dateLabel = new Date(sessionDate + "T00:00:00").toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-    return `${local.weekday}, ${dateLabel} at ${local.timeFormatted} (${userTz.replace(/_/g, " ")}) — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
+    return `${weekday}, ${dateLabel} at ${timeFormatted} — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
   };
 
   const keyFor = (s: TrialSlot) => `${s.day_of_week}|${s.start_time}`;
 
   const selectedSlot = availableSlots.find((s) => keyFor(s) === selectedKey);
-  const sourceTimezone = selectedSlot?.timezone ?? availableSlots[0]?.timezone ?? "Africa/Cairo";
 
   const commit = () => {
     if (!selectedKey || !selectedSlot) return;
@@ -189,7 +186,7 @@ const TrialSlotPicker = ({ onSelect, onBack, classLanguage }: TrialSlotPickerPro
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        Times shown in your timezone ({userTz.replace(/_/g, " ")}) · source: {sourceTimezone}
+        All times shown in your local timezone ({userTz.replace(/_/g, " ")})
       </p>
 
       <Button
