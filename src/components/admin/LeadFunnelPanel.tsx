@@ -43,6 +43,18 @@ interface FunnelRow {
   signup_completed: boolean | null;
 }
 
+interface UserProfile {
+  user_id: string;
+  name: string;
+  email: string;
+}
+
+interface UserIdentifier {
+  name: string;
+  email: string;
+  phone: string | null;
+}
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 const fmt = (d: string | null) =>
@@ -168,6 +180,44 @@ const LeadFunnelPanel: React.FC = () => {
     },
   });
 
+  // ── User identity queries ────────────────────────────────────────────────
+
+  const { data: profiles = [] } = useQuery({
+    queryKey: ["funnel_profiles"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id, name, email");
+      return (data ?? []) as UserProfile[];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: trialPhones = [] } = useQuery({
+    queryKey: ["funnel_trial_phones"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("trial_bookings")
+        .select("email, phone")
+        .not("phone", "is", null);
+      return (data ?? []) as { email: string; phone: string }[];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const userMap = useMemo(() => {
+    const phoneByEmail = new Map(trialPhones.map((t) => [t.email.toLowerCase(), t.phone]));
+    const map = new Map<string, UserIdentifier>();
+    for (const p of profiles) {
+      map.set(p.user_id, {
+        name: p.name,
+        email: p.email,
+        phone: phoneByEmail.get(p.email.toLowerCase()) ?? null,
+      });
+    }
+    return map;
+  }, [profiles, trialPhones]);
+
   const refresh = () => { refetchEvents(); refetchFunnel(); refetchEnrollments(); };
 
   // ── Computed stats ──────────────────────────────────────────────────────
@@ -279,10 +329,23 @@ const LeadFunnelPanel: React.FC = () => {
   // CSV export
   const exportEventsCSV = () => {
     if (events.length === 0) return;
-    const headers = ["created_at", "source_type", "source_page", "cta_label", "campaign", "utm_source", "session_id", "user_id"];
-    const rows = events.map((e) =>
-      headers.map((h) => JSON.stringify((e as Record<string, unknown>)[h] ?? "")).join(",")
-    );
+    const headers = ["created_at", "name", "email", "phone", "source_type", "source_page", "cta_label", "campaign", "utm_source", "session_id", "user_id"];
+    const rows = events.map((e) => {
+      const ident = e.user_id ? userMap.get(e.user_id) : undefined;
+      return [
+        JSON.stringify(e.created_at ?? ""),
+        JSON.stringify(ident?.name ?? ""),
+        JSON.stringify(ident?.email ?? ""),
+        JSON.stringify(ident?.phone ?? ""),
+        JSON.stringify(e.source_type ?? ""),
+        JSON.stringify(e.source_page ?? ""),
+        JSON.stringify(e.cta_label ?? ""),
+        JSON.stringify(e.campaign ?? ""),
+        JSON.stringify(e.utm_source ?? ""),
+        JSON.stringify(e.session_id ?? ""),
+        JSON.stringify(e.user_id ?? ""),
+      ].join(",");
+    });
     const csv = [headers.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -389,6 +452,7 @@ const LeadFunnelPanel: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-xs">First Seen</TableHead>
+                    <TableHead className="text-xs">User</TableHead>
                     <TableHead className="text-xs">Touchpoints</TableHead>
                     <TableHead className="text-xs text-center">WA</TableHead>
                     <TableHead className="text-xs text-center">Trial</TableHead>
@@ -401,21 +465,37 @@ const LeadFunnelPanel: React.FC = () => {
                   {loading ? (
                     Array.from({ length: 5 }).map((_, i) => (
                       <TableRow key={i}>
-                        {Array.from({ length: 7 }).map((_, j) => (
+                        {Array.from({ length: 8 }).map((_, j) => (
                           <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                         ))}
                       </TableRow>
                     ))
                   ) : funnelRows.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                         No lead sessions yet. Events will appear once visitors interact with CTAs.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    funnelRows.slice(0, 50).map((r) => (
+                    funnelRows.slice(0, 50).map((r) => {
+                      const uid = r.user_id ?? "";
+                      const ident = uid ? userMap.get(uid) : undefined;
+                      return (
                       <TableRow key={r.session_id}>
                         <TableCell className="text-xs whitespace-nowrap">{fmt(r.first_seen)}</TableCell>
+                        <TableCell className="text-xs min-w-[140px]">
+                          {ident ? (
+                            <div className="flex flex-col gap-0.5">
+                              <span className="font-medium text-foreground">{ident.name}</span>
+                              <span className="text-muted-foreground">{ident.email}</span>
+                              {ident.phone && (
+                                <span className="text-muted-foreground">{ident.phone}</span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground italic">anon</span>
+                          )}
+                        </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {(r.touchpoints ?? []).map((t) => (
@@ -435,7 +515,8 @@ const LeadFunnelPanel: React.FC = () => {
                           ) : ""}
                         </TableCell>
                       </TableRow>
-                    ))
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
@@ -482,7 +563,9 @@ const LeadFunnelPanel: React.FC = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    pagedEvents.map((e) => (
+                    pagedEvents.map((e) => {
+                      const ident = e.user_id ? userMap.get(e.user_id) : undefined;
+                      return (
                       <TableRow key={e.id}>
                         <TableCell className="text-xs whitespace-nowrap">{fmt(e.created_at)}</TableCell>
                         <TableCell>
@@ -493,9 +576,22 @@ const LeadFunnelPanel: React.FC = () => {
                         <TableCell className="text-xs max-w-[120px] truncate">{e.source_page}</TableCell>
                         <TableCell className="text-xs">{e.cta_label ?? "—"}</TableCell>
                         <TableCell className="text-xs">{e.campaign || e.utm_source || "—"}</TableCell>
-                        <TableCell className="text-xs font-mono">{e.user_id ? e.user_id.slice(0, 8) + "…" : "anon"}</TableCell>
+                        <TableCell className="text-xs min-w-[130px]">
+                          {ident ? (
+                            <div className="flex flex-col gap-0.5">
+                              <span className="font-medium">{ident.name}</span>
+                              <span className="text-muted-foreground">{ident.email}</span>
+                              {ident.phone && (
+                                <span className="text-muted-foreground">{ident.phone}</span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground italic">anon</span>
+                          )}
+                        </TableCell>
                       </TableRow>
-                    ))
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
