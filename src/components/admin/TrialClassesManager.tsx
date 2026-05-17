@@ -379,7 +379,8 @@ const TrialClassesManager = () => {
   const sessions = useMemo(() => {
     const groups: Record<string, TrialBooking[]> = {};
     filtered.forEach((b) => {
-      const key = isTbaBooking(b) ? TBA_KEY : `${b.trial_date}__${b.start_time}`;
+      // Cancelled bookings move to Unscheduled so admin can reschedule them.
+      const key = (isTbaBooking(b) || b.status === "cancelled") ? TBA_KEY : `${b.trial_date}__${b.start_time}`;
       (groups[key] ||= []).push(b);
     });
     return Object.entries(groups)
@@ -402,11 +403,11 @@ const TrialClassesManager = () => {
 
   if (loading) return <p className="text-muted-foreground text-center py-8">Loading trial bookings...</p>;
 
-  const formatSessionLabel = (date: string | null, time: string | null, dow: number) => {
-    // NULL (or legacy sentinel) → unscheduled placeholder.
+  const formatSessionLabel = (date: string | null, time: string | null, dow: number, slotTz?: string | null) => {
     if (!date || !time || time === "TBA" || date === "2099-12-31") return "TBA — Unscheduled";
     const adminTz = getAdminTimezone();
-    const lcl = convertDateTimeToTimezone(date, time, "Africa/Cairo", adminTz);
+    const srcTz = slotTz || "Asia/Kuala_Lumpur";
+    const lcl = convertDateTimeToTimezone(date, time, srcTz, adminTz);
     const d = new Date(`${lcl.dateStr}T00:00:00`);
     const weekday = lcl.weekday || DAY_NAMES[dow] || d.toLocaleDateString("en-US", { weekday: "long" });
     const dateLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -492,7 +493,7 @@ const TrialClassesManager = () => {
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <CardTitle className="text-sm">
-                      {formatSessionLabel(session.date, session.time, session.dow)}
+                      {formatSessionLabel(session.date, session.time, session.dow, session.items[0]?.timezone)}
                     </CardTitle>
                     {past && <Badge variant="outline" className="text-[10px]">past</Badge>}
                     {!isTbaSession && isLegacySlot(session.time) && (
