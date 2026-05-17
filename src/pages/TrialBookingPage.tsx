@@ -129,7 +129,6 @@ const TrialBookingPage = () => {
   const [selectedLevel, setSelectedLevel] = useState("");
   const [loading, setLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
-  const [rescheduling, setRescheduling] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>(guessCountryFromTz);
   const [classLanguage, setClassLanguage] = useState<"arabic" | "english">(() =>
     defaultLanguageForCountry(guessCountryFromTz())
@@ -325,39 +324,19 @@ const TrialBookingPage = () => {
     logLeadEvent({ source_type: "free_trial", cta_label: "slot_page_viewed" });
   }, []);
 
-  // ── Reschedule: cancel existing booking then re-show slot picker ──────────
-  const handleReschedule = async () => {
+  // ── Reschedule: re-show slot picker without pre-cancelling.
+  // book-trial atomically deletes the old booking when authed=true,
+  // so we don't cancel here — admin sees the booking as confirmed until
+  // the student actually completes the new booking.
+  const handleReschedule = () => {
     if (!user || !bookingResult) return;
-    setRescheduling(true);
-    try {
-      await supabase
-        .from("trial_bookings")
-        .update({ status: "cancelled" })
-        .eq("user_id", user.id)
-        .eq("trial_date", bookingResult.trial_date)
-        .in("status", ["pending", "confirmed"]);
-
-      track.custom("trial_reschedule_started", { old_date: bookingResult.trial_date });
-      logLeadEvent({
-        source_type: "free_trial",
-        cta_label: "trial_reschedule_started",
-        metadata: { old_date: bookingResult.trial_date },
-      });
-
-      toast({
-        title: t("trialBooking.rescheduleToast"),
-        variant: "default",
-      });
-      setBookingResult(null);
-    } catch (err: any) {
-      toast({
-        title: t("trialBooking.somethingWrong"),
-        description: err.message || t("trialBooking.tryAgain"),
-        variant: "destructive",
-      });
-    } finally {
-      setRescheduling(false);
-    }
+    track.custom("trial_reschedule_started", { old_date: bookingResult.trial_date });
+    logLeadEvent({
+      source_type: "free_trial",
+      cta_label: "trial_reschedule_started",
+      metadata: { old_date: bookingResult.trial_date },
+    });
+    setBookingResult(null);
   };
 
   // ── Success state ──────────────────────────────────────────────────────────
@@ -418,11 +397,10 @@ const TrialBookingPage = () => {
               {/* Change date button */}
               <button
                 onClick={handleReschedule}
-                disabled={rescheduling}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 text-sm font-semibold text-foreground transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mx-auto"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 text-sm font-semibold text-foreground transition-all shadow-sm mx-auto"
               >
                 <CalendarClock className="h-4 w-4 text-primary" />
-                {rescheduling ? t("trialBooking.rescheduling") : t("trialBooking.changeDateBtn")}
+                {t("trialBooking.changeDateBtn")}
               </button>
 
               {/* Inline country selector — updates pricing below in real time */}
