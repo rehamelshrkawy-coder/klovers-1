@@ -183,13 +183,22 @@ Deno.serve(async (req) => {
     const trialDate = (bodyTrialDate && /^\d{4}-\d{2}-\d{2}$/.test(bodyTrialDate))
       ? bodyTrialDate
       : nextDateForDay(day_of_week);
-    const timezone = "Africa/Cairo";
 
-    // Registrations close 1 day before the class (compare in Cairo time UTC+2, no DST)
-    const cairoNow = new Date(Date.now() + 2 * 60 * 60 * 1000);
-    const cairoDayStr = cairoNow.toISOString().split("T")[0];
+    // Look up the slot's source timezone from the DB (teacher is MYT-based).
+    // Fall back to MYT if the slot row is missing.
+    const { data: slotTzRow } = await supabase
+      .from("trial_slots")
+      .select("timezone")
+      .eq("trial_date", trialDate)
+      .eq("start_time", start_time)
+      .maybeSingle();
+    const timezone: string = (slotTzRow as { timezone?: string | null } | null)?.timezone || "Asia/Kuala_Lumpur";
+
+    // Registrations close 1 day before the class (compare in MYT, UTC+8)
+    const mytNow = new Date(Date.now() + 8 * 60 * 60 * 1000);
+    const mytDayStr = mytNow.toISOString().split("T")[0];
     const trialMs = new Date(trialDate + "T00:00:00Z").getTime();
-    const todayMs = new Date(cairoDayStr + "T00:00:00Z").getTime();
+    const todayMs = new Date(mytDayStr + "T00:00:00Z").getTime();
     if (Math.round((trialMs - todayMs) / 86_400_000) <= 1) {
       return new Response(
         JSON.stringify({ ok: false, success: false, error: "Booking is closed — registrations close 1 day before the class." }),

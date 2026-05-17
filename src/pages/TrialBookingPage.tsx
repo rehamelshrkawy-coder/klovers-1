@@ -129,7 +129,6 @@ const TrialBookingPage = () => {
   const [selectedLevel, setSelectedLevel] = useState("");
   const [loading, setLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
-  const [rescheduling, setRescheduling] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>(guessCountryFromTz);
   const [classLanguage, setClassLanguage] = useState<"arabic" | "english">(() =>
     defaultLanguageForCountry(guessCountryFromTz())
@@ -171,13 +170,13 @@ const TrialBookingPage = () => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const todayCairo = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      const todayMyt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
       const { data } = await supabase
         .from("trial_bookings")
         .select("trial_date, start_time, duration_min, timezone, calendar_url, status")
         .eq("user_id", user.id)
         .in("status", ["pending", "confirmed"])
-        .gte("trial_date", todayCairo)
+        .gte("trial_date", todayMyt)
         .neq("trial_date", "2099-12-31")
         .order("trial_date", { ascending: true })
         .limit(1)
@@ -201,7 +200,7 @@ const TrialBookingPage = () => {
           start_time: timeStr || "",
           start_time_12h,
           duration_min: data.duration_min || 45,
-          timezone: data.timezone || "Africa/Cairo",
+          timezone: data.timezone || "Asia/Kuala_Lumpur",
           calendar_url: data.calendar_url || "",
         });
       }
@@ -325,39 +324,19 @@ const TrialBookingPage = () => {
     logLeadEvent({ source_type: "free_trial", cta_label: "slot_page_viewed" });
   }, []);
 
-  // ── Reschedule: cancel existing booking then re-show slot picker ──────────
-  const handleReschedule = async () => {
+  // ── Reschedule: re-show slot picker without pre-cancelling.
+  // book-trial atomically deletes the old booking when authed=true,
+  // so we don't cancel here — admin sees the booking as confirmed until
+  // the student actually completes the new booking.
+  const handleReschedule = () => {
     if (!user || !bookingResult) return;
-    setRescheduling(true);
-    try {
-      await supabase
-        .from("trial_bookings")
-        .update({ status: "cancelled" })
-        .eq("user_id", user.id)
-        .eq("trial_date", bookingResult.trial_date)
-        .in("status", ["pending", "confirmed"]);
-
-      track.custom("trial_reschedule_started", { old_date: bookingResult.trial_date });
-      logLeadEvent({
-        source_type: "free_trial",
-        cta_label: "trial_reschedule_started",
-        metadata: { old_date: bookingResult.trial_date },
-      });
-
-      toast({
-        title: t("trialBooking.rescheduleToast"),
-        variant: "default",
-      });
-      setBookingResult(null);
-    } catch (err: any) {
-      toast({
-        title: t("trialBooking.somethingWrong"),
-        description: err.message || t("trialBooking.tryAgain"),
-        variant: "destructive",
-      });
-    } finally {
-      setRescheduling(false);
-    }
+    track.custom("trial_reschedule_started", { old_date: bookingResult.trial_date });
+    logLeadEvent({
+      source_type: "free_trial",
+      cta_label: "trial_reschedule_started",
+      metadata: { old_date: bookingResult.trial_date },
+    });
+    setBookingResult(null);
   };
 
   // ── Success state ──────────────────────────────────────────────────────────
@@ -371,22 +350,20 @@ const TrialBookingPage = () => {
     const trialDateMs = new Date(bookingResult.trial_date + "T00:00:00").getTime();
     const daysUntil = Math.max(0, Math.round((trialDateMs - Date.now()) / 86400000));
 
-    // Always use the BROWSER's real timezone — bypasses any stale localStorage value
-    // written by EnrollNowPage, so admin testing in Asia doesn't bleed into student view.
-    const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Africa/Cairo";
+    // Always use the BROWSER's real timezone — bypasses any stale localStorage value.
+    const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kuala_Lumpur";
 
-    // All slots are defined in Cairo time — always convert FROM Cairo regardless of
-    // what bookingResult.timezone stores (it may reflect the client TZ at booking time).
-    const SLOT_TZ = "Africa/Cairo";
+    // Convert from the slot's source timezone (stored in the booking record from the edge function).
+    const SLOT_TZ = bookingResult.timezone || "Asia/Kuala_Lumpur";
     const localized = convertDateTimeToTimezone(bookingResult.trial_date, bookingResult.start_time, SLOT_TZ, userTz);
     const localDate = new Date(localized.dateStr + "T00:00:00");
     const localFormattedDate = localDate.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
-    // Friendly city name: "Africa/Cairo" → "Cairo", "Asia/Singapore" → "Singapore"
+    // Friendly city name: "Asia/Kuala_Lumpur" → "Kuala Lumpur"
     const tzCity = userTz.includes("/") ? userTz.split("/").pop()!.replace(/_/g, " ") : userTz;
 
-    // Show Cairo reference line only when the user is NOT already in Cairo
-    const isInCairo = userTz === SLOT_TZ || userTz === "Africa/Cairo";
+    // Show source-tz reference line only when the user is in a different timezone
+    const isInSlotTz = userTz === SLOT_TZ;
 
     return (
       <div className="min-h-screen bg-background">
@@ -406,9 +383,9 @@ const TrialBookingPage = () => {
                   <p className="text-sm text-muted-foreground">
                     {localized.timeFormatted} · {bookingResult.duration_min} {t("mySchedule.minutes")} · {tzCity}
                   </p>
-                  {!isInCairo && (
+                  {!isInSlotTz && (
                     <p className="text-[11px] text-muted-foreground/60">
-                      ({formattedDate} {bookingResult.start_time_12h} Cairo)
+                      ({formattedDate} {bookingResult.start_time_12h} {SLOT_TZ.split("/").pop()?.replace(/_/g, " ")})
                     </p>
                   )}
                 </div>
@@ -420,11 +397,10 @@ const TrialBookingPage = () => {
               {/* Change date button */}
               <button
                 onClick={handleReschedule}
-                disabled={rescheduling}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 text-sm font-semibold text-foreground transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mx-auto"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 text-sm font-semibold text-foreground transition-all shadow-sm mx-auto"
               >
                 <CalendarClock className="h-4 w-4 text-primary" />
-                {rescheduling ? t("trialBooking.rescheduling") : t("trialBooking.changeDateBtn")}
+                {t("trialBooking.changeDateBtn")}
               </button>
 
               {/* Inline country selector — updates pricing below in real time */}
