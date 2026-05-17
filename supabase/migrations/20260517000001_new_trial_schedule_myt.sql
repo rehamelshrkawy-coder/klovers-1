@@ -12,10 +12,10 @@ WHERE lifecycle = 'active';
 -- Insert the 4 new MYT-anchored slots with explicit language assignments
 INSERT INTO public.trial_slots (trial_date, start_time, day_of_week, capacity, is_active, lifecycle, timezone, class_language)
 VALUES
-  ('2026-05-29', '01:00', 5, 20, true, 'active', 'Asia/Kuala_Lumpur', 'arabic'),
-  ('2026-05-30', '23:00', 6, 20, true, 'active', 'Asia/Kuala_Lumpur', 'arabic'),
-  ('2026-06-02', '23:00', 2, 20, true, 'active', 'Asia/Kuala_Lumpur', 'english'),
-  ('2026-06-07', '09:00', 0, 20, true, 'active', 'Asia/Kuala_Lumpur', 'english')
+  ('2026-05-29', '01:00', 5, 10, true, 'active', 'Asia/Kuala_Lumpur', 'arabic'),
+  ('2026-05-30', '23:00', 6, 10, true, 'active', 'Asia/Kuala_Lumpur', 'arabic'),
+  ('2026-06-02', '23:00', 2, 10, true, 'active', 'Asia/Kuala_Lumpur', 'english'),
+  ('2026-06-07', '09:00', 0, 10, true, 'active', 'Asia/Kuala_Lumpur', 'english')
 ON CONFLICT (trial_date, start_time) DO UPDATE
   SET is_active      = true,
       lifecycle      = 'active',
