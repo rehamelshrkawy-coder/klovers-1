@@ -25,10 +25,24 @@ const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frid
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
+  date_selected: "bg-blue-100 text-blue-700",
+  awaiting_attendance: "bg-purple-100 text-purple-800",
+  confirmed_attendance: "bg-green-100 text-green-700",
   confirmed: "bg-blue-100 text-blue-800",
   completed: "bg-green-100 text-green-800",
   no_show: "bg-red-100 text-red-800",
   cancelled: "bg-gray-100 text-gray-500",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  date_selected: "Date Selected",
+  awaiting_attendance: "Awaiting Confirmation",
+  confirmed_attendance: "Attendance Confirmed",
+  confirmed: "Confirmed",
+  completed: "Completed",
+  no_show: "No Show",
+  cancelled: "Cancelled",
 };
 
 interface TrialBooking {
@@ -49,6 +63,8 @@ interface TrialBooking {
   user_id?: string | null;
   rebook_email_sent_at?: string | null;
   is_tba?: boolean;
+  attendance_confirmed_at?: string | null;
+  confirmation_token?: string | null;
 }
 
 // Source of truth for unscheduled placeholders. Post-migration, TBA rows
@@ -74,6 +90,7 @@ interface UpcomingSlot {
   date: string;
   day_of_week: number;
   start_time: string;
+  meeting_url?: string | null;
 }
 
 function getActualUpcomingGroups(bookings: TrialBooking[]): UpcomingSlot[] {
