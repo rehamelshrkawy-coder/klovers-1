@@ -14,7 +14,7 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation";
   class_link_url?: string;
   tx_ref?: string;
   payment_date?: string;
@@ -47,6 +47,9 @@ interface EmailPayload {
   trial_time?: string;
   trial_timezone?: string;
   calendar_url?: string;
+  booking_id?: string;
+  confirmation_token?: string;
+  meeting_url?: string;
 }
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -695,50 +698,116 @@ function buildTrialRebookEmail(p: EmailPayload) {
     a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time)
   );
 
-  const slotsList = slots.length
-    ? `<ul style="color: ${BRAND_TEXT}; ${isAr ? "padding-right: 20px;" : "padding-left: 20px;"} margin: 16px 0;">
-        ${slots.map((s) => {
-          const day = isAr ? dayNamesAr[s.day_of_week] : dayNamesEn[s.day_of_week];
-          const tz = (s.timezone || "Africa/Cairo").replace(/_/g, " ");
-          const dateLabel = s.date
-            ? new Date(s.date + "T00:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric" })
-            : "";
-          const dayPart = dateLabel ? `<strong>${day}, ${dateLabel}</strong>` : `<strong>${day}</strong>`;
-          return `<li style="margin-bottom: 6px;">${dayPart} — ${formatTime12(s.start_time, isAr)} <span style="color:${BRAND_MUTED}; font-size: 12px;">(${tz})</span></li>`;
-        }).join("")}
-      </ul>`
+  const slotCards = slots.length
+    ? slots.map((s) => {
+        const day = isAr ? dayNamesAr[s.day_of_week] : dayNamesEn[s.day_of_week];
+        const tz = (s.timezone || "Africa/Cairo").replace(/_/g, " ");
+        const dateLabel = s.date
+          ? new Date(s.date + "T00:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric" })
+          : "";
+        const dayPart = dateLabel ? `${day}, ${dateLabel}` : day;
+        return `<div style="background: ${BRAND_GRAY}; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px 16px; margin: 8px 0; ${isAr ? "text-align: right;" : ""}">
+          <p style="margin: 0; font-weight: bold; color: ${BRAND_DARK};">📅 ${dayPart}</p>
+          <p style="margin: 4px 0 0; color: ${BRAND_MUTED}; font-size: 13px;">⏰ ${formatTime12(s.start_time, isAr)} (${tz})</p>
+        </div>`;
+      }).join("")
     : "";
 
-  const btn = `<div style="margin: 24px 0; text-align: center;">
+  const meetLinkSection = p.class_link_url
+    ? (isAr
+        ? `<div style="background: #f0fff4; border: 1px solid #6ee7b7; border-radius: 8px; padding: 14px 18px; margin: 20px 0; text-align: center;">
+            <p style="margin: 0 0 8px; font-weight: bold; color: ${BRAND_DARK};">🎓 رابط Google Meet (احفظه لو سمحت!)</p>
+            <a href="${p.class_link_url}" style="display: inline-block; background: ${BRAND_BLACK}; color: ${BRAND_YELLOW}; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">انضم للكلاس</a>
+            <p style="margin: 8px 0 0; color: ${BRAND_MUTED}; font-size: 12px;">ملاحظة: هذا الرابط شخصي — لا تشاركه مع أحد.</p>
+          </div>`
+        : `<div style="background: #f0fff4; border: 1px solid #6ee7b7; border-radius: 8px; padding: 14px 18px; margin: 20px 0; text-align: center;">
+            <p style="margin: 0 0 8px; font-weight: bold; color: ${BRAND_DARK};">🎓 Your Google Meet link (save it for class day!)</p>
+            <a href="${p.class_link_url}" style="display: inline-block; background: ${BRAND_BLACK}; color: ${BRAND_YELLOW}; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">Join the Class</a>
+            <p style="margin: 8px 0 0; color: ${BRAND_MUTED}; font-size: 12px;">Note: This link is personal — please don't share it.</p>
+          </div>`)
+    : "";
+
+  const chooseBtn = `<div style="margin: 24px 0; text-align: center;">
     <a href="${url}" style="display: inline-block; background: ${BRAND_BLACK}; color: ${BRAND_YELLOW}; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">
-      ${isAr ? "اختر موعدك الآن" : "Pick your trial time"}
+      ${isAr ? "اختر موعدك الآن" : "Choose My Date"}
     </a>
   </div>`;
 
   if (isAr) {
     return {
-      subject: "KLovers — من فضلك اختر موعد حصتك التجريبية 🕒",
+      subject: "اختر موعد حصتك التجريبية في Klovers 🎉",
       html: brandWrapper(`
         <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! 👋</h1>
-        <p>شكراً لاهتمامك بحصة الكورية التجريبية المجانية في Klovers.</p>
-        <p>موعد الحصة الذي اخترته سابقاً لم يعد متاحاً، أو لم تختر موعداً بعد. هذه هي المواعيد المتاحة حالياً:</p>
-        ${slotsList}
-        <p>اختر الموعد المناسب لك من الرابط التالي حتى نؤكد حجز حصتك:</p>
-        ${btn}
+        <p>مواعيد جديدة متاحة الآن — اختر الموعد الذي يناسبك:</p>
+        ${slotCards}
+        ${chooseBtn}
+        ${meetLinkSection}
         <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">إذا واجهت أي مشكلة، راسلنا على واتساب أو رد على هذا الإيميل.</p>
       `, true),
     };
   }
   return {
-    subject: "KLovers — Please pick a time for your free trial 🕒",
+    subject: "Choose your new trial class date at Klovers 🎉",
     html: brandWrapper(`
       <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 👋</h1>
-      <p>Thanks for your interest in a free Korean trial class at Klovers.</p>
-      <p>Your previous slot is no longer available, or you haven't picked one yet. Here are the times we currently run:</p>
-      ${slotsList}
-      <p>Please pick the time that works best for you so we can confirm your class:</p>
-      ${btn}
+      <p>New trial dates are now available — choose one that works for you.</p>
+      ${slotCards}
+      ${chooseBtn}
+      ${meetLinkSection}
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Any trouble? Just reply to this email or message us on WhatsApp.</p>
+    `, false),
+  };
+}
+
+function buildTrialAttendanceConfirmationEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const confirmUrl = `https://kloversegy.com/trial-confirm?id=${p.booking_id || ""}&token=${p.confirmation_token || ""}`;
+  const classLink = p.class_link_url || p.meeting_url || null;
+
+  const meetSection = classLink
+    ? (isAr
+        ? `<div style="background: #f0fff4; border: 1px solid #6ee7b7; border-radius: 8px; padding: 14px 18px; margin: 20px 0; text-align: center;">
+            <p style="margin: 0 0 8px; font-weight: bold; color: ${BRAND_DARK};">🎓 رابط Google Meet الخاص بك</p>
+            <a href="${classLink}" style="display: inline-block; background: ${BRAND_BLACK}; color: ${BRAND_YELLOW}; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">انضم للكلاس</a>
+          </div>`
+        : `<div style="background: #f0fff4; border: 1px solid #6ee7b7; border-radius: 8px; padding: 14px 18px; margin: 20px 0; text-align: center;">
+            <p style="margin: 0 0 8px; font-weight: bold; color: ${BRAND_DARK};">🎓 Your Google Meet link</p>
+            <a href="${classLink}" style="display: inline-block; background: ${BRAND_BLACK}; color: ${BRAND_YELLOW}; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">Join the Class</a>
+          </div>`)
+    : "";
+
+  if (isAr) {
+    return {
+      subject: "KLovers — أكّد حضورك لحصتك التجريبية ✅",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! 🎉</h1>
+        <p>تم تأكيد حصتك التجريبية في اللغة الكورية!</p>
+        ${brandTable([
+          ["📅 التاريخ", p.trial_date || ""],
+          ["⏰ الوقت", p.trial_time || ""],
+        ])}
+        <div style="margin: 24px 0; text-align: center;">
+          <a href="${confirmUrl}" style="display: inline-block; background: ${BRAND_YELLOW}; color: ${BRAND_BLACK}; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px; border: 2px solid ${BRAND_BLACK};">✅ أكّد حضوري</a>
+        </div>
+        ${meetSection}
+        <p style="color: ${BRAND_MUTED}; font-size: 13px;">تأكيد الحضور يساعدنا في حجز مقعدك والتحضير لك. شكراً!</p>
+      `, true),
+    };
+  }
+  return {
+    subject: "Please confirm your attendance for your Klovers trial class ✅",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 🎉</h1>
+      <p>Your trial class is confirmed! Please confirm your attendance so we can reserve your seat and prepare for you.</p>
+      ${brandTable([
+        ["📅 Date", p.trial_date || ""],
+        ["⏰ Time", p.trial_time || ""],
+      ])}
+      <div style="margin: 24px 0; text-align: center;">
+        <a href="${confirmUrl}" style="display: inline-block; background: ${BRAND_YELLOW}; color: ${BRAND_BLACK}; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px; border: 2px solid ${BRAND_BLACK};">✅ Confirm My Attendance</a>
+      </div>
+      ${meetSection}
+      <p style="color: ${BRAND_MUTED}; font-size: 13px;">Confirming attendance helps us reserve your seat and prepare for you.</p>
     `, false),
   };
 }
@@ -1400,6 +1469,9 @@ serve(async (req) => {
         break;
       case "class_feedback":
         ({ subject, html } = buildClassFeedbackEmail(payload));
+        break;
+      case "trial_attendance_confirmation":
+        ({ subject, html } = buildTrialAttendanceConfirmationEmail(payload));
         break;
       case "enrollment":
       default:

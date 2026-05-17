@@ -79,6 +79,8 @@ interface TrialSlot {
   day_of_week: number;
   start_time: string;
   is_active: boolean;
+  trial_date?: string | null;
+  meeting_url?: string | null;
 }
 
 type TimeFilter = "all" | "upcoming" | "past";
@@ -147,7 +149,7 @@ const TrialClassesManager = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("trial_slots")
-        .select("day_of_week, start_time, is_active")
+        .select("day_of_week, start_time, is_active, trial_date, meeting_url")
         .eq("is_active", true);
       if (error) throw error;
       return (data as TrialSlot[] | null) ?? [];
@@ -156,7 +158,16 @@ const TrialClassesManager = () => {
   });
 
   const loading = loadingBookings || loadingSlots;
-  const upcomingSlots = useMemo(() => getActualUpcomingGroups(bookings), [bookings]);
+  const upcomingSlots = useMemo(() => {
+    const slots = getActualUpcomingGroups(bookings);
+    // Enrich each slot with meeting_url from the matching activeSlots row
+    return slots.map((s) => {
+      const match = activeSlots.find(
+        (a) => a.trial_date === s.date && a.start_time === s.start_time
+      ) ?? activeSlots.find((a) => a.start_time === s.start_time);
+      return { ...s, meeting_url: match?.meeting_url ?? null };
+    });
+  }, [bookings, activeSlots]);
 
   const fetchData = () => {
     // Invalidate trials-related caches so both the local table and the
@@ -262,6 +273,15 @@ const TrialClassesManager = () => {
   const sendRebookEmail = async (booking: TrialBooking) => {
     setActioningId(booking.id);
     try {
+      // Warn if no meeting_url for any upcoming slot
+      const meetingUrl = upcomingSlots[0]?.meeting_url ?? null;
+      if (!meetingUrl) {
+        toast({
+          title: "No Google Meet link found for this class.",
+          description: "Add it in the trial slot settings before sending.",
+          variant: "destructive",
+        });
+      }
       const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
           template: "trial_rebook_request",
@@ -269,6 +289,7 @@ const TrialClassesManager = () => {
           name: booking.name || booking.email,
           language: "ar",
           rebook_url: `${window.location.origin}/trial-booking`,
+          class_link_url: meetingUrl,
           available_slots: upcomingSlots.map((s) => ({
             day_of_week: s.day_of_week,
             start_time: s.start_time,
@@ -302,6 +323,15 @@ const TrialClassesManager = () => {
       toast({ title: "Nothing to send", description: "No unscheduled (TBA) bookings right now." });
       return;
     }
+    // Warn if no meeting_url for any upcoming slot
+    const bulkMeetingUrl = upcomingSlots[0]?.meeting_url ?? null;
+    if (!bulkMeetingUrl) {
+      toast({
+        title: "No Google Meet link found for this class.",
+        description: "Add it in the trial slot settings before sending.",
+        variant: "destructive",
+      });
+    }
     setBulkBusy(true);
     let ok = 0, fail = 0;
     for (const b of tba) {
@@ -313,6 +343,7 @@ const TrialClassesManager = () => {
             name: b.name || b.email,
             language: "ar",
             rebook_url: `${window.location.origin}/trial-booking`,
+            class_link_url: bulkMeetingUrl,
             available_slots: upcomingSlots.map((s) => ({
               day_of_week: s.day_of_week,
               start_time: s.start_time,
@@ -415,6 +446,38 @@ const TrialClassesManager = () => {
         return (b.date || "").localeCompare(a.date || "") || (b.time || "").localeCompare(a.time || "");
       });
   }, [filtered]);
+
+  const sendResendConfirmation = async (booking: TrialBooking) => {
+    setActioningId(booking.id);
+    try {
+      const { data: slotRow } = await supabase
+        .from("trial_slots")
+        .select("meeting_url")
+        .eq("trial_date", booking.trial_date ?? "")
+        .eq("start_time", booking.start_time ?? "")
+        .maybeSingle();
+      const meetingUrl = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
+      const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
+        body: {
+          template: "trial_attendance_confirmation",
+          email: booking.email,
+          name: booking.name || booking.email,
+          language: booking.language || "en",
+          trial_date: booking.trial_date,
+          trial_time: booking.start_time,
+          class_link_url: meetingUrl,
+          booking_id: booking.id,
+          confirmation_token: booking.confirmation_token,
+        },
+      });
+      if (emailErr) throw emailErr;
+      toast({ title: "Confirmation resent", description: booking.email });
+    } catch (err: any) {
+      toast({ title: "Email failed", description: err.message, variant: "destructive" });
+    } finally {
+      setActioningId(null);
+    }
+  };
 
   const pendingCount = bookings.filter((b) => b.status === "pending").length;
 
@@ -547,7 +610,7 @@ const TrialClassesManager = () => {
                             title={tbaUnsentCount === 0 ? "No unscheduled students" : `Email ${tbaUnsentCount} unscheduled student${tbaUnsentCount === 1 ? "" : "s"}`}
                           >
                             <Mail className="h-3.5 w-3.5 mr-1" />
-                            Send rebook email ({tbaUnsentCount})
+                            Resend with new dates ({tbaUnsentCount})
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -599,9 +662,16 @@ const TrialClassesManager = () => {
                             {b.level ? (getLevelShortLabel(b.level) || b.level) : "—"}
                           </TableCell>
                           <TableCell>
-                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[b.status] || "bg-gray-100 text-gray-600"}`}>
-                              {(b.status || "unknown").replace("_", " ")}
-                            </span>
+                            <div className="flex flex-col gap-0.5">
+                              <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[b.status] || "bg-gray-100 text-gray-600"}`}>
+                                {STATUS_LABELS[b.status] || (b.status || "unknown")}
+                              </span>
+                              {b.status === "confirmed_attendance" && b.attendance_confirmed_at && (
+                                <span className="text-[10px] text-muted-foreground">
+                                  Confirmed {new Date(b.attendance_confirmed_at).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                             {new Date(b.created_at).toLocaleDateString()}
@@ -618,18 +688,34 @@ const TrialClassesManager = () => {
                                       email sent {Math.max(0, Math.floor((Date.now() - new Date(b.rebook_email_sent_at).getTime()) / 86400000))}d ago
                                     </Badge>
                                   )}
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-7"
-                                    disabled={actioningId === b.id}
-                                    onClick={() => sendRebookEmail(b)}
-                                    title={b.rebook_email_sent_at ? "Resend rebook email" : "Email student to pick a slot"}
-                                  >
-                                    <Mail className="h-3.5 w-3.5 mr-1" />
-                                    {b.rebook_email_sent_at ? "Resend" : "Email"}
-                                  </Button>
+                                  <div className="flex flex-col items-end gap-0.5">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7"
+                                      disabled={actioningId === b.id}
+                                      onClick={() => sendRebookEmail(b)}
+                                      title={b.rebook_email_sent_at ? "Resend with new dates" : "Invite student to choose a new trial date"}
+                                    >
+                                      <Mail className="h-3.5 w-3.5 mr-1" />
+                                      Resend with new dates
+                                    </Button>
+                                    <span className="text-[10px] text-muted-foreground">Invite students to choose a new trial date</span>
+                                  </div>
                                 </>
+                              )}
+                              {b.status === "awaiting_attendance" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7"
+                                  disabled={actioningId === b.id}
+                                  onClick={() => sendResendConfirmation(b)}
+                                  title="Resend attendance confirmation email"
+                                >
+                                  <Mail className="h-3.5 w-3.5 mr-1" />
+                                  Resend confirmation
+                                </Button>
                               )}
                               {b.status === "pending" && (
                                 <>

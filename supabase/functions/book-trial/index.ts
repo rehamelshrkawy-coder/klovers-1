@@ -290,6 +290,9 @@ Deno.serve(async (req) => {
     // Unauthenticated: only remove TBA placeholders.
     const shouldDelete = existingBooking && (authed || isTbaPlaceholder);
 
+    // Authenticated bookings use awaiting_attendance so students confirm via email link
+    const bookingStatus = authed && resolvedUserId ? "awaiting_attendance" : "confirmed";
+
     // Atomic delete + insert via Postgres RPC (prevents orphaned bookings on crash)
     const { data: newBookingId, error: bookingError } = await supabase.rpc("upsert_trial_booking", {
       p_delete_id:   shouldDelete ? existingBooking!.id : null,
@@ -304,7 +307,7 @@ Deno.serve(async (req) => {
       p_timezone:    timezone,
       p_language:    class_language === "arabic" ? "arabic" : "english",
       p_user_id:     resolvedUserId || null,
-      p_status:      "confirmed",
+      p_status:      bookingStatus,
     });
 
     // Wrap result in same shape the rest of the function expects
@@ -372,30 +375,61 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const meetingUrl: string | null = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
 
-    // 5. Send trial confirmation email — track failures in DB for admin visibility
-    supabase.functions.invoke("send-confirmation-email", {
-      body: {
-        template: "trial_confirmed",
-        email: normalizedEmail,
-        name: finalName,
-        language: "en",
-        trial_date: trialDate,
-        trial_time: start_time,
-        trial_timezone: timezone,
-        level: level?.trim() || "",
-        calendar_url: calendarUrl,
-        ...(meetingUrl ? { class_link_url: meetingUrl } : {}),
-      },
-    }).then(null, async (e) => {
-      console.warn("trial_confirmed email failed:", e);
-      // Mark failure so admin can see it in the dashboard and manually resend
-      try {
-        await supabase
-          .from("trial_bookings")
-          .update({ confirmation_email_failed_at: new Date().toISOString() })
-          .eq("id", booking.id);
-      } catch { /* non-critical */ }
-    });
+    // 5. Send trial confirmation email
+    if (authed && resolvedUserId) {
+      // Authenticated booking: fetch confirmation_token and send attendance confirmation
+      const { data: newBookingRow } = await supabase
+        .from("trial_bookings")
+        .select("id, confirmation_token")
+        .eq("id", booking.id)
+        .maybeSingle();
+
+      await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-confirmation-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+        },
+        body: JSON.stringify({
+          template: "trial_attendance_confirmation",
+          email: normalizedEmail,
+          name: finalName,
+          language: class_language === "arabic" ? "ar" : "en",
+          trial_date: trialDate,
+          trial_time: start_time,
+          class_link_url: meetingUrl,
+          booking_id: newBookingRow?.id ?? booking.id,
+          confirmation_token: (newBookingRow as { confirmation_token?: string | null } | null)?.confirmation_token ?? null,
+        }),
+      }).catch((e) => {
+        console.warn("trial_attendance_confirmation email failed:", e);
+      });
+    } else {
+      // Unauthenticated booking: send standard trial confirmed email
+      supabase.functions.invoke("send-confirmation-email", {
+        body: {
+          template: "trial_confirmed",
+          email: normalizedEmail,
+          name: finalName,
+          language: "en",
+          trial_date: trialDate,
+          trial_time: start_time,
+          trial_timezone: timezone,
+          level: level?.trim() || "",
+          calendar_url: calendarUrl,
+          ...(meetingUrl ? { class_link_url: meetingUrl } : {}),
+        },
+      }).then(null, async (e) => {
+        console.warn("trial_confirmed email failed:", e);
+        // Mark failure so admin can see it in the dashboard and manually resend
+        try {
+          await supabase
+            .from("trial_bookings")
+            .update({ confirmation_email_failed_at: new Date().toISOString() })
+            .eq("id", booking.id);
+        } catch { /* non-critical */ }
+      });
+    }
 
     return new Response(
       JSON.stringify({
