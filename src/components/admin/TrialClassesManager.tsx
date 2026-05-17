@@ -411,7 +411,20 @@ const TrialClassesManager = () => {
     const d = new Date(`${lcl.dateStr}T00:00:00`);
     const weekday = lcl.weekday || DAY_NAMES[dow] || d.toLocaleDateString("en-US", { weekday: "long" });
     const dateLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    return `${weekday}, ${dateLabel} — ${lcl.timeFormatted} (${adminTz})`;
+
+    // Also show the time in the browser's local timezone if it differs from adminTz
+    const browserTz = typeof window !== "undefined"
+      ? (Intl.DateTimeFormat().resolvedOptions().timeZone || "")
+      : "";
+    const showBrowser = browserTz && browserTz !== adminTz && browserTz !== srcTz;
+    let browserSuffix = "";
+    if (showBrowser) {
+      const br = convertDateTimeToTimezone(date, time, srcTz, browserTz);
+      const tzCity = browserTz.includes("/") ? browserTz.split("/").pop()!.replace(/_/g, " ") : browserTz;
+      browserSuffix = ` · ${br.timeFormatted} (${tzCity})`;
+    }
+
+    return `${weekday}, ${dateLabel} — ${lcl.timeFormatted} (${adminTz})${browserSuffix}`;
   };
 
   const isLegacySlot = (time: string | null) => !!time && !activeSlots.some((s) => s.start_time === time);
