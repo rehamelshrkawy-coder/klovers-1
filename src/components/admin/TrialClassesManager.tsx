@@ -273,8 +273,8 @@ const TrialClassesManager = () => {
   const sendRebookEmail = async (booking: TrialBooking) => {
     setActioningId(booking.id);
     try {
-      // Warn if no meeting_url for any upcoming slot
-      const meetingUrl = upcomingSlots[0]?.meeting_url ?? null;
+      // Use active trial slots as the canonical slot list (not derived from bookings).
+      const meetingUrl = activeSlots.find((s) => s.meeting_url)?.meeting_url ?? null;
       if (!meetingUrl) {
         toast({
           title: "No Google Meet link found for this class.",
@@ -290,12 +290,14 @@ const TrialClassesManager = () => {
           language: "ar",
           rebook_url: `${window.location.origin}/trial-booking`,
           class_link_url: meetingUrl,
-          available_slots: upcomingSlots.map((s) => ({
-            day_of_week: s.day_of_week,
-            start_time: s.start_time,
-            timezone: "Africa/Cairo",
-            date: s.date,
-          })),
+          available_slots: activeSlots
+            .filter((s) => s.trial_date)
+            .map((s) => ({
+              day_of_week: s.day_of_week,
+              start_time: s.start_time,
+              timezone: "Africa/Cairo",
+              date: s.trial_date,
+            })),
         },
       });
       if (emailErr) throw emailErr;
@@ -323,8 +325,8 @@ const TrialClassesManager = () => {
       toast({ title: "Nothing to send", description: "No unscheduled (TBA) bookings right now." });
       return;
     }
-    // Warn if no meeting_url for any upcoming slot
-    const bulkMeetingUrl = upcomingSlots[0]?.meeting_url ?? null;
+    // Use active trial slots as the canonical slot list (not derived from bookings).
+    const bulkMeetingUrl = activeSlots.find((s) => s.meeting_url)?.meeting_url ?? null;
     if (!bulkMeetingUrl) {
       toast({
         title: "No Google Meet link found for this class.",
@@ -333,6 +335,14 @@ const TrialClassesManager = () => {
       });
     }
     setBulkBusy(true);
+    const rebookSlots = activeSlots
+      .filter((s) => s.trial_date)
+      .map((s) => ({
+        day_of_week: s.day_of_week,
+        start_time: s.start_time,
+        timezone: "Africa/Cairo",
+        date: s.trial_date,
+      }));
     let ok = 0, fail = 0;
     for (const b of tba) {
       try {
@@ -344,12 +354,7 @@ const TrialClassesManager = () => {
             language: "ar",
             rebook_url: `${window.location.origin}/trial-booking`,
             class_link_url: bulkMeetingUrl,
-            available_slots: upcomingSlots.map((s) => ({
-              day_of_week: s.day_of_week,
-              start_time: s.start_time,
-              timezone: "Africa/Cairo",
-              date: s.date,
-            })),
+            available_slots: rebookSlots,
           },
         });
         if (emailErr) throw emailErr;
