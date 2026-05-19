@@ -184,15 +184,17 @@ Deno.serve(async (req) => {
       ? bodyTrialDate
       : nextDateForDay(day_of_week);
 
-    // Look up the slot's source timezone from the DB (teacher is MYT-based).
-    // Fall back to MYT if the slot row is missing.
+    // Look up slot metadata in one query (timezone, duration, meeting link).
     const { data: slotTzRow } = await supabase
       .from("trial_slots")
-      .select("timezone")
+      .select("timezone, duration_min, meeting_url")
       .eq("trial_date", trialDate)
       .eq("start_time", start_time)
       .maybeSingle();
-    const timezone: string = (slotTzRow as { timezone?: string | null } | null)?.timezone || "Asia/Kuala_Lumpur";
+    const _slot = slotTzRow as { timezone?: string | null; duration_min?: number | null; meeting_url?: string | null } | null;
+    const timezone: string = _slot?.timezone || "Asia/Kuala_Lumpur";
+    const slotDurationMin: number = _slot?.duration_min ?? 30;
+    const meetingUrl: string | null = _slot?.meeting_url ?? null;
 
     // Registrations close 1 day before the class (compare in MYT, UTC+8)
     const mytNow = new Date(Date.now() + 8 * 60 * 60 * 1000);
@@ -361,19 +363,11 @@ Deno.serve(async (req) => {
       title: "Free Korean Trial Class — Klovers Academy",
       date: trialDate,
       time: start_time,
-      durationMin: 30,
-      description: `Your free 30-min trial Korean class with Klovers Academy.\nLevel: ${level || "Beginner"}\n\nhttps://kloversegy.com`,
+      durationMin: slotDurationMin,
+      description: `Your free ${slotDurationMin}-min trial Korean class with Klovers Academy.\nLevel: ${level || "Beginner"}\n\nhttps://kloversegy.com`,
       timezone,
     });
-
-    // Fetch meeting URL from the matching trial slot (if set by admin)
-    const { data: slotRow } = await supabase
-      .from("trial_slots")
-      .select("meeting_url")
-      .eq("trial_date", trialDate)
-      .eq("start_time", start_time)
-      .maybeSingle();
-    const meetingUrl: string | null = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
+    // meetingUrl already resolved from the merged slot query above
 
     // 5. Send trial confirmation email
     if (authed && resolvedUserId) {
@@ -440,7 +434,7 @@ Deno.serve(async (req) => {
           day_name: dayName,
           start_time,
           start_time_12h: formatTime12h(start_time),
-          duration_min: 30,
+          duration_min: slotDurationMin,
           timezone,
           calendar_url: calendarUrl,
         },

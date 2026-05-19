@@ -774,7 +774,13 @@ function buildTrialAttendanceConfirmationEmail(p: EmailPayload) {
             <p style="margin: 0 0 8px; font-weight: bold; color: ${BRAND_DARK};">🎓 Your Google Meet link</p>
             <a href="${classLink}" style="display: inline-block; background: ${BRAND_BLACK}; color: ${BRAND_YELLOW}; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">Join the Class</a>
           </div>`)
-    : "";
+    : (isAr
+        ? `<div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 14px 18px; margin: 20px 0; text-align: center;">
+            <p style="margin: 0; color: ${BRAND_DARK}; font-size: 14px;">🕐 سيتم إرسال رابط الحصة إليك بالبريد الإلكتروني قبل ٢٤ ساعة من الموعد</p>
+          </div>`
+        : `<div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 14px 18px; margin: 20px 0; text-align: center;">
+            <p style="margin: 0; color: ${BRAND_DARK}; font-size: 14px;">🕐 Your class link will be sent to you 24 hours before your session</p>
+          </div>`);
 
   if (isAr) {
     return {
