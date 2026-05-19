@@ -160,6 +160,23 @@ export function useCreateTrialSlot() {
   });
 }
 
+export function useUpdateSlotMeetingUrl() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ slotId, meetingUrl }: { slotId: string; meetingUrl: string | null }) => {
+      const { error } = await supabase
+        .from('trial_slots')
+        .update({ meeting_url: meetingUrl })
+        .eq('id', slotId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEYS.slotsRaw });
+      qc.invalidateQueries({ queryKey: KEYS.upcomingSlots });
+    },
+  });
+}
+
 // --- Client-side derivations ----------------------------------------------
 
 export function splitBookingsByBucket(bookings: AdminTrialBooking[]) {

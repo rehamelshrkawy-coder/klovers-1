@@ -10,7 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CalendarDays } from "lucide-react";
+import { ArrowLeft, CalendarDays, Mail, CheckCircle2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { convertDateTimeToTimezone } from "@/lib/admin-utils";
 
 /**
@@ -52,6 +53,9 @@ const TrialSlotPicker = ({ onSelect, onBack, classLanguage }: TrialSlotPickerPro
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedKey, setSelectedKey] = useState<string>("");
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
+  const [waitlistDone, setWaitlistDone] = useState(false);
 
   useEffect(() => {
     setSelectedKey(""); // reset selection when language changes
@@ -116,12 +120,59 @@ const TrialSlotPicker = ({ onSelect, onBack, classLanguage }: TrialSlotPickerPro
   }
 
   if (availableSlots.length === 0) {
+    const handleWaitlist = async () => {
+      const trimmed = waitlistEmail.trim().toLowerCase();
+      if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return;
+      setWaitlistSubmitting(true);
+      await supabase.from("leads").upsert(
+        {
+          email: trimmed,
+          name: trimmed.split("@")[0],
+          source: "trial_waitlist",
+          status: "waitlist",
+          goal: "Trial - notify when slot opens",
+        },
+        { onConflict: "email" }
+      );
+      setWaitlistSubmitting(false);
+      setWaitlistDone(true);
+    };
+
     return (
-      <div className="text-center py-8 space-y-3">
+      <div className="text-center py-8 space-y-4">
         <CalendarDays className="h-10 w-10 mx-auto text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
-          All trial sessions are currently full. Please check back soon or contact us on WhatsApp.
-        </p>
+        <p className="text-sm font-semibold text-foreground">All sessions are currently full</p>
+        {waitlistDone ? (
+          <div className="flex items-center justify-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            You're on the list! We'll email you when a spot opens.
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">
+              Leave your email and we'll notify you when a spot opens.
+            </p>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                placeholder="your@email.com"
+                value={waitlistEmail}
+                onChange={(e) => setWaitlistEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleWaitlist()}
+                className="flex-1 h-9 text-sm"
+              />
+              <Button
+                size="sm"
+                className="h-9 gap-1.5"
+                disabled={waitlistSubmitting || !waitlistEmail.trim()}
+                onClick={handleWaitlist}
+              >
+                <Mail className="h-3.5 w-3.5" />
+                Notify Me
+              </Button>
+            </div>
+          </div>
+        )}
         <Button variant="outline" size="sm" onClick={onBack} className="gap-1">
           <ArrowLeft className="h-4 w-4" /> Go back
         </Button>

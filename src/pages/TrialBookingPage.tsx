@@ -563,23 +563,6 @@ const TrialBookingPage = () => {
                   <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-orange-600 group-hover:translate-x-0.5 transition-all shrink-0" />
                 </button>
               </div>
-              <h2 className="text-xl font-bold text-foreground mb-2">{t("trialBooking.findLevelTitle")}</h2>
-              <p className="text-sm text-muted-foreground mb-5 max-w-sm mx-auto">
-                {t("trialBooking.findLevelDesc")}
-              </p>
-              <Button
-                size="lg"
-                className="gap-2 font-bold px-8 shadow-lg"
-                onClick={() => {
-                  track.custom("post_trial_cta_clicked", { cta: "placement_test" });
-                  logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_placement_test" });
-                  navigate("/placement-test");
-                }}
-              >
-                <GraduationCap className="h-4 w-4" />
-                {t("trialBooking.findLevelTitle")}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
             </div>
 
             {/* Invite-a-friend card — referral growth loop */}
