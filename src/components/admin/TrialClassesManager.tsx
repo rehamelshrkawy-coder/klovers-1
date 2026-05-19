@@ -217,9 +217,13 @@ const TrialClassesManager = () => {
         level: booking.level?.trim() || "",
       };
       if (meetingUrl) emailBody.class_link_url = meetingUrl;
-      await supabase.functions.invoke("send-confirmation-email", { body: emailBody });
+      const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", { body: emailBody });
 
-      toast({ title: "Confirmed & email sent", description: `${booking.name || booking.email} → ${date} at ${time}` });
+      if (emailErr) {
+        toast({ title: "Confirmed (email failed)", description: `Booking saved. Email error: ${emailErr.message}`, variant: "destructive" });
+      } else {
+        toast({ title: "Confirmed & email sent", description: `${booking.name || booking.email} → ${date} at ${time}` });
+      }
       fetchData();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
