@@ -42,29 +42,61 @@ const tierPrices: Record<TierKey, { duration: string; classes: string; usd: numb
   ],
 };
 
-const egpGroupPrices = [
-  { duration: "1 Month", classes: "4 classes", egp: 1200 },
-  { duration: "3 Months", classes: "12 classes", egp: 3300 },
-  { duration: "6 Months", classes: "24 classes", egp: 6100 },
+interface LocalPriceRow { duration: string; classes: string; local: number; currency: string }
+
+const DURATION_ROWS: Array<{ duration: string; classes: string }> = [
+  { duration: "1 Month",  classes: "4 classes"  },
+  { duration: "3 Months", classes: "12 classes" },
+  { duration: "6 Months", classes: "24 classes" },
 ];
 
-const egpPrivatePrices = [
-  { duration: "1 Month", classes: "4 classes", egp: 2350 },
-  { duration: "3 Months", classes: "12 classes", egp: 6600 },
-  { duration: "6 Months", classes: "24 classes", egp: 11750 },
-];
+function mkLocal(currency: string, g: [number, number, number], p: [number, number, number]) {
+  return {
+    group:   DURATION_ROWS.map((d, i) => ({ ...d, local: g[i], currency })),
+    private: DURATION_ROWS.map((d, i) => ({ ...d, local: p[i], currency })),
+  };
+}
 
-const madGroupPrices = [
-  { duration: "1 Month", classes: "4 classes", mad: 250 },
-  { duration: "3 Months", classes: "12 classes", mad: 700 },
-  { duration: "6 Months", classes: "24 classes", mad: 1300 },
-];
+// Approximate rates — May 2026. Lebanon/Syria/Sudan/Yemen/Argentina omitted (unstable).
+const countryLocalPrices: Record<string, { group: LocalPriceRow[]; private: LocalPriceRow[] }> = {
+  // Local tier  ($25 / $70 / $130 group  |  $50 / $140 / $250 private)
+  "Egypt":   mkLocal("EGP", [1200,  3300,   6100],  [2350,  6600,  11750]),
+  "Morocco": mkLocal("MAD", [250,    700,   1300],   [500,   1400,   2500]),
+  "Tunisia": mkLocal("TND", [78,     217,    403],   [155,    435,    775]),
+  "Algeria": mkLocal("DZD", [3400,  9500,  17500],  [6750, 18900,  33750]),
+  "Libya":   mkLocal("LYD", [122,    343,    637],   [245,    686,   1225]),
+  "Jordan":  mkLocal("JOD", [18,      50,     92],   [36,      99,    178]),
+  "Iraq":    mkLocal("IQD", [32750, 91700, 170300],  [65500, 183400, 327500]),
 
-const madPrivatePrices = [
-  { duration: "1 Month", classes: "4 classes", mad: 500 },
-  { duration: "3 Months", classes: "12 classes", mad: 1400 },
-  { duration: "6 Months", classes: "24 classes", mad: 2500 },
-];
+  // Regional tier  ($40 / $110 / $200 group  |  $80 / $220 / $380 private)
+  "Malaysia":    mkLocal("MYR", [175,     485,     880],    [350,     970,    1672]),
+  "Indonesia":   mkLocal("IDR", [648000, 1782000, 3240000], [1296000, 3564000, 6156000]),
+  "Thailand":    mkLocal("THB", [1320,   3630,    6600],    [2640,    7260,   12540]),
+  "Vietnam":     mkLocal("VND", [1016000, 2794000, 5080000],[2032000, 5588000, 9652000]),
+  "Philippines": mkLocal("PHP", [2240,   6160,   11200],    [4480,   12320,   21280]),
+  "India":       mkLocal("INR", [3360,   9240,   16800],    [6720,   18480,   31920]),
+  "Pakistan":    mkLocal("PKR", [11160, 30690,   55800],    [22320,  61380,  106020]),
+  "Brazil":      mkLocal("BRL", [228,    627,    1140],     [456,    1254,    2166]),
+  "Mexico":      mkLocal("MXN", [680,   1870,    3400],     [1360,   3740,    6460]),
+  "Colombia":    mkLocal("COP", [168000, 462000,  840000],  [336000,  924000, 1596000]),
+  "Turkey":      mkLocal("TRY", [1520,  4180,    7600],     [3040,   8360,   14440]),
+
+  // Global tier  ($60 / $170 / $300 group  |  $120 / $330 / $580 private)
+  "UAE":            mkLocal("AED", [220,     624,    1100],   [440,    1210,    2130]),
+  "Saudi Arabia":   mkLocal("SAR", [225,     638,    1125],   [450,    1238,    2175]),
+  "Qatar":          mkLocal("QAR", [218,     619,    1092],   [436,    1200,    2110]),
+  "Bahrain":        mkLocal("BHD", [22.6,   63.9,   112.8],  [45.1,   124.6,   218.5]),
+  "Oman":           mkLocal("OMR", [23.1,   65.5,   115.5],  [46.2,   127,     223]),
+  "Kuwait":         mkLocal("KWD", [18.4,   52.2,    92.1],  [36.8,   101.3,   178]),
+  "United Kingdom": mkLocal("GBP", [47,     134,     237],   [95,     261,     458]),
+  "Germany":        mkLocal("EUR", [55,     156,     276],   [110,    304,     534]),
+  "France":         mkLocal("EUR", [55,     156,     276],   [110,    304,     534]),
+  "Canada":         mkLocal("CAD", [83,     235,     414],   [165,    455,     800]),
+  "Australia":      mkLocal("AUD", [93,     264,     465],   [186,    512,     899]),
+  "Japan":          mkLocal("JPY", [8940,  25330,  44700],   [17880, 49170,   86420]),
+  "South Korea":    mkLocal("KRW", [82500, 233750, 412500],  [165000, 453750, 797500]),
+  "China":          mkLocal("CNY", [436,   1236,    2181],   [872,   2399,    4217]),
+};
 
 const privatePrices: Record<TierKey, { duration: string; classes: string; usd: number }[]> = {
   local: [
@@ -119,12 +151,11 @@ const PricingSection = () => {
 
   // Anchors cost per month. Reframes "$70 for 3 months" as "$23/mo" which
   // reads closer to a streaming sub than an upfront fee.
-  const derivePerMonth = (price: { duration: string; usd?: number; egp?: number; mad?: number }): string => {
+  const derivePerMonth = (price: { duration: string; usd?: number; local?: number; currency?: string }): string => {
     const months = /^(\d+)/.exec(price.duration)?.[1];
     const n = months ? parseInt(months, 10) : 1;
     if (n <= 1) return "";
-    if (price.egp) return `${Math.round(price.egp / n).toLocaleString()} EGP/mo`;
-    if (price.mad) return `${Math.round(price.mad / n).toLocaleString()} MAD/mo`;
+    if (price.local && price.currency) return `${Math.round(price.local / n).toLocaleString()} ${price.currency}/mo`;
     if (price.usd) return `$${Math.round(price.usd / n)}/mo`;
     return "";
   };
@@ -267,7 +298,7 @@ const PricingSection = () => {
 
                   <div className="space-y-3 mb-6">
                     {classType === "group" ? (
-                      (selectedCountry === "Egypt" && tierKey === "local" ? egpGroupPrices : selectedCountry === "Morocco" && tierKey === "local" ? madGroupPrices : tierPrices[tierKey]).map((price: any) => {
+                      ((isActive ? countryLocalPrices[selectedCountry]?.group : undefined) ?? tierPrices[tierKey]).map((price: any) => {
                         const isBestValue = price.duration === "3 Months";
                         return (
                         <div
@@ -293,7 +324,7 @@ const PricingSection = () => {
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-lg text-foreground">
-                              {price.egp ? `${price.egp.toLocaleString()} EGP` : price.mad ? `${price.mad.toLocaleString()} MAD` : `$${price.usd}`}
+                              {price.local ? `${price.local.toLocaleString()} ${price.currency}` : `$${price.usd}`}
                             </p>
                             {derivePerMonth(price) && (
                               <p className="text-[11px] text-green-600 dark:text-green-400 font-semibold">
@@ -305,7 +336,7 @@ const PricingSection = () => {
                         );
                       })
                     ) : (
-                      (selectedCountry === "Egypt" && tierKey === "local" ? egpPrivatePrices : selectedCountry === "Morocco" && tierKey === "local" ? madPrivatePrices : privatePrices[tierKey]).map((price: any) => {
+                      ((isActive ? countryLocalPrices[selectedCountry]?.private : undefined) ?? privatePrices[tierKey]).map((price: any) => {
                         const isBestValue = price.duration === "3 Months";
                         return (
                         <div
@@ -331,7 +362,7 @@ const PricingSection = () => {
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-lg text-foreground">
-                              {price.egp ? `${price.egp.toLocaleString()} EGP` : price.mad ? `${price.mad.toLocaleString()} MAD` : `$${price.usd}`}
+                              {price.local ? `${price.local.toLocaleString()} ${price.currency}` : `$${price.usd}`}
                             </p>
                             {derivePerMonth(price) && (
                               <p className="text-[11px] text-green-600 dark:text-green-400 font-semibold">
