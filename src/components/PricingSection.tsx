@@ -119,7 +119,7 @@ const PricingSection = () => {
 
   // Anchors cost per month. Reframes "$70 for 3 months" as "$23/mo" which
   // reads closer to a streaming sub than an upfront fee.
-  const derivePerMonth = (price: { duration: string; usd?: number; egp?: number }): string => {
+  const derivePerMonth = (price: { duration: string; usd?: number; egp?: number; mad?: number }): string => {
     const months = /^(\d+)/.exec(price.duration)?.[1];
     const n = months ? parseInt(months, 10) : 1;
     if (n <= 1) return "";
