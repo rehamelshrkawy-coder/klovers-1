@@ -11,7 +11,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { trackAndOpenWhatsApp } from "@/lib/leadTracking";
-import { type TierKey, type ClassType, type Duration, tierPrices, getTierForCountry, DURATION_CLASSES } from "@/lib/stripePrices";
+import { type TierKey, type ClassType, type Duration, tierPrices, getTierForCountry, DURATION_CLASSES, formatLocalPrice } from "@/lib/stripePrices";
 import { track } from "@/lib/tracking";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -56,7 +56,7 @@ const EnrollPage = () => {
   }, [tier, planType, duration]);
 
   const classesIncluded = duration ? DURATION_CLASSES[Number(duration) as Duration] : 0;
-  const unitPrice = price && classesIncluded ? (price / classesIncluded).toFixed(2) : "0.00";
+  const unitPrice = price && classesIncluded ? formatLocalPrice(userCountry, Math.round(price / classesIncluded)) : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,11 +185,11 @@ const EnrollPage = () => {
                   <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">{t("enrollForm.classesIncluded").replace("{count}", String(classesIncluded))}</span>
-                      <span className="text-xs text-muted-foreground">{t("enrollForm.perClass").replace("{price}", unitPrice)}</span>
+                      {unitPrice && <span className="text-xs text-muted-foreground">{unitPrice}{t("enrollForm.perClass")}</span>}
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-foreground">{t("enrollForm.total")}</span>
-                      <span className="font-bold text-2xl text-foreground">${price}</span>
+                      <span className="font-bold text-2xl text-foreground">{formatLocalPrice(userCountry, price)}</span>
                     </div>
                   </div>
                 )}

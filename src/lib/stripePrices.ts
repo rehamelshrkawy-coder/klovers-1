@@ -89,3 +89,67 @@ export function getTierForCountry(country: string): TierKey | null {
 export { DURATION_CLASSES };
 
 export type { TierKey, ClassType, Duration, PriceInfo };
+
+// ── Local-currency display ────────────────────────────────────────────────────
+
+interface CountryCurrency {
+  code: string;
+  symbol: string;
+  /** 1 USD = rate LOCAL */
+  rate: number;
+  /** true → symbol printed before the number (e.g. $25), false → after (e.g. 25 EGP) */
+  symbolBefore: boolean;
+}
+
+export const countryCurrencyMap: Record<string, CountryCurrency> = {
+  // Local tier
+  Egypt:        { code: "EGP", symbol: "EGP", rate: 48,    symbolBefore: false },
+  Morocco:      { code: "MAD", symbol: "MAD", rate: 10.0,  symbolBefore: false },
+  Tunisia:      { code: "TND", symbol: "TND", rate: 3.1,   symbolBefore: false },
+  Algeria:      { code: "DZD", symbol: "DZD", rate: 135,   symbolBefore: false },
+  Libya:        { code: "LYD", symbol: "LYD", rate: 4.8,   symbolBefore: false },
+  Jordan:       { code: "JOD", symbol: "JOD", rate: 0.71,  symbolBefore: false },
+  Lebanon:      { code: "LBP", symbol: "LBP", rate: 89500, symbolBefore: false },
+  Iraq:         { code: "IQD", symbol: "IQD", rate: 1310,  symbolBefore: false },
+  Syria:        { code: "SYP", symbol: "SYP", rate: 14000, symbolBefore: false },
+  Sudan:        { code: "SDG", symbol: "SDG", rate: 570,   symbolBefore: false },
+  Yemen:        { code: "YER", symbol: "YER", rate: 530,   symbolBefore: false },
+  // Regional tier
+  Malaysia:     { code: "MYR", symbol: "RM",  rate: 4.4,   symbolBefore: true  },
+  Indonesia:    { code: "IDR", symbol: "Rp",  rate: 16200, symbolBefore: true  },
+  Thailand:     { code: "THB", symbol: "฿",   rate: 33,    symbolBefore: true  },
+  Vietnam:      { code: "VND", symbol: "₫",   rate: 25400, symbolBefore: false },
+  Philippines:  { code: "PHP", symbol: "₱",   rate: 56,    symbolBefore: true  },
+  India:        { code: "INR", symbol: "₹",   rate: 84,    symbolBefore: true  },
+  Pakistan:     { code: "PKR", symbol: "Rs",  rate: 278,   symbolBefore: true  },
+  Brazil:       { code: "BRL", symbol: "R$",  rate: 5.7,   symbolBefore: true  },
+  Mexico:       { code: "MXN", symbol: "MX$", rate: 17.5,  symbolBefore: true  },
+  Colombia:     { code: "COP", symbol: "COP", rate: 4200,  symbolBefore: false },
+  Argentina:    { code: "ARS", symbol: "AR$", rate: 1050,  symbolBefore: true  },
+  Turkey:       { code: "TRY", symbol: "₺",   rate: 38,    symbolBefore: true  },
+  // Global tier
+  UAE:              { code: "AED", symbol: "AED", rate: 3.67,   symbolBefore: false },
+  "Saudi Arabia":   { code: "SAR", symbol: "SAR", rate: 3.75,   symbolBefore: false },
+  Qatar:            { code: "QAR", symbol: "QAR", rate: 3.64,   symbolBefore: false },
+  Bahrain:          { code: "BHD", symbol: "BHD", rate: 0.377,  symbolBefore: false },
+  Oman:             { code: "OMR", symbol: "OMR", rate: 0.385,  symbolBefore: false },
+  Kuwait:           { code: "KWD", symbol: "KWD", rate: 0.31,   symbolBefore: false },
+  "United States":  { code: "USD", symbol: "$",   rate: 1,      symbolBefore: true  },
+  "United Kingdom": { code: "GBP", symbol: "£",   rate: 0.79,   symbolBefore: true  },
+  Germany:          { code: "EUR", symbol: "€",   rate: 0.92,   symbolBefore: true  },
+  France:           { code: "EUR", symbol: "€",   rate: 0.92,   symbolBefore: true  },
+  Canada:           { code: "CAD", symbol: "CA$", rate: 1.38,   symbolBefore: true  },
+  Australia:        { code: "AUD", symbol: "A$",  rate: 1.58,   symbolBefore: true  },
+  Japan:            { code: "JPY", symbol: "¥",   rate: 148,    symbolBefore: true  },
+  "South Korea":    { code: "KRW", symbol: "₩",   rate: 1330,   symbolBefore: true  },
+  China:            { code: "CNY", symbol: "¥",   rate: 7.25,   symbolBefore: true  },
+};
+
+/** Format a USD amount as local currency for the given country. Falls back to USD. */
+export function formatLocalPrice(country: string, usdAmount: number): string {
+  const curr = countryCurrencyMap[country];
+  if (!curr) return `$${usdAmount}`;
+  const local = Math.round(usdAmount * curr.rate);
+  const formatted = local.toLocaleString("en-US");
+  return curr.symbolBefore ? `${curr.symbol}${formatted}` : `${formatted} ${curr.symbol}`;
+}

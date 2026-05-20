@@ -22,7 +22,7 @@ import { fetchPrivateAvailability } from "@/lib/privateAvailability";
 import { LEVEL_SELECT_OPTIONS, normalizeLevel, getLevelByKey } from "@/constants/levels";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { trackAndOpenWhatsApp, logLeadEvent } from "@/lib/leadTracking";
-import { type TierKey, type ClassType, type Duration, tierPrices, tierCountries, DURATION_CLASSES } from "@/lib/stripePrices";
+import { type TierKey, type ClassType, type Duration, tierPrices, tierCountries, DURATION_CLASSES, formatLocalPrice } from "@/lib/stripePrices";
 import { toast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -781,7 +781,7 @@ const EnrollNowPage = () => {
                         >
                           <p className="font-bold text-foreground">{d} {d === 1 ? t("enrollNow.month") : t("enrollNow.months")}</p>
                           <p className="text-xs text-muted-foreground">{durationClasses[d]} {t("enrollNow.classes")}</p>
-                          <p className="text-sm font-bold text-foreground mt-1">{isEgypt ? `${egpPrices[classType][d].toLocaleString()} EGP` : `$${tierPrices[tier][classType][d]}`}</p>
+                          <p className="text-sm font-bold text-foreground mt-1">{isEgypt ? `${egpPrices[classType][d].toLocaleString()} EGP` : formatLocalPrice(selectedCountry, tierPrices[tier][classType][d])}</p>
                         </button>
                       ))}
                     </div>
@@ -1033,32 +1033,32 @@ const EnrollNowPage = () => {
                       {classType === "group" ? t("enrollNow.group") : t("enrollNow.private")} · {duration} {duration === 1 ? t("enrollNow.month") : t("enrollNow.months")} ({durationClasses[duration]} {t("enrollNow.classes")})
                     </span>
                     <span className={`font-bold text-foreground ${isFirstTime && !isEgypt ? "line-through text-muted-foreground" : ""}`}>
-                      {isEgypt ? `${originalPrice.toLocaleString()} EGP` : `$${originalPrice}`}
+                      {isEgypt ? `${originalPrice.toLocaleString()} EGP` : formatLocalPrice(selectedCountry, originalPrice)}
                     </span>
                   </div>
 
                   {isFirstTime && discountAmount > 0 && (
                     <div className="flex justify-between text-sm text-primary">
                       <span>{t("enrollNow.firstTimeDiscount")}</span>
-                      <span className="font-bold">-${discountAmount.toFixed(2)}</span>
+                      <span className="font-bold">-{formatLocalPrice(selectedCountry, discountAmount)}</span>
                     </div>
                   )}
 
                   {promoApplied && promoDiscountAmount > 0 && (
                     <div className="flex justify-between text-sm text-green-600">
                       <span className="flex items-center gap-1"><Tag className="h-3.5 w-3.5" /> {promoApplied.code}</span>
-                      <span className="font-bold">-{isEgypt ? `${promoDiscountAmount.toLocaleString()} EGP` : `$${promoDiscountAmount.toFixed(2)}`}</span>
+                      <span className="font-bold">-{isEgypt ? `${promoDiscountAmount.toLocaleString()} EGP` : formatLocalPrice(selectedCountry, promoDiscountAmount)}</span>
                     </div>
                   )}
 
                   <div className="border-t border-border pt-2 flex justify-between">
                     <span className="font-semibold text-foreground">{t("enrollNow.total")}</span>
-                    <span className="font-bold text-lg text-foreground">{isEgypt ? `${finalPrice.toLocaleString()} EGP` : `$${finalPrice.toFixed(2)}`}</span>
+                    <span className="font-bold text-lg text-foreground">{isEgypt ? `${finalPrice.toLocaleString()} EGP` : formatLocalPrice(selectedCountry, finalPrice)}</span>
                   </div>
 
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>{durationClasses[duration]} {t("enrollNow.classesIncluded")}</span>
-                    <span>{isEgypt ? `${Math.round(finalPrice / durationClasses[duration]).toLocaleString()} EGP${t("enrollNow.perClass")}` : `$${(finalPrice / durationClasses[duration]).toFixed(2)}${t("enrollNow.perClass")}`}</span>
+                    <span>{isEgypt ? `${Math.round(finalPrice / durationClasses[duration]).toLocaleString()} EGP${t("enrollNow.perClass")}` : `${formatLocalPrice(selectedCountry, Math.round(finalPrice / durationClasses[duration]))}${t("enrollNow.perClass")}`}</span>
                   </div>
                 </div>
               )}
@@ -1094,7 +1094,7 @@ const EnrollNowPage = () => {
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                       <span className="text-sm font-medium text-green-700 dark:text-green-400">
                         {promoApplied.code} applied!
-                        {promoApplied.discount_pct ? ` (${promoApplied.discount_pct}% off)` : promoApplied.discount_flat ? ` (${isEgypt ? `EGP ${promoApplied.discount_flat}` : `$${promoApplied.discount_flat}`} off)` : ""}
+                        {promoApplied.discount_pct ? ` (${promoApplied.discount_pct}% off)` : promoApplied.discount_flat ? ` (${isEgypt ? `EGP ${promoApplied.discount_flat}` : formatLocalPrice(selectedCountry, promoApplied.discount_flat)} off)` : ""}
                       </span>
                     </div>
                     <button
@@ -1162,7 +1162,7 @@ const EnrollNowPage = () => {
                 ) : (
                   <>
                     <CreditCard className="mr-2 h-4 w-4" />
-                    {t("enrollNow.payNow")} ${finalPrice?.toFixed(2) ?? "—"} {t("enrollNow.now")}
+                    {t("enrollNow.payNow")} {finalPrice !== null ? formatLocalPrice(selectedCountry, finalPrice) : "—"} {t("enrollNow.now")}
                   </>
                 )}
               </Button>

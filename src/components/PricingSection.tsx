@@ -15,6 +15,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "@/hooks/use-toast";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
+import { formatLocalPrice } from "@/lib/stripePrices";
 
 type TierKey = "local" | "regional" | "global";
 
@@ -105,14 +106,14 @@ const PricingSection = () => {
     setActiveTier(match?.tier ?? null);
   };
 
-  // Anchors cost per month. Reframes "$70 for 3 months" as "$23/mo" which
+  // Anchors cost per month. Reframes "$70 for 3 months" as "~$23/mo" which
   // reads closer to a streaming sub than an upfront fee.
   const derivePerMonth = (price: { duration: string; usd?: number; egp?: number }): string => {
     const months = /^(\d+)/.exec(price.duration)?.[1];
     const n = months ? parseInt(months, 10) : 1;
     if (n <= 1) return "";
     if (price.egp) return `${Math.round(price.egp / n).toLocaleString()} EGP/mo`;
-    if (price.usd) return `$${Math.round(price.usd / n)}/mo`;
+    if (price.usd) return `${formatLocalPrice(selectedCountry, Math.round(price.usd / n))}/mo`;
     return "";
   };
 
@@ -280,16 +281,11 @@ const PricingSection = () => {
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-lg text-foreground">
-                              {price.egp ? `${price.egp.toLocaleString()} EGP` : `$${price.usd}`}
+                              {price.egp ? `${price.egp.toLocaleString()} EGP` : formatLocalPrice(selectedCountry, price.usd)}
                             </p>
                             {derivePerMonth(price) && (
                               <p className="text-[11px] text-green-600 dark:text-green-400 font-semibold">
                                 {derivePerMonth(price)}
-                              </p>
-                            )}
-                            {price.local && isActive && !price.egp && (
-                              <p className="text-xs text-muted-foreground">
-                                {price.local}
                               </p>
                             )}
                           </div>
@@ -323,7 +319,7 @@ const PricingSection = () => {
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-lg text-foreground">
-                              {price.egp ? `${price.egp.toLocaleString()} EGP` : `$${price.usd}`}
+                              {price.egp ? `${price.egp.toLocaleString()} EGP` : formatLocalPrice(selectedCountry, price.usd)}
                             </p>
                             {derivePerMonth(price) && (
                               <p className="text-[11px] text-green-600 dark:text-green-400 font-semibold">
