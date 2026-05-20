@@ -24,11 +24,11 @@ const tierIcons: Record<TierKey, React.ReactNode> = {
   global: <Crown className="h-6 w-6" />,
 };
 
-const tierPrices: Record<TierKey, { duration: string; classes: string; usd: number; local?: string }[]> = {
+const tierPrices: Record<TierKey, { duration: string; classes: string; usd: number }[]> = {
   local: [
-    { duration: "1 Month", classes: "4 classes", usd: 25, local: "~1,170 EGP" },
-    { duration: "3 Months", classes: "12 classes", usd: 70, local: "~3,276 EGP" },
-    { duration: "6 Months", classes: "24 classes", usd: 130, local: "~6,110 EGP" },
+    { duration: "1 Month", classes: "4 classes", usd: 25 },
+    { duration: "3 Months", classes: "12 classes", usd: 70 },
+    { duration: "6 Months", classes: "24 classes", usd: 130 },
   ],
   regional: [
     { duration: "1 Month", classes: "4 classes", usd: 40 },
@@ -52,6 +52,18 @@ const egpPrivatePrices = [
   { duration: "1 Month", classes: "4 classes", egp: 2350 },
   { duration: "3 Months", classes: "12 classes", egp: 6600 },
   { duration: "6 Months", classes: "24 classes", egp: 11750 },
+];
+
+const madGroupPrices = [
+  { duration: "1 Month", classes: "4 classes", mad: 250 },
+  { duration: "3 Months", classes: "12 classes", mad: 700 },
+  { duration: "6 Months", classes: "24 classes", mad: 1300 },
+];
+
+const madPrivatePrices = [
+  { duration: "1 Month", classes: "4 classes", mad: 500 },
+  { duration: "3 Months", classes: "12 classes", mad: 1400 },
+  { duration: "6 Months", classes: "24 classes", mad: 2500 },
 ];
 
 const privatePrices: Record<TierKey, { duration: string; classes: string; usd: number }[]> = {
@@ -112,6 +124,7 @@ const PricingSection = () => {
     const n = months ? parseInt(months, 10) : 1;
     if (n <= 1) return "";
     if (price.egp) return `${Math.round(price.egp / n).toLocaleString()} EGP/mo`;
+    if (price.mad) return `${Math.round(price.mad / n).toLocaleString()} MAD/mo`;
     if (price.usd) return `$${Math.round(price.usd / n)}/mo`;
     return "";
   };
@@ -244,7 +257,7 @@ const PricingSection = () => {
                 </CardHeader>
 
                 <CardContent className="pt-4">
-                  {tierT("discountLabel") && (
+                  {tierT("discountLabel") && isDiscountedCountry && (
                     <div className="text-center mb-4">
                       <Badge variant="outline" className="text-xs">
                         {tierT("discountLabel")}
@@ -254,7 +267,7 @@ const PricingSection = () => {
 
                   <div className="space-y-3 mb-6">
                     {classType === "group" ? (
-                      (selectedCountry === "Egypt" && tierKey === "local" ? egpGroupPrices : tierPrices[tierKey]).map((price: any) => {
+                      (selectedCountry === "Egypt" && tierKey === "local" ? egpGroupPrices : selectedCountry === "Morocco" && tierKey === "local" ? madGroupPrices : tierPrices[tierKey]).map((price: any) => {
                         const isBestValue = price.duration === "3 Months";
                         return (
                         <div
@@ -280,16 +293,11 @@ const PricingSection = () => {
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-lg text-foreground">
-                              {price.egp ? `${price.egp.toLocaleString()} EGP` : `$${price.usd}`}
+                              {price.egp ? `${price.egp.toLocaleString()} EGP` : price.mad ? `${price.mad.toLocaleString()} MAD` : `$${price.usd}`}
                             </p>
                             {derivePerMonth(price) && (
                               <p className="text-[11px] text-green-600 dark:text-green-400 font-semibold">
                                 {derivePerMonth(price)}
-                              </p>
-                            )}
-                            {price.local && isActive && !price.egp && (
-                              <p className="text-xs text-muted-foreground">
-                                {price.local}
                               </p>
                             )}
                           </div>
@@ -297,7 +305,7 @@ const PricingSection = () => {
                         );
                       })
                     ) : (
-                      (selectedCountry === "Egypt" && tierKey === "local" ? egpPrivatePrices : privatePrices[tierKey]).map((price: any) => {
+                      (selectedCountry === "Egypt" && tierKey === "local" ? egpPrivatePrices : selectedCountry === "Morocco" && tierKey === "local" ? madPrivatePrices : privatePrices[tierKey]).map((price: any) => {
                         const isBestValue = price.duration === "3 Months";
                         return (
                         <div
@@ -323,7 +331,7 @@ const PricingSection = () => {
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-lg text-foreground">
-                              {price.egp ? `${price.egp.toLocaleString()} EGP` : `$${price.usd}`}
+                              {price.egp ? `${price.egp.toLocaleString()} EGP` : price.mad ? `${price.mad.toLocaleString()} MAD` : `$${price.usd}`}
                             </p>
                             {derivePerMonth(price) && (
                               <p className="text-[11px] text-green-600 dark:text-green-400 font-semibold">
