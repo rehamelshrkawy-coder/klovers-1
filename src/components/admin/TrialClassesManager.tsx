@@ -81,6 +81,7 @@ interface TrialSlot {
   is_active: boolean;
   trial_date?: string | null;
   meeting_url?: string | null;
+  class_language?: string | null;
 }
 
 type TimeFilter = "all" | "upcoming" | "past";
@@ -149,7 +150,7 @@ const TrialClassesManager = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("trial_slots")
-        .select("day_of_week, start_time, is_active, trial_date, meeting_url")
+        .select("day_of_week, start_time, is_active, trial_date, meeting_url, class_language")
         .eq("is_active", true);
       if (error) throw error;
       return (data as TrialSlot[] | null) ?? [];
@@ -584,6 +585,11 @@ const TrialClassesManager = () => {
           const confirmed = session.items.filter((i) => i.status === "confirmed").length;
           const past = isPastSession(session.date);
           const isTbaSession = session.isTba;
+          const slotMatch = !session.isTba && session.date && session.time
+            ? activeSlots.find((s) => s.trial_date === session.date && s.start_time === session.time)
+              ?? activeSlots.find((s) => s.start_time === session.time)
+            : null;
+          const sessionLanguage = slotMatch?.class_language ?? session.items[0]?.language ?? null;
           const tbaUnsentCount = isTbaSession ? session.items.length : 0;
           return (
             <Card key={session.key}>
@@ -596,6 +602,12 @@ const TrialClassesManager = () => {
                     {past && <Badge variant="outline" className="text-[10px]">past</Badge>}
                     {!isTbaSession && isLegacySlot(session.time) && (
                       <Badge variant="outline" className="text-[10px]">legacy slot</Badge>
+                    )}
+                    {sessionLanguage === "arabic" && (
+                      <Badge className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-100">Arabic</Badge>
+                    )}
+                    {sessionLanguage === "english" && (
+                      <Badge className="text-[10px] bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-100">English</Badge>
                     )}
                   </div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
