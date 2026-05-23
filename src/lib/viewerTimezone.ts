@@ -1,14 +1,12 @@
 /**
  * Viewer-timezone helpers.
  *
- * All time data in this app is stored in `Africa/Cairo` (the source of truth).
- * When rendering a time, we localize it to the viewer's timezone:
+ * All trial-class times are anchored to `Asia/Kuala_Lumpur` (MYT, UTC+8),
+ * the teacher's local timezone. When rendering, we localize to the visitor's
+ * timezone detected from the browser — no country label is ever shown publicly.
  *
- *   - Students: their own timezone (profile → localStorage → browser → Cairo fallback)
+ *   - Students: their own timezone (profile → localStorage → browser → MYT fallback)
  *   - Admin/teacher: Asia/Kuala_Lumpur by default, overridable via profile or browser
- *
- * Keeping this behind a single helper means we can swap the detection strategy
- * (e.g. move to a settings table) without touching every render site.
  */
 
 import { ADMIN_TIMEZONE as ADMIN_TZ_FALLBACK } from "@/constants/scheduling";
@@ -28,7 +26,7 @@ export function getUserTimezone(): string {
     const fromLs = typeof window !== "undefined" ? window.localStorage.getItem(USER_TZ_LS_KEY) : null;
     if (fromLs) return fromLs;
   } catch { /* ignore */ }
-  return browserTimezone() || "Africa/Cairo";
+  return browserTimezone() || "Asia/Kuala_Lumpur";
 }
 
 /** Persist the user's chosen timezone so later renders pick it up without a DB round-trip. */

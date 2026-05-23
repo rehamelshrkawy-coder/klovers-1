@@ -27,6 +27,7 @@ type Form = {
   durationMin: number;
   capacity: number;
   timezone: string;
+  meetingUrl: string;
 };
 
 const defaultForm = (): Form => ({
@@ -35,6 +36,7 @@ const defaultForm = (): Form => ({
   durationMin: 30,
   capacity: 15,
   timezone: 'Africa/Cairo',
+  meetingUrl: '',
 });
 
 /**
@@ -74,6 +76,7 @@ export default function AddTrialClassDialog() {
           is_active: true,
           lifecycle: 'active',
           trial_date: f.trialDate,
+          meeting_url: f.meetingUrl.trim() || null,
         })
         .select('id, trial_date, start_time, day_of_week')
         .single();
@@ -194,6 +197,20 @@ export default function AddTrialClassDialog() {
                 placeholder="Africa/Cairo"
               />
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="trial-meeting-url">Meet / Zoom Link (optional)</Label>
+            <Input
+              id="trial-meeting-url"
+              type="url"
+              value={form.meetingUrl}
+              onChange={(e) => setForm({ ...form, meetingUrl: e.target.value })}
+              placeholder="https://meet.google.com/xxx-xxxx-xxx"
+            />
+            <p className="text-xs text-muted-foreground">
+              Shown as a "Join the Class" button in the booking confirmation email.
+            </p>
           </div>
         </div>
 

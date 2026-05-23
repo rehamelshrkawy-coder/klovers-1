@@ -25,10 +25,24 @@ const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frid
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
+  date_selected: "bg-blue-100 text-blue-700",
+  awaiting_attendance: "bg-purple-100 text-purple-800",
+  confirmed_attendance: "bg-green-100 text-green-700",
   confirmed: "bg-blue-100 text-blue-800",
   completed: "bg-green-100 text-green-800",
   no_show: "bg-red-100 text-red-800",
   cancelled: "bg-gray-100 text-gray-500",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  date_selected: "Date Selected",
+  awaiting_attendance: "Awaiting Confirmation",
+  confirmed_attendance: "Attendance Confirmed",
+  confirmed: "Confirmed",
+  completed: "Completed",
+  no_show: "No Show",
+  cancelled: "Cancelled",
 };
 
 interface TrialBooking {
@@ -42,6 +56,7 @@ interface TrialBooking {
   start_time: string | null;
   trial_date: string | null;
   timezone: string;
+  language?: string | null;
   status: string;
   confirmed_at: string | null;
   created_at: string;
@@ -51,6 +66,8 @@ interface TrialBooking {
   user_id?: string | null;
   rebook_email_sent_at?: string | null;
   is_tba?: boolean;
+  attendance_confirmed_at?: string | null;
+  confirmation_token?: string | null;
 }
 
 // Source of truth for unscheduled placeholders. Post-migration, TBA rows
@@ -68,6 +85,9 @@ interface TrialSlot {
   day_of_week: number;
   start_time: string;
   is_active: boolean;
+  trial_date?: string | null;
+  meeting_url?: string | null;
+  class_language?: string | null;
 }
 
 type TimeFilter = "all" | "upcoming" | "past";
@@ -79,6 +99,7 @@ interface UpcomingSlot {
   date: string;
   day_of_week: number;
   start_time: string;
+  meeting_url?: string | null;
 }
 
 function getActualUpcomingGroups(bookings: TrialBooking[]): UpcomingSlot[] {
@@ -135,7 +156,7 @@ const TrialClassesManager = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("trial_slots")
-        .select("day_of_week, start_time, is_active")
+        .select("day_of_week, start_time, is_active, trial_date, meeting_url, class_language")
         .eq("is_active", true);
       if (error) throw error;
       return (data as TrialSlot[] | null) ?? [];
@@ -144,7 +165,16 @@ const TrialClassesManager = () => {
   });
 
   const loading = loadingBookings || loadingSlots;
-  const upcomingSlots = useMemo(() => getActualUpcomingGroups(bookings), [bookings]);
+  const upcomingSlots = useMemo(() => {
+    const slots = getActualUpcomingGroups(bookings);
+    // Enrich each slot with meeting_url from the matching activeSlots row
+    return slots.map((s) => {
+      const match = activeSlots.find(
+        (a) => a.trial_date === s.date && a.start_time === s.start_time
+      ) ?? activeSlots.find((a) => a.start_time === s.start_time);
+      return { ...s, meeting_url: match?.meeting_url ?? null };
+    });
+  }, [bookings, activeSlots]);
 
   const formatDateTime = (value?: string | null) =>
     value ? new Date(value).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" }) : "—";
@@ -175,7 +205,31 @@ const TrialClassesManager = () => {
         } as any)
         .eq("id", booking.id);
       if (error) throw error;
-      toast({ title: "Confirmed", description: `${booking.name || booking.email} → ${date} at ${time}` });
+
+      // Fetch meeting URL for this specific session date
+      const { data: slotRow } = await supabase
+        .from("trial_slots")
+        .select("meeting_url")
+        .eq("trial_date", date)
+        .eq("start_time", time)
+        .maybeSingle();
+      const meetingUrl = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
+
+      // Send confirmation email with join link to the student
+      const emailBody: Record<string, unknown> = {
+        template: "trial_confirmed",
+        email: booking.email,
+        name: booking.name || booking.email,
+        language: booking.language || "en",
+        trial_date: date,
+        trial_time: time,
+        trial_timezone: "Africa/Cairo",
+        level: booking.level?.trim() || "",
+      };
+      if (meetingUrl) emailBody.class_link_url = meetingUrl;
+      await supabase.functions.invoke("send-confirmation-email", { body: emailBody });
+
+      toast({ title: "Confirmed & email sent", description: `${booking.name || booking.email} → ${date} at ${time}` });
       fetchData();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -256,6 +310,15 @@ const TrialClassesManager = () => {
   const sendRebookEmail = async (booking: TrialBooking) => {
     setActioningId(booking.id);
     try {
+      // Use active trial slots as the canonical slot list (not derived from bookings).
+      const meetingUrl = activeSlots.find((s) => s.meeting_url)?.meeting_url ?? null;
+      if (!meetingUrl) {
+        toast({
+          title: "No Google Meet link found for this class.",
+          description: "Add it in the trial slot settings before sending.",
+          variant: "destructive",
+        });
+      }
       const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
           template: "trial_rebook_request",
@@ -263,12 +326,15 @@ const TrialClassesManager = () => {
           name: booking.name || booking.email,
           language: "ar",
           rebook_url: `${window.location.origin}/trial-booking`,
-          available_slots: upcomingSlots.map((s) => ({
-            day_of_week: s.day_of_week,
-            start_time: s.start_time,
-            timezone: "Africa/Cairo",
-            date: s.date,
-          })),
+          class_link_url: meetingUrl,
+          available_slots: activeSlots
+            .filter((s) => s.trial_date)
+            .map((s) => ({
+              day_of_week: s.day_of_week,
+              start_time: s.start_time,
+              timezone: "Africa/Cairo",
+              date: s.trial_date,
+            })),
         },
       });
       if (emailErr) throw emailErr;
@@ -296,7 +362,24 @@ const TrialClassesManager = () => {
       toast({ title: "Nothing to send", description: "No unscheduled (TBA) bookings right now." });
       return;
     }
+    // Use active trial slots as the canonical slot list (not derived from bookings).
+    const bulkMeetingUrl = activeSlots.find((s) => s.meeting_url)?.meeting_url ?? null;
+    if (!bulkMeetingUrl) {
+      toast({
+        title: "No Google Meet link found for this class.",
+        description: "Add it in the trial slot settings before sending.",
+        variant: "destructive",
+      });
+    }
     setBulkBusy(true);
+    const rebookSlots = activeSlots
+      .filter((s) => s.trial_date)
+      .map((s) => ({
+        day_of_week: s.day_of_week,
+        start_time: s.start_time,
+        timezone: "Africa/Cairo",
+        date: s.trial_date,
+      }));
     let ok = 0, fail = 0;
     for (const b of tba) {
       try {
@@ -307,12 +390,8 @@ const TrialClassesManager = () => {
             name: b.name || b.email,
             language: "ar",
             rebook_url: `${window.location.origin}/trial-booking`,
-            available_slots: upcomingSlots.map((s) => ({
-              day_of_week: s.day_of_week,
-              start_time: s.start_time,
-              timezone: "Africa/Cairo",
-              date: s.date,
-            })),
+            class_link_url: bulkMeetingUrl,
+            available_slots: rebookSlots,
           },
         });
         if (emailErr) throw emailErr;
@@ -390,7 +469,8 @@ const TrialClassesManager = () => {
   const sessions = useMemo(() => {
     const groups: Record<string, TrialBooking[]> = {};
     filtered.forEach((b) => {
-      const key = isTbaBooking(b) ? TBA_KEY : `${b.trial_date}__${b.start_time}`;
+      // Cancelled bookings move to Unscheduled so admin can reschedule them.
+      const key = (isTbaBooking(b) || b.status === "cancelled") ? TBA_KEY : `${b.trial_date}__${b.start_time}`;
       (groups[key] ||= []).push(b);
     });
     return Object.entries(groups)
@@ -409,19 +489,64 @@ const TrialClassesManager = () => {
       });
   }, [filtered]);
 
+  const sendResendConfirmation = async (booking: TrialBooking) => {
+    setActioningId(booking.id);
+    try {
+      const { data: slotRow } = await supabase
+        .from("trial_slots")
+        .select("meeting_url")
+        .eq("trial_date", booking.trial_date ?? "")
+        .eq("start_time", booking.start_time ?? "")
+        .maybeSingle();
+      const meetingUrl = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
+      const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
+        body: {
+          template: "trial_attendance_confirmation",
+          email: booking.email,
+          name: booking.name || booking.email,
+          language: booking.language || "en",
+          trial_date: booking.trial_date,
+          trial_time: booking.start_time,
+          class_link_url: meetingUrl,
+          booking_id: booking.id,
+          confirmation_token: booking.confirmation_token,
+        },
+      });
+      if (emailErr) throw emailErr;
+      toast({ title: "Confirmation resent", description: booking.email });
+    } catch (err: any) {
+      toast({ title: "Email failed", description: err.message, variant: "destructive" });
+    } finally {
+      setActioningId(null);
+    }
+  };
+
   const pendingCount = bookings.filter((b) => b.status === "pending").length;
 
   if (loading) return <p className="text-muted-foreground text-center py-8">Loading trial bookings...</p>;
 
-  const formatSessionLabel = (date: string | null, time: string | null, dow: number) => {
-    // NULL (or legacy sentinel) → unscheduled placeholder.
+  const formatSessionLabel = (date: string | null, time: string | null, dow: number, slotTz?: string | null) => {
     if (!date || !time || time === "TBA" || date === "2099-12-31") return "TBA — Unscheduled";
     const adminTz = getAdminTimezone();
-    const lcl = convertDateTimeToTimezone(date, time, "Africa/Cairo", adminTz);
+    const srcTz = slotTz || "Asia/Kuala_Lumpur";
+    const lcl = convertDateTimeToTimezone(date, time, srcTz, adminTz);
     const d = new Date(`${lcl.dateStr}T00:00:00`);
     const weekday = lcl.weekday || DAY_NAMES[dow] || d.toLocaleDateString("en-US", { weekday: "long" });
     const dateLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    return `${weekday}, ${dateLabel} — ${lcl.timeFormatted} (${adminTz})`;
+
+    // Also show the time in the browser's local timezone if it differs from adminTz
+    const browserTz = typeof window !== "undefined"
+      ? (Intl.DateTimeFormat().resolvedOptions().timeZone || "")
+      : "";
+    const showBrowser = browserTz && browserTz !== adminTz && browserTz !== srcTz;
+    let browserSuffix = "";
+    if (showBrowser) {
+      const br = convertDateTimeToTimezone(date, time, srcTz, browserTz);
+      const tzCity = browserTz.includes("/") ? browserTz.split("/").pop()!.replace(/_/g, " ") : browserTz;
+      browserSuffix = ` · ${br.timeFormatted} (${tzCity})`;
+    }
+
+    return `${weekday}, ${dateLabel} — ${lcl.timeFormatted} (${adminTz})${browserSuffix}`;
   };
 
   const isLegacySlot = (time: string | null) => !!time && !activeSlots.some((s) => s.start_time === time);
@@ -496,6 +621,11 @@ const TrialClassesManager = () => {
           const confirmed = session.items.filter((i) => i.status === "confirmed").length;
           const past = isPastSession(session.date);
           const isTbaSession = session.isTba;
+          const slotMatch = !session.isTba && session.date && session.time
+            ? activeSlots.find((s) => s.trial_date === session.date && s.start_time === session.time)
+              ?? activeSlots.find((s) => s.start_time === session.time)
+            : null;
+          const sessionLanguage = slotMatch?.class_language ?? session.items[0]?.language ?? null;
           const tbaUnsentCount = isTbaSession ? session.items.length : 0;
           return (
             <Card key={session.key}>
@@ -503,11 +633,17 @@ const TrialClassesManager = () => {
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <CardTitle className="text-sm">
-                      {formatSessionLabel(session.date, session.time, session.dow)}
+                      {formatSessionLabel(session.date, session.time, session.dow, session.items[0]?.timezone)}
                     </CardTitle>
                     {past && <Badge variant="outline" className="text-[10px]">past</Badge>}
                     {!isTbaSession && isLegacySlot(session.time) && (
                       <Badge variant="outline" className="text-[10px]">legacy slot</Badge>
+                    )}
+                    {sessionLanguage === "arabic" && (
+                      <Badge className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-100">Arabic</Badge>
+                    )}
+                    {sessionLanguage === "english" && (
+                      <Badge className="text-[10px] bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-100">English</Badge>
                     )}
                   </div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -527,7 +663,7 @@ const TrialClassesManager = () => {
                             title={tbaUnsentCount === 0 ? "No unscheduled students" : `Email ${tbaUnsentCount} unscheduled student${tbaUnsentCount === 1 ? "" : "s"}`}
                           >
                             <Mail className="h-3.5 w-3.5 mr-1" />
-                            Send rebook email ({tbaUnsentCount})
+                            Resend with new dates ({tbaUnsentCount})
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -581,9 +717,16 @@ const TrialClassesManager = () => {
                             {b.level ? (getLevelShortLabel(b.level) || b.level) : "—"}
                           </TableCell>
                           <TableCell>
-                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[b.status] || "bg-gray-100 text-gray-600"}`}>
-                              {(b.status || "unknown").replace("_", " ")}
-                            </span>
+                            <div className="flex flex-col gap-0.5">
+                              <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[b.status] || "bg-gray-100 text-gray-600"}`}>
+                                {STATUS_LABELS[b.status] || (b.status || "unknown")}
+                              </span>
+                              {b.status === "confirmed_attendance" && b.attendance_confirmed_at && (
+                                <span className="text-[10px] text-muted-foreground">
+                                  Confirmed {new Date(b.attendance_confirmed_at).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                             {new Date(b.created_at).toLocaleDateString()}
@@ -609,18 +752,34 @@ const TrialClassesManager = () => {
                                       email sent {Math.max(0, Math.floor((Date.now() - new Date(b.rebook_email_sent_at).getTime()) / 86400000))}d ago
                                     </Badge>
                                   )}
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-7"
-                                    disabled={actioningId === b.id}
-                                    onClick={() => sendRebookEmail(b)}
-                                    title={b.rebook_email_sent_at ? "Resend rebook email" : "Email student to pick a slot"}
-                                  >
-                                    <Mail className="h-3.5 w-3.5 mr-1" />
-                                    {b.rebook_email_sent_at ? "Resend" : "Email"}
-                                  </Button>
+                                  <div className="flex flex-col items-end gap-0.5">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7"
+                                      disabled={actioningId === b.id}
+                                      onClick={() => sendRebookEmail(b)}
+                                      title={b.rebook_email_sent_at ? "Resend with new dates" : "Invite student to choose a new trial date"}
+                                    >
+                                      <Mail className="h-3.5 w-3.5 mr-1" />
+                                      Resend with new dates
+                                    </Button>
+                                    <span className="text-[10px] text-muted-foreground">Invite students to choose a new trial date</span>
+                                  </div>
                                 </>
+                              )}
+                              {b.status === "awaiting_attendance" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7"
+                                  disabled={actioningId === b.id}
+                                  onClick={() => sendResendConfirmation(b)}
+                                  title="Resend attendance confirmation email"
+                                >
+                                  <Mail className="h-3.5 w-3.5 mr-1" />
+                                  Resend confirmation
+                                </Button>
                               )}
                               {b.status === "pending" && (
                                 <>

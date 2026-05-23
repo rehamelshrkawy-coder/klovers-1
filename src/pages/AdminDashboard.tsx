@@ -72,6 +72,147 @@ const TabLoader = () => (
 
 const STATUS_OPTIONS = ["new", "trial_booked", "contacted", "enrolled", "rejected", "lost"];
 
+// ── Trial Interest Confirmation Campaign Card ─────────────────────────────────
+function TrialInterestConfirmationCard() {
+  const [testEmail, setTestEmail] = useState("reham.elshrkawy@gmail.com");
+  const [testName, setTestName] = useState("Reham");
+  const [testSending, setTestSending] = useState(false);
+  const [testSent, setTestSent] = useState(false);
+  const [bulkSending, setBulkSending] = useState(false);
+  const [confirmBulk, setConfirmBulk] = useState(false);
+
+  const sendTest = async () => {
+    setTestSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "send-trial-interest-confirmation",
+        { body: { test_email: testEmail, test_name: testName } },
+      );
+      if (error) throw error;
+      setTestSent(true);
+      toast({
+        title: "Test email sent! ✅",
+        description: `Sent to ${testEmail}. Check inbox before sending to all users.`,
+      });
+      console.log("[trial-interest-confirmation] test result:", data);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setTestSending(false);
+    }
+  };
+
+  const sendAll = async () => {
+    setBulkSending(true);
+    setConfirmBulk(false);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "send-trial-interest-confirmation",
+        { body: { send_all: true } },
+      );
+      if (error) throw error;
+      toast({
+        title: "Campaign sent! 🎉",
+        description: `Sent: ${data?.sent ?? 0} / ${data?.total ?? 0} students.`,
+      });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setBulkSending(false);
+    }
+  };
+
+  return (
+    <Card className="rounded-2xl border-2 border-yellow-300">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          🇰🇷 Trial Interest Confirmation Email
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Bilingual (Arabic/English) email for students who registered interest but haven't
+          attended a trial class yet. Confirms interest, shares trial dates (Thu 4 Jun / Fri 5 Jun / Sun 7 Jun 2026),
+          and drives bookings.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-5">
+
+        {/* Schedule summary */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm space-y-1">
+          <p className="font-semibold text-yellow-900">Trial Schedule included in email:</p>
+          <p className="text-yellow-800">📅 Thursday 4 June 2026 — 7:00 PM Egypt</p>
+          <p className="text-yellow-800">📅 Friday 5 June 2026 — 7:00 PM Egypt</p>
+          <p className="text-yellow-800">📅 Sunday 7 June 2026 — 6:00 PM Egypt</p>
+          <p className="text-xs text-yellow-700 mt-1">
+            Join link is read from <strong>Admin → Settings → Zoom/Meet URL</strong>.
+            Add your Google Meet link there before sending to all users.
+          </p>
+        </div>
+
+        {/* Test section */}
+        <div className="space-y-3">
+          <p className="text-sm font-medium">Step 1 — Send test email first</p>
+          <div className="flex gap-2 flex-wrap">
+            <Input
+              value={testEmail}
+              onChange={(e) => setTestEmail(e.target.value)}
+              placeholder="test@email.com"
+              className="max-w-xs"
+            />
+            <Input
+              value={testName}
+              onChange={(e) => setTestName(e.target.value)}
+              placeholder="Name"
+              className="max-w-[140px]"
+            />
+          </div>
+          <Button onClick={sendTest} disabled={testSending || !testEmail} variant="outline">
+            <Mail className="h-4 w-4 mr-2" />
+            {testSending ? "Sending…" : testSent ? "✅ Test Sent — Send Again" : "Send Test Email"}
+          </Button>
+        </div>
+
+        <hr className="border-dashed" />
+
+        {/* Bulk section */}
+        <div className="space-y-3">
+          <p className="text-sm font-medium">
+            Step 2 — Send to all users{" "}
+            <span className="text-muted-foreground font-normal">(only after test is confirmed)</span>
+          </p>
+          {!confirmBulk ? (
+            <Button
+              onClick={() => setConfirmBulk(true)}
+              disabled={bulkSending || !testSent}
+              variant={testSent ? "default" : "outline"}
+            >
+              <Mail className="h-4 w-4 mr-2" />
+              {bulkSending ? "Sending to all…" : "Send to All Users"}
+            </Button>
+          ) : (
+            <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-800 flex-1">
+                ⚠️ This will email <strong>all subscribed users</strong>. Are you sure?
+              </p>
+              <Button size="sm" onClick={sendAll} disabled={bulkSending} className="bg-red-600 hover:bg-red-700 text-white">
+                {bulkSending ? "Sending…" : "Yes, Send to All"}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setConfirmBulk(false)}>
+                Cancel
+              </Button>
+            </div>
+          )}
+          {!testSent && (
+            <p className="text-xs text-muted-foreground">
+              Send and verify the test email first to unlock bulk send.
+            </p>
+          )}
+        </div>
+
+      </CardContent>
+    </Card>
+  );
+}
+
 // Error boundary for lazy-loaded tab components
 class TabErrorBoundary extends Component<
   { name: string; children: ReactNode },
@@ -226,7 +367,12 @@ const AdminDashboard = () => {
   const adminTab = searchParams.get("tab") ?? "students";
   const setAdminTab = useCallback((tab: string) => {
     setSearchParams({ tab }, { replace: true });
-  }, [setSearchParams]);
+    // Immediately re-fetch trial stats when navigating to trials tab
+    // so the badge reflects the live DB count without waiting for staleTime.
+    if (tab === "trials") {
+      queryClient.invalidateQueries({ queryKey: ["admin", "trial-stats"] });
+    }
+  }, [setSearchParams, queryClient]);
   const [editingUnitPrice, setEditingUnitPrice] = useState<Record<string, string>>({});
   const [sendingReminder, setSendingReminder] = useState<Set<string>>(new Set());
   const [rejectTarget, setRejectTarget] = useState<Enrollment | null>(null);
@@ -1105,46 +1251,27 @@ const AdminDashboard = () => {
           )}
 
           {/* Unified "Action needed" bar — stacks quick-actions into one row */}
-          {(actionableEnrollments > 0 || trialStats.pending > 0) && (
+          {actionableEnrollments > 0 && (
             <div role="status" aria-label="Action items requiring attention" className="rounded-xl border border-amber-400/60 bg-gradient-to-r from-amber-50 to-amber-100/30 dark:from-amber-950/25 dark:to-amber-900/10 overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-2 border-b border-amber-400/30">
                 <Bell className="h-4 w-4 text-amber-600 animate-pulse" />
                 <span className="text-xs font-semibold text-amber-800 dark:text-amber-300 uppercase tracking-wide">
-                  Action needed ({(actionableEnrollments > 0 ? 1 : 0) + (trialStats.pending > 0 ? 1 : 0)})
+                  Action needed (1)
                 </span>
               </div>
               <div className="divide-y divide-amber-400/20">
-                {actionableEnrollments > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => { setAdminTab("enrollments"); setTabGroup("ops"); }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-start hover:bg-amber-100/60 dark:hover:bg-amber-900/20 transition-colors"
-                  >
-                    <FileCheck className="h-4 w-4 text-amber-600 shrink-0" />
-                    <div className="flex-1 min-w-0 text-sm">
-                      <span className="font-semibold text-amber-900 dark:text-amber-200">{actionableEnrollments}</span>
-                      <span className="text-amber-800 dark:text-amber-300"> enrollment{actionableEnrollments > 1 ? "s" : ""} pending review or payment</span>
-                    </div>
-                    <span className="text-xs font-medium text-amber-700 dark:text-amber-400 shrink-0">Review →</span>
-                  </button>
-                )}
-                {trialStats.pending > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => { setAdminTab("trials"); setTabGroup("ops"); }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-start hover:bg-amber-100/60 dark:hover:bg-amber-900/20 transition-colors"
-                  >
-                    <Users className="h-4 w-4 text-amber-600 shrink-0" />
-                    <div className="flex-1 min-w-0 text-sm">
-                      <span className="font-semibold text-amber-900 dark:text-amber-200">{trialStats.pending}</span>
-                      <span className="text-amber-800 dark:text-amber-300"> trial booking{trialStats.pending > 1 ? "s" : ""} awaiting confirmation</span>
-                      {trialStats.thisWeek > 0 && (
-                        <span className="text-xs text-amber-700/80 dark:text-amber-400/80 ml-2">· {trialStats.thisWeek} this week</span>
-                      )}
-                    </div>
-                    <span className="text-xs font-medium text-amber-700 dark:text-amber-400 shrink-0">Confirm →</span>
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => { setAdminTab("enrollments"); setTabGroup("ops"); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-start hover:bg-amber-100/60 dark:hover:bg-amber-900/20 transition-colors"
+                >
+                  <FileCheck className="h-4 w-4 text-amber-600 shrink-0" />
+                  <div className="flex-1 min-w-0 text-sm">
+                    <span className="font-semibold text-amber-900 dark:text-amber-200">{actionableEnrollments}</span>
+                    <span className="text-amber-800 dark:text-amber-300"> enrollment{actionableEnrollments > 1 ? "s" : ""} pending review or payment</span>
+                  </div>
+                  <span className="text-xs font-medium text-amber-700 dark:text-amber-400 shrink-0">Review →</span>
+                </button>
               </div>
             </div>
           )}
@@ -1159,7 +1286,7 @@ const AdminDashboard = () => {
                   const GroupIcon = g.icon;
                   const isActive = tabGroup === g.id;
                   const hasAlert =
-                    (g.id === "ops" && (actionableEnrollments > 0 || trialStats.pending > 0)) ||
+                    (g.id === "ops" && actionableEnrollments > 0) ||
                     (g.id === "learn" && pendingAttendance > 0);
                   return (
                     <Tooltip key={g.id}>
@@ -1240,15 +1367,6 @@ const AdminDashboard = () => {
                 {inActiveGroup("trials") && (
                   <TabsTrigger value="trials" className={TAB_CLS}>
                     <Users className="h-3.5 w-3.5" /> Trial Classes
-                    {trialStats.pending > 0 && (
-                      <span className="relative inline-flex">
-                        <Badge variant="destructive" className="h-4 min-w-4 px-1 text-[9px] rounded-full">{trialStats.pending}</Badge>
-                        <span className="absolute inset-0 rounded-full bg-destructive/60 animate-ping" />
-                      </span>
-                    )}
-                    {trialStats.pending === 0 && trialStats.upcoming > 0 && (
-                      <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[9px] rounded-full">{trialStats.upcoming}</Badge>
-                    )}
                   </TabsTrigger>
                 )}
                 {inActiveGroup("lead-funnel") && (
@@ -1581,6 +1699,9 @@ const AdminDashboard = () => {
                     </Button>
                   </CardContent>
                 </Card>
+
+                {/* Trial Interest Confirmation Campaign */}
+                <TrialInterestConfirmationCard />
               </div>
             </TabsContent>
 

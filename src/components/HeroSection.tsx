@@ -2,7 +2,7 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Gift, Users, Star, Globe, MessageCircle, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
-import heroPoster from "@/assets/hero-korean.jpg";
+const heroPoster = "/hero-korean.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
@@ -30,23 +30,42 @@ const useCountUp = (target: number, duration = 1800) => {
   return { count, ref };
 };
 
-const nextClassDay = () => {
-  const days = [0, 3, 6]; // Sun, Wed, Sat
-  const today = new Date().getDay();
-  const names = ["Sunday", "Wednesday", "Saturday"];
-  const namesAr = ["الأحد", "الأربعاء", "السبت"];
-  for (let i = 1; i <= 7; i++) {
-    const d = (today + i) % 7;
-    const idx = days.indexOf(d);
-    if (idx !== -1) return { en: names[idx], ar: namesAr[idx] };
-  }
-  return { en: "Monday", ar: "الاثنين" };
+/** 4 official trial class timestamps stored as MYT (UTC+8) ISO instants. */
+const TRIAL_INSTANTS_MYT = [
+  "2026-05-29T01:00:00+08:00",
+  "2026-05-30T23:00:00+08:00",
+  "2026-06-02T23:00:00+08:00",
+  "2026-06-07T09:00:00+08:00",
+];
+
+/** Returns the label for the next upcoming trial class in the visitor's timezone. */
+const nextClassLabel = () => {
+  const now = Date.now();
+  const upcoming = TRIAL_INSTANTS_MYT
+    .map((iso) => new Date(iso))
+    .filter((d) => d.getTime() > now);
+  if (upcoming.length === 0) return { en: "soon", ar: "قريباً" };
+  const next = upcoming[0];
+  const userTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return "Asia/Kuala_Lumpur"; } })();
+  const en = next.toLocaleDateString("en-US", { weekday: "long", timeZone: userTz });
+  const ar = next.toLocaleDateString("ar-EG", { weekday: "long", timeZone: userTz });
+  return { en, ar };
 };
+
+/** Formats a trial instant for display in the visitor's local timezone. */
+function formatTrialPill(iso: string, lang: "en" | "ar"): string | null {
+  const d = new Date(iso);
+  if (d.getTime() <= Date.now()) return null;
+  const userTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return "Asia/Kuala_Lumpur"; } })();
+  const day = d.toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", { weekday: "short", month: "short", day: "numeric", timeZone: userTz });
+  const time = d.toLocaleTimeString(lang === "ar" ? "ar-EG" : "en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: userTz });
+  return `${day} · ${time}`;
+}
 
 const HeroSection = () => {
   const { t, language } = useLanguage();
   const isAr = language === "ar";
-  const nextDay = useMemo(() => nextClassDay(), []);
+  const nextDay = useMemo(() => nextClassLabel(), []);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoReady, setVideoReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -97,6 +116,7 @@ const HeroSection = () => {
           loop
           muted
           playsInline
+          aria-hidden="true"
           onCanPlay={() => setVideoReady(true)}
           className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ${
             videoReady ? "opacity-100" : "opacity-0"
@@ -227,21 +247,18 @@ const HeroSection = () => {
             {isAr ? "✓ بدون بطاقة بنكية · ✓ ٩٨٪ راضون · ✓ رد خلال دقائق" : "✓ No credit card · ✓ 98% satisfaction · ✓ Reply in minutes"}
           </p>
 
-          {/* Class schedule — answers "when can I start?" immediately */}
+          {/* Upcoming class sessions — auto-localised to visitor timezone */}
           <div className="flex flex-wrap gap-2 justify-center">
-            {[
-              { day: isAr ? "السبت" : "Sat", time: "4:00 PM" },
-              { day: isAr ? "الأحد" : "Sun", time: "6:30 PM" },
-              { day: isAr ? "الأربعاء" : "Wed", time: "5:30 PM" },
-            ].map(({ day, time }) => (
-              <div key={day} className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/80">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
-                {day} · {time}
-              </div>
-            ))}
-            <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/60">
-              {isAr ? "توقيت القاهرة" : "Cairo time"}
-            </div>
+            {TRIAL_INSTANTS_MYT.map((iso) => {
+              const label = formatTrialPill(iso, isAr ? "ar" : "en");
+              if (!label) return null;
+              return (
+                <div key={iso} className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/80">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+                  {label}
+                </div>
+              );
+            })}
           </div>
 
           {/* Hangul sheet — reciprocity trigger */}

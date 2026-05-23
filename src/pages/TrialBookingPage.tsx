@@ -127,12 +127,11 @@ const TrialBookingPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [profile, setProfile] = useState<{ name: string | null; email: string | null; level: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ name: string | null; email: string | null; level: string | null; country: string | null } | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState("");
   const [loading, setLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
-  const [rescheduling, setRescheduling] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>(guessCountryFromTz);
   const [classLanguage, setClassLanguage] = useState<"arabic" | "english">(() =>
@@ -149,19 +148,23 @@ const TrialBookingPage = () => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("name, email, level")
+      .select("name, email, level, country")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) setProfile(data as any);
-        // Fall back to level captured at signup (user_metadata) if profile is empty —
-        // covers the email-confirmation flow where signup couldn't write to profiles.
         const profileLevel = (data as any)?.level?.trim();
         const metaLevel = (user.user_metadata?.level as string | undefined)?.trim();
         if (profileLevel) {
           setSelectedLevel(profileLevel);
         } else if (metaLevel) {
           setSelectedLevel(metaLevel);
+        }
+        // Pre-fill country from profile if available — avoids asking the user again
+        const profileCountry = (data as any)?.country?.trim();
+        if (profileCountry && ALL_COUNTRIES.includes(profileCountry)) {
+          setSelectedCountry(profileCountry);
+          setClassLanguage(defaultLanguageForCountry(profileCountry));
         }
         setProfileLoaded(true);
       });
@@ -175,32 +178,37 @@ const TrialBookingPage = () => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const todayCairo = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      const todayMyt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
       const { data } = await supabase
         .from("trial_bookings")
         .select("trial_date, start_time, duration_min, timezone, calendar_url, status")
         .eq("user_id", user.id)
         .in("status", ["pending", "confirmed"])
-        .gte("trial_date", todayCairo)
+        .gte("trial_date", todayMyt)
+        .neq("trial_date", "2099-12-31")
         .order("trial_date", { ascending: true })
         .limit(1)
         .maybeSingle();
       if (data && data.trial_date) {
         const d = new Date(data.trial_date + "T00:00:00");
         const day_name = d.toLocaleDateString("en-US", { weekday: "long" });
+        const timeStr = data.start_time as string | null;
+        const timeMatch = timeStr?.match(/^(\d{1,2}):(\d{2})$/);
+        const start_time_12h = timeMatch
+          ? (() => {
+              const h = Number(timeMatch[1]);
+              const m = Number(timeMatch[2]);
+              const ap = h >= 12 ? "PM" : "AM";
+              return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${ap}`;
+            })()
+          : "";
         setBookingResult({
           trial_date: data.trial_date,
           day_name,
-          start_time: data.start_time || "",
-          start_time_12h: data.start_time
-            ? (() => {
-                const [h, m] = (data.start_time as string).split(":").map(Number);
-                const ap = h >= 12 ? "PM" : "AM";
-                return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${ap}`;
-              })()
-            : "",
+          start_time: timeStr || "",
+          start_time_12h,
           duration_min: data.duration_min || 45,
-          timezone: data.timezone || "Africa/Cairo",
+          timezone: data.timezone || "Asia/Kuala_Lumpur",
           calendar_url: data.calendar_url || "",
         });
       }
@@ -324,55 +332,18 @@ const TrialBookingPage = () => {
     logLeadEvent({ source_type: "free_trial", cta_label: "slot_page_viewed" });
   }, []);
 
-  // ── Reschedule: cancel existing booking then re-show slot picker ──────────
-  const handleReschedule = async () => {
+  // ── Reschedule: re-show slot picker without pre-cancelling. When the
+  // student completes the new booking, book-trial closes the old row with
+  // changed/cancel timestamps so admin keeps a visible audit trail.
+  const handleReschedule = () => {
     if (!user || !bookingResult) return;
-    setRescheduling(true);
-    try {
-      const now = new Date().toISOString();
-      const update = await supabase
-        .from("trial_bookings")
-        .update({
-          status: "cancelled",
-          changed_at: now,
-          cancelled_at: now,
-          cancel_reason: "student_reschedule",
-        } as any)
-        .eq("user_id", user.id)
-        .eq("trial_date", bookingResult.trial_date)
-        .in("status", ["pending", "confirmed"]);
-      if (update.error) {
-        if (!isMissingAuditColumn(update.error)) throw update.error;
-        const fallback = await supabase
-          .from("trial_bookings")
-          .update({ status: "cancelled" })
-          .eq("user_id", user.id)
-          .eq("trial_date", bookingResult.trial_date)
-          .in("status", ["pending", "confirmed"]);
-        if (fallback.error) throw fallback.error;
-      }
-
-      track.custom("trial_reschedule_started", { old_date: bookingResult.trial_date });
-      logLeadEvent({
-        source_type: "free_trial",
-        cta_label: "trial_reschedule_started",
-        metadata: { old_date: bookingResult.trial_date },
-      });
-
-      toast({
-        title: t("trialBooking.rescheduleToast"),
-        variant: "default",
-      });
-      setBookingResult(null);
-    } catch (err: any) {
-      toast({
-        title: t("trialBooking.somethingWrong"),
-        description: err.message || t("trialBooking.tryAgain"),
-        variant: "destructive",
-      });
-    } finally {
-      setRescheduling(false);
-    }
+    track.custom("trial_reschedule_started", { old_date: bookingResult.trial_date });
+    logLeadEvent({
+      source_type: "free_trial",
+      cta_label: "trial_reschedule_started",
+      metadata: { old_date: bookingResult.trial_date },
+    });
+    setBookingResult(null);
   };
 
   const handleCancelBooking = async () => {
@@ -436,22 +407,20 @@ const TrialBookingPage = () => {
     const trialDateMs = new Date(bookingResult.trial_date + "T00:00:00").getTime();
     const daysUntil = Math.max(0, Math.round((trialDateMs - Date.now()) / 86400000));
 
-    // Always use the BROWSER's real timezone — bypasses any stale localStorage value
-    // written by EnrollNowPage, so admin testing in Asia doesn't bleed into student view.
-    const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Africa/Cairo";
+    // Always use the BROWSER's real timezone — bypasses any stale localStorage value.
+    const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kuala_Lumpur";
 
-    // All slots are defined in Cairo time — always convert FROM Cairo regardless of
-    // what bookingResult.timezone stores (it may reflect the client TZ at booking time).
-    const SLOT_TZ = "Africa/Cairo";
+    // Convert from the slot's source timezone (stored in the booking record from the edge function).
+    const SLOT_TZ = bookingResult.timezone || "Asia/Kuala_Lumpur";
     const localized = convertDateTimeToTimezone(bookingResult.trial_date, bookingResult.start_time, SLOT_TZ, userTz);
     const localDate = new Date(localized.dateStr + "T00:00:00");
     const localFormattedDate = localDate.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
-    // Friendly city name: "Africa/Cairo" → "Cairo", "Asia/Singapore" → "Singapore"
+    // Friendly city name: "Asia/Kuala_Lumpur" → "Kuala Lumpur"
     const tzCity = userTz.includes("/") ? userTz.split("/").pop()!.replace(/_/g, " ") : userTz;
 
-    // Show Cairo reference line only when the user is NOT already in Cairo
-    const isInCairo = userTz === SLOT_TZ || userTz === "Africa/Cairo";
+    // Show source-tz reference line only when the user is in a different timezone
+    const isInSlotTz = userTz === SLOT_TZ;
 
     return (
       <div className="min-h-screen bg-background">
@@ -471,9 +440,9 @@ const TrialBookingPage = () => {
                   <p className="text-sm text-muted-foreground">
                     {localized.timeFormatted} · {bookingResult.duration_min} {t("mySchedule.minutes")} · {tzCity}
                   </p>
-                  {!isInCairo && (
+                  {!isInSlotTz && (
                     <p className="text-[11px] text-muted-foreground/60">
-                      ({formattedDate} {bookingResult.start_time_12h} Cairo)
+                      ({formattedDate} {bookingResult.start_time_12h} {SLOT_TZ.split("/").pop()?.replace(/_/g, " ")})
                     </p>
                   )}
                 </div>
@@ -485,15 +454,15 @@ const TrialBookingPage = () => {
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
                 <button
                   onClick={handleReschedule}
-                  disabled={rescheduling || cancelling}
+                  disabled={cancelling}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 text-sm font-semibold text-foreground transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <CalendarClock className="h-4 w-4 text-primary" />
-                  {rescheduling ? t("trialBooking.rescheduling") : t("trialBooking.changeDateBtn")}
+                  {t("trialBooking.changeDateBtn")}
                 </button>
                 <button
                   onClick={handleCancelBooking}
-                  disabled={rescheduling || cancelling}
+                  disabled={cancelling}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-destructive/50 hover:bg-destructive/5 text-sm font-semibold text-foreground transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <CalendarX className="h-4 w-4 text-destructive" />
@@ -657,23 +626,6 @@ const TrialBookingPage = () => {
                   <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-orange-600 group-hover:translate-x-0.5 transition-all shrink-0" />
                 </button>
               </div>
-              <h2 className="text-xl font-bold text-foreground mb-2">{t("trialBooking.findLevelTitle")}</h2>
-              <p className="text-sm text-muted-foreground mb-5 max-w-sm mx-auto">
-                {t("trialBooking.findLevelDesc")}
-              </p>
-              <Button
-                size="lg"
-                className="gap-2 font-bold px-8 shadow-lg"
-                onClick={() => {
-                  track.custom("post_trial_cta_clicked", { cta: "placement_test" });
-                  logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_placement_test" });
-                  navigate("/placement-test");
-                }}
-              >
-                <GraduationCap className="h-4 w-4" />
-                {t("trialBooking.findLevelTitle")}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
             </div>
 
             {/* Invite-a-friend card — referral growth loop */}
@@ -801,24 +753,26 @@ const TrialBookingPage = () => {
                 </p>
               )}
 
-              {/* Country selector — always shown, pre-filled from timezone */}
-              <div className="mb-4 space-y-1.5">
-                <Label htmlFor="trial-country" className="text-sm font-medium flex items-center gap-1.5">
-                  <Globe className="h-3.5 w-3.5 text-muted-foreground" />
-                  {language === "ar" ? "بلدك" : "Your country"}
-                  <span className="text-[10px] text-muted-foreground font-normal">{language === "ar" ? "(للأسعار)" : "(for pricing)"}</span>
-                </Label>
-                <Select value={selectedCountry} onValueChange={handleCountryChange}>
-                  <SelectTrigger id="trial-country">
-                    <SelectValue placeholder={language === "ar" ? "اختر بلدك" : "Select your country"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ALL_COUNTRIES.map(c => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Country selector — hidden when profile already has a country */}
+              {!(profile?.country?.trim() && ALL_COUNTRIES.includes(profile.country.trim())) && (
+                <div className="mb-4 space-y-1.5">
+                  <Label htmlFor="trial-country" className="text-sm font-medium flex items-center gap-1.5">
+                    <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                    {language === "ar" ? "بلدك" : "Your country"}
+                    <span className="text-[10px] text-muted-foreground font-normal">{language === "ar" ? "(للأسعار)" : "(for pricing)"}</span>
+                  </Label>
+                  <Select value={selectedCountry} onValueChange={handleCountryChange}>
+                    <SelectTrigger id="trial-country">
+                      <SelectValue placeholder={language === "ar" ? "اختر بلدك" : "Select your country"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALL_COUNTRIES.map(c => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Class language — auto-detected from country, user can override */}
               <div className="mb-6 space-y-1.5">
@@ -859,6 +813,7 @@ const TrialBookingPage = () => {
               <TrialSlotPicker
                 onSelect={handleSlotPicked}
                 onBack={() => navigate("/free-trial")}
+                classLanguage={classLanguage}
               />
 
               {loading && (

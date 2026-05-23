@@ -10,8 +10,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CalendarDays } from "lucide-react";
-import { convertSlotToTimezone } from "@/lib/admin-utils";
+import { ArrowLeft, CalendarDays, Mail, CheckCircle2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { convertDateTimeToTimezone } from "@/lib/admin-utils";
 
 /**
  * Fallback: next UTC occurrence of dayOfWeek — mirrors the edge function
@@ -41,23 +42,30 @@ interface TrialSlot {
 interface TrialSlotPickerProps {
   onSelect: (dayOfWeek: number, startTime: string, trialDate: string) => void;
   onBack: () => void;
+  classLanguage?: "arabic" | "english";
 }
 
 // Only used when the backend row somehow omits capacity (shouldn't happen in prod).
 const DEFAULT_CAPACITY = 6;
 
-const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
+const TrialSlotPicker = ({ onSelect, onBack, classLanguage }: TrialSlotPickerProps) => {
   const [slots, setSlots] = useState<TrialSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedKey, setSelectedKey] = useState<string>("");
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
+  const [waitlistDone, setWaitlistDone] = useState(false);
 
   useEffect(() => {
+    setSelectedKey(""); // reset selection when language changes
     const fetchSlots = async () => {
       setLoading(true);
       setError(null);
       try {
-        const { data, error: rpcError } = await supabase.rpc("get_trial_availability" as any);
+        const { data, error: rpcError } = await supabase.rpc("get_trial_availability" as any, {
+          p_language: classLanguage ?? null,
+        });
         if (rpcError) throw rpcError;
         const rows = (data || []) as any[];
         const normalised: TrialSlot[] = rows.map((s) => ({
@@ -79,7 +87,7 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
       }
     };
     fetchSlots();
-  }, []);
+  }, [classLanguage]);
 
   // RPC already filters full slots server-side; keep defensive client filter too.
   const availableSlots = slots.filter((s) => {
@@ -112,12 +120,59 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
   }
 
   if (availableSlots.length === 0) {
+    const handleWaitlist = async () => {
+      const trimmed = waitlistEmail.trim().toLowerCase();
+      if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return;
+      setWaitlistSubmitting(true);
+      await supabase.from("leads").upsert(
+        {
+          email: trimmed,
+          name: trimmed.split("@")[0],
+          source: "trial_waitlist",
+          status: "waitlist",
+          goal: "Trial - notify when slot opens",
+        },
+        { onConflict: "email" }
+      );
+      setWaitlistSubmitting(false);
+      setWaitlistDone(true);
+    };
+
     return (
-      <div className="text-center py-8 space-y-3">
+      <div className="text-center py-8 space-y-4">
         <CalendarDays className="h-10 w-10 mx-auto text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
-          All trial sessions are currently full. Please check back soon or contact us on WhatsApp.
-        </p>
+        <p className="text-sm font-semibold text-foreground">All sessions are currently full</p>
+        {waitlistDone ? (
+          <div className="flex items-center justify-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            You're on the list! We'll email you when a spot opens.
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">
+              Leave your email and we'll notify you when a spot opens.
+            </p>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                placeholder="your@email.com"
+                value={waitlistEmail}
+                onChange={(e) => setWaitlistEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleWaitlist()}
+                className="flex-1 h-9 text-sm"
+              />
+              <Button
+                size="sm"
+                className="h-9 gap-1.5"
+                disabled={waitlistSubmitting || !waitlistEmail.trim()}
+                onClick={handleWaitlist}
+              >
+                <Mail className="h-3.5 w-3.5" />
+                Notify Me
+              </Button>
+            </div>
+          </div>
+        )}
         <Button variant="outline" size="sm" onClick={onBack} className="gap-1">
           <ArrowLeft className="h-4 w-4" /> Go back
         </Button>
@@ -125,30 +180,27 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
     );
   }
 
-  // Always read from browser — bypasses stale localStorage values that bleed
-  // from admin sessions (the old getUserTimezone() read localStorage first).
-  const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Africa/Cairo";
+  // Always read from browser — bypasses stale localStorage values.
+  const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kuala_Lumpur";
 
   const sessionDateFor = (s: TrialSlot): string =>
     s.next_trial_date ?? nextDateForDayUTC(s.day_of_week);
 
   const labelFor = (s: TrialSlot) => {
-    const srcTz = s.timezone || "Africa/Cairo";
-    const local = convertSlotToTimezone(s.day_of_week, s.start_time, srcTz, userTz);
+    const srcTz = s.timezone || "Asia/Kuala_Lumpur";
+    const sessionDate = sessionDateFor(s);
+    // Use convertDateTimeToTimezone for specific-dated slots (accurate DST handling)
+    const { dateStr: localDateStr, timeFormatted, weekday } = convertDateTimeToTimezone(sessionDate, s.start_time, srcTz, userTz);
+    const [ly, lm, ld] = localDateStr.split("-").map(Number);
+    const dateLabel = new Date(ly, lm - 1, ld).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     const cap = s.capacity ?? DEFAULT_CAPACITY;
     const spotsLeft = cap - s.booked_count;
-    const sessionDate = sessionDateFor(s);
-    const dateLabel = new Date(sessionDate + "T00:00:00").toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-    return `${local.weekday}, ${dateLabel} at ${local.timeFormatted} (${userTz.replace(/_/g, " ")}) — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
+    return `${weekday}, ${dateLabel} at ${timeFormatted} — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
   };
 
   const keyFor = (s: TrialSlot) => `${s.day_of_week}|${s.start_time}`;
 
   const selectedSlot = availableSlots.find((s) => keyFor(s) === selectedKey);
-  const sourceTimezone = selectedSlot?.timezone ?? availableSlots[0]?.timezone ?? "Africa/Cairo";
 
   const commit = () => {
     if (!selectedKey || !selectedSlot) return;
@@ -185,7 +237,7 @@ const TrialSlotPicker = ({ onSelect, onBack }: TrialSlotPickerProps) => {
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        Times shown in your timezone ({userTz.replace(/_/g, " ")}) · source: {sourceTimezone}
+        All times shown in your local timezone ({userTz.replace(/_/g, " ")})
       </p>
 
       <Button

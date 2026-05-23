@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import { Component, ReactNode } from "react";
 
 interface Props {
@@ -15,6 +16,10 @@ class ErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: { componentStack: string }) {
+    Sentry.captureException(error, { extra: { componentStack: info.componentStack } });
   }
 
   render() {

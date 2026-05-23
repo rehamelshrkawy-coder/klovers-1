@@ -69,6 +69,7 @@ export interface AdminTrialSlotOccurrence {
   seats_left: number;
   is_full: boolean;
   lifecycle: TrialSlotLifecycle;
+  meeting_url: string | null;
 }
 
 // fn_suggest_trial_slots

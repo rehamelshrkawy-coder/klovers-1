@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { AdminTrialSlotOccurrence } from '@/types/trial-admin';
 import { convertDateTimeToTimezone } from '@/lib/admin-utils';
 import { getAdminTimezone } from '@/lib/viewerTimezone';
-// trigger redeploy
+import { useUpdateSlotMeetingUrl } from '@/hooks/useTrialAdmin';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Check, Pencil, X } from 'lucide-react';
 import AddTrialClassDialog from './AddTrialClassDialog';
 
 function StatusBadge({ slot }: { slot: AdminTrialSlotOccurrence }) {
@@ -23,6 +27,68 @@ function StatusBadge({ slot }: { slot: AdminTrialSlotOccurrence }) {
     <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-950/40 dark:text-green-200">
       {slot.seats_left} seat{slot.seats_left === 1 ? '' : 's'} left
     </span>
+  );
+}
+
+function MeetingUrlCell({ slot }: { slot: AdminTrialSlotOccurrence }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const update = useUpdateSlotMeetingUrl();
+
+  const save = () => {
+    update.mutate(
+      { slotId: slot.slot_id, meetingUrl: draft.trim() || null },
+      { onSuccess: () => setEditing(false) }
+    );
+  };
+
+  if (editing) {
+    return (
+      <div className="flex gap-1.5 items-center">
+        <Input
+          className="h-7 text-xs w-48"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false); }}
+          placeholder="https://meet.google.com/..."
+          autoFocus
+        />
+        <button
+          onClick={save}
+          disabled={update.isPending}
+          className="h-7 w-7 flex items-center justify-center rounded-md bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
+          title="Save"
+        >
+          <Check className="h-3.5 w-3.5" />
+        </button>
+        <button
+          onClick={() => setEditing(false)}
+          className="h-7 w-7 flex items-center justify-center rounded-md border border-border hover:bg-muted text-muted-foreground"
+          title="Cancel"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      {slot.meeting_url ? (
+        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-950/40 dark:text-green-200">
+          <Check className="h-3 w-3" /> Link set
+        </span>
+      ) : (
+        <span className="text-xs text-muted-foreground">No link</span>
+      )}
+      <button
+        onClick={() => { setDraft(slot.meeting_url ?? ''); setEditing(true); }}
+        className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+        title="Edit link"
+      >
+        <Pencil className="h-3 w-3" />
+      </button>
+    </div>
   );
 }
 
@@ -62,6 +128,7 @@ export default function UpcomingSlots({
                 <th className="px-3 py-2 text-right font-medium">Booked</th>
                 <th className="px-3 py-2 text-right font-medium">Seats left</th>
                 <th className="px-3 py-2 text-left font-medium">Status</th>
+                <th className="px-3 py-2 text-left font-medium">Class Link</th>
               </tr>
             </thead>
             <tbody>
@@ -88,6 +155,9 @@ export default function UpcomingSlots({
                   <td className="px-3 py-2 text-right tabular-nums">{s.seats_left}</td>
                   <td className="px-3 py-2">
                     <StatusBadge slot={s} />
+                  </td>
+                  <td className="px-3 py-2">
+                    <MeetingUrlCell slot={s} />
                   </td>
                 </tr>
                 );

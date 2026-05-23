@@ -183,13 +183,24 @@ Deno.serve(async (req) => {
     const trialDate = (bodyTrialDate && /^\d{4}-\d{2}-\d{2}$/.test(bodyTrialDate))
       ? bodyTrialDate
       : nextDateForDay(day_of_week);
-    const timezone = "Africa/Cairo";
 
-    // Registrations close 1 day before the class (compare in Cairo time UTC+2, no DST)
-    const cairoNow = new Date(Date.now() + 2 * 60 * 60 * 1000);
-    const cairoDayStr = cairoNow.toISOString().split("T")[0];
+    // Look up slot metadata in one query (timezone, duration, meeting link).
+    const { data: slotTzRow } = await supabase
+      .from("trial_slots")
+      .select("timezone, duration_min, meeting_url")
+      .eq("trial_date", trialDate)
+      .eq("start_time", start_time)
+      .maybeSingle();
+    const _slot = slotTzRow as { timezone?: string | null; duration_min?: number | null; meeting_url?: string | null } | null;
+    const timezone: string = _slot?.timezone || "Asia/Kuala_Lumpur";
+    const slotDurationMin: number = _slot?.duration_min ?? 30;
+    const meetingUrl: string | null = _slot?.meeting_url ?? null;
+
+    // Registrations close 1 day before the class (compare in MYT, UTC+8)
+    const mytNow = new Date(Date.now() + 8 * 60 * 60 * 1000);
+    const mytDayStr = mytNow.toISOString().split("T")[0];
     const trialMs = new Date(trialDate + "T00:00:00Z").getTime();
-    const todayMs = new Date(cairoDayStr + "T00:00:00Z").getTime();
+    const todayMs = new Date(mytDayStr + "T00:00:00Z").getTime();
     if (Math.round((trialMs - todayMs) / 86_400_000) <= 1) {
       return new Response(
         JSON.stringify({ ok: false, success: false, error: "Booking is closed — registrations close 1 day before the class." }),
@@ -242,9 +253,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 2. For authenticated users rebooking, remove any existing booking (TBA or
-    // real) so the INSERT below succeeds. Unauthenticated path only removes TBA
-    // placeholders; real bookings there hit 23505 and return a friendly message.
+    // 2. For authenticated users rebooking, close any existing booking (TBA or
+    // real) so the INSERT below succeeds and admin keeps a visible audit trail.
+    // Unauthenticated path only closes TBA placeholders; real bookings there hit
+    // 23505 and return a friendly message.
     // Look up existing booking — prefer user_id match (reliable), fall back to email.
     let existingBooking: { id: string; start_time: string | null; trial_date: string | null; is_tba: boolean | null } | null = null;
     if (resolvedUserId) {
@@ -277,13 +289,42 @@ Deno.serve(async (req) => {
         existingBooking.start_time === "TBA" ||
         existingBooking.trial_date === "2099-12-31");
 
-    // Authenticated rebook: remove previous booking (any kind) to allow slot change.
-    // Unauthenticated: only remove TBA placeholders.
-    const shouldDelete = existingBooking && (authed || isTbaPlaceholder);
+    // Authenticated rebook: mark previous booking cancelled (any kind) to allow
+    // slot change while preserving changed_at/cancelled_at for admin.
+    // Unauthenticated: only close TBA placeholders.
+    const shouldCloseExisting = existingBooking && (authed || isTbaPlaceholder);
+    if (shouldCloseExisting) {
+      const auditUpdate = await supabase
+        .from("trial_bookings")
+        .update({
+          status: "cancelled",
+          changed_at: new Date().toISOString(),
+          cancelled_at: new Date().toISOString(),
+          cancel_reason: authed ? "student_reschedule" : "tba_rebook",
+        } as any)
+        .eq("id", existingBooking!.id);
 
-    // Atomic delete + insert via Postgres RPC (prevents orphaned bookings on crash)
+      if (auditUpdate.error) {
+        const missingAuditColumn =
+          auditUpdate.error.code === "42703" ||
+          /changed_at|cancelled_at|cancel_reason/i.test(auditUpdate.error.message || "");
+        if (!missingAuditColumn) throw auditUpdate.error;
+
+        const fallback = await supabase
+          .from("trial_bookings")
+          .update({ status: "cancelled" } as any)
+          .eq("id", existingBooking!.id);
+        if (fallback.error) throw fallback.error;
+      }
+    }
+
+    // Authenticated bookings use awaiting_attendance so students confirm via email link
+    const bookingStatus = authed && resolvedUserId ? "awaiting_attendance" : "confirmed";
+
+    // Atomic insert via Postgres RPC. p_delete_id remains for older deployments,
+    // but rebooks now preserve the old row as cancelled for admin visibility.
     const { data: newBookingId, error: bookingError } = await supabase.rpc("upsert_trial_booking", {
-      p_delete_id:   shouldDelete ? existingBooking!.id : null,
+      p_delete_id:   null,
       p_name:        finalName,
       p_email:       normalizedEmail,
       p_phone:       phone?.trim() || null,
@@ -295,7 +336,7 @@ Deno.serve(async (req) => {
       p_timezone:    timezone,
       p_language:    class_language === "arabic" ? "arabic" : "english",
       p_user_id:     resolvedUserId || null,
-      p_status:      "confirmed",
+      p_status:      bookingStatus,
     });
 
     // Wrap result in same shape the rest of the function expects
@@ -324,48 +365,92 @@ Deno.serve(async (req) => {
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      console.error("book-trial insert error:", JSON.stringify(bookingError));
-      throw bookingError ?? new Error("Failed to insert trial booking");
+      // Surface the real DB error in the response body instead of throwing a
+      // generic 500 — this lets the UI show a meaningful message and lets us
+      // see the error code/message without needing server-side log access.
+      const errMsg = bookingError?.message ?? "Failed to insert trial booking";
+      const errCode = bookingError?.code ?? "unknown";
+      console.error("book-trial insert error:", errCode, errMsg, JSON.stringify(bookingError));
+      return new Response(
+        JSON.stringify({ ok: false, success: false, error: errMsg, error_code: errCode }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // 3. Notify admin
-    await supabase.from("admin_notifications").insert({
-      message: `New trial booking: ${finalName} (${normalizedEmail}) — ${dayName} ${formatTime12h(start_time)}, Level: ${level || "Unknown"}`,
-      type: "trial",
-    }).catch(() => {}); // non-critical
+    try {
+      await supabase.from("admin_notifications").insert({
+        message: `New trial booking: ${finalName} (${normalizedEmail}) — ${dayName} ${formatTime12h(start_time)}, Level: ${level || "Unknown"}`,
+        type: "trial",
+      });
+    } catch { /* non-critical */ }
 
     // 4. Build calendar URL for the response
     const calendarUrl = buildCalendarUrl({
       title: "Free Korean Trial Class — Klovers Academy",
       date: trialDate,
       time: start_time,
-      durationMin: 30,
-      description: `Your free 30-min trial Korean class with Klovers Academy.\nLevel: ${level || "Beginner"}\n\nhttps://kloversegy.com`,
+      durationMin: slotDurationMin,
+      description: `Your free ${slotDurationMin}-min trial Korean class with Klovers Academy.\nLevel: ${level || "Beginner"}\n\nhttps://kloversegy.com`,
       timezone,
     });
+    // meetingUrl already resolved from the merged slot query above
 
-    // 5. Send trial confirmation email — track failures in DB for admin visibility
-    supabase.functions.invoke("send-confirmation-email", {
-      body: {
-        template: "trial_confirmed",
-        email: normalizedEmail,
-        name: finalName,
-        language: "en",
-        trial_date: trialDate,
-        trial_time: start_time,
-        trial_timezone: timezone,
-        level: level?.trim() || "",
-        calendar_url: calendarUrl,
-      },
-    }).catch(async (e) => {
-      console.warn("trial_confirmed email failed:", e);
-      // Mark failure so admin can see it in the dashboard and manually resend
-      await supabase
+    // 5. Send trial confirmation email
+    if (authed && resolvedUserId) {
+      // Authenticated booking: fetch confirmation_token and send attendance confirmation
+      const { data: newBookingRow } = await supabase
         .from("trial_bookings")
-        .update({ confirmation_email_failed_at: new Date().toISOString() })
+        .select("id, confirmation_token")
         .eq("id", booking.id)
-        .catch(() => {});
-    });
+        .maybeSingle();
+
+      await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-confirmation-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+        },
+        body: JSON.stringify({
+          template: "trial_attendance_confirmation",
+          email: normalizedEmail,
+          name: finalName,
+          language: class_language === "arabic" ? "ar" : "en",
+          trial_date: trialDate,
+          trial_time: start_time,
+          class_link_url: meetingUrl,
+          booking_id: newBookingRow?.id ?? booking.id,
+          confirmation_token: (newBookingRow as { confirmation_token?: string | null } | null)?.confirmation_token ?? null,
+        }),
+      }).catch((e) => {
+        console.warn("trial_attendance_confirmation email failed:", e);
+      });
+    } else {
+      // Unauthenticated booking: send standard trial confirmed email
+      supabase.functions.invoke("send-confirmation-email", {
+        body: {
+          template: "trial_confirmed",
+          email: normalizedEmail,
+          name: finalName,
+          language: "en",
+          trial_date: trialDate,
+          trial_time: start_time,
+          trial_timezone: timezone,
+          level: level?.trim() || "",
+          calendar_url: calendarUrl,
+          ...(meetingUrl ? { class_link_url: meetingUrl } : {}),
+        },
+      }).then(null, async (e) => {
+        console.warn("trial_confirmed email failed:", e);
+        // Mark failure so admin can see it in the dashboard and manually resend
+        try {
+          await supabase
+            .from("trial_bookings")
+            .update({ confirmation_email_failed_at: new Date().toISOString() })
+            .eq("id", booking.id);
+        } catch { /* non-critical */ }
+      });
+    }
 
     return new Response(
       JSON.stringify({
@@ -376,7 +461,7 @@ Deno.serve(async (req) => {
           day_name: dayName,
           start_time,
           start_time_12h: formatTime12h(start_time),
-          duration_min: 30,
+          duration_min: slotDurationMin,
           timezone,
           calendar_url: calendarUrl,
         },
