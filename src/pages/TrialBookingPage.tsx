@@ -20,7 +20,7 @@ import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { track } from "@/lib/tracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
-import { CheckCircle2, CalendarPlus, CalendarClock, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2, Globe, Link2, Check } from "lucide-react";
+import { CheckCircle2, CalendarPlus, CalendarClock, CalendarX, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2, Globe, Link2, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { convertDateTimeToTimezone } from "@/lib/admin-utils";
 
@@ -101,6 +101,9 @@ function defaultLanguageForCountry(country: string): "arabic" | "english" {
   return ARABIC_COUNTRIES.has(country) ? "arabic" : "english";
 }
 
+const isMissingAuditColumn = (error: any) =>
+  error?.code === "42703" || /changed_at|cancelled_at|cancel_reason/i.test(error?.message || "");
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface BookingResult {
@@ -130,6 +133,7 @@ const TrialBookingPage = () => {
   const [loading, setLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
   const [rescheduling, setRescheduling] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>(guessCountryFromTz);
   const [classLanguage, setClassLanguage] = useState<"arabic" | "english">(() =>
     defaultLanguageForCountry(guessCountryFromTz())
@@ -325,12 +329,28 @@ const TrialBookingPage = () => {
     if (!user || !bookingResult) return;
     setRescheduling(true);
     try {
-      await supabase
+      const now = new Date().toISOString();
+      const update = await supabase
         .from("trial_bookings")
-        .update({ status: "cancelled" })
+        .update({
+          status: "cancelled",
+          changed_at: now,
+          cancelled_at: now,
+          cancel_reason: "student_reschedule",
+        } as any)
         .eq("user_id", user.id)
         .eq("trial_date", bookingResult.trial_date)
         .in("status", ["pending", "confirmed"]);
+      if (update.error) {
+        if (!isMissingAuditColumn(update.error)) throw update.error;
+        const fallback = await supabase
+          .from("trial_bookings")
+          .update({ status: "cancelled" })
+          .eq("user_id", user.id)
+          .eq("trial_date", bookingResult.trial_date)
+          .in("status", ["pending", "confirmed"]);
+        if (fallback.error) throw fallback.error;
+      }
 
       track.custom("trial_reschedule_started", { old_date: bookingResult.trial_date });
       logLeadEvent({
@@ -352,6 +372,56 @@ const TrialBookingPage = () => {
       });
     } finally {
       setRescheduling(false);
+    }
+  };
+
+  const handleCancelBooking = async () => {
+    if (!user || !bookingResult) return;
+    setCancelling(true);
+    try {
+      const now = new Date().toISOString();
+      const update = await supabase
+        .from("trial_bookings")
+        .update({
+          status: "cancelled",
+          cancelled_at: now,
+          cancel_reason: "student_cancel",
+        } as any)
+        .eq("user_id", user.id)
+        .eq("trial_date", bookingResult.trial_date)
+        .in("status", ["pending", "confirmed"]);
+      if (update.error) {
+        if (!isMissingAuditColumn(update.error)) throw update.error;
+        const fallback = await supabase
+          .from("trial_bookings")
+          .update({ status: "cancelled" })
+          .eq("user_id", user.id)
+          .eq("trial_date", bookingResult.trial_date)
+          .in("status", ["pending", "confirmed"]);
+        if (fallback.error) throw fallback.error;
+      }
+
+      track.custom("trial_cancelled", { old_date: bookingResult.trial_date });
+      logLeadEvent({
+        source_type: "free_trial",
+        cta_label: "trial_cancelled",
+        metadata: { old_date: bookingResult.trial_date },
+      });
+
+      toast({
+        title: t("trialBooking.cancelToast"),
+        variant: "default",
+      });
+      setBookingResult(null);
+      navigate("/dashboard");
+    } catch (err: any) {
+      toast({
+        title: t("trialBooking.somethingWrong"),
+        description: err.message || t("trialBooking.tryAgain"),
+        variant: "destructive",
+      });
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -412,15 +482,24 @@ const TrialBookingPage = () => {
                 {t("trialBooking.successDesc")}
               </p>
 
-              {/* Change date button */}
-              <button
-                onClick={handleReschedule}
-                disabled={rescheduling}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 text-sm font-semibold text-foreground transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mx-auto"
-              >
-                <CalendarClock className="h-4 w-4 text-primary" />
-                {rescheduling ? t("trialBooking.rescheduling") : t("trialBooking.changeDateBtn")}
-              </button>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  onClick={handleReschedule}
+                  disabled={rescheduling || cancelling}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 text-sm font-semibold text-foreground transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CalendarClock className="h-4 w-4 text-primary" />
+                  {rescheduling ? t("trialBooking.rescheduling") : t("trialBooking.changeDateBtn")}
+                </button>
+                <button
+                  onClick={handleCancelBooking}
+                  disabled={rescheduling || cancelling}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-destructive/50 hover:bg-destructive/5 text-sm font-semibold text-foreground transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CalendarX className="h-4 w-4 text-destructive" />
+                  {cancelling ? t("trialBooking.cancelling") : t("trialBooking.cancelDateBtn")}
+                </button>
+              </div>
 
               {/* Inline country selector — updates pricing below in real time */}
               <div className="mt-5 flex items-center justify-center gap-2 flex-wrap">

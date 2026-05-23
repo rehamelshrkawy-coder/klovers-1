@@ -45,6 +45,9 @@ interface TrialBooking {
   status: string;
   confirmed_at: string | null;
   created_at: string;
+  changed_at?: string | null;
+  cancelled_at?: string | null;
+  cancel_reason?: string | null;
   user_id?: string | null;
   rebook_email_sent_at?: string | null;
   is_tba?: boolean;
@@ -57,6 +60,9 @@ const isTbaBooking = (b: Pick<TrialBooking, "is_tba" | "start_time" | "trial_dat
   b.is_tba === true ||
   !b.start_time || !b.trial_date ||
   b.start_time === "TBA" || b.trial_date === "2099-12-31";
+
+const isMissingAuditColumn = (error: any) =>
+  error?.code === "42703" || /changed_at|cancelled_at|cancel_reason/i.test(error?.message || "");
 
 interface TrialSlot {
   day_of_week: number;
@@ -140,6 +146,9 @@ const TrialClassesManager = () => {
   const loading = loadingBookings || loadingSlots;
   const upcomingSlots = useMemo(() => getActualUpcomingGroups(bookings), [bookings]);
 
+  const formatDateTime = (value?: string | null) =>
+    value ? new Date(value).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" }) : "—";
+
   const fetchData = () => {
     // Invalidate trials-related caches so both the local table and the
     // dashboard's pending-count badge refresh from the same source.
@@ -180,9 +189,20 @@ const TrialClassesManager = () => {
     try {
       const { error } = await supabase
         .from("trial_bookings")
-        .update({ status: "cancelled" } as any)
+        .update({
+          status: "cancelled",
+          cancelled_at: new Date().toISOString(),
+          cancel_reason: "admin_reject",
+        } as any)
         .eq("id", booking.id);
-      if (error) throw error;
+      if (error) {
+        if (!isMissingAuditColumn(error)) throw error;
+        const fallback = await supabase
+          .from("trial_bookings")
+          .update({ status: "cancelled" } as any)
+          .eq("id", booking.id);
+        if (fallback.error) throw fallback.error;
+      }
       toast({ title: "Cancelled", description: booking.name || booking.email });
       fetchData();
     } catch (err: any) {
@@ -205,9 +225,25 @@ const TrialClassesManager = () => {
           is_tba: true,
           confirmed_at: null,
           rebook_email_sent_at: null,
+          changed_at: new Date().toISOString(),
         } as any)
         .eq("id", booking.id);
-      if (error) throw error;
+      if (error) {
+        if (!isMissingAuditColumn(error)) throw error;
+        const fallback = await supabase
+          .from("trial_bookings")
+          .update({
+            start_time: "TBA",
+            trial_date: "2099-12-31",
+            day_of_week: 0,
+            status: "pending",
+            is_tba: true,
+            confirmed_at: null,
+            rebook_email_sent_at: null,
+          } as any)
+          .eq("id", booking.id);
+        if (fallback.error) throw fallback.error;
+      }
       toast({ title: "Moved to TBA", description: booking.name || booking.email });
       fetchData();
     } catch (err: any) {
@@ -522,6 +558,8 @@ const TrialClassesManager = () => {
                         <TableHead>Level</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Booked</TableHead>
+                        <TableHead>Changed</TableHead>
+                        <TableHead>Cancelled</TableHead>
                         <TableHead>Notes</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
@@ -549,6 +587,15 @@ const TrialClassesManager = () => {
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                             {new Date(b.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                            {formatDateTime(b.changed_at)}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                            <div>{formatDateTime(b.cancelled_at)}</div>
+                            {b.cancel_reason && (
+                              <div className="text-[10px] text-muted-foreground/80">{b.cancel_reason.replace(/_/g, " ")}</div>
+                            )}
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground max-w-[220px] truncate" title={b.goal || ""}>
                             {b.goal || "—"}

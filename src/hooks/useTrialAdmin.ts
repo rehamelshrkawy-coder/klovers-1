@@ -18,6 +18,9 @@ const KEYS = {
   settings: ['trial-admin', 'settings'] as const,
 };
 
+const isMissingAuditColumn = (error: { code?: string; message?: string } | null) =>
+  error?.code === '42703' || /changed_at|cancelled_at|cancel_reason/i.test(error?.message || '');
+
 // --- Queries ---------------------------------------------------------------
 
 export function useTrialBookings() {
@@ -30,7 +33,35 @@ export function useTrialBookings() {
         .order('trial_date', { ascending: false })
         .order('start_time', { ascending: true });
       if (error) throw error;
-      return data ?? [];
+      const bookings = (data ?? []) as AdminTrialBooking[];
+      const ids = bookings.map((b) => b.id);
+      if (ids.length === 0) return bookings;
+
+      const { data: auditRows, error: auditError } = await supabase
+        .from('trial_bookings')
+        .select('id, changed_at, cancelled_at, cancel_reason')
+        .in('id', ids);
+      if (auditError) {
+        if (!isMissingAuditColumn(auditError)) throw auditError;
+        return bookings.map((booking) => ({
+          ...booking,
+          changed_at: booking.changed_at ?? null,
+          cancelled_at: booking.cancelled_at ?? null,
+          cancel_reason: booking.cancel_reason ?? null,
+        }));
+      }
+
+      const auditById = new Map(
+        ((auditRows ?? []) as Pick<AdminTrialBooking, 'id' | 'changed_at' | 'cancelled_at' | 'cancel_reason'>[])
+          .map((row) => [row.id, row])
+      );
+
+      return bookings.map((booking) => ({
+        ...booking,
+        changed_at: auditById.get(booking.id)?.changed_at ?? booking.changed_at ?? null,
+        cancelled_at: auditById.get(booking.id)?.cancelled_at ?? booking.cancelled_at ?? null,
+        cancel_reason: auditById.get(booking.id)?.cancel_reason ?? booking.cancel_reason ?? null,
+      }));
     },
   });
 }

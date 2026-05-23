@@ -29,6 +29,9 @@ export interface AdminTrialBooking {
   status: TrialBookingStatus;
   confirmed_at: string | null;
   created_at: string | null;
+  changed_at: string | null;
+  cancelled_at: string | null;
+  cancel_reason: string | null;
   user_id: string | null;
   timezone: string | null;
   confirmation_email_failed_at: string | null;
