@@ -100,6 +100,7 @@ interface UpcomingSlot {
   day_of_week: number;
   start_time: string;
   meeting_url?: string | null;
+  class_language?: string | null;
 }
 
 function getActualUpcomingGroups(bookings: TrialBooking[]): UpcomingSlot[] {
@@ -186,6 +187,7 @@ const TrialClassesManager = () => {
           day_of_week: dow,
           start_time: s.start_time,
           meeting_url: s.meeting_url ?? null,
+          class_language: s.class_language ?? null,
         };
       });
   }, [activeSlots]);
@@ -797,18 +799,31 @@ const TrialClassesManager = () => {
                               )}
                               {b.status === "pending" && (
                                 <>
+                                  {(() => {
+                                    const lang = b.language ?? null;
+                                    const filtered = lang
+                                      ? upcomingSlots.filter((s) => s.class_language === lang)
+                                      : upcomingSlots;
+                                    const slots = filtered.length ? filtered : upcomingSlots;
+                                    const defaultVal = trialSlotMap[b.id] ?? slots[0]?.value ?? "";
+                                    return (
                                   <div className="flex items-center gap-1 flex-wrap">
                                     <Select
-                                      value={trialSlotMap[b.id] ?? upcomingSlots[0]?.value ?? ""}
+                                      value={defaultVal}
                                       onValueChange={(v) => setTrialSlotMap((prev) => ({ ...prev, [b.id]: v }))}
                                     >
-                                      <SelectTrigger className="h-7 w-[160px] text-xs">
+                                      <SelectTrigger className="h-7 w-[185px] text-xs">
                                         <SelectValue placeholder="Pick class date" />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        {upcomingSlots.map((s) => (
+                                        {slots.map((s) => (
                                           <SelectItem key={s.value} value={s.value} className="text-xs">
-                                            {s.label}
+                                            <span className="flex items-center gap-1.5">
+                                              <span className={`inline-block px-1 py-0.5 rounded text-[10px] font-medium leading-none ${s.class_language === "arabic" ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"}`}>
+                                                {s.class_language === "arabic" ? "AR" : "EN"}
+                                              </span>
+                                              {s.label}
+                                            </span>
                                           </SelectItem>
                                         ))}
                                       </SelectContent>
@@ -817,12 +832,14 @@ const TrialClassesManager = () => {
                                       size="sm"
                                       variant="outline"
                                       className="h-7"
-                                      disabled={actioningId === b.id || !upcomingSlots.length}
-                                      onClick={() => handleConfirm(b, trialSlotMap[b.id] ?? upcomingSlots[0]?.value ?? "")}
+                                      disabled={actioningId === b.id || !slots.length}
+                                      onClick={() => handleConfirm(b, defaultVal)}
                                     >
                                       <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
                                     </Button>
                                   </div>
+                                    );
+                                  })()}
                                   <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleReject(b)}>
                                     <XCircle className="h-3.5 w-3.5 mr-1 text-red-600" /> Reject
                                   </Button>
