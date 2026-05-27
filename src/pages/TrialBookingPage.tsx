@@ -238,6 +238,7 @@ const TrialBookingPage = () => {
     }
 
     setLoading(true);
+    let skipFinallyReset = false;
     try {
       // Log the intent (links automatically to user via session_id stitching)
       logLeadEvent({
@@ -293,6 +294,40 @@ const TrialBookingPage = () => {
 
       setBookingResult(data.booking);
     } catch (err: any) {
+      // Detect 429 rate-limit: Supabase wraps it in FunctionsHttpError with status on .context
+      const is429 =
+        err?.context?.status === 429 ||
+        (typeof err?.message === "string" && err.message.includes("non-2xx"));
+
+      if (is429) {
+        // Before showing an error, check whether the booking actually landed
+        // (the function may have succeeded on a prior tap before rate-limiting kicked in).
+        const { data: existing } = await supabase
+          .from("trial_bookings")
+          .select("id, trial_date, start_time, day_of_week, status")
+          .eq("email", user.email ?? "")
+          .neq("status", "cancelled")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (existing?.trial_date === trialDate && existing?.start_time === startTime) {
+          // Booking succeeded on a previous tap — treat as success silently.
+          setBookingResult(existing as any);
+          return;
+        }
+
+        toast({
+          title: t("trialBooking.tooManyAttempts") ?? "Too many attempts",
+          description: t("trialBooking.tooManyAttemptsDesc") ?? "Please wait a moment, then check your dashboard — your booking may already be saved.",
+          variant: "destructive",
+        });
+        // Keep button disabled for 8 s so the student doesn't hammer again.
+        skipFinallyReset = true;
+        setTimeout(() => setLoading(false), 8000);
+        return;
+      }
+
       logLeadEvent({ source_type: "free_trial", cta_label: "booking_failed", metadata: { reason: err?.message || "unknown" } });
       toast({
         title: t("trialBooking.somethingWrong"),
@@ -300,7 +335,7 @@ const TrialBookingPage = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      if (!skipFinallyReset) setLoading(false);
     }
   };
 
