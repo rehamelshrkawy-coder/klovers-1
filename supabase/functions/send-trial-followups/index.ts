@@ -168,6 +168,9 @@ async function isAuthorised(req: Request, supabase: ReturnType<typeof createClie
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
   if (!token) return false;
 
+  // pg_cron passes CRON_SECRET as a Bearer token; accept it directly
+  if (cronSecret && token === cronSecret) return true;
+
   const { data: { user }, error } = await supabase.auth.getUser(token);
   if (error || !user) return false;
 
