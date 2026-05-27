@@ -650,17 +650,23 @@ const AdminDashboard = () => {
     if (sendingResend.has(key)) return;
     setSendingResend(prev => new Set(prev).add(key));
     try {
+      const tz = e.timezone ?? "";
+      const language = (tz.startsWith("Asia/") || tz.startsWith("Europe/") || tz.startsWith("America/")) ? "en" : "ar";
       const { error } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
           template: "approval",
           email: e.profiles?.email,
           name: e.profiles?.name ?? "Student",
-          language: "ar",
+          language,
           plan_type: e.plan_type,
           duration: e.duration,
           sessions_total: e.sessions_total,
           amount: e.amount,
           currency: e.currency ?? "EGP",
+          preferred_day: e.preferred_day ?? "",
+          preferred_time: e.preferred_time ?? "",
+          timezone: tz || "Africa/Cairo",
+          level: e.level ?? "",
         },
       });
       if (error) {
