@@ -166,15 +166,29 @@ const TrialClassesManager = () => {
 
   const loading = loadingBookings || loadingSlots;
   const upcomingSlots = useMemo(() => {
-    const slots = getActualUpcomingGroups(bookings);
-    // Enrich each slot with meeting_url from the matching activeSlots row
-    return slots.map((s) => {
-      const match = activeSlots.find(
-        (a) => a.trial_date === s.date && a.start_time === s.start_time
-      ) ?? activeSlots.find((a) => a.start_time === s.start_time);
-      return { ...s, meeting_url: match?.meeting_url ?? null };
-    });
-  }, [bookings, activeSlots]);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStr = today.toISOString().slice(0, 10);
+    return activeSlots
+      .filter((s) => s.trial_date && s.trial_date >= todayStr)
+      .sort((a, b) => (a.trial_date ?? "").localeCompare(b.trial_date ?? ""))
+      .map((s) => {
+        const d = new Date(s.trial_date + "T00:00:00");
+        const dow = s.day_of_week;
+        const [h, m] = s.start_time.split(":").map(Number);
+        const ampm = h >= 12 ? "PM" : "AM";
+        const h12 = h % 12 || 12;
+        const label = `${DAY_NAMES[dow]} ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+        return {
+          value: `${s.trial_date}|${dow}|${s.start_time}`,
+          label,
+          date: s.trial_date!,
+          day_of_week: dow,
+          start_time: s.start_time,
+          meeting_url: s.meeting_url ?? null,
+        };
+      });
+  }, [activeSlots]);
 
   const formatDateTime = (value?: string | null) =>
     value ? new Date(value).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" }) : "—";
