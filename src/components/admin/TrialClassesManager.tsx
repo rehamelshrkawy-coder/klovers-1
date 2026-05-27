@@ -222,21 +222,24 @@ const TrialClassesManager = () => {
         .eq("id", booking.id);
       if (error) throw error;
 
-      // Fetch meeting URL for this specific session date
+      // Fetch meeting URL + class language for this specific session date
       const { data: slotRow } = await supabase
         .from("trial_slots")
-        .select("meeting_url")
+        .select("meeting_url, class_language")
         .eq("trial_date", date)
         .eq("start_time", time)
         .maybeSingle();
-      const meetingUrl = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
+      const meetingUrl = (slotRow as { meeting_url?: string | null; class_language?: string | null } | null)?.meeting_url ?? null;
+      const slotLang = (slotRow as { class_language?: string | null } | null)?.class_language ?? booking.language ?? "en";
+      // Normalise "arabic"→"ar", "english"→"en" for the email template
+      const emailLang = slotLang === "arabic" ? "ar" : slotLang === "english" ? "en" : slotLang;
 
       // Send confirmation email with join link to the student
       const emailBody: Record<string, unknown> = {
         template: "trial_confirmed",
         email: booking.email,
         name: booking.name || booking.email,
-        language: booking.language || "en",
+        language: emailLang,
         trial_date: date,
         trial_time: time,
         trial_timezone: "Africa/Cairo",
@@ -513,17 +516,19 @@ const TrialClassesManager = () => {
     try {
       const { data: slotRow } = await supabase
         .from("trial_slots")
-        .select("meeting_url")
+        .select("meeting_url, class_language")
         .eq("trial_date", booking.trial_date ?? "")
         .eq("start_time", booking.start_time ?? "")
         .maybeSingle();
-      const meetingUrl = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
+      const meetingUrl = (slotRow as { meeting_url?: string | null; class_language?: string | null } | null)?.meeting_url ?? null;
+      const resendLang = (slotRow as { class_language?: string | null } | null)?.class_language ?? booking.language ?? "en";
+      const resendEmailLang = resendLang === "arabic" ? "ar" : resendLang === "english" ? "en" : resendLang;
       const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
           template: "trial_attendance_confirmation",
           email: booking.email,
           name: booking.name || booking.email,
-          language: booking.language || "en",
+          language: resendEmailLang,
           trial_date: booking.trial_date,
           trial_time: booking.start_time,
           class_link_url: meetingUrl,
