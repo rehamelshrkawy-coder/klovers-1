@@ -11,14 +11,14 @@ function buildEnglishEmail(name: string, overCount: number): { subject: string; 
   return {
     subject: `Action needed: ${overCount} class${overCount === 1 ? "" : "es"} over your package`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div translate="no" class="notranslate" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <h2 style="color: #6d28d9;">Hi ${name},</h2>
         <p>You've used <strong>${overCount}</strong> more class${overCount === 1 ? "" : "es"} than your current package includes.</p>
         <p>To continue without interruptions, please renew your package.</p>
         <div style="margin: 24px 0;">
           <a href="https://kloversegy.com/enroll-now" style="background: #6d28d9; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Renew Package</a>
         </div>
-        <p style="color: #999; font-size: 12px; margin-top: 24px;">— The KLovers Team</p>
+        <p style="color: #999; font-size: 12px; margin-top: 24px;"><span translate="no" class="notranslate">— The KLovers Team</span></p>
       </div>
     `,
   };
@@ -28,7 +28,7 @@ function buildArabicEmail(name: string, overCount: number): { subject: string; h
   return {
     subject: `تنبيه: تجاوزت باقتك بـ ${overCount} حصة`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; direction: rtl; text-align: right;">
+      <div translate="no" class="notranslate" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; direction: rtl; text-align: right;">
         <h2 style="color: #6d28d9;">مرحباً ${name}،</h2>
         <p>لقد استخدمت <strong>${overCount}</strong> حصة إضافية أكثر من باقتك الحالية.</p>
         <p>لمتابعة دروسك بدون انقطاع، يرجى تجديد باقتك.</p>

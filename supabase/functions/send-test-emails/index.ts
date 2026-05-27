@@ -58,7 +58,7 @@ serve(async (req) => {
           <div style="margin:24px 0;">
             <a href="https://kloversegy.com/enroll-now" style="background:#6d28d9;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;">Start Learning Korean</a>
           </div>
-          <p style="color:#999;font-size:12px;margin-top:24px;">— The KLovers Team</p>
+          <p style="color:#999;font-size:12px;margin-top:24px;"><span translate="no" class="notranslate">— The KLovers Team</span></p>
         </div>`;
 
         await fetch("https://api.resend.com/emails", {
