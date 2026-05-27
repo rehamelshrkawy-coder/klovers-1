@@ -587,7 +587,7 @@ const TrialClassesManager = () => {
           const isTbaSession = session.isTba;
           const slotMatch = !session.isTba && session.date && session.time
             ? activeSlots.find((s) => s.trial_date === session.date && s.start_time === session.time)
-              ?? activeSlots.find((s) => s.start_time === session.time)
+              ?? activeSlots.find((s) => !s.trial_date && s.start_time === session.time)
             : null;
           const sessionLanguage = slotMatch?.class_language ?? session.items[0]?.language ?? null;
           const tbaUnsentCount = isTbaSession ? session.items.length : 0;

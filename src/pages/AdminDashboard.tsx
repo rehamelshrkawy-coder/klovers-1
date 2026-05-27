@@ -283,6 +283,18 @@ import { useReferralStats } from "@/hooks/admin/useReferralStats";
 import { useTrialStats } from "@/hooks/admin/useTrialStats";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
+// Arabic-speaking timezones that would otherwise be misclassified by a
+// simple Africa/* prefix check. Covers Gulf states and Levant.
+const ARABIC_TZ = new Set([
+  "Asia/Riyadh", "Asia/Dubai", "Asia/Kuwait", "Asia/Bahrain", "Asia/Qatar",
+  "Asia/Muscat", "Asia/Baghdad", "Asia/Amman", "Asia/Beirut", "Asia/Damascus",
+  "Asia/Aden", "Asia/Gaza", "Asia/Hebron",
+]);
+function approvalEmailLanguage(tz: string): "ar" | "en" {
+  if (!tz || tz.startsWith("Africa/") || ARABIC_TZ.has(tz)) return "ar";
+  return "en";
+}
+
 const AdminDashboard = () => {
   const { t } = useTranslation("admin");
   const queryClient = useQueryClient();
@@ -651,7 +663,7 @@ const AdminDashboard = () => {
     setSendingResend(prev => new Set(prev).add(key));
     try {
       const tz = e.timezone ?? "";
-      const language = (tz.startsWith("Asia/") || tz.startsWith("Europe/") || tz.startsWith("America/")) ? "en" : "ar";
+      const language = approvalEmailLanguage(tz);
       const { error } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
           template: "approval",
@@ -660,7 +672,7 @@ const AdminDashboard = () => {
           language,
           plan_type: e.plan_type,
           duration: e.duration,
-          sessions_total: e.sessions_total,
+          sessions_total: e.sessions_total ?? e.classes_included,
           amount: e.amount,
           currency: e.currency ?? "EGP",
           preferred_day: e.preferred_day ?? "",
