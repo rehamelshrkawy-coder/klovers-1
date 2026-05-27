@@ -335,22 +335,24 @@ const TrialClassesManager = () => {
           variant: "destructive",
         });
       }
+      const bookingLang = booking.language ?? "ar";
+      const langSlots = activeSlots.filter(
+        (s) => s.trial_date && (!s.class_language || s.class_language === bookingLang)
+      );
       const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
           template: "trial_rebook_request",
           email: booking.email,
           name: booking.name || booking.email,
-          language: "ar",
+          language: bookingLang,
           rebook_url: `${window.location.origin}/trial-booking`,
           class_link_url: meetingUrl,
-          available_slots: activeSlots
-            .filter((s) => s.trial_date)
-            .map((s) => ({
-              day_of_week: s.day_of_week,
-              start_time: s.start_time,
-              timezone: "Africa/Cairo",
-              date: s.trial_date,
-            })),
+          available_slots: langSlots.map((s) => ({
+            day_of_week: s.day_of_week,
+            start_time: s.start_time,
+            timezone: "Africa/Cairo",
+            date: s.trial_date,
+          })),
         },
       });
       if (emailErr) throw emailErr;
@@ -388,26 +390,27 @@ const TrialClassesManager = () => {
       });
     }
     setBulkBusy(true);
-    const rebookSlots = activeSlots
-      .filter((s) => s.trial_date)
-      .map((s) => ({
-        day_of_week: s.day_of_week,
-        start_time: s.start_time,
-        timezone: "Africa/Cairo",
-        date: s.trial_date,
-      }));
     let ok = 0, fail = 0;
     for (const b of tba) {
       try {
+        const bLang = b.language ?? "ar";
+        const bSlots = activeSlots
+          .filter((s) => s.trial_date && (!s.class_language || s.class_language === bLang))
+          .map((s) => ({
+            day_of_week: s.day_of_week,
+            start_time: s.start_time,
+            timezone: "Africa/Cairo",
+            date: s.trial_date,
+          }));
         const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
           body: {
             template: "trial_rebook_request",
             email: b.email,
             name: b.name || b.email,
-            language: "ar",
+            language: bLang,
             rebook_url: `${window.location.origin}/trial-booking`,
             class_link_url: bulkMeetingUrl,
-            available_slots: rebookSlots,
+            available_slots: bSlots,
           },
         });
         if (emailErr) throw emailErr;
