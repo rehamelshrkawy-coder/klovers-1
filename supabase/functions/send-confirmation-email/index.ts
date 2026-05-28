@@ -606,76 +606,215 @@ function buildPaymentMethodReminderEmail(name: string, enrollmentId: string, lan
 function buildTrialConfirmedEmail(p: EmailPayload) {
   const isAr = p.language === "ar";
   const tz = (p.trial_timezone || "Africa/Cairo").replace(/_/g, " ");
+
   const calBtn = p.calendar_url
-    ? `<div style="margin: 20px 0; text-align: center;">
-        <a href="${p.calendar_url}" style="display: inline-block; background: #4285f4; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">📅 ${isAr ? "أضف إلى تقويم جوجل" : "Add to Google Calendar"}</a>
+    ? `<div style="margin: 16px 0; text-align: center;">
+        <a href="${p.calendar_url}" style="display: inline-block; background: #4285f4; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">📅 ${isAr ? "أضف إلى تقويم Google" : "Add to Google Calendar"}</a>
        </div>`
     : "";
 
-  if (isAr) {
+  const joinBtn = p.class_link_url
+    ? `<div style="margin: 20px 0; text-align: center;">
+        <a href="${p.class_link_url}" style="display:inline-block;background:${BRAND_BLACK};color:${BRAND_YELLOW};padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;">🎓 ${isAr ? "انضم للحصة" : "Join the Class"}</a>
+       </div>`
+    : `<p style="color: ${BRAND_MUTED}; font-size: 13px; text-align: ${isAr ? "right" : "left"};">${isAr ? "سيتم إرسال رابط الحصة إليك قبل الموعد مباشرة. تابع بريدك الإلكتروني! 📩" : "The class link will be sent to you before the session. Keep an eye on your inbox! 📩"}</p>`;
+
+  // ── ENGLISH VERSION ──────────────────────────────────────────────────────
+  if (!isAr) {
     return {
-      subject: "KLovers — تم تأكيد حصتك التجريبية المجانية! ✅",
+      subject: "🎉 You're in! Your free Korean trial class is confirmed — KLovers",
       html: brandWrapper(`
-        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! 🎉</h1>
-        <p>تم تأكيد حصتك التجريبية المجانية في الكورية!</p>
-        ${brandTable([
-          ["📅 التاريخ", p.trial_date || ""],
-          ["⏰ الوقت", p.trial_time || ""],
-          ["🌍 المنطقة الزمنية", tz],
-          ["📚 المستوى", p.level || "مبتدئ"],
-          ["⏱ المدة", "45 دقيقة"],
-        ])}
+        <h1 style="color: ${BRAND_DARK}; font-size: 24px; margin-bottom: 4px;">Hi ${p.name}! 👋</h1>
+        <p style="color: ${BRAND_TEXT}; font-size: 15px; margin-bottom: 20px;">
+          We're so excited to have you! Your <strong>free trial Korean class</strong> is officially confirmed.
+          Get ready for a fun, relaxed session — no pressure, just great energy. 🌟
+        </p>
+
+        <!-- Details card -->
+        <div style="background: #f9f9f9; border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; margin-bottom: 20px;">
+          <div style="background: ${BRAND_BLACK}; padding: 10px 18px;">
+            <p style="margin: 0; color: ${BRAND_YELLOW}; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">📅 Class Details</p>
+          </div>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 11px 18px; border-bottom: 1px solid #f0f0f0; color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; width: 90px;">🗓️ Date</td>
+              <td style="padding: 11px 18px; border-bottom: 1px solid #f0f0f0; font-weight: 700; color: ${BRAND_DARK}; font-size: 14px;">${p.trial_date || ""}</td>
+            </tr>
+            <tr>
+              <td style="padding: 11px 18px; border-bottom: 1px solid #f0f0f0; color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;">⏰ Time</td>
+              <td style="padding: 11px 18px; border-bottom: 1px solid #f0f0f0; font-weight: 700; color: ${BRAND_DARK}; font-size: 14px;">${p.trial_time || ""}</td>
+            </tr>
+            <tr>
+              <td style="padding: 11px 18px; color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;">🌍 Timezone</td>
+              <td style="padding: 11px 18px; font-weight: 700; color: ${BRAND_DARK}; font-size: 14px;">${tz}</td>
+            </tr>
+          </table>
+        </div>
+
         ${calBtn}
-        ${p.class_link_url
-          ? `<div style="margin:24px 0;text-align:center;">
-              <a href="${p.class_link_url}" style="display:inline-block;background:#000000;color:#FFFF00;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;">🎓 انضم للكلاس</a>
-            </div>`
-          : ""
-        }
-        <h3 style="color: ${BRAND_DARK}; font-size: 16px; margin-top: 24px;">ماذا تتوقع:</h3>
-        <ul style="color: ${BRAND_TEXT}; padding-right: 20px;">
-          <li>حصة مباشرة مع مدرس حقيقي</li>
-          <li>تقييم شخصي لمستواك</li>
-          <li>نصائح لتعلم الكورية بشكل أسرع</li>
-        </ul>
-        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">عندك أسئلة؟ تواصل معنا على واتساب.</p>
-      `, true),
+        ${joinBtn}
+
+        <!-- What to expect -->
+        <h3 style="color: ${BRAND_DARK}; font-size: 16px; font-weight: 700; margin: 24px 0 12px;">✨ What happens in this session?</h3>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin: 0 0 12px;">This is <strong>not</strong> a regular lesson — it's a friendly intro session where we get to know you! Here's what we'll do:</p>
+
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 9px 0; border-bottom: 1px solid #f5f5f5; vertical-align: top;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: ${BRAND_YELLOW}; border-radius: 50%; font-size: 13px; flex-shrink: 0;">👋</span>
+            </td>
+            <td style="padding: 9px 0 9px 10px; border-bottom: 1px solid #f5f5f5; color: ${BRAND_TEXT}; font-size: 14px; line-height: 1.5;">
+              <strong>Introductions</strong> — meet your teacher and the rest of the group
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 9px 0; border-bottom: 1px solid #f5f5f5; vertical-align: top;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: ${BRAND_YELLOW}; border-radius: 50%; font-size: 13px; flex-shrink: 0;">💬</span>
+            </td>
+            <td style="padding: 9px 0 9px 10px; border-bottom: 1px solid #f5f5f5; color: ${BRAND_TEXT}; font-size: 14px; line-height: 1.5;">
+              <strong>Why Korean?</strong> — everyone shares their story and motivation
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 9px 0; border-bottom: 1px solid #f5f5f5; vertical-align: top;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: ${BRAND_YELLOW}; border-radius: 50%; font-size: 13px; flex-shrink: 0;">🗺️</span>
+            </td>
+            <td style="padding: 9px 0 9px 10px; border-bottom: 1px solid #f5f5f5; color: ${BRAND_TEXT}; font-size: 14px; line-height: 1.5;">
+              <strong>How the course works</strong> — structure, schedule, and what to expect
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 9px 0; border-bottom: 1px solid #f5f5f5; vertical-align: top;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: ${BRAND_YELLOW}; border-radius: 50%; font-size: 13px; flex-shrink: 0;">📊</span>
+            </td>
+            <td style="padding: 9px 0 9px 10px; border-bottom: 1px solid #f5f5f5; color: ${BRAND_TEXT}; font-size: 14px; line-height: 1.5;">
+              <strong>Korean levels explained</strong> — we'll help you find where you fit in
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 9px 0; border-bottom: 1px solid #f5f5f5; vertical-align: top;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: ${BRAND_YELLOW}; border-radius: 50%; font-size: 13px; flex-shrink: 0;">🎯</span>
+            </td>
+            <td style="padding: 9px 0 9px 10px; border-bottom: 1px solid #f5f5f5; color: ${BRAND_TEXT}; font-size: 14px; line-height: 1.5;">
+              <strong>Your goals</strong> — what do you want to achieve with Korean?
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 9px 0; vertical-align: top;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: ${BRAND_YELLOW}; border-radius: 50%; font-size: 13px; flex-shrink: 0;">❓</span>
+            </td>
+            <td style="padding: 9px 0 9px 10px; color: ${BRAND_TEXT}; font-size: 14px; line-height: 1.5;">
+              <strong>Q&amp;A</strong> — ask us anything, no question is too small!
+            </td>
+          </tr>
+        </table>
+
+        <!-- Tip box -->
+        <div style="background: #fffff0; border-left: 4px solid ${BRAND_YELLOW}; border-radius: 6px; padding: 13px 16px; margin: 22px 0;">
+          <p style="margin: 0; color: ${BRAND_DARK}; font-size: 13.5px;">💡 <strong>Quick tip:</strong> Join 5 minutes early, find a quiet spot, and bring your smile — that's all you need! 🇰🇷</p>
+        </div>
+
+        <p style="color: ${BRAND_MUTED}; font-size: 12px; margin-top: 8px; text-align: center;">Questions? Just reply to this email or reach us on WhatsApp anytime.</p>
+      `, false),
     };
   }
+
+  // ── ARABIC VERSION ───────────────────────────────────────────────────────
   return {
-    subject: "✅ You're booked! Your free 30-min Korean trial class — KLovers",
+    subject: "🎉 تم تأكيد حصتك التجريبية المجانية في الكورية — KLovers",
     html: brandWrapper(`
-      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 🎉</h1>
-      <p style="color: ${BRAND_TEXT}; font-size: 15px; margin-bottom: 4px;">Your <strong>free 30-minute Korean trial class</strong> is confirmed. We can't wait to meet you!</p>
-      ${brandTable([
-        ["📅 Date", p.trial_date || ""],
-        ["⏰ Time", p.trial_time || ""],
-        ["🌍 Timezone", tz],
-        ["📚 Level", p.level || "Beginner"],
-        ["⏱ Duration", "30 minutes"],
-      ])}
+      <h1 style="color: ${BRAND_DARK}; font-size: 24px; margin-bottom: 4px;">أهلاً ${p.name}! 👋</h1>
+      <p style="color: ${BRAND_TEXT}; font-size: 15px; margin-bottom: 20px;">
+        يسعدنا جداً انضمامك! تم تأكيد مكانك في <strong>الحصة التجريبية المجانية</strong> بنجاح.
+        استعد لجلسة ممتعة وخالية من أي ضغط — طاقة إيجابية وأصدقاء جدد! 🌟
+      </p>
+
+      <!-- Details card -->
+      <div style="background: #f9f9f9; border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; margin-bottom: 20px;">
+        <div style="background: ${BRAND_BLACK}; padding: 10px 18px; text-align: right;">
+          <p style="margin: 0; color: ${BRAND_YELLOW}; font-size: 12px; font-weight: 700; letter-spacing: 1px;">تفاصيل الحصة 📅</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; direction: rtl;">
+          <tr>
+            <td style="padding: 11px 18px; border-bottom: 1px solid #f0f0f0; color: #888; font-size: 12px; font-weight: 600; width: 90px;">🗓️ التاريخ</td>
+            <td style="padding: 11px 18px; border-bottom: 1px solid #f0f0f0; font-weight: 700; color: ${BRAND_DARK}; font-size: 14px;">${p.trial_date || ""}</td>
+          </tr>
+          <tr>
+            <td style="padding: 11px 18px; border-bottom: 1px solid #f0f0f0; color: #888; font-size: 12px; font-weight: 600;">⏰ الوقت</td>
+            <td style="padding: 11px 18px; border-bottom: 1px solid #f0f0f0; font-weight: 700; color: ${BRAND_DARK}; font-size: 14px;">${p.trial_time || ""}</td>
+          </tr>
+          <tr>
+            <td style="padding: 11px 18px; color: #888; font-size: 12px; font-weight: 600;">🌍 التوقيت</td>
+            <td style="padding: 11px 18px; font-weight: 700; color: ${BRAND_DARK}; font-size: 14px;">${tz}</td>
+          </tr>
+        </table>
+      </div>
+
       ${calBtn}
-      <h3 style="color: ${BRAND_DARK}; font-size: 16px; margin-top: 28px;">What happens in your 30 minutes?</h3>
-      <ul style="color: ${BRAND_TEXT}; padding-left: 20px; line-height: 1.9;">
-        <li>🧑‍🏫 <strong>Meet your teacher</strong> — a real live session, not a recording</li>
-        <li>📊 <strong>Level check</strong> — we figure out exactly where you are</li>
-        <li>🔤 <strong>Taste of Korean</strong> — you'll actually learn something in this class</li>
-        <li>🗺️ <strong>Your learning roadmap</strong> — we show you the fastest path to fluency</li>
-      </ul>
-      <div style="background: #fffff0; border-left: 4px solid ${BRAND_YELLOW}; border-radius: 6px; padding: 14px 18px; margin: 24px 0;">
-        <p style="margin: 0; color: ${BRAND_DARK}; font-size: 14px;"><strong>No prep needed.</strong> Just show up with 30 minutes and an open mind. We'll handle the rest.</p>
+      ${joinBtn}
+
+      <!-- What to expect -->
+      <h3 style="color: ${BRAND_DARK}; font-size: 16px; font-weight: 700; margin: 24px 0 12px; text-align: right;">✨ إيه اللي هيحصل في الحصة دي؟</h3>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; margin: 0 0 12px; text-align: right;">مش حصة دراسية — ده لقاء تعارف ودردشة ممتعة! هنعمل مع بعض:</p>
+
+      <table style="width: 100%; border-collapse: collapse; direction: rtl;">
+        <tr>
+          <td style="padding: 9px 0; border-bottom: 1px solid #f5f5f5; vertical-align: top; width: 36px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: ${BRAND_YELLOW}; border-radius: 50%; font-size: 13px;">👋</span>
+          </td>
+          <td style="padding: 9px 10px 9px 0; border-bottom: 1px solid #f5f5f5; color: ${BRAND_TEXT}; font-size: 14px; line-height: 1.6; text-align: right;">
+            <strong>تعارف</strong> — هنتعرف على المدرس وعلى بعض
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 9px 0; border-bottom: 1px solid #f5f5f5; vertical-align: top;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: ${BRAND_YELLOW}; border-radius: 50%; font-size: 13px;">💬</span>
+          </td>
+          <td style="padding: 9px 10px 9px 0; border-bottom: 1px solid #f5f5f5; color: ${BRAND_TEXT}; font-size: 14px; line-height: 1.6; text-align: right;">
+            <strong>ليه الكورية؟</strong> — كل واحد يشارك قصته وسبب اهتمامه باللغة
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 9px 0; border-bottom: 1px solid #f5f5f5; vertical-align: top;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: ${BRAND_YELLOW}; border-radius: 50%; font-size: 13px;">🗺️</span>
+          </td>
+          <td style="padding: 9px 10px 9px 0; border-bottom: 1px solid #f5f5f5; color: ${BRAND_TEXT}; font-size: 14px; line-height: 1.6; text-align: right;">
+            <strong>إزاي الكورس بيشتغل؟</strong> — هنشرح المحتوى والجداول وكل التفاصيل
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 9px 0; border-bottom: 1px solid #f5f5f5; vertical-align: top;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: ${BRAND_YELLOW}; border-radius: 50%; font-size: 13px;">📊</span>
+          </td>
+          <td style="padding: 9px 10px 9px 0; border-bottom: 1px solid #f5f5f5; color: ${BRAND_TEXT}; font-size: 14px; line-height: 1.6; text-align: right;">
+            <strong>مستويات اللغة الكورية</strong> — هتعرف إنت على أي مستوى وتبدأ منين
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 9px 0; border-bottom: 1px solid #f5f5f5; vertical-align: top;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: ${BRAND_YELLOW}; border-radius: 50%; font-size: 13px;">🎯</span>
+          </td>
+          <td style="padding: 9px 10px 9px 0; border-bottom: 1px solid #f5f5f5; color: ${BRAND_TEXT}; font-size: 14px; line-height: 1.6; text-align: right;">
+            <strong>أهدافك</strong> — عايز تحقق إيه من تعلم الكورية؟
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 9px 0; vertical-align: top;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: ${BRAND_YELLOW}; border-radius: 50%; font-size: 13px;">❓</span>
+          </td>
+          <td style="padding: 9px 10px 9px 0; color: ${BRAND_TEXT}; font-size: 14px; line-height: 1.6; text-align: right;">
+            <strong>أسئلة وأجوبة</strong> — اسأل أي حاجة، ما فيش سؤال صغير!
+          </td>
+        </tr>
+      </table>
+
+      <!-- Tip box -->
+      <div style="background: #fffff0; border-right: 4px solid ${BRAND_YELLOW}; border-radius: 6px; padding: 13px 16px; margin: 22px 0; text-align: right;">
+        <p style="margin: 0; color: ${BRAND_DARK}; font-size: 13.5px;">💡 <strong>نصيحة سريعة:</strong> انضم قبل الحصة بـ 5 دقايق، دور على مكان هادي، وجيب معاك ابتسامتك — ده كل اللي محتاجه! 🇰🇷</p>
       </div>
-      ${p.class_link_url
-        ? `<div style="margin:24px 0;text-align:center;">
-            <a href="${p.class_link_url}" style="display:inline-block;background:#000000;color:#FFFF00;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;">🎓 Join the Class</a>
-          </div>`
-        : `<p style="color: ${BRAND_TEXT}; font-size: 14px;">The class link will be sent to you before the session. Keep an eye on your inbox!</p>`
-      }
-      <div style="margin: 24px 0; text-align: center;">
-        ${brandButton("Message us on WhatsApp", "https://wa.me/201010003084")}
-      </div>
-      <p style="color: ${BRAND_MUTED}; font-size: 12px; margin-top: 8px;">Questions? Just reply to this email or reach us on WhatsApp anytime.</p>
-    `, false),
+
+      <p style="color: ${BRAND_MUTED}; font-size: 12px; margin-top: 8px; text-align: center;">عندك أسئلة؟ رد على الإيميل ده أو راسلنا واتساب في أي وقت.</p>
+    `, true),
   };
 }
 
