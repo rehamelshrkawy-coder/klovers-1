@@ -338,9 +338,12 @@ const TrialClassesManager = () => {
           variant: "destructive",
         });
       }
-      const bookingLang = booking.language ?? "ar";
+      // class_language on the booking is "arabic" | "english" (stored at booking time).
+      // Normalise to the ISO code expected by the email template ("ar" / "en").
+      const rawLang = booking.class_language ?? "en";
+      const bookingLang = rawLang === "arabic" ? "ar" : rawLang === "english" ? "en" : rawLang;
       const langSlots = activeSlots.filter(
-        (s) => s.trial_date && (!s.class_language || s.class_language === bookingLang)
+        (s) => s.trial_date && (!s.class_language || s.class_language === rawLang)
       );
       const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
@@ -396,9 +399,10 @@ const TrialClassesManager = () => {
     let ok = 0, fail = 0;
     for (const b of tba) {
       try {
-        const bLang = b.language ?? "ar";
+        const bRawLang = b.class_language ?? "en";
+        const bLang = bRawLang === "arabic" ? "ar" : bRawLang === "english" ? "en" : bRawLang;
         const bSlots = activeSlots
-          .filter((s) => s.trial_date && (!s.class_language || s.class_language === bLang))
+          .filter((s) => s.trial_date && (!s.class_language || s.class_language === bRawLang))
           .map((s) => ({
             day_of_week: s.day_of_week,
             start_time: s.start_time,
