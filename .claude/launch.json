@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm.cmd",
       "runtimeArgs": ["run", "dev"],
       "port": 8080
+    },
+    {
+      "name": "email-preview",
+      "runtimeExecutable": "npx.cmd",
+      "runtimeArgs": ["serve", "email-preview", "-p", "3333", "--no-clipboard"],
+      "port": 3333
     }
   ]
 }
