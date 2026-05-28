@@ -30,6 +30,7 @@ interface Booking {
   trial_date: string;
   user_id: string | null;
   level: string | null;
+  class_language: string | null;
   created_at: string;
 }
 
@@ -82,7 +83,7 @@ Deno.serve(async (req) => {
     // is the opposite of "silent" — they're about to be very-much-attending.
     const { data: bookings, error } = await supabase
       .from("trial_bookings")
-      .select("id, name, email, trial_date, user_id, level, created_at")
+      .select("id, name, email, trial_date, user_id, level, class_language, created_at")
       .gte("trial_date", cutoffCairo)
       .lt("trial_date", todayCairo)
       .is("followup_day3_sent_at", null)
@@ -139,7 +140,7 @@ Deno.serve(async (req) => {
           body: {
             email: b.email,
             name: b.name || "there",
-            language: "ar",
+            language: b.class_language === "english" ? "en" : "ar",
             template: "trial_followup_day3",
             level: b.level,
           },

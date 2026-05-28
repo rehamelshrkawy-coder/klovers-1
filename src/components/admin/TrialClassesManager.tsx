@@ -545,7 +545,7 @@ const TrialClassesManager = () => {
         .eq("start_time", booking.start_time ?? "")
         .maybeSingle();
       const meetingUrl = (slotRow as { meeting_url?: string | null; class_language?: string | null } | null)?.meeting_url ?? null;
-      const resendLang = (slotRow as { class_language?: string | null } | null)?.class_language ?? booking.language ?? "en";
+      const resendLang = (slotRow as { class_language?: string | null } | null)?.class_language ?? booking.class_language ?? "en";
       const resendEmailLang = resendLang === "arabic" ? "ar" : resendLang === "english" ? "en" : resendLang;
       const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
