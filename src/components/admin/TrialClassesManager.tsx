@@ -222,17 +222,37 @@ const TrialClassesManager = () => {
         .eq("id", booking.id);
       if (error) throw error;
 
-      // Fetch meeting URL + class language for this specific session date
-      const { data: slotRow } = await supabase
+      // Fetch meeting URL for this slot.
+      // Try exact trial_date match first (one-off slots); fall back to
+      // day_of_week match (recurring slots whose trial_date differs from the
+      // booking date).
+      const { data: slotByDate } = await supabase
         .from("trial_slots")
         .select("meeting_url, class_language")
         .eq("trial_date", date)
         .eq("start_time", time)
         .maybeSingle();
-      const meetingUrl = (slotRow as { meeting_url?: string | null; class_language?: string | null } | null)?.meeting_url ?? null;
-      const slotLang = (slotRow as { class_language?: string | null } | null)?.class_language ?? booking.language ?? "en";
+      const { data: slotByDow } = slotByDate
+        ? { data: null }
+        : await supabase
+            .from("trial_slots")
+            .select("meeting_url, class_language")
+            .eq("day_of_week", Number(dowStr))
+            .eq("start_time", time)
+            .eq("is_active", true)
+            .limit(1)
+            .maybeSingle();
+      const effectiveSlot = slotByDate ?? slotByDow;
+      const meetingUrl = (effectiveSlot as any)?.meeting_url ?? null;
+
+      // Language: booking.class_language ("arabic" / "english") is stored at
+      // booking time and is the authoritative source. Fall back to the slot's
+      // value in case the booking pre-dates the column, then hard-default "en".
+      const rawLang = booking.class_language
+        ?? (effectiveSlot as any)?.class_language
+        ?? "en";
       // Normalise "arabic"→"ar", "english"→"en" for the email template
-      const emailLang = slotLang === "arabic" ? "ar" : slotLang === "english" ? "en" : slotLang;
+      const emailLang = rawLang === "arabic" ? "ar" : rawLang === "english" ? "en" : rawLang;
 
       // Send confirmation email with join link to the student
       const emailBody: Record<string, unknown> = {
