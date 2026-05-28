@@ -432,7 +432,7 @@ Deno.serve(async (req) => {
           template: "trial_confirmed",
           email: normalizedEmail,
           name: finalName,
-          language: "en",
+          language: class_language === "arabic" ? "ar" : "en",
           trial_date: trialDate,
           trial_time: start_time,
           trial_timezone: timezone,
