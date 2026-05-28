@@ -46,6 +46,7 @@ interface EmailPayload {
   trial_date?: string;
   trial_time?: string;
   trial_timezone?: string;
+  trial_duration_min?: number;
   calendar_url?: string;
   booking_id?: string;
   confirmation_token?: string;
@@ -175,6 +176,26 @@ function generateICS(opts: {
     "END:VEVENT",
     "END:VCALENDAR",
   ].filter(Boolean).join("\r\n");
+}
+
+// Convert a local date+time string to UTC ISO, given an IANA timezone.
+function localToUTCISO(dateStr: string, timeStr: string, tz: string): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const [hStr, mStr] = timeStr.split(":");
+  const h = pad(parseInt(hStr ?? "0", 10));
+  const m = pad(parseInt(mStr ?? "0", 10));
+  // Treat the desired local time as UTC first, then measure the offset.
+  const fakeUTC = new Date(`${dateStr}T${h}:${m}:00Z`);
+  if (isNaN(fakeUTC.getTime())) return new Date().toISOString();
+  const formatted = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false,
+  }).format(fakeUTC).replace(", ", "T").replace("T24:", "T00:");
+  const localTime = new Date(formatted + "Z");
+  const offsetMs = localTime.getTime() - fakeUTC.getTime();
+  return new Date(fakeUTC.getTime() - offsetMs).toISOString();
 }
 
 async function sendEmail(
@@ -606,12 +627,41 @@ function buildPaymentMethodReminderEmail(name: string, enrollmentId: string, lan
 function buildTrialConfirmedEmail(p: EmailPayload) {
   const isAr = p.language === "ar";
   const tz = (p.trial_timezone || "Africa/Cairo").replace(/_/g, " ");
+  const tzIana = p.trial_timezone || "Africa/Cairo";
+  const durationMin = p.trial_duration_min || 30;
 
-  const calBtn = p.calendar_url
+  // Generate ICS attachment when we have enough data
+  let icsAttachment: { filename: string; content: string; content_type: string } | undefined;
+  if (p.trial_date && p.trial_time) {
+    try {
+      const dtUTC = localToUTCISO(p.trial_date, p.trial_time, tzIana);
+      const icsText = generateICS({
+        summary: isAr ? "حصة كورية تجريبية مجانية — KLovers" : "Free Korean Trial Class — Klovers Egypt",
+        description: isAr
+          ? `حصتك التجريبية المجانية في اللغة الكورية مع KLovers.\nالمستوى: ${p.level || "مبتدئ"}\n\nhttps://kloversegy.com`
+          : `Your free ${durationMin}-min trial Korean class with Klovers Egypt.\nLevel: ${p.level || "Beginner"}\n\nhttps://kloversegy.com`,
+        dtstart: dtUTC,
+        durationMinutes: durationMin,
+        url: p.class_link_url || "https://kloversegy.com",
+      });
+      icsAttachment = {
+        filename: "klovers-trial-class.ics",
+        content: btoa(unescape(encodeURIComponent(icsText))),
+        content_type: "text/calendar",
+      };
+    } catch { /* skip if date parse fails */ }
+  }
+
+  const calSection = icsAttachment
     ? `<div style="margin: 16px 0; text-align: center;">
-        <a href="${p.calendar_url}" style="display: inline-block; background: #4285f4; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">📅 ${isAr ? "أضف إلى تقويم Google" : "Add to Google Calendar"}</a>
+        <p style="margin: 0 0 8px; color: ${BRAND_MUTED}; font-size: 13px;">📎 ${isAr ? "ملف التقويم (.ics) مرفق بهذا الإيميل — افتحه لإضافة الحصة لأي تطبيق تقويم (Google, Apple, Outlook)" : "A calendar file (.ics) is attached — open it to add your class to Google Calendar, Apple Calendar, or Outlook"}</p>
+        ${p.calendar_url ? `<a href="${p.calendar_url}" style="display: inline-block; background: #4285f4; color: #ffffff; padding: 10px 22px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px;">📅 ${isAr ? "أضف إلى Google Calendar" : "Add to Google Calendar"}</a>` : ""}
        </div>`
-    : "";
+    : (p.calendar_url
+        ? `<div style="margin: 16px 0; text-align: center;">
+            <a href="${p.calendar_url}" style="display: inline-block; background: #4285f4; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">📅 ${isAr ? "أضف إلى تقويم Google" : "Add to Google Calendar"}</a>
+           </div>`
+        : "");
 
   const joinBtn = p.class_link_url
     ? `<div style="margin: 20px 0; text-align: center;">
@@ -651,7 +701,7 @@ function buildTrialConfirmedEmail(p: EmailPayload) {
           </table>
         </div>
 
-        ${calBtn}
+        ${calSection}
         ${joinBtn}
 
         <!-- What to expect -->
@@ -716,6 +766,7 @@ function buildTrialConfirmedEmail(p: EmailPayload) {
 
         <p style="color: ${BRAND_MUTED}; font-size: 12px; margin-top: 8px; text-align: center;">Questions? Just reply to this email or reach us on WhatsApp anytime.</p>
       `, false),
+      icsAttachment,
     };
   }
 
@@ -815,6 +866,7 @@ function buildTrialConfirmedEmail(p: EmailPayload) {
 
       <p style="color: ${BRAND_MUTED}; font-size: 12px; margin-top: 8px; text-align: center;">عندك أسئلة؟ رد على الإيميل ده أو راسلنا واتساب في أي وقت.</p>
     `, true),
+    icsAttachment,
   };
 }
 
@@ -902,6 +954,29 @@ function buildTrialAttendanceConfirmationEmail(p: EmailPayload) {
   const isAr = p.language === "ar";
   const confirmUrl = `https://kloversegy.com/trial-confirm?id=${p.booking_id || ""}&token=${p.confirmation_token || ""}`;
   const classLink = p.class_link_url || p.meeting_url || null;
+  const tzIana = p.trial_timezone || "Africa/Cairo";
+  const durationMin = p.trial_duration_min || 30;
+
+  let icsAttachment: { filename: string; content: string; content_type: string } | undefined;
+  if (p.trial_date && p.trial_time) {
+    try {
+      const dtUTC = localToUTCISO(p.trial_date, p.trial_time, tzIana);
+      const icsText = generateICS({
+        summary: isAr ? "حصة كورية تجريبية مجانية — KLovers" : "Free Korean Trial Class — Klovers Egypt",
+        description: isAr
+          ? `حصتك التجريبية المجانية في اللغة الكورية مع KLovers.\nhttps://kloversegy.com`
+          : `Your free ${durationMin}-min trial Korean class with Klovers Egypt.\nhttps://kloversegy.com`,
+        dtstart: dtUTC,
+        durationMinutes: durationMin,
+        url: classLink || "https://kloversegy.com",
+      });
+      icsAttachment = {
+        filename: "klovers-trial-class.ics",
+        content: btoa(unescape(encodeURIComponent(icsText))),
+        content_type: "text/calendar",
+      };
+    } catch { /* skip */ }
+  }
 
   const meetSection = classLink
     ? (isAr
@@ -936,7 +1011,9 @@ function buildTrialAttendanceConfirmationEmail(p: EmailPayload) {
         </div>
         ${meetSection}
         <p style="color: ${BRAND_MUTED}; font-size: 13px;">تأكيد الحضور يساعدنا في حجز مقعدك والتحضير لك. شكراً!</p>
+        ${icsAttachment ? `<p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">📎 ملف التقويم (.ics) مرفق — افتحه لإضافة الحصة لتقويمك</p>` : ""}
       `, true),
+      icsAttachment,
     };
   }
   return {
@@ -953,7 +1030,9 @@ function buildTrialAttendanceConfirmationEmail(p: EmailPayload) {
       </div>
       ${meetSection}
       <p style="color: ${BRAND_MUTED}; font-size: 13px;">Confirming attendance helps us reserve your seat and prepare for you.</p>
+      ${icsAttachment ? `<p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">📎 A calendar file (.ics) is attached — open it to add your class to any calendar app</p>` : ""}
     `, false),
+    icsAttachment,
   };
 }
 
@@ -1582,9 +1661,13 @@ serve(async (req) => {
       case "rejection":
         ({ subject, html } = buildRejectionEmail(payload));
         break;
-      case "trial_confirmed":
-        ({ subject, html } = buildTrialConfirmedEmail(payload));
+      case "trial_confirmed": {
+        const trialResult = buildTrialConfirmedEmail(payload);
+        subject = trialResult.subject;
+        html = trialResult.html;
+        if (trialResult.icsAttachment) emailAttachments = [trialResult.icsAttachment];
         break;
+      }
       case "trial_rebook_request":
         ({ subject, html } = buildTrialRebookEmail(payload));
         break;
@@ -1615,9 +1698,13 @@ serve(async (req) => {
       case "class_feedback":
         ({ subject, html } = buildClassFeedbackEmail(payload));
         break;
-      case "trial_attendance_confirmation":
-        ({ subject, html } = buildTrialAttendanceConfirmationEmail(payload));
+      case "trial_attendance_confirmation": {
+        const attendResult = buildTrialAttendanceConfirmationEmail(payload);
+        subject = attendResult.subject;
+        html = attendResult.html;
+        if (attendResult.icsAttachment) emailAttachments = [attendResult.icsAttachment];
         break;
+      }
       case "enrollment":
       default:
         ({ subject, html } = buildEnrollmentEmail(payload));
