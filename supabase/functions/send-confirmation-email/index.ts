@@ -1656,7 +1656,7 @@ serve(async (req) => {
         break;
       }
       case "payment_method_reminder":
-        ({ subject, html } = buildPaymentMethodReminderEmail(name, payload.enrollment_id!, language || "ar"));
+        ({ subject, html } = buildPaymentMethodReminderEmail(name, payload.enrollment_id!, language || "en"));
         break;
       case "rejection":
         ({ subject, html } = buildRejectionEmail(payload));

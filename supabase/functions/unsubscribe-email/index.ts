@@ -21,7 +21,7 @@ const html = (msg: string, isAr: boolean) => `<!DOCTYPE html>
 serve(async (req) => {
   const url = new URL(req.url);
   const token = url.searchParams.get("token");
-  const lang  = url.searchParams.get("lang") ?? "ar";
+  const lang  = url.searchParams.get("lang") ?? "en";
   const isAr  = lang === "ar";
 
   if (!token) {

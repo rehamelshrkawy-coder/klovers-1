@@ -37,11 +37,8 @@ interface Booking {
 }
 
 function pickLanguage(classLanguage: string | null): "ar" | "en" {
-  // Use the language stored at booking time ("arabic" / "english").
-  // Normalise to ISO code; default to "ar" for existing rows that pre-date
-  // the class_language column (MENA-majority audience).
-  if (classLanguage === "english") return "en";
-  return "ar";
+  if (classLanguage === "arabic") return "ar";
+  return "en";
 }
 
 const STAGE_TEMPLATE: Record<Stage, "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "trial_followup_day7"> = {
