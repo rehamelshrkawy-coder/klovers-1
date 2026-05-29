@@ -308,15 +308,17 @@ const TrialClassesManager = () => {
   const handleUnschedule = async (booking: TrialBooking) => {
     setActioningId(booking.id);
     try {
+      // Use NULL for date/time so the sync_is_tba trigger correctly sets is_tba=true.
+      // Sentinel values (2099-12-31 / "TBA") leave is_tba=false and hit the unique constraint.
       const { error } = await supabase
         .from("trial_bookings")
         .update({
-          start_time: "TBA",
-          trial_date: "2099-12-31",
+          start_time: null,
+          trial_date: null,
           day_of_week: 0,
           status: "pending",
-          is_tba: true,
           confirmed_at: null,
+          attendance_confirmed_at: null,
           rebook_email_sent_at: null,
           changed_at: new Date().toISOString(),
         } as any)
@@ -326,12 +328,12 @@ const TrialClassesManager = () => {
         const fallback = await supabase
           .from("trial_bookings")
           .update({
-            start_time: "TBA",
-            trial_date: "2099-12-31",
+            start_time: null,
+            trial_date: null,
             day_of_week: 0,
             status: "pending",
-            is_tba: true,
             confirmed_at: null,
+            attendance_confirmed_at: null,
             rebook_email_sent_at: null,
           } as any)
           .eq("id", booking.id);
