@@ -996,6 +996,58 @@ function buildTrialAttendanceConfirmationEmail(p: EmailPayload) {
             <p style="margin: 0; color: ${BRAND_DARK}; font-size: 14px;">🕐 Your class link will be sent to you 24 hours before your session</p>
           </div>`);
 
+  const breakdownAr = `
+    <h2 style="color: ${BRAND_DARK}; font-size: 18px; margin: 28px 0 8px;">✨ ماذا سيحدث في هذه الحصة؟</h2>
+    <p style="color: ${BRAND_MUTED}; font-size: 14px; margin: 0 0 16px;">هذه مش حصة دراسة عادية — دي جلسة تعارف ممتعة عشان نتعرف عليك! إليك ما سنفعله:</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+      ${[
+        ["👋", "تعارف", "تتعرف على معلمك وبقية المجموعة"],
+        ["💬", "ليه الكورية؟", "كل واحد يشارك قصته وسبب اهتمامه"],
+        ["🗺️", "كيف يعمل الكورس؟", "شرح منهج وطريقة التدريس"],
+        ["📊", "مستويات الكورية", "تعرف مستواك وين في رحلة التعلم"],
+        ["🎯", "أهدافك", "نناقش ما تريد تحقيقه"],
+        ["❓", "أسئلة وأجوبة", "اسأل أي شيء في بالك"],
+      ].map(([icon, title, desc]) => `
+        <tr>
+          <td width="48" style="padding: 10px 8px; vertical-align: top; text-align: center;">
+            <span style="display: inline-block; width: 36px; height: 36px; background: ${BRAND_YELLOW}; border-radius: 50%; line-height: 36px; text-align: center; font-size: 18px;">${icon}</span>
+          </td>
+          <td style="padding: 10px 8px; vertical-align: top;">
+            <strong style="color: ${BRAND_DARK};">${title}</strong>
+            <span style="color: ${BRAND_MUTED}; font-size: 13px;"> — ${desc}</span>
+          </td>
+        </tr>`).join("")}
+    </table>
+    <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 14px 18px; margin: 20px 0;">
+      <p style="margin: 0; color: ${BRAND_DARK}; font-size: 14px;">💡 <strong>نصيحة سريعة:</strong> انضم قبل ٥ دقائق، اختر مكاناً هادئاً، وابتسم 😊</p>
+    </div>`;
+
+  const breakdownEn = `
+    <h2 style="color: ${BRAND_DARK}; font-size: 18px; margin: 28px 0 8px;">✨ What happens in this session?</h2>
+    <p style="color: ${BRAND_MUTED}; font-size: 14px; margin: 0 0 16px;">This is <strong>not</strong> a regular lesson — it's a friendly intro session where we get to know you! Here's what we'll do:</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+      ${[
+        ["👋", "Introductions", "meet your teacher and the rest of the group"],
+        ["💬", "Why Korean?", "everyone shares their story and motivation"],
+        ["🗺️", "How the course works", "we walk you through the curriculum and teaching style"],
+        ["📊", "Korean levels explained", "understand where you are in the learning journey"],
+        ["🎯", "Your goals", "we discuss what you want to achieve"],
+        ["❓", "Q&A", "ask us anything on your mind"],
+      ].map(([icon, title, desc]) => `
+        <tr>
+          <td width="48" style="padding: 10px 8px; vertical-align: top; text-align: center;">
+            <span style="display: inline-block; width: 36px; height: 36px; background: ${BRAND_YELLOW}; border-radius: 50%; line-height: 36px; text-align: center; font-size: 18px;">${icon}</span>
+          </td>
+          <td style="padding: 10px 8px; vertical-align: top;">
+            <strong style="color: ${BRAND_DARK};">${title}</strong>
+            <span style="color: ${BRAND_MUTED}; font-size: 13px;"> — ${desc}</span>
+          </td>
+        </tr>`).join("")}
+    </table>
+    <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 14px 18px; margin: 20px 0;">
+      <p style="margin: 0; color: ${BRAND_DARK}; font-size: 14px;">💡 <strong>Quick tip:</strong> Join 5 minutes early, find a quiet spot, and bring your smile 😊</p>
+    </div>`;
+
   if (isAr) {
     return {
       subject: "KLovers — أكّد حضورك لحصتك التجريبية ✅",
@@ -1010,6 +1062,7 @@ function buildTrialAttendanceConfirmationEmail(p: EmailPayload) {
           <a href="${confirmUrl}" style="display: inline-block; background: ${BRAND_YELLOW}; color: ${BRAND_BLACK}; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px; border: 2px solid ${BRAND_BLACK};">✅ أكّد حضوري</a>
         </div>
         ${meetSection}
+        ${breakdownAr}
         <p style="color: ${BRAND_MUTED}; font-size: 13px;">تأكيد الحضور يساعدنا في حجز مقعدك والتحضير لك. شكراً!</p>
         ${icsAttachment ? `<p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">📎 ملف التقويم (.ics) مرفق — افتحه لإضافة الحصة لتقويمك</p>` : ""}
       `, true),
@@ -1029,6 +1082,7 @@ function buildTrialAttendanceConfirmationEmail(p: EmailPayload) {
         <a href="${confirmUrl}" style="display: inline-block; background: ${BRAND_YELLOW}; color: ${BRAND_BLACK}; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px; border: 2px solid ${BRAND_BLACK};">✅ Confirm My Attendance</a>
       </div>
       ${meetSection}
+      ${breakdownEn}
       <p style="color: ${BRAND_MUTED}; font-size: 13px;">Confirming attendance helps us reserve your seat and prepare for you.</p>
       ${icsAttachment ? `<p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">📎 A calendar file (.ics) is attached — open it to add your class to any calendar app</p>` : ""}
     `, false),
