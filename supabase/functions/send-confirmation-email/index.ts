@@ -1063,6 +1063,17 @@ function buildTrialAttendanceConfirmationEmail(p: EmailPayload) {
         </div>
         ${meetSection}
         ${breakdownAr}
+        <div style="margin: 28px 0 8px; text-align: center;">
+          <p style="color: ${BRAND_DARK}; font-weight: bold; font-size: 15px; margin: 0 0 16px;">استعد للحصة — ابدأ بهذين الخطوتين</p>
+          <table width="100%" cellpadding="0" cellspacing="0"><tr>
+            <td style="padding: 0 8px 0 0; text-align: center;">
+              <a href="${SITE_URL}/placement-test" style="display: inline-block; background: ${BRAND_YELLOW}; color: ${BRAND_BLACK}; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; border: 2px solid ${BRAND_BLACK}; width: 100%; box-sizing: border-box;">🎯 اختبر مستواك</a>
+            </td>
+            <td style="padding: 0 0 0 8px; text-align: center;">
+              <a href="${SITE_URL}/pricing" style="display: inline-block; background: ${BRAND_BLACK}; color: ${BRAND_YELLOW}; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; border: 2px solid ${BRAND_BLACK}; width: 100%; box-sizing: border-box;">💰 شوف الأسعار</a>
+            </td>
+          </tr></table>
+        </div>
         <p style="color: ${BRAND_MUTED}; font-size: 13px;">تأكيد الحضور يساعدنا في حجز مقعدك والتحضير لك. شكراً!</p>
         ${icsAttachment ? `<p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">📎 ملف التقويم (.ics) مرفق — افتحه لإضافة الحصة لتقويمك</p>` : ""}
       `, true),
@@ -1083,6 +1094,17 @@ function buildTrialAttendanceConfirmationEmail(p: EmailPayload) {
       </div>
       ${meetSection}
       ${breakdownEn}
+      <div style="margin: 28px 0 8px; text-align: center;">
+        <p style="color: ${BRAND_DARK}; font-weight: bold; font-size: 15px; margin: 0 0 16px;">Get ready — start with these two steps</p>
+        <table width="100%" cellpadding="0" cellspacing="0"><tr>
+          <td style="padding: 0 8px 0 0; text-align: center;">
+            <a href="${SITE_URL}/placement-test" style="display: inline-block; background: ${BRAND_YELLOW}; color: ${BRAND_BLACK}; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; border: 2px solid ${BRAND_BLACK}; width: 100%; box-sizing: border-box;">🎯 Take the Placement Test</a>
+          </td>
+          <td style="padding: 0 0 0 8px; text-align: center;">
+            <a href="${SITE_URL}/pricing" style="display: inline-block; background: ${BRAND_BLACK}; color: ${BRAND_YELLOW}; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; border: 2px solid ${BRAND_BLACK}; width: 100%; box-sizing: border-box;">💰 See Class Prices</a>
+          </td>
+        </tr></table>
+      </div>
       <p style="color: ${BRAND_MUTED}; font-size: 13px;">Confirming attendance helps us reserve your seat and prepare for you.</p>
       ${icsAttachment ? `<p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">📎 A calendar file (.ics) is attached — open it to add your class to any calendar app</p>` : ""}
     `, false),
