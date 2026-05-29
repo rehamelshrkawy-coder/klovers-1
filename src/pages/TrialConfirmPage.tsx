@@ -107,7 +107,7 @@ const TrialConfirmPage = () => {
               </a>
               <a
                 href="/pricing"
-                className="inline-block border-2 border-black text-black font-bold px-6 py-3 rounded-xl text-base hover:bg-black hover:text-yellow-400 transition-colors"
+                className="inline-block bg-black text-yellow-400 font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
               >
                 💰 View Prices
               </a>
