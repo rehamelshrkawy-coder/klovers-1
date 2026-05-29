@@ -101,13 +101,15 @@ const TrialConfirmPage = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a
                 href="/placement-test"
-                className="inline-block bg-black text-yellow-400 font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
+                style={{ backgroundColor: "#000", color: "#FACC15" }}
+                className="inline-block font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
               >
                 📝 Take Placement Test
               </a>
               <a
                 href="/pricing"
-                className="inline-block bg-black text-yellow-400 font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
+                style={{ backgroundColor: "#000", color: "#FACC15" }}
+                className="inline-block font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
               >
                 💰 View Prices
               </a>
