@@ -871,7 +871,7 @@ function buildTrialConfirmedEmail(p: EmailPayload) {
 }
 
 function buildTrialRebookEmail(p: EmailPayload) {
-  const isAr = p.language === "ar";
+  const isAr = false; // always send in English
   const url = p.rebook_url || `${SITE_URL}/free-trial`;
 
   const dayNamesEn = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
