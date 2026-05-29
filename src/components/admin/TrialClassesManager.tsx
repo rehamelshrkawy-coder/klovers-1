@@ -370,7 +370,7 @@ const TrialClassesManager = () => {
           template: "trial_rebook_request",
           email: booking.email,
           name: booking.name || booking.email,
-          language: bookingLang,
+          language: "en",
           rebook_url: `${window.location.origin}/trial-booking`,
           class_link_url: meetingUrl,
           available_slots: langSlots.map((s) => ({
@@ -434,7 +434,7 @@ const TrialClassesManager = () => {
             template: "trial_rebook_request",
             email: b.email,
             name: b.name || b.email,
-            language: bLang,
+            language: "en",
             rebook_url: `${window.location.origin}/trial-booking`,
             class_link_url: bulkMeetingUrl,
             available_slots: bSlots,
