@@ -308,8 +308,17 @@ const TrialClassesManager = () => {
   const handleUnschedule = async (booking: TrialBooking) => {
     setActioningId(booking.id);
     try {
-      // Use NULL for date/time so the sync_is_tba trigger correctly sets is_tba=true.
-      // Sentinel values (2099-12-31 / "TBA") leave is_tba=false and hit the unique constraint.
+      // Cancel any existing TBA booking for this email so the one-tba-per-email
+      // unique index doesn't block moving this booking to TBA.
+      await supabase
+        .from("trial_bookings")
+        .update({ status: "cancelled" } as any)
+        .eq("status", "pending")
+        .eq("is_tba", true)
+        .ilike("email", booking.email)
+        .neq("id", booking.id);
+
+      // Use NULL for date/time — the sync_is_tba trigger sets is_tba=true automatically.
       const { error } = await supabase
         .from("trial_bookings")
         .update({
