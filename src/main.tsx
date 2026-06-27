@@ -6,9 +6,11 @@ import { ThemeProvider } from "./contexts/ThemeContext.tsx";
 import "./i18n/config";
 import { initSentry, Sentry } from "./lib/sentry";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { initMetaPixel } from "./lib/metaPixel";
 
 // Initialize Sentry as early as possible so it can capture init-time errors.
 initSentry();
+initMetaPixel();
 
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN as string | undefined;
 if (sentryDsn) {
