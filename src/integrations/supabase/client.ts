@@ -6,12 +6,18 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 // JWT anon key (eyJ...) takes priority — the sb_publishable_ format is rejected by the auth endpoint
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error('Supabase environment configuration is incomplete.');
+}
+
+const authStorage = typeof window !== 'undefined' ? window.localStorage : undefined;
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,
+    storage: authStorage,
     persistSession: true,
     autoRefreshToken: true,
   }
