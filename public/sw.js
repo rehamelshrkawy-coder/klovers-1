@@ -1,10 +1,10 @@
-// Klovers Service Worker — v1
+// Klovers Service Worker — v2
 // Strategy:
 //   Static assets (JS/CSS/images) → Cache-First (immutable bundles)
 //   Navigation (HTML)             → Network-First with offline fallback
 //   Supabase API / edge functions → Network-Only (never cache auth/data)
 
-const CACHE_NAME = "klovers-v1";
+const CACHE_NAME = "klovers-v2";
 const OFFLINE_URL = "/";
 
 // Assets to pre-cache on install (shell)
@@ -21,7 +21,13 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then((cache) =>
+        Promise.allSettled(
+          PRECACHE_URLS.map((url) =>
+            cache.add(url).catch((error) => ({ url, error }))
+          )
+        )
+      )
       .then(() => self.skipWaiting())
   );
 });
@@ -81,7 +87,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 3. Images → Cache-First with 7-day expiry (simple size limit)
+  // 3. Images → Cache-First
   if (
     request.destination === "image" ||
     url.pathname.endsWith(".jpg") ||
