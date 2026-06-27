@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/react";
-import { Component, ReactNode } from "react";
+import { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -18,8 +18,14 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, info: { componentStack: string }) {
-    Sentry.captureException(error, { extra: { componentStack: info.componentStack } });
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Forward to Sentry with React component stack as extra context.
+    // Safe to call even when Sentry is not initialized.
+    Sentry.withScope((scope) => {
+      scope.setTag("errorBoundary", "app");
+      scope.setExtra("componentStack", errorInfo.componentStack);
+      Sentry.captureException(error);
+    });
   }
 
   render() {

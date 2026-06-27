@@ -29,18 +29,16 @@ interface Booking {
   trial_date: string;
   user_id: string | null;
   level: string | null;
+  class_language: string | null;
   followup_prep_sent_at: string | null;
   followup_day1_sent_at: string | null;
   followup_day3_sent_at: string | null;
   followup_day7_sent_at: string | null;
 }
 
-function pickLanguage(level: string | null): "ar" | "en" {
-  // No per-user language column on trial_bookings; default to Arabic since
-  // 95%+ of Klovers traffic is EG/MENA. Teachers can flip individuals
-  // manually if needed.
-  void level;
-  return "ar";
+function pickLanguage(classLanguage: string | null): "ar" | "en" {
+  if (classLanguage === "arabic") return "ar";
+  return "en";
 }
 
 const STAGE_TEMPLATE: Record<Stage, "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "trial_followup_day7"> = {
@@ -87,7 +85,7 @@ async function dispatchStage(
   // Exclude TBA placeholders and anyone with an APPROVED enrollment.
   const { data: bookings, error } = await supabase
     .from("trial_bookings")
-    .select(`id, name, email, trial_date, user_id, level, followup_prep_sent_at, followup_day1_sent_at, followup_day3_sent_at, followup_day7_sent_at`)
+    .select(`id, name, email, trial_date, user_id, level, class_language, followup_prep_sent_at, followup_day1_sent_at, followup_day3_sent_at, followup_day7_sent_at`)
     .eq("trial_date", targetDate)
     .is(column, null)
     .not("is_tba", "is", true)
@@ -139,7 +137,7 @@ async function dispatchStage(
         body: {
           email: b.email,
           name: b.name || "there",
-          language: pickLanguage(b.level),
+          language: pickLanguage(b.class_language),
           template: STAGE_TEMPLATE[stage],
           level: b.level,
           ...(referralUrl ? { referral_url: referralUrl } : {}),

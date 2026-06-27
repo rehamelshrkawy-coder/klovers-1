@@ -23,6 +23,9 @@ const STATUS_OPTIONS: (TrialBookingStatus | 'all')[] = [
 const BUCKET_OPTIONS = ['all', 'upcoming', 'past'] as const;
 const SLOT_OPTIONS = ['all', 'active', 'retired'] as const;
 
+const formatDateTime = (value?: string | null) =>
+  value ? value.replace('T', ' ').slice(0, 16) : '—';
+
 export default function RequestsTable({ bookings }: { bookings: AdminTrialBooking[] }) {
   const [q, setQ] = useState('');
   const [status, setStatus] = useState<(TrialBookingStatus | 'all')>('all');
@@ -116,6 +119,8 @@ export default function RequestsTable({ bookings }: { bookings: AdminTrialBookin
               <th className="px-3 py-2 text-left font-medium" aria-label="RSVP attendance response"><span aria-hidden="true">✅</span> RSVP</th>
               <th className="px-3 py-2 text-left font-medium">Phase</th>
               <th className="px-3 py-2 text-left font-medium">Requested</th>
+              <th className="px-3 py-2 text-left font-medium">Changed</th>
+              <th className="px-3 py-2 text-left font-medium">Cancelled</th>
             </tr>
           </thead>
           <tbody>
@@ -200,13 +205,22 @@ export default function RequestsTable({ bookings }: { bookings: AdminTrialBookin
                   {b.program_phase === 'pre_launch' ? 'pre-launch' : 'active program'}
                 </td>
                 <td className="px-3 py-2 text-xs text-muted-foreground">
-                  {b.created_at ? b.created_at.replace('T', ' ').slice(0, 16) : '—'}
+                  {formatDateTime(b.created_at)}
+                </td>
+                <td className="px-3 py-2 text-xs text-muted-foreground">
+                  {formatDateTime(b.changed_at)}
+                </td>
+                <td className="px-3 py-2 text-xs text-muted-foreground">
+                  <div>{formatDateTime(b.cancelled_at)}</div>
+                  {b.cancel_reason && (
+                    <div className="text-[10px] text-muted-foreground/80">{b.cancel_reason.replace(/_/g, ' ')}</div>
+                  )}
                 </td>
               </tr>
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={10} className="px-3 py-6 text-center text-sm text-muted-foreground">
+                <td colSpan={12} className="px-3 py-6 text-center text-sm text-muted-foreground">
                   No requests match the current filters.
                 </td>
               </tr>

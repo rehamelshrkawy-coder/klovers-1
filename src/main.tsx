@@ -4,6 +4,11 @@ import App from "./App.tsx";
 import "./index.css";
 import { ThemeProvider } from "./contexts/ThemeContext.tsx";
 import "./i18n/config";
+import { initSentry, Sentry } from "./lib/sentry";
+import ErrorBoundary from "./components/ErrorBoundary";
+
+// Initialize Sentry as early as possible so it can capture init-time errors.
+initSentry();
 
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN as string | undefined;
 if (sentryDsn) {
@@ -36,7 +41,31 @@ if (
 }
 
 createRoot(document.getElementById("root")!).render(
-  <ThemeProvider>
-    <App />
-  </ThemeProvider>
+  <Sentry.ErrorBoundary
+    fallback={({ error, resetError }) => (
+      <div className="min-h-screen flex items-center justify-center p-8 text-center">
+        <div className="space-y-4 max-w-md">
+          <h2 className="text-xl font-semibold">Something went wrong</h2>
+          <p className="text-muted-foreground text-sm">
+            {error instanceof Error
+              ? error.message
+              : "An unexpected error occurred."}
+          </p>
+          <button
+            className="px-4 py-2 text-sm bg-foreground text-background rounded-md hover:opacity-80 transition-opacity"
+            onClick={resetError}
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    )}
+    showDialog={false}
+  >
+    <ErrorBoundary>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </ErrorBoundary>
+  </Sentry.ErrorBoundary>
 );

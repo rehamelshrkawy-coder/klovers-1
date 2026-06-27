@@ -36,15 +36,15 @@ const LOGO_URL = "https://kloversegy.com/klovers-logo.jpg";
 
 function brandWrapper(content: string) {
   return `
-  <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;">
+  <div translate="no" class="notranslate" style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;">
     <div style="background: ${BRAND_BLACK}; padding: 24px; text-align: center;">
       <img src="${LOGO_URL}" alt="KLovers" style="width: 60px; height: 60px; border-radius: 50%; border: 3px solid ${BRAND_YELLOW};" />
-      <h2 style="color: ${BRAND_YELLOW}; margin: 12px 0 0; font-size: 22px; letter-spacing: 1px;">KLovers</h2>
+      <h2 translate="no" class="notranslate" style="color: ${BRAND_YELLOW}; margin: 12px 0 0; font-size: 22px; letter-spacing: 1px;">KLovers</h2>
       <p style="color: #cccccc; margin: 4px 0 0; font-size: 12px;">Korean Language Academy</p>
     </div>
     <div style="padding: 28px 24px; color: ${BRAND_TEXT};">${content}</div>
     <div style="background: ${BRAND_BLACK}; padding: 20px 24px; text-align: center;">
-      <p style="color: ${BRAND_YELLOW}; font-size: 13px; margin: 0 0 8px;">— The KLovers Team</p>
+      <p style="color: ${BRAND_YELLOW}; font-size: 13px; margin: 0 0 8px;"><span translate="no" class="notranslate">— The KLovers Team</span></p>
       <a href="${SITE_URL}" style="color: #cccccc; font-size: 11px; text-decoration: none;">kloversegy.com</a>
     </div>
   </div>`;

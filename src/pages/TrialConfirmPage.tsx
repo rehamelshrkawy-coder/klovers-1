@@ -98,14 +98,30 @@ const TrialConfirmPage = () => {
                 ? "You've already confirmed your attendance. See you in class!"
                 : "You're all set. See you in class!"}
             </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <a
+                href="/placement-test"
+                style={{ backgroundColor: "#000", color: "#FACC15" }}
+                className="inline-block font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
+              >
+                📝 Take Placement Test
+              </a>
+              <a
+                href="/pricing"
+                style={{ backgroundColor: "#000", color: "#FACC15" }}
+                className="inline-block font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
+              >
+                💰 View Prices
+              </a>
+            </div>
             {classLink && (
               <a
                 href={classLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block bg-black text-yellow-400 font-bold px-6 py-3 rounded-xl text-base hover:opacity-90 transition-opacity"
+                className="inline-block mt-3 text-sm text-gray-500 underline hover:text-gray-700"
               >
-                🎓 Join via Google Meet
+                Join via Google Meet
               </a>
             )}
           </div>

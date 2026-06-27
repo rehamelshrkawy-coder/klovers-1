@@ -68,14 +68,14 @@ function buildEmail(name: string, missing: MissingField[], lang: string, planTyp
       <span style="font-size: 22px; font-weight: 900; color: #000; letter-spacing: -0.5px;">K-Lovers</span>
     </div>`;
 
-  const footer = `<p style="color: #999; font-size: 12px; margin-top: 32px; border-top: 1px solid #eee; padding-top: 16px;">— The KLovers Team · <a href="https://kloversegy.com" style="color: #999;">kloversegy.com</a></p>`;
+  const footer = `<p style="color: #999; font-size: 12px; margin-top: 32px; border-top: 1px solid #eee; padding-top: 16px;"><span translate="no" class="notranslate">— The KLovers Team</span> · <a href="https://kloversegy.com" style="color: #999;">kloversegy.com</a></p>`;
   const footerAr = `<p style="color: #999; font-size: 12px; margin-top: 32px; border-top: 1px solid #eee; padding-top: 16px;">— فريق KLovers · <a href="https://kloversegy.com" style="color: #999;">kloversegy.com</a></p>`;
 
   if (isAr) {
     return {
       subject: subjectAr,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 20px; background: #ffffff; direction: rtl; text-align: right;">
+        <div translate="no" class="notranslate" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 20px; background: #ffffff; direction: rtl; text-align: right;">
           ${headerLine}
           <h1 style="color: #000000; font-size: 26px; margin-bottom: 8px;">مرحباً ${name && name !== "Unknown" ? name : ""}!</h1>
           <p style="color: #333; font-size: 15px; line-height: 1.7;">تم تأكيد دفعك بنجاح! &#127881; لبدء ترتيب ${planLabel}، نحتاج منك إكمال بعض البيانات الناقصة.</p>
@@ -90,7 +90,7 @@ function buildEmail(name: string, missing: MissingField[], lang: string, planTyp
   return {
     subject: subjectEn,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 20px; background: #ffffff;">
+      <div translate="no" class="notranslate" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 20px; background: #ffffff;">
         ${headerLine}
         <h1 style="color: #000000; font-size: 26px; margin-bottom: 8px;">Hi ${name && name !== "Unknown" ? name : "there"}!</h1>
         <p style="color: #333; font-size: 15px; line-height: 1.7;">Your payment is confirmed! &#127881; To arrange your ${planLabel}, we need a few more details from you.</p>

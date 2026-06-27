@@ -20,7 +20,7 @@ import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { track } from "@/lib/tracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
-import { CheckCircle2, CalendarPlus, CalendarClock, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2, Globe, Link2, Check } from "lucide-react";
+import { CheckCircle2, CalendarPlus, CalendarClock, CalendarX, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2, Globe, Link2, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { convertDateTimeToTimezone } from "@/lib/admin-utils";
 
@@ -101,6 +101,9 @@ function defaultLanguageForCountry(country: string): "arabic" | "english" {
   return ARABIC_COUNTRIES.has(country) ? "arabic" : "english";
 }
 
+const isMissingAuditColumn = (error: any) =>
+  error?.code === "42703" || /changed_at|cancelled_at|cancel_reason/i.test(error?.message || "");
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface BookingResult {
@@ -129,6 +132,7 @@ const TrialBookingPage = () => {
   const [selectedLevel, setSelectedLevel] = useState("");
   const [loading, setLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
+  const [cancelling, setCancelling] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>(guessCountryFromTz);
   const [classLanguage, setClassLanguage] = useState<"arabic" | "english">(() =>
     defaultLanguageForCountry(guessCountryFromTz())
@@ -234,6 +238,7 @@ const TrialBookingPage = () => {
     }
 
     setLoading(true);
+    let skipFinallyReset = false;
     try {
       // Log the intent (links automatically to user via session_id stitching)
       logLeadEvent({
@@ -289,6 +294,40 @@ const TrialBookingPage = () => {
 
       setBookingResult(data.booking);
     } catch (err: any) {
+      // Detect 429 rate-limit: Supabase wraps it in FunctionsHttpError with status on .context
+      const is429 =
+        err?.context?.status === 429 ||
+        (typeof err?.message === "string" && err.message.includes("non-2xx"));
+
+      if (is429) {
+        // Before showing an error, check whether the booking actually landed
+        // (the function may have succeeded on a prior tap before rate-limiting kicked in).
+        const { data: existing } = await supabase
+          .from("trial_bookings")
+          .select("id, trial_date, start_time, day_of_week, status")
+          .eq("email", user.email ?? "")
+          .neq("status", "cancelled")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (existing?.trial_date === trialDate && existing?.start_time === startTime) {
+          // Booking succeeded on a previous tap — treat as success silently.
+          setBookingResult(existing as any);
+          return;
+        }
+
+        toast({
+          title: t("trialBooking.tooManyAttempts") ?? "Too many attempts",
+          description: t("trialBooking.tooManyAttemptsDesc") ?? "Please wait a moment, then check your dashboard — your booking may already be saved.",
+          variant: "destructive",
+        });
+        // Keep button disabled for 8 s so the student doesn't hammer again.
+        skipFinallyReset = true;
+        setTimeout(() => setLoading(false), 8000);
+        return;
+      }
+
       logLeadEvent({ source_type: "free_trial", cta_label: "booking_failed", metadata: { reason: err?.message || "unknown" } });
       toast({
         title: t("trialBooking.somethingWrong"),
@@ -296,7 +335,7 @@ const TrialBookingPage = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      if (!skipFinallyReset) setLoading(false);
     }
   };
 
@@ -328,10 +367,9 @@ const TrialBookingPage = () => {
     logLeadEvent({ source_type: "free_trial", cta_label: "slot_page_viewed" });
   }, []);
 
-  // ── Reschedule: re-show slot picker without pre-cancelling.
-  // book-trial atomically deletes the old booking when authed=true,
-  // so we don't cancel here — admin sees the booking as confirmed until
-  // the student actually completes the new booking.
+  // ── Reschedule: re-show slot picker without pre-cancelling. When the
+  // student completes the new booking, book-trial closes the old row with
+  // changed/cancel timestamps so admin keeps a visible audit trail.
   const handleReschedule = () => {
     if (!user || !bookingResult) return;
     track.custom("trial_reschedule_started", { old_date: bookingResult.trial_date });
@@ -341,6 +379,56 @@ const TrialBookingPage = () => {
       metadata: { old_date: bookingResult.trial_date },
     });
     setBookingResult(null);
+  };
+
+  const handleCancelBooking = async () => {
+    if (!user || !bookingResult) return;
+    setCancelling(true);
+    try {
+      const now = new Date().toISOString();
+      const update = await supabase
+        .from("trial_bookings")
+        .update({
+          status: "cancelled",
+          cancelled_at: now,
+          cancel_reason: "student_cancel",
+        } as any)
+        .eq("user_id", user.id)
+        .eq("trial_date", bookingResult.trial_date)
+        .in("status", ["pending", "confirmed"]);
+      if (update.error) {
+        if (!isMissingAuditColumn(update.error)) throw update.error;
+        const fallback = await supabase
+          .from("trial_bookings")
+          .update({ status: "cancelled" })
+          .eq("user_id", user.id)
+          .eq("trial_date", bookingResult.trial_date)
+          .in("status", ["pending", "confirmed"]);
+        if (fallback.error) throw fallback.error;
+      }
+
+      track.custom("trial_cancelled", { old_date: bookingResult.trial_date });
+      logLeadEvent({
+        source_type: "free_trial",
+        cta_label: "trial_cancelled",
+        metadata: { old_date: bookingResult.trial_date },
+      });
+
+      toast({
+        title: t("trialBooking.cancelToast"),
+        variant: "default",
+      });
+      setBookingResult(null);
+      navigate("/dashboard");
+    } catch (err: any) {
+      toast({
+        title: t("trialBooking.somethingWrong"),
+        description: err.message || t("trialBooking.tryAgain"),
+        variant: "destructive",
+      });
+    } finally {
+      setCancelling(false);
+    }
   };
 
   // ── Success state ──────────────────────────────────────────────────────────
@@ -398,14 +486,24 @@ const TrialBookingPage = () => {
                 {t("trialBooking.successDesc")}
               </p>
 
-              {/* Change date button */}
-              <button
-                onClick={handleReschedule}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 text-sm font-semibold text-foreground transition-all shadow-sm mx-auto"
-              >
-                <CalendarClock className="h-4 w-4 text-primary" />
-                {t("trialBooking.changeDateBtn")}
-              </button>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  onClick={handleReschedule}
+                  disabled={cancelling}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 text-sm font-semibold text-foreground transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CalendarClock className="h-4 w-4 text-primary" />
+                  {t("trialBooking.changeDateBtn")}
+                </button>
+                <button
+                  onClick={handleCancelBooking}
+                  disabled={cancelling}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-destructive/50 hover:bg-destructive/5 text-sm font-semibold text-foreground transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CalendarX className="h-4 w-4 text-destructive" />
+                  {cancelling ? t("trialBooking.cancelling") : t("trialBooking.cancelDateBtn")}
+                </button>
+              </div>
 
               {/* Inline country selector — updates pricing below in real time */}
               <div className="mt-5 flex items-center justify-center gap-2 flex-wrap">

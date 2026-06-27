@@ -16,6 +16,9 @@ const STATUS_COLORS: Record<TrialBookingStatus, string> = {
   cancelled: 'bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200',
 };
 
+const formatDateTime = (value?: string | null) =>
+  value ? value.replace('T', ' ').slice(0, 16) : null;
+
 export default function HistoricalBookings({
   bookings,
 }: {
@@ -109,7 +112,17 @@ export default function HistoricalBookings({
                       className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{r.name}</span>
+                        <div>
+                          <span className="font-medium">{r.name}</span>
+                          {(r.changed_at || r.cancelled_at) && (
+                            <div className="text-[11px] text-muted-foreground">
+                              {r.changed_at && <>changed {formatDateTime(r.changed_at)}</>}
+                              {r.changed_at && r.cancelled_at && <span> · </span>}
+                              {r.cancelled_at && <>cancelled {formatDateTime(r.cancelled_at)}</>}
+                              {r.cancel_reason && <span> ({r.cancel_reason.replace(/_/g, ' ')})</span>}
+                            </div>
+                          )}
+                        </div>
                         <span className="text-xs text-muted-foreground">{r.email}</span>
                       </div>
                       <span

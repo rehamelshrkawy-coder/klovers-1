@@ -111,6 +111,7 @@ const OptimizedImage = ({
         alt={alt}
         loading={priority ? "eager" : "lazy"}
         decoding={priority ? "sync" : "async"}
+        referrerPolicy="no-referrer"
         {...(priority ? { fetchPriority: "high" as const } : {})}
         className={`
           ${className}

@@ -32,10 +32,10 @@ const useCountUp = (target: number, duration = 1800) => {
 
 /** 4 official trial class timestamps stored as MYT (UTC+8) ISO instants. */
 const TRIAL_INSTANTS_MYT = [
-  "2026-05-29T01:00:00+08:00",
-  "2026-05-30T23:00:00+08:00",
-  "2026-06-02T23:00:00+08:00",
-  "2026-06-07T09:00:00+08:00",
+  "2026-07-03T01:00:00+08:00",
+  "2026-07-04T23:00:00+08:00",
+  "2026-07-05T09:00:00+08:00",
+  "2026-07-07T23:00:00+08:00",
 ];
 
 /** Returns the label for the next upcoming trial class in the visitor's timezone. */

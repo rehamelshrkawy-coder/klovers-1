@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Klovers – Trial Email Preview</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#d0d0d0; font-family: 'Segoe UI', Arial, sans-serif; padding: 32px 16px; }
+
+    /* Tab switcher */
+    .tabs { display:flex; gap:8px; max-width:620px; margin:0 auto 20px; }
+    .tab {
+      padding:10px 24px; border-radius:8px 8px 0 0; cursor:pointer;
+      font-weight:700; font-size:14px; border:none; outline:none;
+      background:#bbb; color:#555;
+    }
+    .tab.active { background:#ffffff; color:#111; }
+
+    .email-wrapper {
+      max-width:600px; margin:0 auto;
+      border-radius:12px; overflow:hidden;
+      box-shadow:0 8px 40px rgba(0,0,0,0.18);
+      display:none;
+    }
+    .email-wrapper.active { display:block; }
+
+    /* HEADER */
+    .hdr { background:#000; padding:24px; text-align:center; }
+    .hdr-logo { font-size:26px; font-weight:800; color:#FFFF00; letter-spacing:1px; }
+    .hdr-sub { font-size:11px; color:#888; letter-spacing:2px; text-transform:uppercase; margin-top:3px; }
+
+    /* BODY */
+    .body { background:#fff; padding:32px 28px; color:#333; }
+
+    /* Details card */
+    .card { background:#f9f9f9; border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; margin-bottom:20px; }
+    .card-head { background:#000; padding:10px 18px; }
+    .card-head p { margin:0; color:#FFFF00; font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+    .card table { width:100%; border-collapse:collapse; }
+    .card td { padding:11px 18px; border-bottom:1px solid #f0f0f0; font-size:14px; }
+    .card tr:last-child td { border-bottom:none; }
+    .card .lbl { color:#888; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; width:100px; }
+    .card .val { font-weight:700; color:#111; }
+
+    /* Agenda table */
+    .agenda { width:100%; border-collapse:collapse; margin-top:8px; }
+    .agenda td { padding:9px 0; border-bottom:1px solid #f5f5f5; vertical-align:top; font-size:14px; line-height:1.55; color:#333; }
+    .agenda tr:last-child td { border-bottom:none; }
+    .bullet {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:26px; height:26px; background:#FFFF00; border-radius:50%;
+      font-size:13px; flex-shrink:0; margin-top:1px;
+    }
+    .agenda .icon-cell { width:36px; }
+    .agenda .text-cell { padding-left:10px; }
+
+    /* Tip box */
+    .tip { background:#ffffcc; border-left:4px solid #FFFF00; border-radius:6px; padding:13px 16px; margin:22px 0; font-size:13.5px; }
+
+    /* Buttons */
+    .btn-join {
+      display:block; text-align:center; background:#000; color:#FFFF00;
+      padding:14px 36px; border-radius:8px; text-decoration:none; font-weight:700;
+      font-size:16px; margin:20px 0;
+    }
+    .btn-cal {
+      display:block; text-align:center; background:#4285f4; color:#fff;
+      padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:700;
+      font-size:14px; margin:16px 0;
+    }
+
+    /* FOOTER */
+    .ftr { background:#000; padding:22px; text-align:center; }
+    .ftr-brand { color:#FFFF00; font-size:13px; font-weight:700; }
+    .ftr-site { color:#666; font-size:11px; margin-top:4px; }
+
+    /* Arabic overrides */
+    .rtl { direction:rtl; }
+    .rtl .card-head p { text-align:right; }
+    .rtl .card table { direction:rtl; }
+    .rtl .agenda { direction:rtl; }
+    .rtl .agenda .text-cell { padding-left:0; padding-right:10px; text-align:right; }
+    .rtl .tip { border-left:none; border-right:4px solid #FFFF00; text-align:right; }
+    .rtl .muted-center { text-align:center; }
+    .agenda-head { color:#111; font-size:16px; font-weight:700; margin:24px 0 6px; }
+    .agenda-sub { color:#888; font-size:13px; margin:0 0 12px; }
+    .rtl .agenda-head, .rtl .agenda-sub { text-align:right; }
+    .muted-sm { color:#888; font-size:12px; margin-top:8px; text-align:center; }
+    .greeting { font-size:24px; font-weight:700; color:#111; margin-bottom:6px; }
+    .intro-text { font-size:15px; color:#333; margin-bottom:20px; line-height:1.6; }
+    .rtl .greeting, .rtl .intro-text { text-align:right; }
+  </style>
+</head>
+<body>
+
+<div class="tabs">
+  <button class="tab active" onclick="show('en', this)">🇬🇧 English Email</button>
+  <button class="tab" onclick="show('ar', this)">🇪🇬 Arabic Email</button>
+</div>
+
+<!-- ═══════════════════════ ENGLISH ═══════════════════════ -->
+<div id="en" class="email-wrapper active">
+  <div class="hdr">
+    <div class="hdr-logo" translate="no">KLovers</div>
+    <div class="hdr-sub">Korean Language Academy</div>
+  </div>
+  <div class="body">
+    <div class="greeting">Hi {{student_name}}! 👋</div>
+    <p class="intro-text">
+      We're so excited to have you! Your <strong>free trial Korean class</strong> is officially confirmed.
+      Get ready for a fun, relaxed session — no pressure, just great energy. 🌟
+    </p>
+
+    <div class="card">
+      <div class="card-head"><p>📅 Class Details</p></div>
+      <table>
+        <tr><td class="lbl">🗓️ Date</td><td class="val">{{date}}</td></tr>
+        <tr><td class="lbl">⏰ Time</td><td class="val">{{time}}</td></tr>
+        <tr><td class="lbl">🌍 Timezone</td><td class="val">{{timezone}}</td></tr>
+      </table>
+    </div>
+
+    <a href="#" class="btn-cal">📅 Add to Google Calendar</a>
+    <a href="#" class="btn-join">🎓 Join the Class</a>
+
+    <div class="agenda-head">✨ What happens in this session?</div>
+    <p class="agenda-sub">This is <strong>not</strong> a regular lesson — it's a friendly intro session where we get to know you!</p>
+
+    <table class="agenda">
+      <tr>
+        <td class="icon-cell"><span class="bullet">👋</span></td>
+        <td class="text-cell"><strong>Introductions</strong> — meet your teacher and the rest of the group</td>
+      </tr>
+      <tr>
+        <td class="icon-cell"><span class="bullet">💬</span></td>
+        <td class="text-cell"><strong>Why Korean?</strong> — everyone shares their story and motivation</td>
+      </tr>
+      <tr>
+        <td class="icon-cell"><span class="bullet">🗺️</span></td>
+        <td class="text-cell"><strong>How the course works</strong> — structure, schedule, and what to expect</td>
+      </tr>
+      <tr>
+        <td class="icon-cell"><span class="bullet">📊</span></td>
+        <td class="text-cell"><strong>Korean levels explained</strong> — we'll help you find where you fit in</td>
+      </tr>
+      <tr>
+        <td class="icon-cell"><span class="bullet">🎯</span></td>
+        <td class="text-cell"><strong>Your goals</strong> — what do you want to achieve with Korean?</td>
+      </tr>
+      <tr>
+        <td class="icon-cell"><span class="bullet">❓</span></td>
+        <td class="text-cell"><strong>Q&amp;A</strong> — ask us anything, no question is too small!</td>
+      </tr>
+    </table>
+
+    <div class="tip">
+      💡 <strong>Quick tip:</strong> Join 5 minutes early, find a quiet spot, and bring your smile — that's all you need! 🇰🇷
+    </div>
+
+    <p class="muted-sm">Questions? Just reply to this email or reach us on WhatsApp anytime.</p>
+  </div>
+  <div class="ftr">
+    <div class="ftr-brand" translate="no">— The KLovers Team</div>
+    <div class="ftr-site">kloversegy.com</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ ARABIC ════════════════════════ -->
+<div id="ar" class="email-wrapper">
+  <div class="hdr">
+    <div class="hdr-logo" translate="no">KLovers</div>
+    <div class="hdr-sub">Korean Language Academy</div>
+  </div>
+  <div class="body rtl">
+    <div class="greeting">أهلاً {{student_name}}! 👋</div>
+    <p class="intro-text">
+      يسعدنا جداً انضمامك! تم تأكيد مكانك في <strong>الحصة التجريبية المجانية</strong> بنجاح.
+      استعد لجلسة ممتعة وخالية من أي ضغط — طاقة إيجابية وأصدقاء جدد! 🌟
+    </p>
+
+    <div class="card">
+      <div class="card-head"><p>تفاصيل الحصة 📅</p></div>
+      <table>
+        <tr><td class="lbl">🗓️ التاريخ</td><td class="val">{{date}}</td></tr>
+        <tr><td class="lbl">⏰ الوقت</td><td class="val">{{time}}</td></tr>
+        <tr><td class="lbl">🌍 التوقيت</td><td class="val">{{timezone}}</td></tr>
+      </table>
+    </div>
+
+    <a href="#" class="btn-cal">📅 أضف إلى تقويم Google</a>
+    <a href="#" class="btn-join">🎓 انضم للحصة</a>
+
+    <div class="agenda-head">✨ إيه اللي هيحصل في الحصة دي؟</div>
+    <p class="agenda-sub">مش حصة دراسية — ده لقاء تعارف ودردشة ممتعة! هنعمل مع بعض:</p>
+
+    <table class="agenda">
+      <tr>
+        <td class="icon-cell"><span class="bullet">👋</span></td>
+        <td class="text-cell"><strong>تعارف</strong> — هنتعرف على المدرس وعلى بعض</td>
+      </tr>
+      <tr>
+        <td class="icon-cell"><span class="bullet">💬</span></td>
+        <td class="text-cell"><strong>ليه الكورية؟</strong> — كل واحد يشارك قصته وسبب اهتمامه باللغة</td>
+      </tr>
+      <tr>
+        <td class="icon-cell"><span class="bullet">🗺️</span></td>
+        <td class="text-cell"><strong>إزاي الكورس بيشتغل؟</strong> — هنشرح المحتوى والجداول وكل التفاصيل</td>
+      </tr>
+      <tr>
+        <td class="icon-cell"><span class="bullet">📊</span></td>
+        <td class="text-cell"><strong>مستويات اللغة الكورية</strong> — هتعرف إنت على أي مستوى وتبدأ منين</td>
+      </tr>
+      <tr>
+        <td class="icon-cell"><span class="bullet">🎯</span></td>
+        <td class="text-cell"><strong>أهدافك</strong> — عايز تحقق إيه من تعلم الكورية؟</td>
+      </tr>
+      <tr>
+        <td class="icon-cell"><span class="bullet">❓</span></td>
+        <td class="text-cell"><strong>أسئلة وأجوبة</strong> — اسأل أي حاجة، ما فيش سؤال صغير!</td>
+      </tr>
+    </table>
+
+    <div class="tip">
+      💡 <strong>نصيحة سريعة:</strong> انضم قبل الحصة بـ 5 دقايق، دور على مكان هادي، وجيب معاك ابتسامتك — ده كل اللي محتاجه! 🇰🇷
+    </div>
+
+    <p class="muted-sm">عندك أسئلة؟ رد على الإيميل ده أو راسلنا واتساب في أي وقت.</p>
+  </div>
+  <div class="ftr">
+    <div class="ftr-brand" translate="no">— The KLovers Team</div>
+    <div class="ftr-site">kloversegy.com</div>
+  </div>
+</div>
+
+<script>
+  function show(id, btn) {
+    document.querySelectorAll('.email-wrapper').forEach(e => e.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

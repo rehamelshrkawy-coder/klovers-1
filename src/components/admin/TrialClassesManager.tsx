@@ -60,6 +60,9 @@ interface TrialBooking {
   status: string;
   confirmed_at: string | null;
   created_at: string;
+  changed_at?: string | null;
+  cancelled_at?: string | null;
+  cancel_reason?: string | null;
   user_id?: string | null;
   rebook_email_sent_at?: string | null;
   is_tba?: boolean;
@@ -74,6 +77,9 @@ const isTbaBooking = (b: Pick<TrialBooking, "is_tba" | "start_time" | "trial_dat
   b.is_tba === true ||
   !b.start_time || !b.trial_date ||
   b.start_time === "TBA" || b.trial_date === "2099-12-31";
+
+const isMissingAuditColumn = (error: any) =>
+  error?.code === "42703" || /changed_at|cancelled_at|cancel_reason/i.test(error?.message || "");
 
 interface TrialSlot {
   day_of_week: number;
@@ -94,6 +100,7 @@ interface UpcomingSlot {
   day_of_week: number;
   start_time: string;
   meeting_url?: string | null;
+  class_language?: string | null;
 }
 
 function getActualUpcomingGroups(bookings: TrialBooking[]): UpcomingSlot[] {
@@ -160,15 +167,33 @@ const TrialClassesManager = () => {
 
   const loading = loadingBookings || loadingSlots;
   const upcomingSlots = useMemo(() => {
-    const slots = getActualUpcomingGroups(bookings);
-    // Enrich each slot with meeting_url from the matching activeSlots row
-    return slots.map((s) => {
-      const match = activeSlots.find(
-        (a) => a.trial_date === s.date && a.start_time === s.start_time
-      ) ?? activeSlots.find((a) => a.start_time === s.start_time);
-      return { ...s, meeting_url: match?.meeting_url ?? null };
-    });
-  }, [bookings, activeSlots]);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStr = today.toISOString().slice(0, 10);
+    return activeSlots
+      .filter((s) => s.trial_date && s.trial_date >= todayStr)
+      .sort((a, b) => (a.trial_date ?? "").localeCompare(b.trial_date ?? ""))
+      .map((s) => {
+        const d = new Date(s.trial_date + "T00:00:00");
+        const dow = s.day_of_week;
+        const [h, m] = s.start_time.split(":").map(Number);
+        const ampm = h >= 12 ? "PM" : "AM";
+        const h12 = h % 12 || 12;
+        const label = `${DAY_NAMES[dow]} ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+        return {
+          value: `${s.trial_date}|${dow}|${s.start_time}`,
+          label,
+          date: s.trial_date!,
+          day_of_week: dow,
+          start_time: s.start_time,
+          meeting_url: s.meeting_url ?? null,
+          class_language: s.class_language ?? null,
+        };
+      });
+  }, [activeSlots]);
+
+  const formatDateTime = (value?: string | null) =>
+    value ? new Date(value).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" }) : "—";
 
   const fetchData = () => {
     // Invalidate trials-related caches so both the local table and the
@@ -197,21 +222,44 @@ const TrialClassesManager = () => {
         .eq("id", booking.id);
       if (error) throw error;
 
-      // Fetch meeting URL for this specific session date
-      const { data: slotRow } = await supabase
+      // Fetch meeting URL for this slot.
+      // Try exact trial_date match first (one-off slots); fall back to
+      // day_of_week match (recurring slots whose trial_date differs from the
+      // booking date).
+      const { data: slotByDate } = await supabase
         .from("trial_slots")
-        .select("meeting_url")
+        .select("meeting_url, class_language")
         .eq("trial_date", date)
         .eq("start_time", time)
         .maybeSingle();
-      const meetingUrl = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
+      const { data: slotByDow } = slotByDate
+        ? { data: null }
+        : await supabase
+            .from("trial_slots")
+            .select("meeting_url, class_language")
+            .eq("day_of_week", Number(dowStr))
+            .eq("start_time", time)
+            .eq("is_active", true)
+            .limit(1)
+            .maybeSingle();
+      const effectiveSlot = slotByDate ?? slotByDow;
+      const meetingUrl = (effectiveSlot as any)?.meeting_url ?? null;
+
+      // Language: booking.class_language ("arabic" / "english") is stored at
+      // booking time and is the authoritative source. Fall back to the slot's
+      // value in case the booking pre-dates the column, then hard-default "en".
+      const rawLang = booking.class_language
+        ?? (effectiveSlot as any)?.class_language
+        ?? "en";
+      // Normalise "arabic"→"ar", "english"→"en" for the email template
+      const emailLang = rawLang === "arabic" ? "ar" : rawLang === "english" ? "en" : rawLang;
 
       // Send confirmation email with join link to the student
       const emailBody: Record<string, unknown> = {
         template: "trial_confirmed",
         email: booking.email,
         name: booking.name || booking.email,
-        language: booking.language || "en",
+        language: emailLang,
         trial_date: date,
         trial_time: time,
         trial_timezone: "Africa/Cairo",
@@ -234,9 +282,20 @@ const TrialClassesManager = () => {
     try {
       const { error } = await supabase
         .from("trial_bookings")
-        .update({ status: "cancelled" } as any)
+        .update({
+          status: "cancelled",
+          cancelled_at: new Date().toISOString(),
+          cancel_reason: "admin_reject",
+        } as any)
         .eq("id", booking.id);
-      if (error) throw error;
+      if (error) {
+        if (!isMissingAuditColumn(error)) throw error;
+        const fallback = await supabase
+          .from("trial_bookings")
+          .update({ status: "cancelled" } as any)
+          .eq("id", booking.id);
+        if (fallback.error) throw fallback.error;
+      }
       toast({ title: "Cancelled", description: booking.name || booking.email });
       fetchData();
     } catch (err: any) {
@@ -249,19 +308,46 @@ const TrialClassesManager = () => {
   const handleUnschedule = async (booking: TrialBooking) => {
     setActioningId(booking.id);
     try {
+      // Cancel any existing TBA booking for this email so the one-tba-per-email
+      // unique index doesn't block moving this booking to TBA.
+      await supabase
+        .from("trial_bookings")
+        .update({ status: "cancelled" } as any)
+        .eq("status", "pending")
+        .eq("is_tba", true)
+        .ilike("email", booking.email)
+        .neq("id", booking.id);
+
+      // Use NULL for date/time — the sync_is_tba trigger sets is_tba=true automatically.
       const { error } = await supabase
         .from("trial_bookings")
         .update({
-          start_time: "TBA",
-          trial_date: "2099-12-31",
+          start_time: null,
+          trial_date: null,
           day_of_week: 0,
           status: "pending",
-          is_tba: true,
           confirmed_at: null,
+          attendance_confirmed_at: null,
           rebook_email_sent_at: null,
+          changed_at: new Date().toISOString(),
         } as any)
         .eq("id", booking.id);
-      if (error) throw error;
+      if (error) {
+        if (!isMissingAuditColumn(error)) throw error;
+        const fallback = await supabase
+          .from("trial_bookings")
+          .update({
+            start_time: null,
+            trial_date: null,
+            day_of_week: 0,
+            status: "pending",
+            confirmed_at: null,
+            attendance_confirmed_at: null,
+            rebook_email_sent_at: null,
+          } as any)
+          .eq("id", booking.id);
+        if (fallback.error) throw fallback.error;
+      }
       toast({ title: "Moved to TBA", description: booking.name || booking.email });
       fetchData();
     } catch (err: any) {
@@ -283,22 +369,27 @@ const TrialClassesManager = () => {
           variant: "destructive",
         });
       }
+      // class_language on the booking is "arabic" | "english" (stored at booking time).
+      // Normalise to the ISO code expected by the email template ("ar" / "en").
+      const rawLang = booking.class_language ?? "en";
+      const bookingLang = rawLang === "arabic" ? "ar" : rawLang === "english" ? "en" : rawLang;
+      const langSlots = activeSlots.filter(
+        (s) => s.trial_date && (!s.class_language || s.class_language === rawLang)
+      );
       const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
           template: "trial_rebook_request",
           email: booking.email,
           name: booking.name || booking.email,
-          language: "ar",
+          language: "en",
           rebook_url: `${window.location.origin}/trial-booking`,
           class_link_url: meetingUrl,
-          available_slots: activeSlots
-            .filter((s) => s.trial_date)
-            .map((s) => ({
-              day_of_week: s.day_of_week,
-              start_time: s.start_time,
-              timezone: "Africa/Cairo",
-              date: s.trial_date,
-            })),
+          available_slots: langSlots.map((s) => ({
+            day_of_week: s.day_of_week,
+            start_time: s.start_time,
+            timezone: "Africa/Cairo",
+            date: s.trial_date,
+          })),
         },
       });
       if (emailErr) throw emailErr;
@@ -336,26 +427,28 @@ const TrialClassesManager = () => {
       });
     }
     setBulkBusy(true);
-    const rebookSlots = activeSlots
-      .filter((s) => s.trial_date)
-      .map((s) => ({
-        day_of_week: s.day_of_week,
-        start_time: s.start_time,
-        timezone: "Africa/Cairo",
-        date: s.trial_date,
-      }));
     let ok = 0, fail = 0;
     for (const b of tba) {
       try {
+        const bRawLang = b.class_language ?? "en";
+        const bLang = bRawLang === "arabic" ? "ar" : bRawLang === "english" ? "en" : bRawLang;
+        const bSlots = activeSlots
+          .filter((s) => s.trial_date && (!s.class_language || s.class_language === bRawLang))
+          .map((s) => ({
+            day_of_week: s.day_of_week,
+            start_time: s.start_time,
+            timezone: "Africa/Cairo",
+            date: s.trial_date,
+          }));
         const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
           body: {
             template: "trial_rebook_request",
             email: b.email,
             name: b.name || b.email,
-            language: "ar",
+            language: "en",
             rebook_url: `${window.location.origin}/trial-booking`,
             class_link_url: bulkMeetingUrl,
-            available_slots: rebookSlots,
+            available_slots: bSlots,
           },
         });
         if (emailErr) throw emailErr;
@@ -458,17 +551,19 @@ const TrialClassesManager = () => {
     try {
       const { data: slotRow } = await supabase
         .from("trial_slots")
-        .select("meeting_url")
+        .select("meeting_url, class_language")
         .eq("trial_date", booking.trial_date ?? "")
         .eq("start_time", booking.start_time ?? "")
         .maybeSingle();
-      const meetingUrl = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
+      const meetingUrl = (slotRow as { meeting_url?: string | null; class_language?: string | null } | null)?.meeting_url ?? null;
+      const resendLang = (slotRow as { class_language?: string | null } | null)?.class_language ?? booking.class_language ?? "en";
+      const resendEmailLang = resendLang === "arabic" ? "ar" : resendLang === "english" ? "en" : resendLang;
       const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
           template: "trial_attendance_confirmation",
           email: booking.email,
           name: booking.name || booking.email,
-          language: booking.language || "en",
+          language: resendEmailLang,
           trial_date: booking.trial_date,
           trial_time: booking.start_time,
           class_link_url: meetingUrl,
@@ -658,6 +753,8 @@ const TrialClassesManager = () => {
                         <TableHead>Level</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Booked</TableHead>
+                        <TableHead>Changed</TableHead>
+                        <TableHead>Cancelled</TableHead>
                         <TableHead>Notes</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
@@ -692,6 +789,15 @@ const TrialClassesManager = () => {
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                             {new Date(b.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                            {formatDateTime(b.changed_at)}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                            <div>{formatDateTime(b.cancelled_at)}</div>
+                            {b.cancel_reason && (
+                              <div className="text-[10px] text-muted-foreground/80">{b.cancel_reason.replace(/_/g, " ")}</div>
+                            )}
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground max-w-[220px] truncate" title={b.goal || ""}>
                             {b.goal || "—"}
@@ -736,18 +842,31 @@ const TrialClassesManager = () => {
                               )}
                               {b.status === "pending" && (
                                 <>
+                                  {(() => {
+                                    const lang = b.language ?? null;
+                                    const filtered = lang
+                                      ? upcomingSlots.filter((s) => s.class_language === lang)
+                                      : upcomingSlots;
+                                    const slots = filtered.length ? filtered : upcomingSlots;
+                                    const defaultVal = trialSlotMap[b.id] ?? slots[0]?.value ?? "";
+                                    return (
                                   <div className="flex items-center gap-1 flex-wrap">
                                     <Select
-                                      value={trialSlotMap[b.id] ?? upcomingSlots[0]?.value ?? ""}
+                                      value={defaultVal}
                                       onValueChange={(v) => setTrialSlotMap((prev) => ({ ...prev, [b.id]: v }))}
                                     >
-                                      <SelectTrigger className="h-7 w-[160px] text-xs">
+                                      <SelectTrigger className="h-7 w-[185px] text-xs">
                                         <SelectValue placeholder="Pick class date" />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        {upcomingSlots.map((s) => (
+                                        {slots.map((s) => (
                                           <SelectItem key={s.value} value={s.value} className="text-xs">
-                                            {s.label}
+                                            <span className="flex items-center gap-1.5">
+                                              <span className={`inline-block px-1 py-0.5 rounded text-[10px] font-medium leading-none ${s.class_language === "arabic" ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"}`}>
+                                                {s.class_language === "arabic" ? "AR" : "EN"}
+                                              </span>
+                                              {s.label}
+                                            </span>
                                           </SelectItem>
                                         ))}
                                       </SelectContent>
@@ -756,12 +875,14 @@ const TrialClassesManager = () => {
                                       size="sm"
                                       variant="outline"
                                       className="h-7"
-                                      disabled={actioningId === b.id || !upcomingSlots.length}
-                                      onClick={() => handleConfirm(b, trialSlotMap[b.id] ?? upcomingSlots[0]?.value ?? "")}
+                                      disabled={actioningId === b.id || !slots.length}
+                                      onClick={() => handleConfirm(b, defaultVal)}
                                     >
                                       <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
                                     </Button>
                                   </div>
+                                    );
+                                  })()}
                                   <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleReject(b)}>
                                     <XCircle className="h-3.5 w-3.5 mr-1 text-red-600" /> Reject
                                   </Button>

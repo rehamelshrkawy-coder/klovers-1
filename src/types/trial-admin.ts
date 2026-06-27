@@ -29,6 +29,9 @@ export interface AdminTrialBooking {
   status: TrialBookingStatus;
   confirmed_at: string | null;
   created_at: string | null;
+  changed_at: string | null;
+  cancelled_at: string | null;
+  cancel_reason: string | null;
   user_id: string | null;
   timezone: string | null;
   confirmation_email_failed_at: string | null;
@@ -50,6 +53,9 @@ export interface AdminTrialBooking {
   email_opened_at: string | null;
   attendance_response: 'yes' | 'no' | null;
   attendance_responded_at: string | null;
+
+  // language the student booked through ("arabic" | "english" | null)
+  class_language: string | null;
 }
 
 // v_trial_slots_admin — one row per (slot, upcoming occurrence)
@@ -67,6 +73,7 @@ export interface AdminTrialSlotOccurrence {
   is_full: boolean;
   lifecycle: TrialSlotLifecycle;
   meeting_url: string | null;
+  class_language: string | null;
 }
 
 // fn_suggest_trial_slots

@@ -63,7 +63,7 @@ function buildReminderEmail(name: string, missing: MissingField[], lang: string,
     return {
       subject: "KLovers — أكمل بياناتك لبدء الدروس 📝",
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
+        <div translate="no" class="notranslate" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
           ${emailHeader}
           <div style="padding: 32px 28px; direction: rtl; text-align: right;">
             <h2 style="color: #111; font-size: 22px; margin: 0 0 8px 0;">مرحباً ${name || ""}! 👋</h2>
@@ -82,7 +82,7 @@ function buildReminderEmail(name: string, missing: MissingField[], lang: string,
   return {
     subject: "KLovers — Complete your profile to start classes 📝",
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
+      <div translate="no" class="notranslate" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
         ${emailHeader}
         <div style="padding: 32px 28px;">
           <h2 style="color: #111; font-size: 22px; margin: 0 0 8px 0;">Hi ${name || "there"}! 👋</h2>
@@ -92,7 +92,7 @@ function buildReminderEmail(name: string, missing: MissingField[], lang: string,
           <div style="text-align: center; margin: 28px 0;">
             ${ctaBtn}
           </div>
-          <p style="color: #999; font-size: 12px; margin-top: 24px; border-top: 1px solid #eee; padding-top: 16px;">— The KLovers Team</p>
+          <p style="color: #999; font-size: 12px; margin-top: 24px; border-top: 1px solid #eee; padding-top: 16px;"><span translate="no" class="notranslate">— The KLovers Team</span></p>
         </div>
       </div>`,
   };

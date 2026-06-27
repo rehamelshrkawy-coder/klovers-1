@@ -74,7 +74,7 @@ Spots are limited — secure yours now!
 
 Simply reply "YES" to confirm your attendance, or click the button above.
 
-— The KLovers Team 💛
+<span translate="no" class="notranslate">— The KLovers Team</span> 💛
 ---
 To unsubscribe: ${unsubUrl}
 KLovers Academy — kloversegy.com
