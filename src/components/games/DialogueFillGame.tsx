@@ -261,7 +261,7 @@ const DialogueFillGame = ({ onGameComplete }: { onGameComplete?: (score: number,
       {/* Options */}
       <div className="grid grid-cols-1 gap-2">
         {scene.options.map(opt => {
-          let variant: "outline" | "default" | "destructive" = "outline";
+          const variant: "outline" | "default" | "destructive" = "outline";
           let extra = "";
           if (selected) {
             if (opt === scene.correct) extra = "border-green-500 bg-green-50 dark:bg-green-950/30 text-green-800 dark:text-green-200";

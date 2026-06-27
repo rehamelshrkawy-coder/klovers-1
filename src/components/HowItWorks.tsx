@@ -82,7 +82,7 @@ const HowItWorks = () => {
             size="lg"
             asChild
             className="gap-2 text-base font-bold h-12 px-8"
-            onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "how_it_works_cta" }); } catch {} }}
+            onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "how_it_works_cta" }); } catch { /* Analytics must not block navigation. */ } }}
           >
             <Link to="/free-trial">
               {t("howItWorks", "cta")}

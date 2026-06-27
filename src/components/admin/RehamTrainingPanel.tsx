@@ -1501,7 +1501,9 @@ export default function RehamTrainingPanel() {
       if (saved && ["all", "ai", "operations", "customer-care", "translator"].includes(saved)) {
         return saved as InterviewField;
       }
-    } catch {}
+    } catch {
+      // Invalid persisted preferences fall back to the default field.
+    }
     return "all";
   });
 
@@ -2866,7 +2868,6 @@ export default function RehamTrainingPanel() {
                   <div className="flex flex-col items-center justify-center h-full min-h-[320px] p-6 text-center">
                     <p className="text-4xl font-bold mb-3">{fcCurrent.korean}</p>
                     <p className="text-sm text-muted-foreground italic mb-6">{fcCurrent.romanization}</p>
-                    {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                       <PlayBtn onClick={() => speakKorean(fcCurrent.korean)} label="Listen" variant="kr" disabled={isSpeaking} />
                       <PlayBtn onClick={() => speak(fcCurrent.korean, { language: "ko-KR", rate: 0.7 })} label="Slow" variant="slow" disabled={isSpeaking} />
@@ -2881,7 +2882,6 @@ export default function RehamTrainingPanel() {
                       <p className="text-sm font-medium">{fcCurrent.sentence_kr}</p>
                       <p className="text-xs text-muted-foreground">{fcCurrent.sentence_en}</p>
                     </div>
-                    {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                       <PlayBtn onClick={() => speakKorean(fcCurrent.sentence_kr)} label="Sentence KR" variant="kr" disabled={isSpeaking} />
                       <PlayBtn onClick={() => speakEnglish(fcCurrent.sentence_en)} label="Sentence EN" variant="en" disabled={isSpeaking} />

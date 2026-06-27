@@ -33,7 +33,9 @@ export function identify(userId: string, traits?: Record<string, unknown>): void
   if (!KEY) return;
   try {
     localStorage.setItem("kl_did", userId);
-  } catch {}
+  } catch {
+    // Storage may be unavailable in privacy modes; identification still proceeds.
+  }
   _send("$identify", {
     $anon_distinct_id: getDistinctId(),
     ...traits,

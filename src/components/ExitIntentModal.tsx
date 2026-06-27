@@ -114,7 +114,9 @@ const ExitIntentModal = () => {
       supabase.functions.invoke("submit-lead", {
         body: { email, source: "exit_intent_hangul_sheet", name: "Hangul Sheet Request" },
       }).catch(() => {});
-    } catch {}
+    } catch {
+      // Lead capture is best-effort; submission still succeeds locally.
+    }
     setSubmitted(true);
   };
 

@@ -133,7 +133,7 @@ const FinalCTA = () => {
             variant="secondary"
             asChild
             className="gap-2 h-13 px-8 text-base shadow-xl min-w-[200px] font-bold"
-            onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "final_cta_free_trial" }); } catch {} }}
+            onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "final_cta_free_trial" }); } catch { /* Analytics must not block navigation. */ } }}
           >
             <Link to="/free-trial">
               {t("finalCta", "button")}

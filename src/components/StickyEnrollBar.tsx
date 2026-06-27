@@ -53,14 +53,14 @@ const StickyEnrollBar = () => {
         <div className="flex items-center gap-2 flex-shrink-0">
           <Link
             to="/free-trial"
-            onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "sticky_bar_free_trial" }); } catch {} }}
+            onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "sticky_bar_free_trial" }); } catch { /* Analytics must not block navigation. */ } }}
             className="text-xs font-semibold text-white/85 hover:text-white transition-colors hidden sm:block"
           >
             {t("stickyBar.freeTrial")}
           </Link>
           <Link
             to="/enroll-now"
-            onClick={() => { try { logLeadEvent({ source_type: "enroll", cta_label: "sticky_bar_enroll_now" }); } catch {} }}
+            onClick={() => { try { logLeadEvent({ source_type: "enroll", cta_label: "sticky_bar_enroll_now" }); } catch { /* Analytics must not block navigation. */ } }}
             className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-bold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity border border-black/25"
           >
             {t("stickyBar.enrollNow")} <ArrowRight className="h-3.5 w-3.5" />

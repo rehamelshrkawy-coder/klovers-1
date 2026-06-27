@@ -170,7 +170,7 @@ const FreeTrialPage = () => {
 
   useEffect(() => {
     if (referredBy) {
-      try { localStorage.setItem("referrer_id", referredBy); } catch {}
+      try { localStorage.setItem("referrer_id", referredBy); } catch { /* Storage is optional. */ }
       supabase.functions.invoke("track-referral-click", { body: { referrerId: referredBy } }).catch(() => {});
     }
   }, [referredBy]);
