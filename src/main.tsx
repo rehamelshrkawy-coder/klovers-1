@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
@@ -6,20 +5,11 @@ import { ThemeProvider } from "./contexts/ThemeContext.tsx";
 import "./i18n/config";
 import { initSentry, Sentry } from "./lib/sentry";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { initMetaPixel } from "./lib/metaPixel";
 
 // Initialize Sentry as early as possible so it can capture init-time errors.
 initSentry();
-
-const sentryDsn = import.meta.env.VITE_SENTRY_DSN as string | undefined;
-if (sentryDsn) {
-  Sentry.init({
-    dsn: sentryDsn,
-    environment: import.meta.env.MODE,
-    tracesSampleRate: 0.2,
-    replaysOnErrorSampleRate: 1.0,
-    integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
-  });
-}
+initMetaPixel();
 
 // Reload the page when a lazy-loaded chunk fails to fetch (stale deploy).
 // Vite fires this event when a dynamic import 404s after a new production build.

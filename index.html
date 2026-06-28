@@ -71,25 +71,6 @@
       else { setTimeout(_loadGA, 2000); }
     </script>
 
-    <!-- Meta Pixel — deferred; replace PIXEL_ID in .env: VITE_META_PIXEL_ID=your_id -->
-    <script>
-      var _loadPixel = function() {
-        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-        document,'script','https://connect.facebook.net/en_US/fbevents.js');
-        var _pixelId = '%VITE_META_PIXEL_ID%';
-        if (_pixelId && _pixelId !== '%VITE_META_PIXEL_ID%') {
-          fbq('init', _pixelId);
-          fbq('track', 'PageView');
-        }
-      };
-      if ('requestIdleCallback' in window) { requestIdleCallback(_loadPixel); }
-      else { setTimeout(_loadPixel, 2500); }
-    </script>
-    <!-- Meta Pixel noscript moved to body — <img> inside <head><noscript> is invalid HTML -->
-
     <!-- JSON-LD: LocalBusiness (Google My Business) -->
     <script type="application/ld+json">
     {

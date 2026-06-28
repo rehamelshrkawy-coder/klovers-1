@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect, lazy, Suspense } from "react";
 import { useSEO } from "@/hooks/useSEO";
-import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
@@ -17,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Gamepad2, Brain, Layers, Hash, Palette, BookOpen, MessageCircle, ArrowLeftRight, PenLine, Shuffle, Calculator, Tv, Clock, Trophy, Zap, Flame, Lock, X, Keyboard, Volume2, CreditCard, Zap as ZapIcon, MousePointerClick, BookOpenCheck, Headphones } from "lucide-react";
 import { toast as sonnerToast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 const SentenceBuilderGame = lazy(() => import("@/components/games/SentenceBuilderGame"));
 const NumbersGame = lazy(() => import("@/components/games/NumbersGame"));
@@ -48,7 +48,8 @@ const GameFallback = () => (
 const GamesPage = () => {
   useSEO({ title: "Korean Learning Games", description: "Practice Korean with interactive games on Klovers. Memory match, Hangul quiz, word scramble, and more fun vocabulary games.", canonical: "https://kloversegy.com/games" });
   const [activeGame, setActiveGame] = useState<string>("match");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user } = useAuth();
+  const isLoggedIn = Boolean(user);
   const [showSignupNudge, setShowSignupNudge] = useState(false);
   const { awardGameXp, progress, league, leaguePromotion, newBadges, streakCelebration, clearLeaguePromotion, clearNewBadges, clearStreakCelebration } = useGamification();
   const [xpFloat, setXpFloat] = useState<number | null>(null);
@@ -72,16 +73,6 @@ const GamesPage = () => {
       clearNewBadges();
     }
   }, [newBadges]);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setIsLoggedIn(!!session);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
 
   const games = [
     { id: "match", title: t("games.matchTitle"), description: t("games.matchDesc"), icon: Layers, emoji: "🃏", difficulty: t("games.beginner"), free: true },

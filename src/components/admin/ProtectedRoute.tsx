@@ -1,36 +1,36 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [status, setStatus] = useState<"loading" | "authorized" | "unauthorized">("loading");
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    const check = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setStatus("unauthorized");
-        return;
-      }
+    if (loading) return;
+    if (!user) {
+      setStatus("unauthorized");
+      return;
+    }
 
+    let active = true;
+    const check = async () => {
       const { data } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", session.user.id)
+        .eq("user_id", user.id)
         .eq("role", "admin")
         .maybeSingle();
 
-      setStatus(data ? "authorized" : "unauthorized");
+      if (active) setStatus(data ? "authorized" : "unauthorized");
     };
 
-    check();
+    setStatus("loading");
+    void check();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      check();
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => { active = false; };
+  }, [loading, user]);
 
   if (status === "loading") {
     return (

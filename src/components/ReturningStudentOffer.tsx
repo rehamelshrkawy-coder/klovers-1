@@ -223,7 +223,7 @@ const ReturningStudentOffer = () => {
         {/* Mini FAQ */}
         {faqs.length > 0 && (
           <div
-            className={`max-w-3xl mx-auto mb-12 transition-all duration-700 delay-[400ms] ${
+            className={`max-w-3xl mx-auto mb-12 transition-all duration-700 [transition-delay:400ms] ${
               visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
             }`}
           >

@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useSEO } from "@/hooks/useSEO";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +11,7 @@ import OptimizedImage from "@/components/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarDays, User, ArrowRight, Clock, AlertTriangle } from "lucide-react";
+import { CalendarDays, User, ArrowRight, AlertTriangle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BlogPost {
@@ -52,11 +53,28 @@ const BlogPage = () => {
     canonical: "https://kloversegy.com/blog",
   });
 
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
   const [activeType, setActiveType] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(18);
   const { language } = useLanguage();
+
+  const { data: posts = [], isLoading: loading, error: queryError } = useQuery({
+    queryKey: ["blog_posts", language],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("id, title, slug, description, keywords, article_type, hero_image, hero_alt, author, lang, published_at, created_at, seo_score")
+        .eq("published", true)
+        .eq("lang", language)
+        .order("seo_score", { ascending: false, nullsFirst: false })
+        .order("published_at", { ascending: false })
+        .limit(60);
+      if (error) throw new Error(error.message);
+      return (data as BlogPost[]) || [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const fetchError = queryError ? (queryError as Error).message : null;
 
   const typeOptions = useMemo(() => {
     const seen = new Set<string>();
@@ -68,26 +86,7 @@ const BlogPage = () => {
     activeType ? posts.filter(p => p.article_type?.toLowerCase() === activeType) : posts,
   [posts, activeType]);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const { data, error } = await supabase
-        .from("blog_posts")
-        .select("id, title, slug, description, keywords, article_type, hero_image, hero_alt, author, lang, published_at, created_at, seo_score")
-        .eq("published", true)
-        .eq("lang", language)
-        .order("seo_score", { ascending: false, nullsFirst: false })
-        .order("published_at", { ascending: false })
-        .limit(60);
-      if (error) {
-        setFetchError(error.message);
-        setLoading(false);
-        return;
-      }
-      setPosts((data as BlogPost[]) || []);
-      setLoading(false);
-    };
-    fetchPosts();
-  }, [language]);
+  const visiblePosts = filteredPosts.slice(0, visibleCount);
 
   // BreadcrumbList JSON-LD for the listing page
   useEffect(() => {
@@ -133,7 +132,7 @@ const BlogPage = () => {
               <Button
                 size="sm"
                 variant={activeType === null ? "default" : "outline"}
-                onClick={() => setActiveType(null)}
+                onClick={() => { setActiveType(null); setVisibleCount(18); }}
               >
                 All <span className="ml-1.5 text-xs opacity-70">({posts.length})</span>
               </Button>
@@ -142,7 +141,7 @@ const BlogPage = () => {
                   key={type}
                   size="sm"
                   variant={activeType === type ? "default" : "outline"}
-                  onClick={() => setActiveType(type)}
+                  onClick={() => { setActiveType(type); setVisibleCount(18); }}
                   className={activeType !== type ? (TYPE_COLOR[type] ? `border ${TYPE_COLOR[type].split(" ")[2]} hover:opacity-80` : "") : ""}
                 >
                   <span className={activeType !== type ? TYPE_COLOR[type]?.split(" ").slice(0, 2).join(" ") : ""}>
@@ -190,63 +189,57 @@ const BlogPage = () => {
                 : "No articles in this category."}
             </p>
           ) : (
-            <ol className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" role="list">
-              {filteredPosts.map((post, idx) => {
-                const readingTime = Math.max(1, Math.ceil((post.description?.split(/\s+/).length || 0) * 8 / 200));
-                return (
-                <li key={post.id} role="listitem">
-                  <Link to={`/blog/${post.slug}`} className="group block h-full">
-                    <article className="h-full rounded-2xl border border-border bg-card overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 flex flex-col">
+            <>
+              <ol className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" role="list">
+                {visiblePosts.map((post, idx) => (
+                  <li key={post.id} role="listitem">
+                    <Link to={`/blog/${post.slug}`} className="group block h-full">
+                      <article className="h-full rounded-2xl border border-border bg-card overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 flex flex-col">
 
-                      {/* Thumbnail */}
-                      <div className="aspect-video overflow-hidden bg-muted group-hover:bg-muted/80 transition-colors">
-                        <OptimizedImage
-                          src={post.hero_image}
-                          alt={post.hero_alt || post.title}
-                          variant="card"
-                          priority={idx < 3}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      </div>
-
-                      <div className="p-5 flex flex-col flex-1">
-                        {/* Type badge + attraction badges */}
-                        <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${TYPE_COLOR[post.article_type] || "bg-muted text-muted-foreground border-border"}`}>
-                            {TYPE_LABEL[post.article_type] || post.article_type}
-                          </span>
-                          {idx === 0 && (
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
-                              ⭐ {language === "ar" ? "مميز" : "Featured"}
-                            </span>
-                          )}
-                          {(post.seo_priority ?? 0) >= 88 && idx > 0 && (
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200">
-                              ✨ {language === "ar" ? "موصى به" : "Top Pick"}
-                            </span>
-                          )}
+                        {/* Thumbnail */}
+                        <div className="aspect-video overflow-hidden bg-muted group-hover:bg-muted/80 transition-colors">
+                          <OptimizedImage
+                            src={post.hero_image}
+                            alt={post.hero_alt || post.title}
+                            variant="card"
+                            priority={idx < 3}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
                         </div>
 
-                        {/* Title */}
-                        <h2 className="text-lg font-bold text-foreground line-clamp-2 leading-snug mb-2">
-                          {post.title}
-                        </h2>
+                        <div className="p-5 flex flex-col flex-1">
+                          {/* Type badge + attraction badges */}
+                          <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${TYPE_COLOR[post.article_type] || "bg-muted text-muted-foreground border-border"}`}>
+                              {TYPE_LABEL[post.article_type] || post.article_type}
+                            </span>
+                            {idx === 0 && (
+                              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                                ⭐ {language === "ar" ? "مميز" : "Featured"}
+                              </span>
+                            )}
+                            {(post.seo_score ?? 0) >= 88 && idx > 0 && (
+                              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200">
+                                ✨ {language === "ar" ? "موصى به" : "Top Pick"}
+                              </span>
+                            )}
+                          </div>
 
-                        {/* Description */}
-                        <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed flex-1 mb-4">
-                          {post.description}
-                        </p>
+                          {/* Title */}
+                          <h2 className="text-lg font-bold text-foreground line-clamp-2 leading-snug mb-2">
+                            {post.title}
+                          </h2>
 
-                        {/* Footer: author / date / reading time */}
-                        <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border pt-3 mt-auto flex-wrap gap-1">
-                          <span className="flex items-center gap-1">
-                            <User className="h-3 w-3" />
-                            {post.author}
-                          </span>
-                          <div className="flex items-center gap-2">
+                          {/* Description */}
+                          <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed flex-1 mb-4">
+                            {post.description}
+                          </p>
+
+                          {/* Footer: author / date */}
+                          <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border pt-3 mt-auto flex-wrap gap-1">
                             <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {readingTime} min
+                              <User className="h-3 w-3" />
+                              {post.author}
                             </span>
                             <time
                               dateTime={post.published_at || post.created_at}
@@ -256,20 +249,35 @@ const BlogPage = () => {
                               {new Date(post.published_at || post.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                             </time>
                           </div>
-                        </div>
 
-                        {/* Read more */}
-                        <div className="flex items-center gap-1 text-primary text-outlined text-sm font-semibold mt-3 group-hover:gap-2 transition-all">
-                          {language === "ar" ? "اقرأ المزيد" : "Read article"}
-                          <ArrowRight className="h-4 w-4" />
+                          {/* Read more */}
+                          <div className="flex items-center gap-1 text-primary text-outlined text-sm font-semibold mt-3 group-hover:gap-2 transition-all">
+                            {language === "ar" ? "اقرأ المزيد" : "Read article"}
+                            <ArrowRight className="h-4 w-4" />
+                          </div>
                         </div>
-                      </div>
-                    </article>
-                  </Link>
-                </li>
-                );
-              })}
-            </ol>
+                      </article>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+
+              {/* Load More */}
+              {visibleCount < filteredPosts.length && (
+                <div className="flex justify-center mt-10">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => setVisibleCount(c => c + 18)}
+                  >
+                    {language === "ar" ? "تحميل المزيد" : "Load more articles"}
+                    <span className="ml-2 text-xs opacity-60">
+                      ({filteredPosts.length - visibleCount} {language === "ar" ? "متبقية" : "remaining"})
+                    </span>
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
 

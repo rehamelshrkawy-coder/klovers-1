@@ -681,7 +681,7 @@ const TrialBookingPage = () => {
                 />
                 <button
                   onClick={async () => {
-                    try { await navigator.clipboard.writeText(referralShareUrl); } catch {}
+                    try { await navigator.clipboard.writeText(referralShareUrl); } catch { /* Clipboard access is optional. */ }
                     setReferralCopied(true);
                     track.custom("referral_link_copied", { from: "success_screen" });
                     logLeadEvent({ source_type: "free_trial", cta_label: "referral_link_copied" });

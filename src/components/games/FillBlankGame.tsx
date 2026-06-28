@@ -35,7 +35,7 @@ function buildQuestions(exercises: GameExerciseItem[]): Question[] {
       .slice(0, 12)
       .map(e => {
         const blank = e.options[e.correct_index] ?? e.options[0] ?? "";
-        let opts = e.options.length >= 2 ? e.options : [...e.options, ...FILLER_OPTIONS.filter(o => !e.options.includes(o))].slice(0, 4);
+        const opts = e.options.length >= 2 ? e.options : [...e.options, ...FILLER_OPTIONS.filter(o => !e.options.includes(o))].slice(0, 4);
         return { sentence: e.question, blank, hint: e.explanation || "", options: opts };
       });
   }

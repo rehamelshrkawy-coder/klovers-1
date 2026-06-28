@@ -46,7 +46,7 @@ const CommunityBand = () => {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-[#229ED9] hover:bg-[#1a8fc0] text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
-              onClick={() => { try { logLeadEvent({ source_type: "community", cta_label: "community_band_telegram" }); } catch {} }}
+              onClick={() => { try { logLeadEvent({ source_type: "community", cta_label: "community_band_telegram" }); } catch { /* Analytics must not block navigation. */ } }}
             >
               <span aria-hidden="true">✈️</span>
               {isAr ? "تيليغرام" : "Telegram"}
@@ -56,7 +56,7 @@ const CommunityBand = () => {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-[#1877F2] hover:bg-[#1565d8] text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
-              onClick={() => { try { logLeadEvent({ source_type: "community", cta_label: "community_band_facebook" }); } catch {} }}
+              onClick={() => { try { logLeadEvent({ source_type: "community", cta_label: "community_band_facebook" }); } catch { /* Analytics must not block navigation. */ } }}
             >
               <span aria-hidden="true">📘</span>
               {isAr ? "فيسبوك" : "Facebook"}
@@ -81,25 +81,12 @@ const SectionFallback = () => (
 );
 
 const Index = () => {
-  useSEO({ title: "Korean Classes in Arabic | Klovers Academy", description: "Join Klovers Korean Lovers Academy. Interactive online Korean lessons, placement tests, and gamified learning for all levels.", canonical: "https://kloversegy.com/" });
-
-  // Hreflang alternates for EN / AR homepage
-  useEffect(() => {
-    const addAlt = (hreflang: string, href: string) => {
-      const el = document.createElement("link");
-      el.setAttribute("rel", "alternate");
-      el.setAttribute("hreflang", hreflang);
-      el.setAttribute("href", href);
-      el.id = `hreflang-${hreflang}`;
-      document.head.appendChild(el);
-    };
-    addAlt("en", "https://kloversegy.com/");
-    addAlt("ar", "https://kloversegy.com/?lang=ar");
-    addAlt("x-default", "https://kloversegy.com/");
-    return () => {
-      ["en", "ar", "x-default"].forEach(hl => document.getElementById(`hreflang-${hl}`)?.remove());
-    };
-  }, []);
+  useSEO({
+    title: "Korean Classes in Arabic | Klovers Academy",
+    description: "Join Klovers Korean Lovers Academy. Interactive online Korean lessons, placement tests, and gamified learning for all levels.",
+    canonical: "https://kloversegy.com/",
+    hreflangAr: "https://kloversegy.com/?lang=ar",
+  });
 
   useEffect(() => {
     const schema = {
@@ -185,7 +172,7 @@ const Index = () => {
       [25, 50, 75, 90].forEach((m) => {
         if (pct >= m && !milestones.has(m)) {
           milestones.add(m);
-          try { logLeadEvent({ source_type: "homepage", cta_label: `scroll_depth_${m}` }); } catch {}
+          try { logLeadEvent({ source_type: "homepage", cta_label: `scroll_depth_${m}` }); } catch { /* Analytics is best-effort. */ }
         }
       });
     };
@@ -207,7 +194,7 @@ const Index = () => {
       if (!el) return;
       const obs = new IntersectionObserver(([entry]) => {
         if (entry.isIntersecting) {
-          try { logLeadEvent({ source_type: "homepage", cta_label: label }); } catch {}
+          try { logLeadEvent({ source_type: "homepage", cta_label: label }); } catch { /* Analytics is best-effort. */ }
           obs.disconnect();
         }
       }, { threshold: 0.3 });

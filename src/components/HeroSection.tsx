@@ -218,7 +218,7 @@ const HeroSection = () => {
             >
               <Link
                 to="/free-trial"
-                onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "homepage_hero_free_trial" }); } catch {} }}
+                onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "homepage_hero_free_trial" }); } catch { /* Analytics must not block navigation. */ } }}
               >
                 <Gift className="h-5 w-5" />
                 {t("hero", "startNow")}
@@ -265,7 +265,7 @@ const HeroSection = () => {
           <Link
             to="/hangul-starter"
             className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors text-xs underline underline-offset-4 decoration-white/30 hover:decoration-white/60"
-            onClick={() => { try { logLeadEvent({ source_type: "free_resource", cta_label: "hero_hangul_sheet" }); } catch {} }}
+            onClick={() => { try { logLeadEvent({ source_type: "free_resource", cta_label: "hero_hangul_sheet" }); } catch { /* Analytics must not block navigation. */ } }}
           >
             <BookOpen className="h-3.5 w-3.5 shrink-0" />
             {isAr ? "احصل على ورقة هانغول المجانية ←" : "Free Hangul starter sheet →"}

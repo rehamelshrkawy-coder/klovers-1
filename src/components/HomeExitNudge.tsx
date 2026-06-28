@@ -60,7 +60,7 @@ const HomeExitNudge = () => {
 
     // Engagement gate: don't fire on landing — wait until they've spent
     // 8s reading. Filters out instant-bouncers from search-result mistakes.
-    let timer: number | null = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       document.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("scroll", handleScroll, { passive: true });
     }, 8000);

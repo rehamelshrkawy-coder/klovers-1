@@ -126,7 +126,7 @@ const Header = () => {
               <Button size="sm" variant="outline" asChild className="gap-1.5 border-primary/40 text-primary hover:bg-primary/10">
                 <Link
                   to="/free-trial"
-                  onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "header_free_trial" }); } catch {} }}
+                  onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "header_free_trial" }); } catch { /* Analytics must not block navigation. */ } }}
                 >
                   🎁 {isAr ? "حصة مجانية" : "Free Trial"}
                 </Link>

@@ -672,6 +672,7 @@ const EnrollNowPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main id="main-content" className="container mx-auto px-4 pt-24 pb-12 max-w-2xl">
+        <h1 className="sr-only">Enroll in Online Korean Classes</h1>
 
         {/* Social proof banner */}
         <div className="flex items-center justify-center gap-3 flex-wrap mb-6 text-xs text-muted-foreground">

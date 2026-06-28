@@ -7,19 +7,19 @@ interface SEOProps {
   ogImage?: string;
   type?: "website" | "article";
   noindex?: boolean;
-  /**
-   * Pass an Arabic-language URL when this page has an Arabic equivalent.
-   * Emits hreflang="ar" + hreflang="x-default" link tags for Google.
-   * If omitted, no hreflang tags are emitted (correct for pages with no AR pair).
-   */
+  /** Arabic-language equivalent URL, when one exists. */
   hreflangAr?: string;
 }
 
 const BASE_URL = "https://kloversegy.com";
 const SITE_NAME = "Klovers | Korean Lovers Academy";
-const DEFAULT_IMAGE = `${BASE_URL}/klovers-logo.jpg`;
+const DEFAULT_IMAGE = `${BASE_URL}/hero-korean.jpg`;
 const DEFAULT_DESC =
   "Learn Korean online with Klovers — Korean Lovers Academy. Interactive lessons, games, placement tests, and certified instructors.";
+
+const absoluteUrl = (value: string) => new URL(value, BASE_URL).toString();
+const pageTitle = (title: string) =>
+  /\|\s*Klovers\b/i.test(title) ? title : `${title} | Klovers`;
 
 export const useSEO = ({
   title,
@@ -31,75 +31,101 @@ export const useSEO = ({
   hreflangAr,
 }: SEOProps) => {
   useEffect(() => {
-    const fullTitle = `${title} | Klovers`;
+    const fullTitle = pageTitle(title.trim());
+    const canonicalHref = absoluteUrl(canonical || window.location.pathname);
+    const imageUrl = absoluteUrl(ogImage);
+    const imageAlt = `${title.replace(/\s*\|.*$/, "")} — Klovers Korean Lovers Academy`;
 
-    // Title
-    document.title = fullTitle;
-
-    const setMeta = (selector: string, attr: string, value: string) => {
-      let el = document.querySelector(selector) as HTMLMetaElement | null;
-      if (!el) {
-        el = document.createElement("meta") as HTMLMetaElement;
+    const setMeta = (selector: string, value: string) => {
+      let element = document.querySelector(selector) as HTMLMetaElement | null;
+      if (!element) {
+        element = document.createElement("meta");
         const match = selector.match(/\[([^\]="]+)="([^"]+)"\]/);
-        if (match) el.setAttribute(match[1], match[2]);
-        document.head.appendChild(el);
+        if (match) element.setAttribute(match[1], match[2]);
+        document.head.appendChild(element);
       }
-      el.setAttribute(attr, value);
+      element.content = value;
     };
 
-    // Robots (noindex for private pages)
-    const robotsMeta = document.querySelector('meta[name="robots"]');
-    if (robotsMeta) robotsMeta.setAttribute("content", noindex ? "noindex, nofollow" : "index, follow");
+    document.title = fullTitle;
+    setMeta('meta[name="description"]', description);
+    setMeta(
+      'meta[name="robots"]',
+      noindex
+        ? "noindex, nofollow"
+        : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+    );
 
-    // Standard meta
-    setMeta('meta[name="description"]', "content", description);
+    setMeta('meta[property="og:title"]', fullTitle);
+    setMeta('meta[property="og:description"]', description);
+    setMeta('meta[property="og:type"]', type);
+    setMeta('meta[property="og:url"]', canonicalHref);
+    setMeta('meta[property="og:site_name"]', "Klovers");
+    setMeta('meta[property="og:locale"]', "en_US");
+    setMeta('meta[property="og:image"]', imageUrl);
+    setMeta('meta[property="og:image:secure_url"]', imageUrl);
+    setMeta('meta[property="og:image:type"]', "image/jpeg");
+    setMeta('meta[property="og:image:alt"]', imageAlt);
 
-    // Open Graph
-    setMeta('meta[property="og:title"]', "content", fullTitle);
-    setMeta('meta[property="og:description"]', "content", description);
-    setMeta('meta[property="og:type"]', "content", type);
-    setMeta('meta[property="og:image"]', "content", ogImage);
-    if (canonical) setMeta('meta[property="og:url"]', "content", canonical);
+    setMeta('meta[name="twitter:card"]', "summary_large_image");
+    setMeta('meta[name="twitter:site"]', "@kloversegy");
+    setMeta('meta[name="twitter:title"]', fullTitle);
+    setMeta('meta[name="twitter:description"]', description);
+    setMeta('meta[name="twitter:image"]', imageUrl);
+    setMeta('meta[name="twitter:image:alt"]', imageAlt);
 
-    // Twitter
-    setMeta('meta[name="twitter:title"]', "content", fullTitle);
-    setMeta('meta[name="twitter:description"]', "content", description);
-    setMeta('meta[name="twitter:image"]', "content", ogImage);
-
-    // Canonical — always set to current page URL (or explicit override)
-    const canonicalHref = canonical || `${BASE_URL}${window.location.pathname}`;
-    let canonicalEl = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-    if (!canonicalEl) {
-      canonicalEl = document.createElement("link");
-      canonicalEl.rel = "canonical";
-      document.head.appendChild(canonicalEl);
+    let canonicalElement = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonicalElement) {
+      canonicalElement = document.createElement("link");
+      canonicalElement.rel = "canonical";
+      document.head.appendChild(canonicalElement);
     }
-    canonicalEl.href = canonicalHref;
+    canonicalElement.href = canonicalHref;
 
-    // og:url always matches canonical
-    setMeta('meta[property="og:url"]', "content", canonicalHref);
+    let pageSchema = document.getElementById("page-jsonld") as HTMLScriptElement | null;
+    if (!noindex) {
+      if (!pageSchema) {
+        pageSchema = document.createElement("script");
+        pageSchema.id = "page-jsonld";
+        pageSchema.type = "application/ld+json";
+        document.head.appendChild(pageSchema);
+      }
+      pageSchema.textContent = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": type === "article" ? "Article" : "WebPage",
+        "@id": `${canonicalHref}#webpage`,
+        url: canonicalHref,
+        name: fullTitle,
+        description,
+        inLanguage: "en",
+        isPartOf: { "@id": `${BASE_URL}/#website` },
+        about: { "@id": `${BASE_URL}/#organization` },
+        primaryImageOfPage: { "@type": "ImageObject", url: imageUrl },
+      });
+    } else {
+      pageSchema?.remove();
+    }
 
-    // hreflang — emit only when an Arabic pair URL is provided
-    const hreflangEls: HTMLLinkElement[] = [];
+    document.querySelectorAll('link[rel="alternate"][hreflang]').forEach((element) => element.remove());
+    const hreflangElements: HTMLLinkElement[] = [];
     if (hreflangAr) {
-      const createHreflang = (lang: string, href: string) => {
-        const el = document.createElement("link");
-        el.rel = "alternate";
-        el.setAttribute("hreflang", lang);
-        el.href = href;
-        document.head.appendChild(el);
-        hreflangEls.push(el);
+      const addAlternate = (language: string, href: string) => {
+        const element = document.createElement("link");
+        element.rel = "alternate";
+        element.hreflang = language;
+        element.href = absoluteUrl(href);
+        document.head.appendChild(element);
+        hreflangElements.push(element);
       };
-      createHreflang("en", canonicalHref);
-      createHreflang("ar", hreflangAr);
-      createHreflang("x-default", canonicalHref);
+      addAlternate("en", canonicalHref);
+      addAlternate("ar", hreflangAr);
+      addAlternate("x-default", canonicalHref);
     }
 
-    // Cleanup: restore defaults on unmount
     return () => {
       document.title = SITE_NAME;
-      setMeta('meta[name="description"]', "content", DEFAULT_DESC);
-      hreflangEls.forEach(el => el.remove());
+      pageSchema?.remove();
+      hreflangElements.forEach((element) => element.remove());
     };
-  }, [title, description, canonical, ogImage, type, hreflangAr]);
+  }, [title, description, canonical, ogImage, type, noindex, hreflangAr]);
 };
