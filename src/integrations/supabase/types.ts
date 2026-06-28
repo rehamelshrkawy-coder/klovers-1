@@ -99,6 +99,39 @@ export type Database = {
         }
         Relationships: []
       }
+      book_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          available_from: string
+          book_id: string
+          enrollment_id: string | null
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          available_from?: string
+          book_id: string
+          enrollment_id?: string | null
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          available_from?: string
+          book_id?: string
+          enrollment_id?: string | null
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_notifications: {
         Row: {
           created_at: string
@@ -545,23 +578,30 @@ export type Database = {
       }
       enrollments: {
         Row: {
+          acquisition_source: string | null
+          admin_notes: string | null
           admin_review_required: boolean
           amount: number
           approval_status: string
           classes_included: number
+          class_link_sent_at: string | null
+          class_type: string | null
           created_at: string
           currency: string
           due_at: string | null
           duration: number
           enrollment_status: string
+          first_class_date: string | null
           id: string
           last_reminder_at: string | null
           level: string | null
           matched_at: string | null
           matched_batch_id: string | null
           negative_since: string | null
+          notes: string | null
           package_id: string | null
           payment_date: string | null
+          payment_email_sent_at: string | null
           payment_method: string | null
           payment_provider: string | null
           payment_status: string
@@ -585,23 +625,30 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          acquisition_source?: string | null
+          admin_notes?: string | null
           admin_review_required?: boolean
           amount: number
           approval_status?: string
           classes_included: number
+          class_link_sent_at?: string | null
+          class_type?: string | null
           created_at?: string
           currency?: string
           due_at?: string | null
           duration: number
           enrollment_status?: string
+          first_class_date?: string | null
           id?: string
           last_reminder_at?: string | null
           level?: string | null
           matched_at?: string | null
           matched_batch_id?: string | null
           negative_since?: string | null
+          notes?: string | null
           package_id?: string | null
           payment_date?: string | null
+          payment_email_sent_at?: string | null
           payment_method?: string | null
           payment_provider?: string | null
           payment_status?: string
@@ -625,23 +672,30 @@ export type Database = {
           user_id: string
         }
         Update: {
+          acquisition_source?: string | null
+          admin_notes?: string | null
           admin_review_required?: boolean
           amount?: number
           approval_status?: string
           classes_included?: number
+          class_link_sent_at?: string | null
+          class_type?: string | null
           created_at?: string
           currency?: string
           due_at?: string | null
           duration?: number
           enrollment_status?: string
+          first_class_date?: string | null
           id?: string
           last_reminder_at?: string | null
           level?: string | null
           matched_at?: string | null
           matched_batch_id?: string | null
           negative_since?: string | null
+          notes?: string | null
           package_id?: string | null
           payment_date?: string | null
+          payment_email_sent_at?: string | null
           payment_method?: string | null
           payment_provider?: string | null
           payment_status?: string
@@ -1372,41 +1426,50 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          course_level_key: string | null
           country: string
           created_at: string
           credits: number
           email: string
           id: string
           level: string
+          language: string | null
           name: string
           reset_version: string | null
           status: string
+          timezone: string | null
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
+          course_level_key?: string | null
           country?: string
           created_at?: string
           credits?: number
           email: string
           id?: string
           level?: string
+          language?: string | null
           name: string
           reset_version?: string | null
           status?: string
+          timezone?: string | null
           user_id: string
         }
         Update: {
           avatar_url?: string | null
+          course_level_key?: string | null
           country?: string
           created_at?: string
           credits?: number
           email?: string
           id?: string
           level?: string
+          language?: string | null
           name?: string
           reset_version?: string | null
           status?: string
+          timezone?: string | null
           user_id?: string
         }
         Relationships: []
@@ -2230,6 +2293,408 @@ export type Database = {
         }
         Relationships: []
       }
+      email_logs: {
+        Row: {
+          bounced_at: string | null
+          complained_at: string | null
+          created_at: string
+          delivered_at: string | null
+          enrollment_id: string | null
+          error: string | null
+          id: string
+          resend_id: string | null
+          status: string
+          template: string
+          to_email: string
+          to_name: string | null
+        }
+        Insert: {
+          bounced_at?: string | null
+          complained_at?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          enrollment_id?: string | null
+          error?: string | null
+          id?: string
+          resend_id?: string | null
+          status: string
+          template: string
+          to_email: string
+          to_name?: string | null
+        }
+        Update: {
+          bounced_at?: string | null
+          complained_at?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          enrollment_id?: string | null
+          error?: string | null
+          id?: string
+          resend_id?: string | null
+          status?: string
+          template?: string
+          to_email?: string
+          to_name?: string | null
+        }
+        Relationships: []
+      }
+      referral_clicks: {
+        Row: {
+          clicked_at: string
+          id: string
+          referrer_user_id: string
+          visitor_fingerprint: string
+        }
+        Insert: {
+          clicked_at?: string
+          id?: string
+          referrer_user_id: string
+          visitor_fingerprint: string
+        }
+        Update: {
+          clicked_at?: string
+          id?: string
+          referrer_user_id?: string
+          visitor_fingerprint?: string
+        }
+        Relationships: []
+      }
+      referral_conversions: {
+        Row: {
+          converted_at: string
+          id: string
+          referred_email: string
+          referrer_user_id: string
+          xp_awarded: boolean
+        }
+        Insert: {
+          converted_at?: string
+          id?: string
+          referred_email: string
+          referrer_user_id: string
+          xp_awarded?: boolean
+        }
+        Update: {
+          converted_at?: string
+          id?: string
+          referred_email?: string
+          referrer_user_id?: string
+          xp_awarded?: boolean
+        }
+        Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          discount_flat: number | null
+          discount_pct: number | null
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          uses_count: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          discount_flat?: number | null
+          discount_pct?: number | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          uses_count?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          discount_flat?: number | null
+          discount_pct?: number | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          uses_count?: number
+        }
+        Relationships: []
+      }
+      teacher_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          id: string
+          is_available: boolean
+          start_time: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          id?: string
+          is_available?: boolean
+          start_time: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          is_available?: boolean
+          start_time?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      student_nps: {
+        Row: {
+          created_at: string
+          feedback: string | null
+          id: string
+          score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          score: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trial_bookings: {
+        Row: {
+          attendance_confirmed_at: string | null
+          attendance_responded_at: string | null
+          attendance_response: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          changed_at: string | null
+          class_language: string | null
+          confirmation_token: string | null
+          confirmed_at: string | null
+          created_at: string
+          day_of_week: number | null
+          email: string
+          email_opened_at: string | null
+          email_sent_at: string | null
+          followup_day1_sent_at: string | null
+          followup_day3_sent_at: string | null
+          followup_day7_sent_at: string | null
+          followup_prep_sent_at: string | null
+          goal: string | null
+          id: string
+          is_tba: boolean
+          level: string | null
+          name: string
+          phone: string | null
+          rebook_email_sent_at: string | null
+          start_time: string | null
+          status: string | null
+          timezone: string | null
+          trial_date: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attendance_confirmed_at?: string | null
+          attendance_responded_at?: string | null
+          attendance_response?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          changed_at?: string | null
+          class_language?: string | null
+          confirmation_token?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          day_of_week?: number | null
+          email: string
+          email_opened_at?: string | null
+          email_sent_at?: string | null
+          followup_day1_sent_at?: string | null
+          followup_day3_sent_at?: string | null
+          followup_day7_sent_at?: string | null
+          followup_prep_sent_at?: string | null
+          goal?: string | null
+          id?: string
+          is_tba?: boolean
+          level?: string | null
+          name: string
+          phone?: string | null
+          rebook_email_sent_at?: string | null
+          start_time?: string | null
+          status?: string | null
+          timezone?: string | null
+          trial_date?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attendance_confirmed_at?: string | null
+          attendance_responded_at?: string | null
+          attendance_response?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          changed_at?: string | null
+          class_language?: string | null
+          confirmation_token?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          day_of_week?: number | null
+          email?: string
+          email_opened_at?: string | null
+          email_sent_at?: string | null
+          followup_day1_sent_at?: string | null
+          followup_day3_sent_at?: string | null
+          followup_day7_sent_at?: string | null
+          followup_prep_sent_at?: string | null
+          goal?: string | null
+          id?: string
+          is_tba?: boolean
+          level?: string | null
+          name?: string
+          phone?: string | null
+          rebook_email_sent_at?: string | null
+          start_time?: string | null
+          status?: string | null
+          timezone?: string | null
+          trial_date?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      trial_invite_sends: {
+        Row: {
+          attendance_responded_at: string | null
+          attendance_response: string | null
+          campaign: string
+          email: string
+          email_opened_at: string | null
+          id: string
+          name: string | null
+          sent_at: string
+          source: string
+        }
+        Insert: {
+          attendance_responded_at?: string | null
+          attendance_response?: string | null
+          campaign: string
+          email: string
+          email_opened_at?: string | null
+          id?: string
+          name?: string | null
+          sent_at?: string
+          source: string
+        }
+        Update: {
+          attendance_responded_at?: string | null
+          attendance_response?: string | null
+          campaign?: string
+          email?: string
+          email_opened_at?: string | null
+          id?: string
+          name?: string | null
+          sent_at?: string
+          source?: string
+        }
+        Relationships: []
+      }
+      trial_settings: {
+        Row: {
+          default_duration_min: number
+          id: number
+          program_start_date: string | null
+          suggestion_weeks: number
+          updated_at: string
+        }
+        Insert: {
+          default_duration_min?: number
+          id?: number
+          program_start_date?: string | null
+          suggestion_weeks?: number
+          updated_at?: string
+        }
+        Update: {
+          default_duration_min?: number
+          id?: number
+          program_start_date?: string | null
+          suggestion_weeks?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trial_slots: {
+        Row: {
+          archived_at: string | null
+          capacity: number
+          class_language: string | null
+          created_at: string
+          day_of_week: number
+          duration_min: number
+          id: string
+          is_active: boolean
+          lifecycle: string | null
+          meeting_url: string | null
+          notes: string | null
+          start_time: string
+          timezone: string
+          trial_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          capacity?: number
+          class_language?: string | null
+          created_at?: string
+          day_of_week: number
+          duration_min?: number
+          id?: string
+          is_active?: boolean
+          lifecycle?: string | null
+          meeting_url?: string | null
+          notes?: string | null
+          start_time: string
+          timezone?: string
+          trial_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          capacity?: number
+          class_language?: string | null
+          created_at?: string
+          day_of_week?: number
+          duration_min?: number
+          id?: string
+          is_active?: boolean
+          lifecycle?: string | null
+          meeting_url?: string | null
+          notes?: string | null
+          start_time?: string
+          timezone?: string
+          trial_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       lead_funnel: {
@@ -2238,12 +2703,70 @@ export type Database = {
           clicked_whatsapp: boolean | null
           first_seen: string | null
           last_seen: string | null
+          received_broadcast: boolean | null
           session_id: string | null
           signup_completed: boolean | null
           started_placement: boolean | null
           touchpoints: string[] | null
           user_id: string | null
           viewed_pricing_cta: boolean | null
+        }
+        Relationships: []
+      }
+      v_trial_bookings_admin: {
+        Row: {
+          attendance_responded_at: string | null
+          attendance_response: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          changed_at: string | null
+          class_language: string | null
+          confirmation_email_failed_at: string | null
+          confirmed_at: string | null
+          created_at: string | null
+          day_name: string | null
+          day_of_week: number | null
+          email: string | null
+          email_opened_at: string | null
+          email_sent_at: string | null
+          goal: string | null
+          id: string | null
+          is_tba: boolean | null
+          level: string | null
+          name: string | null
+          phone: string | null
+          program_phase: string | null
+          slot_capacity: number | null
+          slot_duration_min: number | null
+          slot_exists: boolean | null
+          slot_id: string | null
+          slot_is_active: boolean | null
+          slot_lifecycle: string | null
+          start_time: string | null
+          status: string | null
+          time_bucket: string | null
+          timezone: string | null
+          trial_date: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      v_trial_slots_admin: {
+        Row: {
+          booked_count: number | null
+          capacity: number | null
+          class_language: string | null
+          day_name: string | null
+          day_of_week: number | null
+          duration_min: number | null
+          is_full: boolean | null
+          lifecycle: string | null
+          meeting_url: string | null
+          occurrence_date: string | null
+          seats_left: number | null
+          slot_id: string | null
+          start_time: string | null
+          timezone: string | null
         }
         Relationships: []
       }
@@ -2315,6 +2838,14 @@ export type Database = {
       }
     }
     Functions: {
+      approve_enrollment: {
+        Args: {
+          _admin_id: string
+          _enrollment_id: string
+          _unit_price?: number | null
+        }
+        Returns: undefined
+      }
       attach_session_to_user: {
         Args: { p_session: string }
         Returns: undefined
@@ -2376,7 +2907,63 @@ export type Database = {
       deduct_credit: { Args: { _user_id: string }; Returns: number }
       ensure_pkg_groups_for_packages: { Args: never; Returns: number }
       factory_reset_data: { Args: never; Returns: string }
+      fn_create_trial_slot: {
+        Args: {
+          p_capacity?: number | null
+          p_day_of_week: number
+          p_duration_min?: number | null
+          p_start_time: string
+          p_timezone?: string | null
+        }
+        Returns: Database["public"]["Tables"]["trial_slots"]["Row"]
+      }
+      fn_retire_trial_slot: {
+        Args: { p_new_lifecycle?: string; p_slot_id: string }
+        Returns: Database["public"]["Tables"]["trial_slots"]["Row"]
+      }
+      fn_set_trial_program_start_date: {
+        Args: { p_date: string | null }
+        Returns: Database["public"]["Tables"]["trial_settings"]["Row"]
+      }
+      fn_suggest_trial_slots: {
+        Args: never
+        Returns: {
+          day_name: string
+          day_of_week: number
+          duration_min: number
+          has_historical_demand: boolean
+          is_reasonable_hour: boolean
+          reasons: string[]
+          score: number
+          source: string
+          start_time: string
+          timezone: string
+          would_replace_full_slot: boolean
+        }[]
+      }
       get_auth_email: { Args: never; Returns: string }
+      get_student_preference_trends: {
+        Args: { days_back?: number }
+        Returns: {
+          day_of_week: number
+          level: string
+          preferred_start_time: string
+          request_count: number
+        }[]
+      }
+      get_trial_availability: {
+        Args: { p_language?: string | null }
+        Returns: {
+          booked_count: number
+          capacity: number
+          class_language: string | null
+          day_of_week: number
+          duration_min: number
+          next_trial_date: string
+          start_time: string
+          timezone: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

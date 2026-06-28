@@ -16,6 +16,34 @@
 
 BEGIN;
 
+-- Prod originally received these objects manually. Capture the prerequisites
+-- before any views/functions reference them so a fresh migration run works.
+ALTER TABLE public.trial_slots
+  ADD COLUMN IF NOT EXISTS lifecycle text NOT NULL DEFAULT 'active',
+  ADD COLUMN IF NOT EXISTS archived_at timestamptz,
+  ADD COLUMN IF NOT EXISTS notes text,
+  ADD COLUMN IF NOT EXISTS trial_date date;
+
+CREATE TABLE IF NOT EXISTS public.trial_settings (
+  id integer PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  program_start_date date,
+  default_duration_min integer NOT NULL DEFAULT 30 CHECK (default_duration_min > 0),
+  suggestion_weeks integer NOT NULL DEFAULT 8 CHECK (suggestion_weeks BETWEEN 1 AND 52),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+INSERT INTO public.trial_settings (id)
+VALUES (1)
+ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE public.trial_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admins manage trial settings" ON public.trial_settings;
+CREATE POLICY "Admins manage trial settings"
+  ON public.trial_settings FOR ALL TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'::public.app_role))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+
 -- ─── #2: retire sentinels ─────────────────────────────────────────────────────
 ALTER TABLE public.trial_bookings
   ALTER COLUMN start_time DROP NOT NULL;
