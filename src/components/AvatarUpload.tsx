@@ -67,7 +67,13 @@ const AvatarUpload = ({ userId, currentUrl, name, onUploaded }: AvatarUploadProp
 
   return (
     <div className="flex items-center gap-4">
-      <div className="relative group cursor-pointer" onClick={() => inputRef.current?.click()}>
+      <button
+        type="button"
+        className="relative group cursor-pointer rounded-full"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        aria-label="Upload a profile photo"
+      >
         <Avatar className="h-16 w-16 border-2 border-primary/20">
           {currentUrl && <AvatarImage src={currentUrl} alt={name} />}
           <AvatarFallback className="bg-primary/20 text-foreground text-lg font-semibold">
@@ -81,7 +87,7 @@ const AvatarUpload = ({ userId, currentUrl, name, onUploaded }: AvatarUploadProp
             <Camera className="h-5 w-5 text-background" />
           )}
         </div>
-      </div>
+      </button>
       <input
         ref={inputRef}
         type="file"

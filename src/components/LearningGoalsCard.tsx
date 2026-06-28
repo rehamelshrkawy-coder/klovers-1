@@ -95,8 +95,9 @@ export function LearningGoalsCard() {
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div>
-                    <label className="text-sm font-medium">Goal Name</label>
+                    <label className="text-sm font-medium" htmlFor="learning-goal-name">Goal Name</label>
                     <Input
+                      id="learning-goal-name"
                       placeholder="e.g., Learn 50 new words"
                       value={newGoal.name}
                       onChange={(e) =>
@@ -105,11 +106,11 @@ export function LearningGoalsCard() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Goal Type</label>
+                    <label className="text-sm font-medium" htmlFor="learning-goal-type">Goal Type</label>
                     <Select value={newGoal.type} onValueChange={(value) =>
                       setNewGoal({ ...newGoal, type: value })
                     }>
-                      <SelectTrigger>
+                      <SelectTrigger id="learning-goal-type">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -121,8 +122,9 @@ export function LearningGoalsCard() {
                     </Select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Target Value</label>
+                    <label className="text-sm font-medium" htmlFor="learning-goal-target">Target Value</label>
                     <Input
+                      id="learning-goal-target"
                       type="number"
                       placeholder="e.g., 50"
                       value={newGoal.value}
@@ -132,11 +134,11 @@ export function LearningGoalsCard() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Time Period</label>
+                    <label className="text-sm font-medium" htmlFor="learning-goal-period">Time Period</label>
                     <Select value={newGoal.period} onValueChange={(value) =>
                       setNewGoal({ ...newGoal, period: value })
                     }>
-                      <SelectTrigger>
+                      <SelectTrigger id="learning-goal-period">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -177,8 +179,9 @@ export function LearningGoalsCard() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
-                <label className="text-sm font-medium">Goal Name</label>
+                <label className="text-sm font-medium" htmlFor="learning-goal-name">Goal Name</label>
                 <Input
+                  id="learning-goal-name"
                   placeholder="e.g., Learn 50 new words"
                   value={newGoal.name}
                   onChange={(e) =>
@@ -187,11 +190,11 @@ export function LearningGoalsCard() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Goal Type</label>
+                <label className="text-sm font-medium" htmlFor="learning-goal-type">Goal Type</label>
                 <Select value={newGoal.type} onValueChange={(value) =>
                   setNewGoal({ ...newGoal, type: value })
                 }>
-                  <SelectTrigger>
+                  <SelectTrigger id="learning-goal-type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -203,8 +206,9 @@ export function LearningGoalsCard() {
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium">Target Value</label>
+                <label className="text-sm font-medium" htmlFor="learning-goal-target">Target Value</label>
                 <Input
+                  id="learning-goal-target"
                   type="number"
                   placeholder="e.g., 50"
                   value={newGoal.value}
@@ -214,11 +218,11 @@ export function LearningGoalsCard() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Time Period</label>
+                <label className="text-sm font-medium" htmlFor="learning-goal-period">Time Period</label>
                 <Select value={newGoal.period} onValueChange={(value) =>
                   setNewGoal({ ...newGoal, period: value })
                 }>
-                  <SelectTrigger>
+                  <SelectTrigger id="learning-goal-period">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

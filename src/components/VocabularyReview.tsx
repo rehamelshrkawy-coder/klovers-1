@@ -112,6 +112,15 @@ export function VocabularyReview({
       <div
         className="h-64 cursor-pointer perspective"
         onClick={() => setIsFlipped(!isFlipped)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setIsFlipped((flipped) => !flipped);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={isFlipped ? "Show Korean word" : "Show word meaning"}
       >
         <Card
           className={`h-full flex items-center justify-center transition-all duration-300 ${

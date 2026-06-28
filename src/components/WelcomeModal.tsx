@@ -106,7 +106,10 @@ const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
             {STEPS.map((_, i) => (
               <button
                 key={i}
+                type="button"
                 onClick={() => setStep(i)}
+                aria-label={`Go to welcome step ${i + 1}`}
+                aria-current={i === step ? "step" : undefined}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   i === step ? "w-6 bg-primary-foreground" : "w-2 bg-primary-foreground/40"
                 }`}
