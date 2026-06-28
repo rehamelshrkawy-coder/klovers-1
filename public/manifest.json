@@ -13,22 +13,22 @@
   "categories": ["education", "language"],
   "icons": [
     {
-      "src": "/klovers-logo.jpg",
+      "src": "/pwa-192.png",
       "sizes": "192x192",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/klovers-logo.jpg",
+      "src": "/pwa-512.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/klovers-mascot.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "src": "/pwa-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -56,15 +56,15 @@
   ],
   "screenshots": [
     {
-      "src": "/klovers-logo.jpg",
-      "sizes": "512x512",
+      "src": "/pwa-screenshot-narrow.jpg",
+      "sizes": "540x720",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Klovers — Learn Korean Online"
     },
     {
-      "src": "/klovers-logo.jpg",
-      "sizes": "512x512",
+      "src": "/pwa-screenshot-wide.jpg",
+      "sizes": "1280x720",
       "type": "image/jpeg",
       "form_factor": "wide",
       "label": "Klovers — Korean Lovers Academy"
