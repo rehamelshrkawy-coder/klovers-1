@@ -22,12 +22,7 @@ export function useLearningGoals() {
   const [goals, setGoals] = useState<LearningGoal[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) return;
-    fetchGoals();
-  }, [user]);
-
-  const fetchGoals = async () => {
+  const fetchGoals = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -42,7 +37,12 @@ export function useLearningGoals() {
       setGoals(data as LearningGoal[]);
     }
     setLoading(false);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    void fetchGoals();
+  }, [fetchGoals, user]);
 
   const createGoal = useCallback(
     async (
@@ -73,7 +73,7 @@ export function useLearningGoals() {
       }
       return false;
     },
-    [user]
+    [fetchGoals, user]
   );
 
   const updateGoalProgress = useCallback(
@@ -97,7 +97,7 @@ export function useLearningGoals() {
         await fetchGoals();
       }
     },
-    [goals]
+    [fetchGoals, goals]
   );
 
   const deleteGoal = useCallback(async (goalId: string) => {
@@ -109,7 +109,7 @@ export function useLearningGoals() {
     if (!error) {
       await fetchGoals();
     }
-  }, []);
+  }, [fetchGoals]);
 
   const getCompletionPercentage = (goal: LearningGoal): number => {
     return Math.min(Math.round((goal.current_progress / goal.target_value) * 100), 100);

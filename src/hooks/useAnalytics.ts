@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useAuth } from "./useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -44,12 +44,7 @@ export function useAnalytics(): AnalyticsData {
   const [totalXp, setTotalXp] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) return;
-    fetchAnalytics();
-  }, [user]);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -157,7 +152,12 @@ export function useAnalytics(): AnalyticsData {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    void fetchAnalytics();
+  }, [fetchAnalytics, user]);
 
   return useMemo(
     () => ({
