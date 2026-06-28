@@ -1175,11 +1175,28 @@ const GroupAttendanceManager = ({
                         {/* Group header */}
                         <div
                           className="flex items-center justify-between p-3 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
-                          onClick={() => setExpandedGroups(prev => {
-                            const next = new Set(prev);
-                            if (next.has(g.id)) { next.delete(g.id); } else { next.add(g.id); }
-                            return next;
-                          })}
+                          role="button"
+                          tabIndex={0}
+                          aria-expanded={isExpanded}
+                          onClick={(event) => {
+                            if ((event.target as HTMLElement).closest("button")) return;
+                            setExpandedGroups(prev => {
+                             const next = new Set(prev);
+                             if (next.has(g.id)) { next.delete(g.id); } else { next.add(g.id); }
+                             return next;
+                            });
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.target !== event.currentTarget) return;
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              setExpandedGroups(prev => {
+                                const next = new Set(prev);
+                                if (next.has(g.id)) { next.delete(g.id); } else { next.add(g.id); }
+                                return next;
+                              });
+                            }
+                          }}
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             {isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" /> : <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />}
@@ -1206,7 +1223,7 @@ const GroupAttendanceManager = ({
                               {activeMembers.length}/{g.capacity}
                               {waitlistMembers.length > 0 && ` (+${waitlistMembers.length} waitlist)`}
                             </Badge>
-                            <div className="flex gap-1" onClick={e => e.stopPropagation()}>
+                            <div className="flex gap-1">
                               <Button variant="ghost" size="sm" onClick={() => {
                                 const legacyGroup = groups.find(lg => lg.name === g.name);
                                 if (legacyGroup) openEditGroup(legacyGroup);

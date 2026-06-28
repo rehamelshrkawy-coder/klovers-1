@@ -378,6 +378,9 @@ function AllTemplateCards({ post, theme, format, active, onSelect, bgImage }: {
           return (
             <button
               key={tpl}
+              type="button"
+              aria-label={`Select ${meta.label} template`}
+              aria-pressed={isActive}
               onClick={() => onSelect(tpl)}
               className={`rounded-xl overflow-hidden border-2 transition-all text-left ${
                 isActive ? "border-primary shadow-lg shadow-primary/20 scale-[1.03]" : "border-border hover:border-primary/50"
@@ -887,7 +890,7 @@ export default function CreatorHub() {
                 <div className="relative rounded-xl overflow-hidden border border-border aspect-square w-full max-w-[200px] mx-auto shadow-md">
                   <img
                     src={bgImage.src}
-                    alt="Background photo"
+                    alt="Selected background"
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-center py-1">
@@ -1005,10 +1008,20 @@ export default function CreatorHub() {
               {posts.map((p, i) => (
                 <div
                   key={p.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={i === activeIndex}
                   className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer text-xs transition-colors ${
                     i === activeIndex ? "bg-accent text-accent-foreground" : "hover:bg-muted text-foreground"
                   }`}
                   onClick={() => setActiveIndex(i)}
+                  onKeyDown={(event) => {
+                    if (event.target !== event.currentTarget) return;
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setActiveIndex(i);
+                    }
+                  }}
                 >
                   <span className="flex-1 truncate">{p.mainText || `Post ${i + 1}`}</span>
                   {posts.length > 1 && (

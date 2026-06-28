@@ -246,12 +246,22 @@ export const StudentsTab = memo(function StudentsTab({
                     return (
                       <div
                         key={u.user_id}
+                        role="button"
+                        tabIndex={u.enrollment_id ? 0 : -1}
+                        aria-expanded={selectedStudentId === u.user_id}
                         className={cn(
                           "rounded-xl border bg-card p-3 space-y-2 cursor-pointer transition-shadow hover:shadow-sm",
                           isAtRisk && "border-amber-300/60 bg-amber-50/60 dark:bg-amber-950/20",
                           isLocked && "border-red-300/60 bg-red-50/60 dark:bg-red-950/20"
                         )}
                         onClick={() => setSelectedStudentId(selectedStudentId === u.user_id ? null : (u.enrollment_id ? u.user_id : null))}
+                        onKeyDown={(event) => {
+                          if (!u.enrollment_id || event.target !== event.currentTarget) return;
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setSelectedStudentId(selectedStudentId === u.user_id ? null : u.user_id);
+                          }
+                        }}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">

@@ -75,11 +75,15 @@ const StudentHealthPanel = ({ overviewRows }: Props) => {
         {cards.map(({ key, icon: Icon, iconColor, bgColor, borderColor, badgeClass, count, label, sublabel, rows }) => (
           <Card
             key={key}
-            className={`rounded-2xl border ${borderColor} ${bgColor} cursor-pointer hover:shadow-md transition-shadow`}
-            onClick={() => setOpenCard(openCard === key ? null : key)}
+            className={`rounded-2xl border ${borderColor} ${bgColor} hover:shadow-md transition-shadow`}
           >
             <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-2">
+              <button
+                type="button"
+                className="flex w-full items-start justify-between gap-2 text-left"
+                aria-expanded={openCard === key}
+                onClick={() => setOpenCard(openCard === key ? null : key)}
+              >
                 <div className="flex items-center gap-2">
                   <Icon className={`h-5 w-5 shrink-0 ${iconColor}`} />
                   <div>
@@ -91,10 +95,10 @@ const StudentHealthPanel = ({ overviewRows }: Props) => {
                 {count > 0 && (
                   openCard === key ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0 mt-1" /> : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
                 )}
-              </div>
+              </button>
 
               {openCard === key && rows.length > 0 && (
-                <div className="mt-3 space-y-1.5 border-t border-border/50 pt-3" onClick={e => e.stopPropagation()}>
+                <div className="mt-3 space-y-1.5 border-t border-border/50 pt-3">
                   {rows.slice(0, 8).map(r => (
                     <div key={r.user_id} className="flex items-center justify-between gap-2 text-xs">
                       <div className="min-w-0 flex-1">
