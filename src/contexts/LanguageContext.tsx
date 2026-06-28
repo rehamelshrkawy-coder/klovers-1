@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useCallback, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 
 type Language = "en" | "ar";
 
@@ -68,9 +68,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("k-lovers-lang", language);
   }, [language]);
 
-  const toggleLanguage = () => setLanguage((prev) => (prev === "en" ? "ar" : "en"));
+  const toggleLanguage = useCallback(() => {
+    setLanguage((prev) => (prev === "en" ? "ar" : "en"));
+  }, []);
 
-  const resolve = (sectionOrPath: string, key?: string): any => {
+  const resolve = useCallback((sectionOrPath: string, key?: string): any => {
     let allKeys: string[];
     if (key !== undefined) {
       // Legacy: t("section", "nested.key")
@@ -84,25 +86,25 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       result = result?.[k];
     }
     return result;
-  };
+  }, [language]);
 
-  const t = (sectionOrPath: string, key?: string): string => {
+  const t = useCallback((sectionOrPath: string, key?: string): string => {
     const result = resolve(sectionOrPath, key);
     return typeof result === "string" ? result : (key ?? sectionOrPath);
-  };
+  }, [resolve]);
 
-  const tArray = (sectionOrPath: string, key?: string): any[] => {
+  const tArray = useCallback((sectionOrPath: string, key?: string): any[] => {
     const result = resolve(sectionOrPath, key);
     return Array.isArray(result) ? result : [];
-  };
+  }, [resolve]);
 
-  const tInterpolate = (template: string, vars: Record<string, string | number>): string => {
+  const tInterpolate = useCallback((template: string, vars: Record<string, string | number>): string => {
     return template.replace(/\{\{(\w+)\}\}/g, (_, key) =>
       vars[key] !== undefined ? String(vars[key]) : `{{${key}}}`
     );
-  };
+  }, []);
 
-  const tPlural = (
+  const tPlural = useCallback((
     sectionOrPath: string,
     count: number,
     vars?: Record<string, string | number>
@@ -123,10 +125,15 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     }
     if (!template) return sectionOrPath;
     return tInterpolate(template, { count, ...vars });
-  };
+  }, [language, resolve, tInterpolate]);
+
+  const value = useMemo(
+    () => ({ language, toggleLanguage, t, tArray, tPlural, tInterpolate }),
+    [language, toggleLanguage, t, tArray, tPlural, tInterpolate],
+  );
 
   return (
-    <LanguageContext.Provider value={{ language, toggleLanguage, t, tArray, tPlural, tInterpolate }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

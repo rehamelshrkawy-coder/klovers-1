@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { XP_VALUES, getLeague, BADGES } from "@/constants/gamification";
 import { capture } from "@/lib/analytics";
+import { useAuth } from "@/hooks/useAuth";
 
 interface UserProgress {
   totalXp: number;
@@ -23,7 +24,8 @@ interface UserProgress {
 }
 
 export function useGamification() {
-  const [userId, setUserId] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth();
+  const userId = user?.id ?? null;
   const [progress, setProgress] = useState<UserProgress>({
     totalXp: 0,
     lessonProgress: {},
@@ -35,17 +37,8 @@ export function useGamification() {
   const [newBadges, setNewBadges] = useState<string[]>([]);
   const [streakCelebration, setStreakCelebration] = useState<number | null>(null);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUserId(session?.user?.id || null);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUserId(session?.user?.id || null);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
   const fetchProgress = useCallback(async (): Promise<UserProgress | null> => {
+    if (authLoading) return null;
     if (!userId) { setLoading(false); return null; }
 
     const [xpRes, progressRes, badgesRes, streakRes] = await Promise.all([
@@ -80,7 +73,7 @@ export function useGamification() {
     setProgress(newProgress);
     setLoading(false);
     return newProgress;
-  }, [userId]);
+  }, [authLoading, userId]);
 
   useEffect(() => { fetchProgress(); }, [fetchProgress]);
 

@@ -5,7 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import { supabase } from "@/integrations/supabase/client";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { attachLeadToUser } from "@/lib/attachLeadToUser";
 import { attachSessionToUser } from "@/lib/attachSessionToUser";
 import { captureUtmFromUrl } from "@/lib/leadSession";
@@ -97,20 +98,10 @@ const PageViewTracker = () => {
 };
 
 const AppInner = () => {
+  const { user } = useAuth();
+
   useEffect(() => {
     captureUtmFromUrl();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        attachLeadToUser(session.user);
-        attachSessionToUser();
-        // Link future analytics events to the authenticated user
-        identify(session.user.id, {
-          email: session.user.email,
-          created_at: session.user.created_at,
-        });
-      }
-    });
 
     // Register service worker for offline support / PWA
     if ("serviceWorker" in navigator) {
@@ -119,8 +110,14 @@ const AppInner = () => {
       });
     }
 
-    return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    void attachLeadToUser(user);
+    void attachSessionToUser();
+    identify(user.id, { email: user.email, created_at: user.created_at });
+  }, [user]);
 
   return null;
 };
@@ -135,8 +132,9 @@ const PageLoader = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <TooltipProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <TooltipProvider>
         <Toaster />
         <Sonner position="bottom-center" />
         <AppInner />
@@ -210,8 +208,9 @@ const App = () => (
             </Suspense>
           </ErrorBoundary>
         </BrowserRouter>
-      </TooltipProvider>
-    </LanguageProvider>
+        </TooltipProvider>
+      </LanguageProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
