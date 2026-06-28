@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { safeInternalPath } from "@/lib/safeNavigation";
 
 const LoginPage = () => {
   useSEO({ title: "Login | Klovers Korean Academy", description: "Sign in to your Klovers account to access your Korean lessons, progress tracker, and student dashboard.", noindex: true });
@@ -17,7 +18,8 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirect");
+  const redirectParam = searchParams.get("redirect");
+  const redirectTo = redirectParam ? safeInternalPath(redirectParam) : null;
   const { t, language } = useLanguage();
   const isAr = language === "ar";
 
@@ -27,7 +29,7 @@ const LoginPage = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         const savedRedirect = localStorage.getItem("enroll_redirect");
-        const finalRedirect = redirectTo || savedRedirect || "/dashboard";
+        const finalRedirect = safeInternalPath(redirectTo || savedRedirect);
         if (savedRedirect) localStorage.removeItem("enroll_redirect");
         navigate(finalRedirect, { replace: true });
       }
@@ -37,7 +39,7 @@ const LoginPage = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         const savedRedirect = localStorage.getItem("enroll_redirect");
-        const finalRedirect = redirectTo || savedRedirect || "/dashboard";
+        const finalRedirect = safeInternalPath(redirectTo || savedRedirect);
         if (savedRedirect) localStorage.removeItem("enroll_redirect");
         navigate(finalRedirect, { replace: true });
       }
@@ -120,7 +122,7 @@ const LoginPage = () => {
       } catch { /* ignore draft sync errors */ }
 
       const savedRedirect = localStorage.getItem("enroll_redirect");
-      const finalRedirect = redirectTo || savedRedirect || "/dashboard";
+      const finalRedirect = safeInternalPath(redirectTo || savedRedirect);
       if (savedRedirect) localStorage.removeItem("enroll_redirect");
       navigate(finalRedirect);
     }
@@ -128,7 +130,7 @@ const LoginPage = () => {
 
   const handleSocialLogin = async (provider: "google") => {
     // Always save intended redirect so we can use it after OAuth callback
-    const intendedRedirect = redirectTo || "/dashboard";
+    const intendedRedirect = safeInternalPath(redirectTo);
     localStorage.setItem("enroll_redirect", intendedRedirect);
 
     try {

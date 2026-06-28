@@ -3948,7 +3948,11 @@ function WordIllustration({ emoji, alt, en, size = 64 }: { emoji: string; alt: s
         const parent = (e.currentTarget as HTMLImageElement).parentElement;
         if (parent && !parent.dataset.fallback) {
           parent.dataset.fallback = "1";
-          parent.innerHTML = `<span style="font-size:${size*0.7}px;line-height:1">${emoji}</span>`;
+          const fallback = document.createElement("span");
+          fallback.style.fontSize = `${size * 0.7}px`;
+          fallback.style.lineHeight = "1";
+          fallback.textContent = emoji;
+          parent.replaceChildren(fallback);
         }
       }}
       style={{ display:"block", objectFit:"cover", borderRadius:"4px", width:`${size}px`, height:`${size}px` }}

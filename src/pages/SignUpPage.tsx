@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,7 @@ import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { track } from "@/lib/tracking";
 import { LEVEL_SELECT_OPTIONS } from "@/constants/levels";
+import { safeInternalPath } from "@/lib/safeNavigation";
 
 const SignUpPage = () => {
   useSEO({ title: "Sign Up | Klovers Korean Academy", description: "Create your free Klovers account and start learning Korean with live interactive classes today.", noindex: true });
@@ -28,16 +29,19 @@ const SignUpPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirect");
+  const redirectParam = searchParams.get("redirect");
+  const redirectTo = redirectParam ? safeInternalPath(redirectParam) : null;
   // Capture referrer ID from URL param or localStorage (set by free-trial page)
   const referrerId = searchParams.get("ref") ?? localStorage.getItem("referrer_id");
-  if (searchParams.get("ref")) {
-    localStorage.setItem("referrer_id", searchParams.get("ref")!);
+  useEffect(() => {
+    const referrer = searchParams.get("ref");
+    if (!referrer) return;
+    localStorage.setItem("referrer_id", referrer);
     // Track the referral link click (fire-and-forget, for +2% sharing bonus)
-    supabase.functions.invoke("track-referral-click", {
-      body: { referrerId: searchParams.get("ref") },
-    }).catch(() => {});
-  }
+    void supabase.functions.invoke("track-referral-click", {
+      body: { referrerId: referrer },
+    });
+  }, [searchParams]);
   const { t, language } = useLanguage();
   const isAr = language === "ar";
 
