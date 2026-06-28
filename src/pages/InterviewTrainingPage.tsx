@@ -51,7 +51,6 @@ export default function InterviewTrainingPage() {
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); setError(false); }}
                   className="pl-10"
-                  autoFocus
                 />
               </div>
               {error && (

@@ -174,7 +174,6 @@ const ProfileCard = ({
                   className="h-8 w-[180px] text-sm"
                   value={nameValue}
                   onChange={(e) => setNameValue(e.target.value)}
-                  autoFocus
                   onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
                 />
                 <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSaveName} disabled={saving}>

@@ -3016,7 +3016,6 @@ export default function RehamTrainingPanel() {
                       >
                         {editingCollectionId === col.id ? (
                           <input
-                            autoFocus
                             type="text"
                             value={editingCollectionName}
                             onChange={(e) => setEditingCollectionName(e.target.value)}

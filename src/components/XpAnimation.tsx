@@ -55,12 +55,15 @@ export function StreakCelebration({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-md"
-      onClick={onContinue}
+      onClick={(event) => event.target === event.currentTarget && onContinue()}
+      onKeyDown={(event) => {
+        if (event.target === event.currentTarget && ["Enter", " ", "Escape"].includes(event.key)) onContinue();
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label="Dismiss streak celebration"
     >
-      <div
-        className="max-w-sm w-full mx-4 text-center animate-scale-in"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="max-w-sm w-full mx-4 text-center animate-scale-in">
         {/* Speech bubble */}
         <div className="relative bg-card border border-border rounded-2xl px-6 py-4 mb-4 shadow-lg animate-fade-in-down">
           <p className="text-sm text-foreground">
@@ -147,11 +150,17 @@ export function LeaguePromotionModal({
   if (!to) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-md" onClick={onClose}>
-      <div
-        className="max-w-sm w-full mx-4 text-center animate-scale-in"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-md"
+      onClick={(event) => event.target === event.currentTarget && onClose()}
+      onKeyDown={(event) => {
+        if (event.target === event.currentTarget && ["Enter", " ", "Escape"].includes(event.key)) onClose();
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label="Dismiss league promotion"
+    >
+      <div className="max-w-sm w-full mx-4 text-center animate-scale-in">
         {/* Mascot celebration */}
         <div className="relative flex justify-center mb-4">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 animate-pulse-glow rounded-full" />
@@ -265,7 +274,13 @@ export function PerfectScoreOverlay({ score, total, onContinue }: {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-md overflow-hidden"
-      onClick={onContinue}
+      onClick={(event) => event.target === event.currentTarget && onContinue()}
+      onKeyDown={(event) => {
+        if (event.target === event.currentTarget && ["Enter", " ", "Escape"].includes(event.key)) onContinue();
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label="Dismiss perfect score celebration"
     >
       {/* Confetti */}
       {confettiPieces.map((i) => (
@@ -284,10 +299,7 @@ export function PerfectScoreOverlay({ score, total, onContinue }: {
         </span>
       ))}
 
-      <div
-        className="max-w-sm w-full mx-4 text-center animate-scale-in"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="max-w-sm w-full mx-4 text-center animate-scale-in">
         <div className="text-7xl mb-4 animate-count-pop">🌟</div>
         <h2 className="text-3xl font-black text-foreground mb-2">Perfect Score!</h2>
         <p className="text-muted-foreground mb-2">
