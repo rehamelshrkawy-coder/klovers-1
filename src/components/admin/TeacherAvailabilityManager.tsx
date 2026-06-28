@@ -245,10 +245,11 @@ const TeacherAvailabilityManager = () => {
             <h3 className="font-semibold text-sm">Add new availability slot</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground block mb-2">
+                <label htmlFor="availability-day" className="text-sm font-medium text-muted-foreground block mb-2">
                   Day
                 </label>
                 <select
+                  id="availability-day"
                   value={newDay}
                   onChange={(e) => setNewDay(e.target.value)}
                   className="w-full px-3 py-2 border border-border rounded-md text-sm"
@@ -261,10 +262,11 @@ const TeacherAvailabilityManager = () => {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground block mb-2">
+                <label htmlFor="availability-time" className="text-sm font-medium text-muted-foreground block mb-2">
                   Time (HH:MM) <span className="text-xs">— {ADMIN_TIMEZONE.replace(/_/g, " ")}</span>
                 </label>
                 <Input
+                  id="availability-time"
                   type="text"
                   placeholder="10:00"
                   value={newTime}

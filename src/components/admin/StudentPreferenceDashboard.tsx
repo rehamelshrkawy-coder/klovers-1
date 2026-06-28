@@ -117,10 +117,10 @@ const StudentPreferenceDashboard = () => {
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground block mb-2">
+            <fieldset>
+              <legend className="text-sm font-medium text-muted-foreground block mb-2">
                 Time Period
-              </label>
+              </legend>
               <div className="flex gap-2">
                 {[7, 14, 30, 90].map((days) => (
                   <Button
@@ -133,13 +133,13 @@ const StudentPreferenceDashboard = () => {
                   </Button>
                 ))}
               </div>
-            </div>
+            </fieldset>
 
             {levels.length > 0 && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground block mb-2">
+              <fieldset>
+                <legend className="text-sm font-medium text-muted-foreground block mb-2">
                   Level
-                </label>
+                </legend>
                 <div className="flex gap-2 flex-wrap">
                   {levels.map((level) => (
                     <Button
@@ -152,7 +152,7 @@ const StudentPreferenceDashboard = () => {
                     </Button>
                   ))}
                 </div>
-              </div>
+              </fieldset>
             )}
           </div>
         </CardContent>
