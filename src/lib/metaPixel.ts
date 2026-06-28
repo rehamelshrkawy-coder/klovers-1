@@ -5,12 +5,12 @@ type QueuedFacebookPixel = ((...args: unknown[]) => void) & {
 };
 
 const scheduleWhenIdle = (callback: () => void) => {
-  if ("requestIdleCallback" in window) {
+  if (typeof window.requestIdleCallback === "function") {
     window.requestIdleCallback(callback);
     return;
   }
 
-  window.setTimeout(callback, 2_500);
+  globalThis.setTimeout(callback, 2_500);
 };
 
 /** Load Meta Pixel only when a valid build-time ID is configured. */
@@ -22,7 +22,9 @@ export const initMetaPixel = () => {
     if (window.fbq) return;
 
     const queue: unknown[][] = [];
-    const fbq = ((...args: unknown[]) => queue.push(args)) as QueuedFacebookPixel;
+    const fbq = ((...args: unknown[]) => {
+      queue.push(args);
+    }) as QueuedFacebookPixel;
     fbq.loaded = true;
     fbq.queue = queue;
     fbq.version = "2.0";
