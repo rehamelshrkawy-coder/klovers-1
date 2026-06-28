@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, memo } from "react";
+import { useCallback, useState, useEffect, useMemo, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -177,7 +177,7 @@ const GroupMatcher = () => {
   const [nameDialogCluster, setNameDialogCluster] = useState<Cluster | null>(null);
   const [groupNameInput, setGroupNameInput] = useState("");
 
-  const autoSendMissingInfoEmails = async (
+  const autoSendMissingInfoEmails = useCallback(async (
     groupEnrollments: UnmatchedEnrollment[],
     privateEnrollments: UnmatchedEnrollment[],
     reviewEnrollments: UnmatchedEnrollment[]
@@ -207,9 +207,9 @@ const GroupMatcher = () => {
     } catch (err: any) {
       console.error("Auto-reminder error:", err.message);
     }
-  };
+  }, []);
 
-  const fetchUnmatched = async () => {
+  const fetchUnmatched = useCallback(async () => {
     setLoading(true);
 
     // Fetch unmatched group enrollments
@@ -350,7 +350,7 @@ const GroupMatcher = () => {
 
     // Auto-send emails to students with missing info (deduplicated per 24 h)
     autoSendMissingInfoEmails(enrichGroup, enrichPrivate, []);
-  };
+  }, [autoSendMissingInfoEmails]);
 
   const handleUnassign = async (enrollment: UnmatchedEnrollment & { matched_at: string }) => {
     try {
@@ -563,8 +563,8 @@ const GroupMatcher = () => {
   };
 
   useEffect(() => {
-    fetchUnmatched();
-  }, []);
+    void fetchUnmatched();
+  }, [fetchUnmatched]);
 
   // Package-driven clustering
   const clusters = useMemo(() => {

@@ -38,4 +38,11 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "warn",
     },
   },
+  {
+    files: ["src/components/ui/**/*.{ts,tsx}", "src/contexts/**/*.{ts,tsx}"],
+    rules: {
+      // shadcn modules and context providers intentionally co-export helpers/hooks.
+      "react-refresh/only-export-components": "off",
+    },
+  },
 );

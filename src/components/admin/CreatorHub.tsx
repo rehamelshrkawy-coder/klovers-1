@@ -134,7 +134,7 @@ const PostPreview = memo(function PostPreview({ post, template, theme, size = 27
     c.width = size;
     c.height = size;
     renderPost(c, post, template, theme, "instagram");
-  }, [post.mainText, post.subtitle, post.extraText, template, theme, size]);
+  }, [post, template, theme, size]);
   return <canvas ref={ref} style={{ width: size, height: size, display: "block" }} className="rounded-lg" />;
 });
 
@@ -599,7 +599,7 @@ export default function CreatorHub() {
       // Also set the posts array to drafts so the grid preview shows all 30
       setPosts(drafts.map(d => ({ id: d.id, mainText: d.mainText, subtitle: d.subtitle, extraText: d.extraText })));
     }
-  }, [groupsLoading, groups]);
+  }, [groupsLoading, groups, selectedCampaign, studentCount]);
 
   function generateMonthlyDrafts() {
     if (groupsLoading) { toast({ title: "Loading class data…", description: "Please wait a moment and try again.", variant: "destructive" }); return; }

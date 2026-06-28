@@ -44,7 +44,7 @@ const SalesAnalytics = () => {
   }, []);
 
   const months = parseInt(range);
-  const now = new Date();
+  const now = useMemo(() => new Date(), []);
 
   const paidEnrollments = useMemo(() =>
     enrollments.filter(e => e.payment_status === "PAID" && e.approval_status === "APPROVED"),
@@ -66,7 +66,7 @@ const SalesAnalytics = () => {
       data.push({ month: label, revenue: inRange.reduce((s, e) => s + Number(e.amount), 0), count: inRange.length });
     }
     return data;
-  }, [paidEnrollments, months]);
+  }, [paidEnrollments, months, now]);
 
   const activeStudents = paidEnrollments.filter(e => (e.sessions_remaining ?? 0) > 0).length;
 
@@ -77,7 +77,7 @@ const SalesAnalytics = () => {
       const cd = parseISO(e.created_at);
       return isWithinInterval(cd, { start: lastMonthStart, end: lastMonthEnd });
     }).length;
-  }, [paidEnrollments]);
+  }, [paidEnrollments, now]);
 
   const totalRevenue = paidEnrollments.reduce((s, e) => s + Number(e.amount), 0);
   const avgOrderValue = paidEnrollments.length > 0 ? totalRevenue / paidEnrollments.length : 0;
@@ -103,7 +103,7 @@ const SalesAnalytics = () => {
       else if (isWithinInterval(cd, { start: lastMonthStart, end: lastMonthEnd })) map[key].lastMonth++;
     });
     return Object.entries(map).map(([name, v]) => ({ name, ...v })).sort((a, b) => b.revenue - a.revenue);
-  }, [paidEnrollments]);
+  }, [paidEnrollments, now]);
 
   // Group vs Private pie
   const typePie = useMemo(() => {

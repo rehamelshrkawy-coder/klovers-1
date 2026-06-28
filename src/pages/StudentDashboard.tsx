@@ -55,7 +55,8 @@ import { Input } from "@/components/ui/input";
 import { toast, useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getLevelByKey } from "@/constants/levels";
-import WelcomeModal, { isOnboardingDone } from "@/components/WelcomeModal";
+import WelcomeModal from "@/components/WelcomeModal";
+import { isOnboardingDone } from "@/lib/onboarding";
 import { useCountUp } from "@/hooks/useCountUp";
 
 interface EnrollmentRecord {

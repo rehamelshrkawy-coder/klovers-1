@@ -1515,7 +1515,7 @@ export default function RehamTrainingPanel() {
     return activeFieldConfig.questionIds
       .map((id) => CONVERSATION_DATA.find((c) => c.id === id))
       .filter(Boolean) as ConversationExchange[];
-  }, [selectedField]);
+  }, [activeFieldConfig.questionIds, selectedField]);
 
   const filteredCategories = useMemo(() => {
     if (selectedField === "all") return CATEGORIES;
@@ -1523,7 +1523,7 @@ export default function RehamTrainingPanel() {
     return CATEGORIES
       .map((cat) => ({ ...cat, ids: cat.ids.filter((id) => fieldIds.has(id)) }))
       .filter((cat) => cat.ids.length > 0);
-  }, [selectedField]);
+  }, [activeFieldConfig.questionIds, selectedField]);
 
   // Persist field selection
   useEffect(() => {
@@ -1677,14 +1677,14 @@ export default function RehamTrainingPanel() {
     const arr = [...starred];
     localStorage.setItem("reham-training-starred", JSON.stringify(arr));
     saveToSupabase(arr, collections);
-  }, [starred]);
+  }, [collections, saveToSupabase, starred]);
 
   // Save collections to localStorage + Supabase whenever they change
   useEffect(() => {
     if (!initialLoadDone.current) return;
     localStorage.setItem("reham-training-collections", JSON.stringify(collections));
     saveToSupabase([...starred], collections);
-  }, [collections]);
+  }, [collections, saveToSupabase, starred]);
 
   // Helper functions for starred items
   const toggleStar = (id: number, isIntroLine = false) => {
@@ -1833,7 +1833,7 @@ export default function RehamTrainingPanel() {
     setMockStartTime(Date.now());
     setThinkingTime(30);
     setMockPhase("question");
-  }, [mockCount]);
+  }, [filteredConversationData, mockCount]);
 
   const mockNext = useCallback(() => {
     if (mockCurrent + 1 >= mockQuestions.length) {

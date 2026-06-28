@@ -71,6 +71,12 @@ const TabLoader = () => (
 // Lead, Enrollment, AttendanceReq, OverviewRow — imported from @/types/admin
 
 const STATUS_OPTIONS = ["new", "trial_booked", "contacted", "enrolled", "rejected", "lost"];
+const TAB_GROUPS: { id: string; label: string; icon: typeof Users; tabs: string[] }[] = [
+  { id: "ops", label: "Operations", icon: BarChart3, tabs: ["students", "enrollments", "leads", "trials", "lead-funnel", "manage", "sales", "promos"] },
+  { id: "learn", label: "Learning", icon: Users, tabs: ["group-attendance", "group-matcher", "placement-tests", "session-attendance", "preferences", "league-users", "books", "trial-books"] },
+  { id: "content", label: "Content", icon: Sparkles, tabs: ["blog", "seo-orchestration", "image-audit", "campaigns"] },
+  { id: "config", label: "Config", icon: Settings, tabs: ["notifications", "scheduling", "availability", "settings"] },
+];
 
 // ── Trial Interest Confirmation Campaign Card ─────────────────────────────────
 function TrialInterestConfirmationCard() {
@@ -1059,12 +1065,6 @@ const AdminDashboard = () => {
 
   const TAB_CLS = "shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium border border-border/60 data-[state=active]:bg-primary data-[state=active]:text-black data-[state=active]:border-primary data-[state=active]:shadow-sm bg-background hover:bg-muted transition-colors gap-1.5 h-auto";
 
-  const TAB_GROUPS: { id: string; label: string; icon: typeof Users; tabs: string[] }[] = [
-    { id: "ops",     label: "Operations", icon: BarChart3, tabs: ["students", "enrollments", "leads", "trials", "lead-funnel", "manage", "sales", "promos"] },
-    { id: "learn",   label: "Learning",   icon: Users,     tabs: ["group-attendance", "group-matcher", "placement-tests", "session-attendance", "preferences", "league-users", "books", "trial-books"] },
-    { id: "content", label: "Content",    icon: Sparkles,  tabs: ["blog", "seo-orchestration", "image-audit", "campaigns"] },
-    { id: "config",  label: "Config",     icon: Settings,  tabs: ["notifications", "scheduling", "availability", "settings"] },
-  ];
   const activeGroup = TAB_GROUPS.find(g => g.tabs.includes(adminTab))?.id ?? "ops";
   const [tabGroup, setTabGroup] = useState<string>(activeGroup);
   useEffect(() => { setTabGroup(activeGroup); }, [activeGroup]);
