@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useLeagueUsers, LeagueUserRow } from "@/hooks/admin/useLeagueUsers";
 import { LEAGUES } from "@/constants/gamification";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,7 +80,7 @@ export default function LeagueUsersPanel() {
   }, [data, leagueFilter, search, sortBy]);
 
   // Reset page when filters change
-  useMemo(() => setPage(0), [leagueFilter, search, sortBy]);
+  useEffect(() => setPage(0), [leagueFilter, search, sortBy]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);

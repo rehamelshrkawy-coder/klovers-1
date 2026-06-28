@@ -91,7 +91,7 @@ const ResubmitSchedulePage = () => {
       setLoading(false);
     };
     validate();
-  }, [token]);
+  }, [t, token]);
 
   // Fetch packages when level changes
   useEffect(() => {

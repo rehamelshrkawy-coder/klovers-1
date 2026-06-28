@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,7 +40,7 @@ const LegacyAttendancePanel = ({
   const [adding, setAdding] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-  const fetchRecords = async () => {
+  const fetchRecords = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("attendance_log")
@@ -53,9 +53,9 @@ const LegacyAttendancePanel = ({
     }
     setRecords((data as any[]) || []);
     setLoading(false);
-  };
+  }, [packageId, studentId]);
 
-  useEffect(() => { fetchRecords(); }, [packageId, studentId]);
+  useEffect(() => { void fetchRecords(); }, [fetchRecords]);
 
   const totalAttended = records.length;
   const remaining = totalClasses - totalAttended;

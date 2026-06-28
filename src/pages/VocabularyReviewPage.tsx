@@ -51,7 +51,7 @@ export function VocabularyReviewPage() {
       });
       clearNewBadges();
     }
-  }, [newBadges]);
+  }, [clearNewBadges, newBadges, uiToast]);
 
   useEffect(() => {
     if (dueCards.length === 0) return;

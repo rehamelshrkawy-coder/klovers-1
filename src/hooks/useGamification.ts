@@ -225,6 +225,16 @@ export function useGamification() {
     }
   }, [userId]);
 
+  const awardBadge = useCallback(async (badgeKey: string) => {
+    if (!userId || progress.badges.includes(badgeKey)) return;
+    await supabase.from("student_badges").upsert(
+      { user_id: userId, badge_key: badgeKey },
+      { onConflict: "user_id,badge_key" }
+    );
+    setNewBadges(prev => [...prev, badgeKey]);
+    setProgress(prev => ({ ...prev, badges: [...prev.badges, badgeKey] }));
+  }, [userId, progress.badges]);
+
   const markSectionDone = useCallback(async (
     lessonId: number,
     section: "vocab_done" | "grammar_done" | "dialogue_done" | "exercises_done" | "reading_done" | "writing_done"
@@ -294,7 +304,7 @@ export function useGamification() {
       checkBadges(),
     ]);
     // awardXp already calls fetchProgress internally; no extra re-fetch needed
-  }, [userId, awardXp, checkBadges, fetchProgress]);
+  }, [awardBadge, userId, awardXp, checkBadges]);
 
   const awardGameXp = useCallback(async (gameId: string, score: number, totalRounds: number) => {
     if (!userId || score <= 0) return 0;
@@ -354,16 +364,6 @@ export function useGamification() {
 
     return totalXpEarned;
   }, [userId, progress.totalXp, progress.badges, updateStreak, fetchProgress]);
-
-  const awardBadge = useCallback(async (badgeKey: string) => {
-    if (!userId || progress.badges.includes(badgeKey)) return;
-    await supabase.from("student_badges").upsert(
-      { user_id: userId, badge_key: badgeKey },
-      { onConflict: "user_id,badge_key" }
-    );
-    setNewBadges(prev => [...prev, badgeKey]);
-    setProgress(prev => ({ ...prev, badges: [...prev.badges, badgeKey] }));
-  }, [userId, progress.badges]);
 
   const clearLeaguePromotion = useCallback(() => setLeaguePromotion(null), []);
   const clearNewBadges = useCallback(() => setNewBadges([]), []);

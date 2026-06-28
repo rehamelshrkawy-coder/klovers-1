@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -39,13 +39,7 @@ const TeacherAvailabilityManager = () => {
   const [newTime, setNewTime] = useState("");
   const [newDay, setNewDay] = useState("1"); // Monday by default
 
-  useEffect(() => {
-    if (user) {
-      fetchAvailability();
-    }
-  }, [user]);
-
-  const fetchAvailability = async () => {
+  const fetchAvailability = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -67,7 +61,13 @@ const TeacherAvailabilityManager = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, user]);
+
+  useEffect(() => {
+    if (user) {
+      void fetchAvailability();
+    }
+  }, [fetchAvailability, user]);
 
   const handleAddSlot = async (e: React.FormEvent) => {
     e.preventDefault();

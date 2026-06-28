@@ -400,7 +400,7 @@ const EgyptPaymentPage = () => {
     };
     load();
     track.pageView();
-  }, [enrollmentId, navigate]);
+  }, [enrollmentId, navigate, t]);
 
   const uploadReceipt = useCallback(async (file: File, enrollId: string): Promise<string> => {
     if (file.size > 5 * 1024 * 1024) throw new Error(t("payment.fileTooLarge"));

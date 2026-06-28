@@ -52,9 +52,9 @@ export default function TrialClassesTab() {
   const sugQ = useTrialSuggestions();
   const settingsQ = useTrialSettings();
 
-  const bookings = bookingsQ.data ?? [];
-  const slots = slotsQ.data ?? [];
-  const suggestions = sugQ.data ?? [];
+  const bookings = useMemo(() => bookingsQ.data ?? [], [bookingsQ.data]);
+  const slots = useMemo(() => slotsQ.data ?? [], [slotsQ.data]);
+  const suggestions = useMemo(() => sugQ.data ?? [], [sugQ.data]);
   const settings = settingsQ.data ?? null;
 
   const overview = useMemo(

@@ -4643,7 +4643,7 @@ export default function HangulBookPage() {
       if (!cancelled) setAccess(adminRow ? "granted" : "denied");
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [navigate]);
 
   if (access === "loading") return (
     <div className="min-h-screen flex items-center justify-center">

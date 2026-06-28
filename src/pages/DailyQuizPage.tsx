@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -65,7 +65,7 @@ const DailyQuizPage = () => {
       });
       clearNewBadges();
     }
-  }, [newBadges]);
+  }, [clearNewBadges, newBadges, toast]);
 
   const [exercises, setExercises] = useState<ExerciseItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,13 +78,7 @@ const DailyQuizPage = () => {
   const [quizAlreadyDone, setQuizAlreadyDone] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (authLoading) return; // Wait for auth to resolve before acting
-    if (!user) return;       // AuthProtectedRoute already handles redirect to login
-    fetchDailyQuiz();
-  }, [user, authLoading]);
-
-  const fetchDailyQuiz = async () => {
+  const fetchDailyQuiz = useCallback(async () => {
     if (!user) return;
     setFetchError(null);
     setLoading(true);
@@ -160,7 +154,13 @@ const DailyQuizPage = () => {
       setFetchError(err instanceof Error ? err.message : t("dailyQuiz.loadFailed"));
       setLoading(false);
     }
-  };
+  }, [t, user]);
+
+  useEffect(() => {
+    if (authLoading) return; // Wait for auth to resolve before acting
+    if (!user) return;       // AuthProtectedRoute already handles redirect to login
+    void fetchDailyQuiz();
+  }, [authLoading, fetchDailyQuiz, user]);
 
   const currentExercise = exercises[currentIndex];
   const totalAnswered = Object.keys(answers).length;
