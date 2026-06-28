@@ -56,7 +56,7 @@ export function StreakCalendar() {
       .gte("created_at", threeMonthsAgo.toISOString());
 
     const dates = new Set<string>();
-    (xpData || []).forEach((r: any) => {
+    (xpData || []).forEach((r) => {
       dates.add(new Date(r.created_at).toISOString().split("T")[0]);
     });
     setActiveDates(dates);

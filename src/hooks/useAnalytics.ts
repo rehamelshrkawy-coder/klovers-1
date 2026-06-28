@@ -63,7 +63,7 @@ export function useAnalytics(): AnalyticsData {
       // Group by week
       if (xpData) {
         const weeklyData: Record<string, number> = {};
-        xpData.forEach((record: any) => {
+        xpData.forEach((record) => {
           const date = new Date(record.created_at);
           const weekStart = new Date(date);
           weekStart.setDate(weekStart.getDate() - weekStart.getDay());
@@ -77,7 +77,7 @@ export function useAnalytics(): AnalyticsData {
 
         setWeeklyXp(sortedWeeks);
         setTotalXp(
-          xpData.reduce((sum: number, record: any) => sum + record.xp_earned, 0)
+          xpData.reduce((sum, record) => sum + record.xp_earned, 0)
         );
       }
 
@@ -98,7 +98,7 @@ export function useAnalytics(): AnalyticsData {
 
         const sectionsProgress = sections.map((section) => {
           const completed = progressData.filter(
-            (p: any) => p[section.key]
+            (progress) => progress[section.key]
           ).length;
           return {
             section: section.name,
@@ -110,12 +110,12 @@ export function useAnalytics(): AnalyticsData {
 
         setSectionProgress(sectionsProgress);
         setTotalLessonsCompleted(
-          progressData.filter((p: any) => p.vocab_done || p.grammar_done).length
+          progressData.filter((progress) => progress.vocab_done || progress.grammar_done).length
         );
       }
 
       // Get vocabulary mastery levels
-      const { data: reviewData } = await (supabase as any)
+      const { data: reviewData } = await supabase
         .from("vocabulary_review_history")
         .select("interval_days")
         .eq("user_id", user.id);
@@ -125,7 +125,7 @@ export function useAnalytics(): AnalyticsData {
         let reviewing = 0;
         let mastered = 0;
 
-        reviewData.forEach((record: any) => {
+        reviewData.forEach((record) => {
           const interval = record.interval_days || 1;
           if (interval <= 1) learning++;
           else if (interval <= 7) reviewing++;

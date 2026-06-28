@@ -8,7 +8,7 @@ import Korean from "@/components/Korean";
 
 interface VocabularyReviewProps {
   cards: SRSCard[];
-  onComplete: (vocabId: number, quality: number) => Promise<void>;
+  onComplete: (vocabId: string, quality: number) => Promise<void>;
   isLoading?: boolean;
 }
 

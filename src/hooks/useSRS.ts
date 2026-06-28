@@ -6,15 +6,9 @@ import { calculateSM2 } from "@/lib/sm2";
 // Re-export so callers that previously imported from useSRS still work
 export { calculateSM2 } from "@/lib/sm2";
 
-// vocabulary_review_history is not yet in the auto-generated Supabase types file.
-// Confining the cast to one named alias keeps all four query sites type-safe
-// relative to each other while documenting why the escape hatch exists.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const srsDb = supabase as any;
-
 export interface SRSCard {
   id: number;
-  lesson_vocabulary_id: number;
+  lesson_vocabulary_id: string;
   korean: string;
   romanization: string;
   meaning: string;
@@ -45,8 +39,8 @@ function getNextReviewDate(intervalDays: number): Date {
  * Hook for managing spaced repetition reviews (SM-2 algorithm).
  */
 export function useSRS(): SRSState & {
-  recordReview: (vocabId: number, quality: number) => Promise<void>;
-  initializeVocabulary: (vocabIds: number[]) => Promise<void>;
+  recordReview: (vocabId: string, quality: number) => Promise<void>;
+  initializeVocabulary: (vocabIds: string[]) => Promise<void>;
 } {
   const { user } = useAuth();
   const [state, setState] = useState<SRSState>({
@@ -71,7 +65,7 @@ export function useSRS(): SRSState & {
     try {
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
-      const { data, error } = await srsDb
+      const { data, error } = await supabase
         .from("vocabulary_review_history")
         .select(
           `
@@ -95,7 +89,7 @@ export function useSRS(): SRSState & {
 
       if (error) throw error;
 
-      const cards: SRSCard[] = (data || []).map((item: any) => ({
+      const cards: SRSCard[] = (data || []).map((item) => ({
         id: item.id,
         lesson_vocabulary_id: item.lesson_vocabulary_id,
         korean: item.lesson_vocabulary.korean,
@@ -129,12 +123,12 @@ export function useSRS(): SRSState & {
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Record a review with quality rating (0-5)
-  const recordReview = async (vocabId: number, quality: number) => {
+  const recordReview = async (vocabId: string, quality: number) => {
     if (!user) return;
 
     try {
       // Get current review record
-      const { data: review, error: fetchError } = await srsDb
+      const { data: review, error: fetchError } = await supabase
         .from("vocabulary_review_history")
         .select("id, difficulty_factor, interval_days, review_count, next_review_date")
         .eq("user_id", user.id)
@@ -157,7 +151,7 @@ export function useSRS(): SRSState & {
       const nextReviewDate = getNextReviewDate(newInterval);
 
       // Update review record
-      const { error: updateError } = await srsDb
+      const { error: updateError } = await supabase
         .from("vocabulary_review_history")
         .update({
           difficulty_factor: newDifficulty,
@@ -182,7 +176,7 @@ export function useSRS(): SRSState & {
   };
 
   // Initialize vocabulary review history for new vocabulary items
-  const initializeVocabulary = async (vocabIds: number[]) => {
+  const initializeVocabulary = async (vocabIds: string[]) => {
     if (!user || vocabIds.length === 0) return;
 
     try {
@@ -196,7 +190,7 @@ export function useSRS(): SRSState & {
       }));
 
       // Use upsert to avoid duplicates
-      const { error } = await srsDb
+      const { error } = await supabase
         .from("vocabulary_review_history")
         .upsert(recordsToInsert, {
           onConflict: "user_id,lesson_vocabulary_id",

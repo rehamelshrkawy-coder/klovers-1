@@ -63,13 +63,16 @@ export function VocabularyReviewPage() {
       .in("id", lessonIds)
       .order("sort_order")
       .then(({ data }) => {
-        setLessonOptions((data || []).map((l: any) => ({ id: l.id, title: `Lesson ${l.sort_order}: ${l.title_en}` })));
+        setLessonOptions((data || []).map((lesson) => ({
+          id: lesson.id,
+          title: `Lesson ${lesson.sort_order}: ${lesson.title_en}`,
+        })));
       });
   }, [dueCards]);
 
   const filteredCards = selectedLessonId ? dueCards.filter(c => c.lesson_id === selectedLessonId) : dueCards;
 
-  const handleReviewComplete = async (vocabId: number, quality: number) => {
+  const handleReviewComplete = async (vocabId: string, quality: number) => {
     try {
       await recordReview(vocabId, quality);
       setXpEarned((prev) => prev + 5);
