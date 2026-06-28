@@ -447,8 +447,8 @@ const AdminDashboard = () => {
     }
     const sessions = parseInt(enrollForm.sessions) || 4;
     const amount = parseFloat(enrollForm.amount);
-    if (isNaN(amount) || amount < 0) {
-      toast({ title: "Enter a valid amount", variant: "destructive" }); return;
+    if (isNaN(amount) || amount <= 0) {
+      toast({ title: "Enter an amount greater than zero", variant: "destructive" }); return;
     }
     setEnrollSaving(true);
     try {
@@ -463,6 +463,7 @@ const AdminDashboard = () => {
           sessions_remaining: sessions,
           sessions_total: sessions,
           amount,
+          unit_price: sessions > 0 ? amount / sessions : amount,
           currency: enrollForm.currency,
           payment_provider: "manual",
           payment_status: "PAID",

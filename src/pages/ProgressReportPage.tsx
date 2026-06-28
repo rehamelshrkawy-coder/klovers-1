@@ -37,7 +37,7 @@ const ProgressReportPage = () => {
         supabase.from("enrollments").select("sessions_remaining, created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         supabase.from("group_attendance").select("id").eq("user_id", uid).eq("status", "present"),
         supabase.from("student_xp").select("xp_earned").eq("user_id", uid),
-        supabase.from("placement_test_results").select("score, level, created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("placement_tests").select("score, level, created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(1).maybeSingle(),
       ]).catch(() => Array(5).fill({ data: null, error: true }));
 
       const totalXp = Array.isArray(xpRes?.data)

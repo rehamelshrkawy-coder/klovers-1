@@ -75,7 +75,7 @@ export function useUpcomingTrialSlots() {
         .select('*')
         .order('occurrence_date', { ascending: true });
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as unknown as AdminTrialSlotOccurrence[];
     },
   });
 }
@@ -90,7 +90,7 @@ export function useAllTrialSlots() {
         .order('day_of_week')
         .order('start_time');
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as unknown as TrialSlotRow[];
     },
   });
 }

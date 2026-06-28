@@ -276,16 +276,16 @@ function ParitySection({ groups }: { groups: ParityGroup[] }) {
                     </span>
                     <span className="ml-auto flex items-center gap-2 shrink-0">
                       {p.has_alt
-                        ? <CheckCircle className="h-3.5 w-3.5 text-green-500" title="Has alt text" />
-                        : <XCircle className="h-3.5 w-3.5 text-red-500" title="Missing alt text" />
+                        ? <CheckCircle className="h-3.5 w-3.5 text-green-500" aria-label="Has alt text" />
+                        : <XCircle className="h-3.5 w-3.5 text-red-500" aria-label="Missing alt text" />
                       }
                       {p.has_alt_correct_lang
-                        ? <CheckCircle className="h-3.5 w-3.5 text-green-500" title="Correct language" />
-                        : <AlertCircle className="h-3.5 w-3.5 text-yellow-500" title="Wrong language" />
+                        ? <CheckCircle className="h-3.5 w-3.5 text-green-500" aria-label="Correct language" />
+                        : <AlertCircle className="h-3.5 w-3.5 text-yellow-500" aria-label="Wrong language" />
                       }
                       {p.published
-                        ? <CheckCircle className="h-3.5 w-3.5 text-green-500" title="Published" />
-                        : <AlertCircle className="h-3.5 w-3.5 text-muted-foreground" title="Draft" />
+                        ? <CheckCircle className="h-3.5 w-3.5 text-green-500" aria-label="Published" />
+                        : <AlertCircle className="h-3.5 w-3.5 text-muted-foreground" aria-label="Draft" />
                       }
                     </span>
                   </div>

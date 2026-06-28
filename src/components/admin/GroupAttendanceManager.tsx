@@ -34,6 +34,14 @@ interface GroupPackageInfo {
   timezone: string | null;
 }
 
+interface SchedulePackageDetails {
+  course_type: string;
+  day_of_week: number;
+  level: string;
+  start_time: string;
+  timezone: string;
+}
+
 interface Group {
   id: string;
   name: string;
@@ -210,8 +218,8 @@ const GroupAttendanceManager = ({
       let sent = 0, failed = 0; const total = userIds.length;
 
       for (const group of activeGroups) {
-        const pkg = pkgMap[group.package_id] || {};
-        const dayName = pkg.day_of_week != null ? DAY[pkg.day_of_week] : "";
+        const pkg = pkgMap[group.package_id];
+        const dayName = pkg?.day_of_week != null ? DAY[pkg.day_of_week] : "";
         const groupMemberNames = membersByGroup[group.id] || [];
         const groupUserIds = usersByGroup[group.id] || [];
 
@@ -225,10 +233,10 @@ const GroupAttendanceManager = ({
                 email: profile.email,
                 name: profile.name,
                 group_name: group.name,
-                group_level: pkg.level || undefined,
+                group_level: pkg?.level || undefined,
                 group_days: dayName,
-                group_time: pkg.start_time || undefined,
-                group_timezone: pkg.timezone || undefined,
+                group_time: pkg?.start_time || undefined,
+                group_timezone: pkg?.timezone || undefined,
                 group_members: groupMemberNames,
                 custom_message: broadcastMessage.trim() || undefined,
               },
@@ -314,7 +322,7 @@ const GroupAttendanceManager = ({
     });
 
     const result: EnrichedGroup[] = pkgGroups.map((g) => {
-      const pkg = g.schedule_packages || {};
+      const pkg = g.schedule_packages as unknown as SchedulePackageDetails | null;
       const grpMembers: EnrichedMember[] = (members || [])
         .filter(m => m.group_id === g.id)
         .map(m => {
@@ -337,11 +345,11 @@ const GroupAttendanceManager = ({
         name: g.name,
         package_id: g.package_id,
         capacity: g.capacity,
-        level: pkg.level || "",
-        course_type: pkg.course_type || "group",
-        day_of_week: pkg.day_of_week ?? -1,
-        start_time: pkg.start_time || "",
-        timezone: pkg.timezone || "",
+        level: pkg?.level || "",
+        course_type: pkg?.course_type || "group",
+        day_of_week: pkg?.day_of_week ?? -1,
+        start_time: pkg?.start_time || "",
+        timezone: pkg?.timezone || "",
         members: grpMembers,
       };
     });
@@ -364,16 +372,16 @@ const GroupAttendanceManager = ({
     if (pkgGroups) {
       const DAY_NAMES_MAP = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
       const mapped: Group[] = pkgGroups.map((g) => {
-        const pkg = g.schedule_packages || {};
+        const pkg = g.schedule_packages as unknown as SchedulePackageDetails | null;
         return {
           id: g.id,
           name: g.name,
-          schedule_day: pkg.day_of_week != null ? DAY_NAMES_MAP[pkg.day_of_week] : null,
-          schedule_time: pkg.start_time ? formatStartTime(pkg.start_time) : null,
-          schedule_timezone: pkg.timezone || null,
-          level: pkg.level || null,
+          schedule_day: pkg?.day_of_week != null ? DAY_NAMES_MAP[pkg.day_of_week] : null,
+          schedule_time: pkg?.start_time ? formatStartTime(pkg.start_time) : null,
+          schedule_timezone: pkg?.timezone || null,
+          level: pkg?.level || null,
           capacity: g.capacity,
-          course_type: pkg.course_type || "group",
+          course_type: pkg?.course_type || "group",
         };
       });
       setGroups(mapped);

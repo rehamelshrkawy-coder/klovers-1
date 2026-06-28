@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Trash2, Plus, Tag, Copy } from "lucide-react";
+import type { TablesInsert } from "@/integrations/supabase/types";
 
 interface PromoCode {
   id: string;
@@ -70,7 +71,7 @@ const PromoCodesManager = () => {
     if (form.discount_type === "pct" && val > 100) { toast({ title: "Percentage must be ≤ 100", variant: "destructive" }); return; }
 
     setSaving(true);
-    const payload: Record<string, unknown> = {
+    const payload: TablesInsert<"promo_codes"> = {
       code,
       description: form.description.trim() || null,
       discount_pct: form.discount_type === "pct" ? val : null,

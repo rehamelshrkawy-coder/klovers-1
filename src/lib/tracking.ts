@@ -16,7 +16,7 @@ export const track = {
   },
 
   /** Free trial form submitted */
-  lead(data?: { content_name?: string }) {
+  lead(data?: { content_name?: string; currency?: string; trial_date?: string; value?: number }) {
     window.fbq?.("track", "Lead", data);
     window.gtag?.("event", "generate_lead");
   },

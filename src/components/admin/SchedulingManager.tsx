@@ -1345,7 +1345,7 @@ const WaitlistManager = () => {
       } else if (r?.status === "waitlisted") {
         toast({ title: "Still waitlisted", description: "Target package also full.", variant: "destructive" });
       } else {
-        toast({ title: "Result", description: r?.status || "Unknown" });
+        toast({ title: "Result", description: typeof r?.status === "string" ? r.status : "Unknown" });
       }
     }
     setAssigning(null);

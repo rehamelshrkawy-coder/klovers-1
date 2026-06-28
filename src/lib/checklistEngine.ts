@@ -31,10 +31,10 @@ export interface EnrollmentChecklist {
 export async function fetchEnrollmentChecklists(): Promise<EnrollmentChecklist[]> {
   // Single batch fetch — no N+1
   const [enrollRes, profilesRes, prefsRes, slotsRes, emailsRes, batchRes] = await Promise.all([
-    supabase.from("enrollments").select("id, user_id, plan_type, duration, sessions_remaining, sessions_total, amount, currency, status, payment_status, approval_status, created_at, preferred_days, preferred_time, timezone, level, package_id, admin_notes").order("created_at", { ascending: false }),
+    supabase.from("enrollments").select("id, user_id, plan_type, duration, sessions_remaining, sessions_total, amount, currency, status, payment_status, payment_method, payment_provider, payment_date, receipt_url, approval_status, created_at, preferred_days, preferred_time, timezone, level, package_id, admin_notes").order("created_at", { ascending: false }),
     // course_level_key is the source of truth for course logic. level is
     // retained only for display as the learner's free-form self-assessment.
-    supabase.from("profiles").select("user_id, name, email, country, course_level_key, level, avatar_url"),
+    supabase.from("profiles").select("user_id, name, email, country, course_level_key, level, avatar_url, created_at"),
     supabase.from("student_slot_preferences").select("enrollment_id, slot_id, preferred_day, preferred_time"),
     supabase.from("matching_slots").select("id, day_of_week, time_slot, teacher_id, is_available"),
     supabase.from("email_sends").select("user_id, status, sent_at"),

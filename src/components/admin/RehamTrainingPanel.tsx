@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 /* ─── Data: Self-Introduction Script (line-by-line) ─── */
 
@@ -1592,7 +1593,7 @@ export default function RehamTrainingPanel() {
       supabase.from("training_starred").upsert({
         user_id: userId,
         starred: starredArr,
-        collections: cols as unknown as Record<string, unknown>,
+        collections: cols as unknown as Json,
         updated_at: new Date().toISOString(),
       });
     }, 500);
@@ -1656,7 +1657,7 @@ export default function RehamTrainingPanel() {
           await supabase.from("training_starred").upsert({
             user_id: uid,
             starred: starredArr,
-            collections: colsArr as unknown as Record<string, unknown>,
+            collections: colsArr as Json,
             updated_at: new Date().toISOString(),
           });
         }

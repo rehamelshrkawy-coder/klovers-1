@@ -1,6 +1,7 @@
 // Unified lead-event logger. Persists every interest signal to lead_events
 // and mirrors to Meta Pixel / GA4 via the existing `track` helper.
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { getSessionId, getAttribution } from "@/lib/leadSession";
 import { track } from "@/lib/tracking";
 
@@ -11,7 +12,12 @@ export type LeadSource =
   | "pricing"
   | "enroll"
   | "contact"
-  | "email";
+  | "email"
+  | "community"
+  | "exit_intent"
+  | "free_resource"
+  | "homepage"
+  | "placement";
 
 interface LogOpts {
   source_type: LeadSource;
@@ -33,7 +39,7 @@ export async function logLeadEvent(opts: LogOpts): Promise<void> {
       utm_medium: attribution.utm_medium ?? null,
       utm_content: attribution.utm_content ?? null,
       referrer: attribution.referrer ?? null,
-      metadata: opts.metadata ?? {},
+      metadata: (opts.metadata ?? {}) as Json,
     };
     // Mirror to Meta Pixel / GA4 (existing infra).
     track.lead({ content_name: opts.source_type });
