@@ -49,10 +49,14 @@ export default function NpsModal({ userId, chapterCount }: NpsModalProps) {
     if (score === null || !userId) return;
 
     // Store in DB
-    await supabase.from("student_nps" as never).upsert(
-      { user_id: userId, score, feedback: feedback.trim() || null },
-      { onConflict: "user_id" }
-    ).catch(() => {});
+    try {
+      await supabase.from("student_nps").upsert(
+        { user_id: userId, score, feedback: feedback.trim() || null },
+        { onConflict: "user_id" },
+      );
+    } catch {
+      // Feedback persistence must never interrupt the learning flow.
+    }
 
     // Track in analytics
     capture({ event: "nps_submitted", score, feedback: feedback.trim() || undefined });

@@ -57,6 +57,7 @@ interface TrialBooking {
   trial_date: string | null;
   timezone: string;
   language?: string | null;
+  class_language?: string | null;
   status: string;
   confirmed_at: string | null;
   created_at: string;

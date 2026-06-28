@@ -551,7 +551,7 @@ export default function CreatorHub() {
           const pkg = pkgMap.get(g.package_id); if (!pkg) continue;
           const activeMembers = memberCounts.get(g.id) || 0;
           const seatsLeft = g.capacity - activeMembers; if (seatsLeft <= 0) continue;
-          result.push({ id: g.id, name: g.name, level: pkg.level, day_name: DAY_NAMES[pkg.day_of_week] || "Unknown", start_time: fmt12(pkg.start_time), duration_min: pkg.duration_min, capacity: g.capacity, active_members: activeMembers, seats_left: seatsLeft, urgency_label: seatsLeft <= 2 ? "🔥 Last 2 seats" : seatsLeft <= 5 ? "⚡ Few seats" : "✅ Open", package_id: g.package_id });
+          result.push({ id: g.id, name: g.name, level: pkg.level, day_name: DAY_NAMES[pkg.day_of_week] || "Unknown", start_time: fmt12(pkg.start_time), duration_min: pkg.duration_min, capacity: g.capacity, active_members: activeMembers, seats_left: seatsLeft, urgency_label: seatsLeft <= 2 ? "Last Seats" : seatsLeft <= 5 ? "Starting Soon" : "Open Registration", package_id: g.package_id });
         }
         setGroups(result);
 

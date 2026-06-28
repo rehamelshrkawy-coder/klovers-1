@@ -29,6 +29,23 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_student_streaks_user_id
   ON public.student_streaks (user_id);
 
 -- student_nps: upsert on user_id; ensure single row per user
+CREATE TABLE IF NOT EXISTS public.student_nps (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  score integer NOT NULL CHECK (score BETWEEN 0 AND 10),
+  feedback text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.student_nps ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users manage own NPS response" ON public.student_nps;
+CREATE POLICY "Users manage own NPS response"
+  ON public.student_nps FOR ALL TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_student_nps_user_id
   ON public.student_nps (user_id);
 

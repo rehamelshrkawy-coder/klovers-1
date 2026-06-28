@@ -29,9 +29,10 @@ const ExitIntentModal = () => {
 
       // Admin check — presence in admin_users table
       const { data: adminRow } = await supabase
-        .from("admin_users")
+        .from("user_roles")
         .select("user_id")
         .eq("user_id", user.id)
+        .eq("role", "admin")
         .maybeSingle();
 
       if (adminRow) {

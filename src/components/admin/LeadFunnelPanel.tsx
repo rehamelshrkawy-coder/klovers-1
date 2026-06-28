@@ -281,7 +281,7 @@ const LeadFunnelPanel: React.FC = () => {
     if (events.length === 0) return;
     const headers = ["created_at", "source_type", "source_page", "cta_label", "campaign", "utm_source", "session_id", "user_id"];
     const rows = events.map((e) =>
-      headers.map((h) => JSON.stringify((e as Record<string, unknown>)[h] ?? "")).join(",")
+      headers.map((h) => JSON.stringify((e as unknown as Record<string, unknown>)[h] ?? "")).join(",")
     );
     const csv = [headers.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });

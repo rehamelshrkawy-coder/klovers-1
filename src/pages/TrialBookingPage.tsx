@@ -181,7 +181,7 @@ const TrialBookingPage = () => {
       const todayMyt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
       const { data } = await supabase
         .from("trial_bookings")
-        .select("trial_date, start_time, duration_min, timezone, calendar_url, status")
+        .select("trial_date, start_time, timezone, status")
         .eq("user_id", user.id)
         .in("status", ["pending", "confirmed"])
         .gte("trial_date", todayMyt)
@@ -207,9 +207,9 @@ const TrialBookingPage = () => {
           day_name,
           start_time: timeStr || "",
           start_time_12h,
-          duration_min: data.duration_min || 45,
+          duration_min: 30,
           timezone: data.timezone || "Asia/Kuala_Lumpur",
-          calendar_url: data.calendar_url || "",
+          calendar_url: "",
         });
       }
     })();

@@ -464,7 +464,9 @@ const StudentManager = () => {
     const { error } = await supabase.from("students").update({ group_name: value }).eq("id", studentId);
     if (error) toast({ title: "Error assigning group", description: error.message, variant: "destructive" });
     else {
-      setLegacyStudents(prev => prev.map(s => s.id === studentId ? { ...s, group_name: value } : s));
+      queryClient.setQueryData<LegacyStudent[]>(["admin", "legacy-students"], (current = []) =>
+        current.map((student) => student.id === studentId ? { ...student, group_name: value } : student),
+      );
       toast({ title: "Group updated" });
     }
   };
@@ -526,6 +528,8 @@ const StudentManager = () => {
       const sessions = parseInt(enrollForm.sessions) || 16;
       const amount = parseFloat(enrollForm.amount) || 0;
       const now = new Date().toISOString();
+      const duration = sessions <= 4 ? 1 : sessions <= 12 ? 3 : 6;
+      const txRef = `manual_${crypto.randomUUID().replace(/-/g, "")}`;
 
       const { data: enrollment, error: enrollErr } = await supabase
         .from("enrollments")
@@ -536,12 +540,16 @@ const StudentManager = () => {
           payment_status: "PAID",
           approval_status: "APPROVED",
           payment_provider: "manual",
+          duration,
           level: enrollForm.level || null,
           classes_included: sessions,
           sessions_remaining: sessions,
           sessions_total: sessions,
           amount,
+          unit_price: sessions > 0 ? amount / sessions : 0,
           currency: enrollForm.currency,
+          tx_ref: txRef,
+          receipt_url: "manual",
           reviewed_at: now,
           notes: enrollForm.notes || null,
         })

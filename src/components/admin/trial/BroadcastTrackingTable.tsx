@@ -10,7 +10,7 @@ interface BroadcastSend {
   campaign: string;
   sent_at: string;
   email_opened_at: string | null;
-  attendance_response: 'yes' | 'no' | null;
+  attendance_response: string | null;
   attendance_responded_at: string | null;
 }
 
