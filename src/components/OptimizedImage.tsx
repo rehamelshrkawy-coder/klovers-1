@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { AlertCircle } from "lucide-react";
 
-const SRCSET_WIDTHS = [320, 480, 640, 828, 1080, 1200, 1920];
+const SRCSET_WIDTHS_FULL = [320, 480, 640, 828, 1080, 1200, 1920];
+const SRCSET_WIDTHS_CARD = [320, 480, 640, 828];
 
 function optimizedUrl(src: string, width: number, quality = 75): string {
   if (!src.startsWith("http://") && !src.startsWith("https://")) return src;
@@ -13,11 +14,24 @@ function optimizedUrl(src: string, width: number, quality = 75): string {
     url.searchParams.set("auto", "format");
     return url.toString();
   }
+  // Supabase Storage image transform API
+  if (src.includes(".supabase.co/storage/v1/object/public/")) {
+    const transformed = src.replace(
+      "/storage/v1/object/public/",
+      "/storage/v1/render/image/public/"
+    );
+    const url = new URL(transformed);
+    url.searchParams.set("width", String(width));
+    url.searchParams.set("quality", String(quality));
+    url.searchParams.set("format", "webp");
+    return url.toString();
+  }
   return src;
 }
 
-function buildSrcSet(src: string, quality = 75): string {
-  return SRCSET_WIDTHS.map((w) => `${optimizedUrl(src, w, quality)} ${w}w`).join(", ");
+function buildSrcSet(src: string, quality = 75, isCard = false): string {
+  const widths = isCard ? SRCSET_WIDTHS_CARD : SRCSET_WIDTHS_FULL;
+  return widths.map((w) => `${optimizedUrl(src, w, quality)} ${w}w`).join(", ");
 }
 
 interface OptimizedImageProps {
@@ -106,7 +120,7 @@ const OptimizedImage = ({
       )}
       <img
         src={optimizedUrl(src!, effectiveIsHero ? 1200 : 640, quality)}
-        srcSet={buildSrcSet(src!, quality)}
+        srcSet={buildSrcSet(src!, quality, isCard)}
         sizes={effectiveSizes}
         alt={alt}
         loading={priority ? "eager" : "lazy"}
