@@ -3,6 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { XP_VALUES, getLeague, BADGES } from "@/constants/gamification";
 import { capture } from "@/lib/analytics";
 import { useAuth } from "@/hooks/useAuth";
+import type { Database } from "@/integrations/supabase/types";
+
+type LessonProgress = UserProgress["lessonProgress"][number];
+type StreakUpdate = Database["public"]["Tables"]["student_streaks"]["Update"];
+type LessonProgressUpdate = Database["public"]["Tables"]["student_lesson_progress"]["Update"];
 
 interface UserProgress {
   totalXp: number;
@@ -48,25 +53,25 @@ export function useGamification() {
       supabase.from("student_streaks").select("current_streak, longest_streak, last_activity_date").eq("user_id", userId).maybeSingle(),
     ]);
 
-    const totalXp = (xpRes.data || []).reduce((sum: number, r: any) => sum + (r.xp_earned || 0), 0);
+    const totalXp = (xpRes.data || []).reduce((sum, row) => sum + (row.xp_earned || 0), 0);
 
-    const lessonProgress: Record<number, any> = {};
-    (progressRes.data || []).forEach((r: any) => {
-      lessonProgress[r.lesson_id] = {
-        vocab_done: r.vocab_done,
-        grammar_done: r.grammar_done,
-        dialogue_done: r.dialogue_done,
-        exercises_done: r.exercises_done,
-        reading_done: r.reading_done,
-        writing_done: r.writing_done,
-        chapter_completed: r.chapter_completed,
+    const lessonProgress: Record<number, LessonProgress> = {};
+    (progressRes.data || []).forEach((row) => {
+      lessonProgress[row.lesson_id] = {
+        vocab_done: row.vocab_done,
+        grammar_done: row.grammar_done,
+        dialogue_done: row.dialogue_done,
+        exercises_done: row.exercises_done,
+        reading_done: row.reading_done,
+        writing_done: row.writing_done,
+        chapter_completed: row.chapter_completed,
       };
     });
 
     const newProgress: UserProgress = {
       totalXp,
       lessonProgress,
-      badges: (badgesRes.data || []).map((b: any) => b.badge_key),
+      badges: (badgesRes.data || []).map((badge) => badge.badge_key),
       streak: streakRes.data || { current_streak: 0, longest_streak: 0, last_activity_date: null },
     };
 
@@ -103,7 +108,7 @@ export function useGamification() {
     const newStreak = wasYesterday ? existing.current_streak + 1 : 1;
     const longestStreak = Math.max(newStreak, existing.longest_streak);
 
-    const updates: any = {
+    const updates: StreakUpdate = {
       current_streak: newStreak,
       longest_streak: longestStreak,
       last_activity_date: today,
@@ -198,12 +203,12 @@ export function useGamification() {
 
     if (!allProgress) return;
 
-    const vocabCount = allProgress.filter((p: any) => p.vocab_done).length;
-    const grammarCount = allProgress.filter((p: any) => p.grammar_done).length;
-    const dialogueCount = allProgress.filter((p: any) => p.dialogue_done).length;
-    const chapterCount = allProgress.filter((p: any) => p.chapter_completed).length;
+    const vocabCount = allProgress.filter((item) => item.vocab_done).length;
+    const grammarCount = allProgress.filter((item) => item.grammar_done).length;
+    const dialogueCount = allProgress.filter((item) => item.dialogue_done).length;
+    const chapterCount = allProgress.filter((item) => item.chapter_completed).length;
 
-    const lesson1 = allProgress.find((p: any) => p.lesson_id === 1);
+    const lesson1 = allProgress.find((item) => item.lesson_id === 1);
     if (lesson1?.chapter_completed) {
       await supabase.from("student_badges").upsert({ user_id: userId, badge_key: "hangul_master" }, { onConflict: "user_id,badge_key" });
     }
@@ -250,7 +255,7 @@ export function useGamification() {
 
     if (existing) {
       if (existing[section]) return;
-      const updates: any = { [section]: true };
+      const updates: LessonProgressUpdate = { [section]: true };
 
       const allDone = ["vocab_done", "grammar_done", "dialogue_done", "exercises_done", "reading_done", "writing_done"]
         .every(s => s === section ? true : existing[s as keyof typeof existing]);
