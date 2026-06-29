@@ -2999,6 +2999,24 @@ export type Database = {
         }[]
       }
       get_auth_email: { Args: never; Returns: string }
+      get_enrollment_for_payment: {
+        Args: { p_enrollment_id: string }
+        Returns: {
+          amount: number
+          approval_status: string
+          class_type: string | null
+          classes_included: number
+          currency: string
+          due_at: string | null
+          duration: number
+          id: string
+          payment_date: string | null
+          payment_method: string | null
+          plan_type: string
+          receipt_url: string
+          user_id: string | null
+        }[]
+      }
       get_student_preference_trends: {
         Args: { days_back?: number }
         Returns: {
