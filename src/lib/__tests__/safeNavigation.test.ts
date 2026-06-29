@@ -5,6 +5,7 @@ describe("safe navigation", () => {
   it("allows local paths and rejects external or protocol-relative redirects", () => {
     expect(safeInternalPath("/dashboard?tab=1")).toBe("/dashboard?tab=1");
     expect(safeInternalPath("//evil.example/path")).toBe("/dashboard");
+    expect(safeInternalPath("/\\evil.example/path")).toBe("/dashboard");
     expect(safeInternalPath("https://evil.example/path")).toBe("/dashboard");
     expect(safeInternalPath("javascript:alert(1)")).toBe("/dashboard");
   });

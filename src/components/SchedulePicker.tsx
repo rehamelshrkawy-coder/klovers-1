@@ -343,6 +343,7 @@ const SchedulePicker = ({
             <button
               key={`${opt.dayIndex}-${opt.time}`}
               type="button"
+              aria-label={`Select private class on ${oLocal.weekday} at ${oLocal.timeFormatted}`}
               onClick={() => {
                 setSelectedPrivateOption(opt);
                 const label = `${oLocal.weekday} · ${oLocal.timeFormatted} · ${userTimezone}`;
@@ -385,6 +386,7 @@ const SchedulePicker = ({
           <button
             key={pkg.id}
             type="button"
+            aria-label={`Select ${local.weekday} at ${local.timeFormatted}; ${pkg.seats_left > 0 ? `${pkg.seats_left} seats available` : "full"}`}
             onClick={() => handleClick(pkg)}
             className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
               pkg.seats_left === 0
@@ -455,6 +457,7 @@ const SchedulePicker = ({
                 <button
                   key={alt.id}
                   type="button"
+                  aria-label={`Select alternative ${altLocal.weekday} at ${altLocal.timeFormatted}`}
                   onClick={() => selectPackage(alt, true)}
                   className="w-full text-left p-3 rounded-lg border-2 border-border hover:border-primary hover:bg-accent transition-all"
                 >

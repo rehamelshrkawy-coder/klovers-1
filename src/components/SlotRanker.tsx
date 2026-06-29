@@ -223,7 +223,7 @@ const SlotRanker = ({ selectedLevel, onComplete }: SlotRankerProps) => {
             return (
               <Badge key={id} variant="secondary" className="gap-1 pr-1">
                 #{idx + 1}: {slot.day} {slot.time}
-                <button type="button" onClick={() => toggleSlot(id)} className="ml-1 hover:text-destructive">
+                <button type="button" onClick={() => toggleSlot(id)} className="ml-1 hover:text-destructive" aria-label="Remove selected slot">
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
@@ -240,6 +240,7 @@ const SlotRanker = ({ selectedLevel, onComplete }: SlotRankerProps) => {
             <button
               key={slot.id}
               type="button"
+              aria-label={`Rank ${slot.day} at ${slot.time}`}
               onClick={() => toggleSlot(slot.id)}
               className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                 rank

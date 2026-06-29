@@ -336,7 +336,18 @@ function TopicGapPanel({
             return (
               <div
                 key={a.slug}
+                role="checkbox"
+                aria-label={`Select recommendation: ${a.title}`}
+                tabIndex={isCreated || isExisting || generating || autoGenerating ? -1 : 0}
+                aria-checked={isSelected}
+                aria-disabled={isCreated || isExisting || generating || autoGenerating}
                 onClick={() => !isCreated && !isExisting && !generating && !autoGenerating && toggleSelect(a.slug)}
+                onKeyDown={(event) => {
+                  if ((event.key === "Enter" || event.key === " ") && !isCreated && !isExisting && !generating && !autoGenerating) {
+                    event.preventDefault();
+                    toggleSelect(a.slug);
+                  }
+                }}
                 className={`flex flex-col gap-1 p-3 rounded-lg border text-sm transition-all select-none
                   ${isCreated ? "border-green-300 bg-green-50/60 cursor-default" :
                     isExisting ? "border-blue-200 bg-blue-50/40 cursor-default" :

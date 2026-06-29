@@ -175,7 +175,6 @@ const RegistrationChecklist = ({ userId, enrollmentId, items, onItemCompleted, a
             placeholder={key}
             value={fieldValue}
             onChange={(e) => setFieldValue(e.target.value)}
-            autoFocus
             onKeyDown={(e) => e.key === "Enter" && handleSaveProfile(dbField, fieldValue)}
           />
           <Button size="sm" variant="default" disabled={saving || !fieldValue.trim()} onClick={() => handleSaveProfile(dbField, fieldValue)}>

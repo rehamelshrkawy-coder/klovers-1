@@ -1,4 +1,4 @@
-import { useEffect, useState, memo } from "react";
+import { useCallback, useEffect, useState, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +26,8 @@ import AdminAttendancePanel from "@/components/admin/AdminAttendancePanel";
 import type { AttendanceRow, AttendanceReq, GroupMember, OverviewRow } from "@/types/admin";
 import { formatTime, getAttendanceStatusColor as statusColor, convertSlotToTimezone } from "@/lib/admin-utils";
 import { getAdminTimezone } from "@/lib/viewerTimezone";
+
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 interface GroupPackageInfo {
   package_id: string | null;
@@ -260,7 +262,7 @@ const GroupAttendanceManager = ({
     }
   };
 
-  const fetchEnrichedGroups = async () => {
+  const fetchEnrichedGroups = useCallback(async () => {
     setEnrichedLoading(true);
     // Fetch all active pkg_groups with parent package info
     const { data: pkgGroups } = await supabase
@@ -356,12 +358,11 @@ const GroupAttendanceManager = ({
 
     setEnrichedGroups(result);
     setEnrichedLoading(false);
-  };
+  }, []);
 
-  const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const [adminWeekdays, setAdminWeekdays] = useState<string[]>([]);
 
-  const fetchGroups = async () => {
+  const fetchGroups = useCallback(async () => {
     // Fetch active pkg_groups with schedule info from schedule_packages
     const { data: pkgGroups } = await supabase
       .from("pkg_groups")
@@ -386,7 +387,7 @@ const GroupAttendanceManager = ({
       });
       setGroups(mapped);
     }
-  };
+  }, []);
 
   // Fetch available days from schedule_packages
   useEffect(() => {
@@ -401,7 +402,7 @@ const GroupAttendanceManager = ({
       });
   }, []);
 
-  useEffect(() => { fetchGroups(); fetchEnrichedGroups(); }, []);
+  useEffect(() => { void fetchGroups(); void fetchEnrichedGroups(); }, [fetchEnrichedGroups, fetchGroups]);
 
   useEffect(() => {
     if (!selectedGroup) {
@@ -460,7 +461,7 @@ const GroupAttendanceManager = ({
         if (data) setSessions(data as Session[]);
       });
 
-  }, [selectedGroup]);
+  }, [groups, selectedGroup]);
 
   useEffect(() => {
     if (!selectedSession) { setAttendanceRows([]); return; }
@@ -1174,11 +1175,28 @@ const GroupAttendanceManager = ({
                         {/* Group header */}
                         <div
                           className="flex items-center justify-between p-3 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
-                          onClick={() => setExpandedGroups(prev => {
-                            const next = new Set(prev);
-                            if (next.has(g.id)) { next.delete(g.id); } else { next.add(g.id); }
-                            return next;
-                          })}
+                          role="button"
+                          tabIndex={0}
+                          aria-expanded={isExpanded}
+                          onClick={(event) => {
+                            if ((event.target as HTMLElement).closest("button")) return;
+                            setExpandedGroups(prev => {
+                             const next = new Set(prev);
+                             if (next.has(g.id)) { next.delete(g.id); } else { next.add(g.id); }
+                             return next;
+                            });
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.target !== event.currentTarget) return;
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              setExpandedGroups(prev => {
+                                const next = new Set(prev);
+                                if (next.has(g.id)) { next.delete(g.id); } else { next.add(g.id); }
+                                return next;
+                              });
+                            }
+                          }}
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             {isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" /> : <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />}
@@ -1205,7 +1223,7 @@ const GroupAttendanceManager = ({
                               {activeMembers.length}/{g.capacity}
                               {waitlistMembers.length > 0 && ` (+${waitlistMembers.length} waitlist)`}
                             </Badge>
-                            <div className="flex gap-1" onClick={e => e.stopPropagation()}>
+                            <div className="flex gap-1">
                               <Button variant="ghost" size="sm" onClick={() => {
                                 const legacyGroup = groups.find(lg => lg.name === g.name);
                                 if (legacyGroup) openEditGroup(legacyGroup);

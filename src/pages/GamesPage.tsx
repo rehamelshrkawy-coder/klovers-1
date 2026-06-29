@@ -72,7 +72,7 @@ const GamesPage = () => {
       });
       clearNewBadges();
     }
-  }, [newBadges]);
+  }, [clearNewBadges, newBadges, toast]);
 
   const games = [
     { id: "match", title: t("games.matchTitle"), description: t("games.matchDesc"), icon: Layers, emoji: "🃏", difficulty: t("games.beginner"), free: true },

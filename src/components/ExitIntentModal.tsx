@@ -196,7 +196,6 @@ const ExitIntentModal = () => {
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setError(""); }}
                 className="h-12 text-base"
-                autoFocus
               />
               {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
               <Button type="submit" size="lg" className="w-full gap-2 font-bold">

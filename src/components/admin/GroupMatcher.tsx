@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, memo } from "react";
+import { useCallback, useState, useEffect, useMemo, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -177,7 +177,7 @@ const GroupMatcher = () => {
   const [nameDialogCluster, setNameDialogCluster] = useState<Cluster | null>(null);
   const [groupNameInput, setGroupNameInput] = useState("");
 
-  const autoSendMissingInfoEmails = async (
+  const autoSendMissingInfoEmails = useCallback(async (
     groupEnrollments: UnmatchedEnrollment[],
     privateEnrollments: UnmatchedEnrollment[],
     reviewEnrollments: UnmatchedEnrollment[]
@@ -207,9 +207,9 @@ const GroupMatcher = () => {
     } catch (err: any) {
       console.error("Auto-reminder error:", err.message);
     }
-  };
+  }, []);
 
-  const fetchUnmatched = async () => {
+  const fetchUnmatched = useCallback(async () => {
     setLoading(true);
 
     // Fetch unmatched group enrollments
@@ -350,7 +350,7 @@ const GroupMatcher = () => {
 
     // Auto-send emails to students with missing info (deduplicated per 24 h)
     autoSendMissingInfoEmails(enrichGroup, enrichPrivate, []);
-  };
+  }, [autoSendMissingInfoEmails]);
 
   const handleUnassign = async (enrollment: UnmatchedEnrollment & { matched_at: string }) => {
     try {
@@ -563,8 +563,8 @@ const GroupMatcher = () => {
   };
 
   useEffect(() => {
-    fetchUnmatched();
-  }, []);
+    void fetchUnmatched();
+  }, [fetchUnmatched]);
 
   // Package-driven clustering
   const clusters = useMemo(() => {
@@ -1511,9 +1511,9 @@ const GroupMatcher = () => {
               Assigning <span className="font-semibold text-foreground">{assignTarget?.name}</span> ({assignTarget?.email})
             </p>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Day</label>
+              <label className="text-xs font-medium text-muted-foreground" htmlFor="assign-slot-day">Day</label>
               <Select value={assignDay} onValueChange={setAssignDay}>
-                <SelectTrigger className="text-sm">
+                <SelectTrigger id="assign-slot-day" className="text-sm">
                   <SelectValue placeholder="Select day" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1524,9 +1524,9 @@ const GroupMatcher = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Time</label>
+              <label className="text-xs font-medium text-muted-foreground" htmlFor="assign-slot-time">Time</label>
               <Select value={assignTime} onValueChange={setAssignTime}>
-                <SelectTrigger className="text-sm">
+                <SelectTrigger id="assign-slot-time" className="text-sm">
                   <SelectValue placeholder="Select time" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1540,9 +1540,9 @@ const GroupMatcher = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Timezone</label>
+              <label className="text-xs font-medium text-muted-foreground" htmlFor="assign-slot-timezone">Timezone</label>
               <Select value={assignTimezone} onValueChange={setAssignTimezone}>
-                <SelectTrigger className="text-sm">
+                <SelectTrigger id="assign-slot-timezone" className="text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1591,9 +1591,9 @@ const GroupMatcher = () => {
               </p>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Reason</label>
+              <label className="text-xs font-medium text-muted-foreground" htmlFor="reject-request-reason">Reason</label>
               <Select value={rejectReason} onValueChange={setRejectReason}>
-                <SelectTrigger className="text-sm">
+                <SelectTrigger id="reject-request-reason" className="text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1607,8 +1607,9 @@ const GroupMatcher = () => {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Additional note (optional)</label>
+              <label className="text-xs font-medium text-muted-foreground" htmlFor="reject-request-note">Additional note (optional)</label>
               <Textarea
+                id="reject-request-note"
                 value={rejectNote}
                 onChange={e => setRejectNote(e.target.value)}
                 placeholder="e.g. We'll notify you when new slots open…"

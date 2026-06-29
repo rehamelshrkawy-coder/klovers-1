@@ -862,7 +862,10 @@ const PlacementTestPage = () => {
                   </Button>
                 )}
                 {recordingUrl && !isRecording && (
-                  <audio controls src={recordingUrl} className="w-full h-10 mt-1" />
+                  <>
+                    {/* eslint-disable-next-line jsx-a11y/media-has-caption -- learner's own recording; prompt is the transcript */}
+                    <audio controls src={recordingUrl} className="w-full h-10 mt-1" />
+                  </>
                 )}
               </div>
 
@@ -1483,6 +1486,8 @@ const PlacementTestPage = () => {
             return (
               <button
                 key={q.id}
+                type="button"
+                aria-label={`Go to question ${q.id}, level ${q.level}, ${st}`}
                 title={`Q${q.id} · ${q.level}`}
                 onClick={() => setPage(qPage)}
                 className={[

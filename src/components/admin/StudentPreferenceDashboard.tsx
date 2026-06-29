@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,11 +25,7 @@ const StudentPreferenceDashboard = () => {
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [daysBack, setDaysBack] = useState(30);
 
-  useEffect(() => {
-    fetchTrends();
-  }, [daysBack]);
-
-  const fetchTrends = async () => {
+  const fetchTrends = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -41,9 +37,9 @@ const StudentPreferenceDashboard = () => {
       setTrends(data || []);
 
       // Auto-select first level if none selected
-      if ((data || []).length > 0 && !selectedLevel) {
+      if ((data || []).length > 0) {
         const levels = Array.from(new Set((data as any[]).map((t: any) => t.level)));
-        setSelectedLevel(levels[0]);
+        setSelectedLevel((current) => current ?? levels[0]);
       }
     } catch (error) {
       console.error("Error fetching trends:", error);
@@ -55,7 +51,11 @@ const StudentPreferenceDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [daysBack, toast]);
+
+  useEffect(() => {
+    void fetchTrends();
+  }, [fetchTrends]);
 
   // Get unique levels
   const levels = Array.from(new Set(trends.map((t) => t.level)));
@@ -117,10 +117,10 @@ const StudentPreferenceDashboard = () => {
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground block mb-2">
+            <fieldset>
+              <legend className="text-sm font-medium text-muted-foreground block mb-2">
                 Time Period
-              </label>
+              </legend>
               <div className="flex gap-2">
                 {[7, 14, 30, 90].map((days) => (
                   <Button
@@ -133,13 +133,13 @@ const StudentPreferenceDashboard = () => {
                   </Button>
                 ))}
               </div>
-            </div>
+            </fieldset>
 
             {levels.length > 0 && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground block mb-2">
+              <fieldset>
+                <legend className="text-sm font-medium text-muted-foreground block mb-2">
                   Level
-                </label>
+                </legend>
                 <div className="flex gap-2 flex-wrap">
                   {levels.map((level) => (
                     <Button
@@ -152,7 +152,7 @@ const StudentPreferenceDashboard = () => {
                     </Button>
                   ))}
                 </div>
-              </div>
+              </fieldset>
             )}
           </div>
         </CardContent>

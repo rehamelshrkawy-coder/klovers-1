@@ -51,7 +51,6 @@ function MeetingUrlCell({ slot }: { slot: AdminTrialSlotOccurrence }) {
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false); }}
           placeholder="https://meet.google.com/..."
-          autoFocus
         />
         <button
           onClick={save}

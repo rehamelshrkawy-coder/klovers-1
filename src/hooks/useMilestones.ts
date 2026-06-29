@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "./useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,13 +24,9 @@ export function useMilestones() {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [loading, setLoading] = useState(true);
   const [newlyAchieved, setNewlyAchieved] = useState<Milestone | null>(null);
+  const achievementTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    if (!user) return;
-    fetchMilestones();
-  }, [user]);
-
-  const fetchMilestones = async () => {
+  const fetchMilestones = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -45,7 +41,16 @@ export function useMilestones() {
       setMilestones(data as Milestone[]);
     }
     setLoading(false);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    void fetchMilestones();
+  }, [fetchMilestones, user]);
+
+  useEffect(() => () => {
+    if (achievementTimerRef.current) clearTimeout(achievementTimerRef.current);
+  }, []);
 
   const updateMilestoneProgress = useCallback(
     async (
@@ -77,14 +82,15 @@ export function useMilestones() {
 
         if (!error && isAchieved) {
           setNewlyAchieved(milestone);
-          setTimeout(() => setNewlyAchieved(null), 5000);
+          if (achievementTimerRef.current) clearTimeout(achievementTimerRef.current);
+          achievementTimerRef.current = setTimeout(() => setNewlyAchieved(null), 5000);
         }
       }
 
       // Refresh milestones
       await fetchMilestones();
     },
-    [user, milestones]
+    [fetchMilestones, user, milestones]
   );
 
   const getGroupedMilestones = (): MilestoneGroup[] => {

@@ -176,7 +176,7 @@ const MySchedulePage = () => {
       }
     };
     load();
-  }, [navigate]);
+  }, [navigate, t]);
 
   const handlePickerSelect = (pkgId: string, label: string) => {
     setSelectedPackageId(pkgId || null);

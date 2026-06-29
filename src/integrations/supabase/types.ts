@@ -1762,6 +1762,8 @@ export type Database = {
         Row: {
           level: string
           package_id: string | null
+          preferred_day_of_week: number | null
+          preferred_start_time: string | null
           requested_at: string
           updated_at: string
           user_id: string
@@ -1769,6 +1771,8 @@ export type Database = {
         Insert: {
           level?: string
           package_id?: string | null
+          preferred_day_of_week?: number | null
+          preferred_start_time?: string | null
           requested_at?: string
           updated_at?: string
           user_id: string
@@ -1776,6 +1780,8 @@ export type Database = {
         Update: {
           level?: string
           package_id?: string | null
+          preferred_day_of_week?: number | null
+          preferred_start_time?: string | null
           requested_at?: string
           updated_at?: string
           user_id?: string
@@ -2695,6 +2701,63 @@ export type Database = {
         }
         Relationships: []
       }
+      vocabulary_review_history: {
+        Row: {
+          created_at: string
+          difficulty_factor: number
+          id: number
+          interval_days: number
+          last_reviewed_at: string | null
+          lesson_vocabulary_id: string
+          next_review_date: string
+          quality_last_review: number | null
+          review_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          difficulty_factor?: number
+          id?: number
+          interval_days?: number
+          last_reviewed_at?: string | null
+          lesson_vocabulary_id: string
+          next_review_date?: string
+          quality_last_review?: number | null
+          review_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          difficulty_factor?: number
+          id?: number
+          interval_days?: number
+          last_reviewed_at?: string | null
+          lesson_vocabulary_id?: string
+          next_review_date?: string
+          quality_last_review?: number | null
+          review_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vocabulary_review_history_lesson_vocabulary_id_fkey"
+            columns: ["lesson_vocabulary_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_vocabulary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vocabulary_review_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Views: {
       lead_funnel: {
@@ -2942,6 +3005,24 @@ export type Database = {
         }[]
       }
       get_auth_email: { Args: never; Returns: string }
+      get_enrollment_for_payment: {
+        Args: { p_enrollment_id: string }
+        Returns: {
+          amount: number
+          approval_status: string
+          class_type: string | null
+          classes_included: number
+          currency: string
+          due_at: string | null
+          duration: number
+          id: string
+          payment_date: string | null
+          payment_method: string | null
+          plan_type: string
+          receipt_url: string
+          user_id: string | null
+        }[]
+      }
       get_student_preference_trends: {
         Args: { days_back?: number }
         Returns: {

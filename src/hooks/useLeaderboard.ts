@@ -48,22 +48,25 @@ export function useLeaderboard(): LeaderboardData {
         .limit(20);
 
       // Build XP leaderboard from the view (already sorted, already has name/avatar)
-      const topXpRows = (xpViewData || []).slice(0, 10);
+      const allXpRows = (xpViewData || []).filter(
+        (row): row is typeof row & { user_id: string } => row.user_id !== null,
+      );
+      const topXpRows = allXpRows.slice(0, 10);
 
-      const xpBoard: LeaderboardEntry[] = topXpRows.map((r: any, idx: number) => ({
-        user_id: r.user_id,
-        name: r.name || "Anonymous",
-        avatar_url: r.avatar_url ?? null,
-        value: r.total_xp ?? 0,
-        rank: idx + 1,
-        isCurrentUser: r.user_id === user?.id,
+      const xpBoard: LeaderboardEntry[] = topXpRows.map((row, index) => ({
+        user_id: row.user_id,
+        name: row.name || "Anonymous",
+        avatar_url: row.avatar_url ?? null,
+        value: row.total_xp ?? 0,
+        rank: index + 1,
+        isCurrentUser: row.user_id === user?.id,
       }));
 
       setXpLeaderboard(xpBoard);
 
       // Determine current user's XP rank within the full view result
       if (user?.id) {
-        const userXpIndex = (xpViewData || []).findIndex((r: any) => r.user_id === user.id);
+        const userXpIndex = allXpRows.findIndex((row) => row.user_id === user.id);
         setCurrentUserXpRank(userXpIndex >= 0 ? userXpIndex + 1 : null);
       }
 
@@ -71,12 +74,12 @@ export function useLeaderboard(): LeaderboardData {
       if (streakData) {
         // Build a profile map from the XP view data we already have
         const profileMap: Record<string, { name: string; avatar_url: string | null }> = {};
-        (xpViewData || []).forEach((r: any) => {
-          profileMap[r.user_id] = { name: r.name || "Anonymous", avatar_url: r.avatar_url ?? null };
+        allXpRows.forEach((row) => {
+          profileMap[row.user_id] = { name: row.name || "Anonymous", avatar_url: row.avatar_url ?? null };
         });
 
         // Find streak user IDs whose profiles aren't already in the XP view
-        const streakUserIds = streakData.slice(0, 10).map((r: any) => r.user_id);
+        const streakUserIds = streakData.slice(0, 10).map((row) => row.user_id);
         const missingIds = streakUserIds.filter((id: string) => !profileMap[id]);
 
         if (missingIds.length > 0) {
@@ -85,26 +88,26 @@ export function useLeaderboard(): LeaderboardData {
             .select("user_id, name, avatar_url")
             .in("user_id", missingIds);
 
-          (profiles || []).forEach((p: any) => {
-            profileMap[p.user_id] = { name: p.name || "Anonymous", avatar_url: p.avatar_url ?? null };
+          (profiles || []).forEach((profile) => {
+            profileMap[profile.user_id] = { name: profile.name || "Anonymous", avatar_url: profile.avatar_url ?? null };
           });
         }
 
         const streakBoard: LeaderboardEntry[] = streakData
           .slice(0, 10)
-          .map((r: any, idx: number) => ({
-            user_id: r.user_id,
-            name: profileMap[r.user_id]?.name || "Anonymous",
-            avatar_url: profileMap[r.user_id]?.avatar_url ?? null,
-            value: r.current_streak,
-            rank: idx + 1,
-            isCurrentUser: r.user_id === user?.id,
+          .map((row, index) => ({
+            user_id: row.user_id,
+            name: profileMap[row.user_id]?.name || "Anonymous",
+            avatar_url: profileMap[row.user_id]?.avatar_url ?? null,
+            value: row.current_streak,
+            rank: index + 1,
+            isCurrentUser: row.user_id === user?.id,
           }));
 
         setStreakLeaderboard(streakBoard);
 
         if (user?.id) {
-          const userStreakRank = streakData.findIndex((r: any) => r.user_id === user.id);
+          const userStreakRank = streakData.findIndex((row) => row.user_id === user.id);
           setCurrentUserStreakRank(userStreakRank >= 0 ? userStreakRank + 1 : null);
         }
       }
@@ -116,14 +119,14 @@ export function useLeaderboard(): LeaderboardData {
 
       const { data: weeklyXpData } = await supabase
         .from("student_xp")
-        .select("user_id, xp_amount")
+        .select("user_id, xp_earned")
         .gte("created_at", startOfWeek.toISOString());
 
       if (weeklyXpData) {
         // Aggregate by user
         const weeklyTotals: Record<string, number> = {};
-        (weeklyXpData as any[]).forEach((row) => {
-          weeklyTotals[row.user_id] = (weeklyTotals[row.user_id] || 0) + (row.xp_amount || 0);
+        weeklyXpData.forEach((row) => {
+          weeklyTotals[row.user_id] = (weeklyTotals[row.user_id] || 0) + (row.xp_earned || 0);
         });
 
         // Sort descending, take top 10
@@ -133,8 +136,8 @@ export function useLeaderboard(): LeaderboardData {
 
         // Build profile map from existing xpViewData
         const profileMap: Record<string, { name: string; avatar_url: string | null }> = {};
-        (xpViewData || []).forEach((r: any) => {
-          profileMap[r.user_id] = { name: r.name || "Anonymous", avatar_url: r.avatar_url ?? null };
+        allXpRows.forEach((row) => {
+          profileMap[row.user_id] = { name: row.name || "Anonymous", avatar_url: row.avatar_url ?? null };
         });
 
         // Fetch missing profiles
@@ -144,8 +147,8 @@ export function useLeaderboard(): LeaderboardData {
             .from("profiles")
             .select("user_id, name, avatar_url")
             .in("user_id", missingIds);
-          (profiles || []).forEach((p: any) => {
-            profileMap[p.user_id] = { name: p.name || "Anonymous", avatar_url: p.avatar_url ?? null };
+          (profiles || []).forEach((profile) => {
+            profileMap[profile.user_id] = { name: profile.name || "Anonymous", avatar_url: profile.avatar_url ?? null };
           });
         }
 

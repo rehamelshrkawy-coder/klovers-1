@@ -1515,7 +1515,7 @@ export default function RehamTrainingPanel() {
     return activeFieldConfig.questionIds
       .map((id) => CONVERSATION_DATA.find((c) => c.id === id))
       .filter(Boolean) as ConversationExchange[];
-  }, [selectedField]);
+  }, [activeFieldConfig.questionIds, selectedField]);
 
   const filteredCategories = useMemo(() => {
     if (selectedField === "all") return CATEGORIES;
@@ -1523,7 +1523,7 @@ export default function RehamTrainingPanel() {
     return CATEGORIES
       .map((cat) => ({ ...cat, ids: cat.ids.filter((id) => fieldIds.has(id)) }))
       .filter((cat) => cat.ids.length > 0);
-  }, [selectedField]);
+  }, [activeFieldConfig.questionIds, selectedField]);
 
   // Persist field selection
   useEffect(() => {
@@ -1677,14 +1677,14 @@ export default function RehamTrainingPanel() {
     const arr = [...starred];
     localStorage.setItem("reham-training-starred", JSON.stringify(arr));
     saveToSupabase(arr, collections);
-  }, [starred]);
+  }, [collections, saveToSupabase, starred]);
 
   // Save collections to localStorage + Supabase whenever they change
   useEffect(() => {
     if (!initialLoadDone.current) return;
     localStorage.setItem("reham-training-collections", JSON.stringify(collections));
     saveToSupabase([...starred], collections);
-  }, [collections]);
+  }, [collections, saveToSupabase, starred]);
 
   // Helper functions for starred items
   const toggleStar = (id: number, isIntroLine = false) => {
@@ -1833,7 +1833,7 @@ export default function RehamTrainingPanel() {
     setMockStartTime(Date.now());
     setThinkingTime(30);
     setMockPhase("question");
-  }, [mockCount]);
+  }, [filteredConversationData, mockCount]);
 
   const mockNext = useCallback(() => {
     if (mockCurrent + 1 >= mockQuestions.length) {
@@ -2844,7 +2844,20 @@ export default function RehamTrainingPanel() {
                     : "bg-blue-50 dark:bg-blue-950/30 border-blue-300",
                   fcMastered.has(fcCurrent.korean) && "ring-2 ring-green-400",
                 )}
-                onClick={() => setFcFlipped(!fcFlipped)}
+                role="button"
+                tabIndex={0}
+                aria-label={`${fcFlipped ? "Show front of" : "Show answer for"} ${fcCurrent.korean}`}
+                onClick={(event) => {
+                  if ((event.target as HTMLElement).closest("button")) return;
+                  setFcFlipped(!fcFlipped);
+                }}
+                onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setFcFlipped(!fcFlipped);
+                  }
+                }}
               >
                 <div className="absolute top-3 left-3">
                   <Badge
@@ -2869,7 +2882,7 @@ export default function RehamTrainingPanel() {
                   <div className="flex flex-col items-center justify-center h-full min-h-[320px] p-6 text-center">
                     <p className="text-4xl font-bold mb-3">{fcCurrent.korean}</p>
                     <p className="text-sm text-muted-foreground italic mb-6">{fcCurrent.romanization}</p>
-                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex gap-2">
                       <PlayBtn onClick={() => speakKorean(fcCurrent.korean)} label="Listen" variant="kr" disabled={isSpeaking} />
                       <PlayBtn onClick={() => speak(fcCurrent.korean, { language: "ko-KR", rate: 0.7 })} label="Slow" variant="slow" disabled={isSpeaking} />
                     </div>
@@ -2883,7 +2896,7 @@ export default function RehamTrainingPanel() {
                       <p className="text-sm font-medium">{fcCurrent.sentence_kr}</p>
                       <p className="text-xs text-muted-foreground">{fcCurrent.sentence_en}</p>
                     </div>
-                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex gap-2">
                       <PlayBtn onClick={() => speakKorean(fcCurrent.sentence_kr)} label="Sentence KR" variant="kr" disabled={isSpeaking} />
                       <PlayBtn onClick={() => speakEnglish(fcCurrent.sentence_en)} label="Sentence EN" variant="en" disabled={isSpeaking} />
                     </div>
@@ -3012,11 +3025,20 @@ export default function RehamTrainingPanel() {
                     >
                       <div
                         className="flex-1 min-w-0"
+                        role="button"
+                        tabIndex={editingCollectionId === col.id ? -1 : 0}
+                        aria-pressed={selectedCollectionId === col.id}
                         onClick={() => setSelectedCollectionId(col.id)}
+                        onKeyDown={(event) => {
+                          if (editingCollectionId === col.id || event.target !== event.currentTarget) return;
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setSelectedCollectionId(col.id);
+                          }
+                        }}
                       >
                         {editingCollectionId === col.id ? (
                           <input
-                            autoFocus
                             type="text"
                             value={editingCollectionName}
                             onChange={(e) => setEditingCollectionName(e.target.value)}

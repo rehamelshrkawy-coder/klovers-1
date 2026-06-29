@@ -1,27 +1,32 @@
-// Klovers Service Worker — v1
+// Klovers Service Worker — v2
 // Strategy:
 //   Static assets (JS/CSS/images) → Cache-First (immutable bundles)
 //   Navigation (HTML)             → Network-First with offline fallback
 //   Supabase API / edge functions → Network-Only (never cache auth/data)
 
-const CACHE_NAME = "klovers-v1";
-const OFFLINE_URL = "/";
+const CACHE_PREFIX = "klovers-";
+const STATIC_CACHE = `${CACHE_PREFIX}static-v2`;
+const IMAGE_CACHE = `${CACHE_PREFIX}images-v2`;
+const OFFLINE_URL = "/offline.html";
+const MAX_IMAGE_ENTRIES = 100;
 
 // Assets to pre-cache on install (shell)
 const PRECACHE_URLS = [
-  "/",
+  OFFLINE_URL,
   "/favicon.ico",
   "/klovers-logo.jpg",
   "/klovers-mascot.svg",
   "/manifest.json",
+  "/pwa-192.png",
+  "/pwa-512.png",
 ];
 
 // ─── Install ────────────────────────────────────────────────────────────────
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .open(STATIC_CACHE)
+      .then((cache) => Promise.all(PRECACHE_URLS.map((url) => cache.add(url).catch(() => undefined))))
       .then(() => self.skipWaiting())
   );
 });
@@ -34,7 +39,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== CACHE_NAME)
+            .filter((key) => key.startsWith(CACHE_PREFIX) && key !== STATIC_CACHE && key !== IMAGE_CACHE)
             .map((key) => caches.delete(key))
         )
       )
@@ -72,7 +77,7 @@ self.addEventListener("fetch", (event) => {
           fetch(request).then((response) => {
             if (response.ok) {
               const clone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+              caches.open(STATIC_CACHE).then((cache) => cache.put(request, clone));
             }
             return response;
           })
@@ -81,7 +86,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 3. Images → Cache-First with 7-day expiry (simple size limit)
+  // 3. Images: Cache-First with a bounded cache
   if (
     request.destination === "image" ||
     url.pathname.endsWith(".jpg") ||
@@ -98,7 +103,11 @@ self.addEventListener("fetch", (event) => {
           fetch(request).then((response) => {
             if (response.ok) {
               const clone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+              caches.open(IMAGE_CACHE).then(async (cache) => {
+                await cache.put(request, clone);
+                const keys = await cache.keys();
+                await Promise.all(keys.slice(0, Math.max(0, keys.length - MAX_IMAGE_ENTRIES)).map((key) => cache.delete(key)));
+              });
             }
             return response;
           })
@@ -142,7 +151,9 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const targetUrl = event.notification.data?.url || "/";
+  const requestedUrl = event.notification.data?.url || "/";
+  const parsedUrl = new URL(requestedUrl, self.location.origin);
+  const targetUrl = parsedUrl.origin === self.location.origin ? parsedUrl.href : `${self.location.origin}/`;
   event.waitUntil(
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })

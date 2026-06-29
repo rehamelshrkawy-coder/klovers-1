@@ -163,7 +163,7 @@ export function exportCSV(
 
 // ── Currency formatting ──────────────────────────────────────────────────────
 
-/** Formats an amount with its currency code using locale-aware number formatting. */
+/** Formats admin-facing amounts consistently across server and browser locales. */
 export function formatCurrency(amount: number, currency = "EGP"): string {
-  return `${amount.toLocaleString()} ${currency}`;
+  return `${amount.toLocaleString("en-US")} ${currency}`;
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,6 +92,7 @@ export default function KoreanInterviewPage() {
   // UI
   const [generating, setGenerating] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
+  const generateQuestionsRef = useRef<(sid?: string, count?: number) => Promise<void>>(async () => {});
 
   // Auth listener
   useEffect(() => {
@@ -108,6 +109,7 @@ export default function KoreanInterviewPage() {
 
   // Handle payment return
   useEffect(() => {
+    let cancelled = false;
     const paymentResult = searchParams.get("payment");
     const returnSessionId = searchParams.get("session_id");
 
@@ -118,6 +120,7 @@ export default function KoreanInterviewPage() {
       const pollPayment = async () => {
         for (let i = 0; i < 10; i++) {
           await new Promise((r) => setTimeout(r, 2000));
+          if (cancelled) return;
           const { data } = await supabase
             .from("interview_training_sessions" as any)
             .select("*")
@@ -128,17 +131,18 @@ export default function KoreanInterviewPage() {
             setPaidRemaining(5);
             setQuestions((data as any).questions || []);
             // Generate the paid questions
-            generateQuestions(returnSessionId, 5);
+            await generateQuestionsRef.current(returnSessionId, 5);
             return;
           }
         }
         toast({ title: t("koreanInterviewPage.toastPayProcTitle"), description: t("koreanInterviewPage.toastPayProcDesc"), variant: "destructive" });
       };
-      pollPayment();
+      void pollPayment();
     } else if (paymentResult === "canceled") {
       toast({ title: t("koreanInterviewPage.toastPayCancelTitle"), description: t("koreanInterviewPage.toastPayCancelDesc") });
     }
-  }, [searchParams]);
+    return () => { cancelled = true; };
+  }, [searchParams, t, toast]);
 
   // Load existing session on auth
   useEffect(() => {
@@ -167,7 +171,7 @@ export default function KoreanInterviewPage() {
     loadSession();
   }, [user]);
 
-  const generateQuestions = async (sid?: string, count = 2) => {
+  const generateQuestions = useCallback(async (sid?: string, count = 2) => {
     setGenerating(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -199,7 +203,11 @@ export default function KoreanInterviewPage() {
     } finally {
       setGenerating(false);
     }
-  };
+  }, [industry, jobTitle, selectedLangs, sessionId, t, toast, yearsExperience]);
+
+  useEffect(() => {
+    generateQuestionsRef.current = generateQuestions;
+  }, [generateQuestions]);
 
   const handleGenerate = () => {
     if (!jobTitle.trim()) {

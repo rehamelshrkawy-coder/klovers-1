@@ -328,6 +328,7 @@ function PaymentMethodEditor({ enrollmentId, currentMethod, onSaved }: { enrollm
 
 /* ─── Side panel for one student ─── */
 function AdminNotesEditor({ enrollmentId, initialNotes }: { enrollmentId: string; initialNotes: string }) {
+  const notesId = `enrollment-admin-notes-${enrollmentId}`;
   const [notes, setNotes] = useState(initialNotes);
   const [saving, setSaving] = useState(false);
 
@@ -341,8 +342,9 @@ function AdminNotesEditor({ enrollmentId, initialNotes }: { enrollmentId: string
 
   return (
     <div className="space-y-1.5">
-      <label className="text-xs font-medium text-muted-foreground">Admin Notes</label>
+      <label className="text-xs font-medium text-muted-foreground" htmlFor={notesId}>Admin Notes</label>
       <textarea
+        id={notesId}
         className="w-full text-xs border border-border rounded-md p-2 bg-background text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-ring"
         rows={2}
         placeholder="Internal notes (not visible to student)..."

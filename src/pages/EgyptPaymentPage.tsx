@@ -36,6 +36,10 @@ interface EnrollmentData {
   payment_date: string | null;
 }
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Unexpected payment error";
+}
+
 /* ── Order Summary sub-component ── */
 const OrderSummary = ({ enrollment }: { enrollment: EnrollmentData }) => {
   const { t, language } = useLanguage();
@@ -371,7 +375,7 @@ const EgyptPaymentPage = () => {
       }
 
       // Try direct query first (works when user_id matches or is null)
-      let data: any = null;
+      let data: EnrollmentData | null = null;
       const { data: direct, error: directErr } = await supabase
         .from("enrollments")
         .select("id, plan_type, class_type, duration, amount, currency, approval_status, due_at, classes_included, receipt_url, payment_method, payment_date")
@@ -382,9 +386,9 @@ const EgyptPaymentPage = () => {
         data = direct;
       } else {
         // Fallback: use SECURITY DEFINER RPC (bypasses RLS for manual enrollments)
-        const { data: rows, error: rpcErr } = await (supabase as any)
+        const { data: rows, error: rpcErr } = await supabase
           .rpc("get_enrollment_for_payment", { p_enrollment_id: enrollmentId! });
-        data = rows && rows.length > 0 ? rows[0] : null;
+        if (!rpcErr) data = rows && rows.length > 0 ? rows[0] : null;
       }
 
       if (!data) {
@@ -392,7 +396,7 @@ const EgyptPaymentPage = () => {
         navigate("/dashboard");
         return;
       }
-      setEnrollment(data as any);
+      setEnrollment(data);
       if (data.receipt_url) {
         setLastFileName(data.receipt_url.split("/").pop() ?? "receipt");
       }
@@ -400,7 +404,7 @@ const EgyptPaymentPage = () => {
     };
     load();
     track.pageView();
-  }, [enrollmentId, navigate]);
+  }, [enrollmentId, navigate, t]);
 
   const uploadReceipt = useCallback(async (file: File, enrollId: string): Promise<string> => {
     if (file.size > 5 * 1024 * 1024) throw new Error(t("payment.fileTooLarge"));
@@ -431,7 +435,7 @@ const EgyptPaymentPage = () => {
         _payment_date: date,
         _receipt_url: path,
         _tx_ref: txRef.trim(),
-      } as any);
+      });
       if (rpcError) {
         // If status changed (e.g. admin already approved), refresh enrollment data
         if (rpcError.message?.includes("PENDING_PAYMENT")) {
@@ -441,7 +445,7 @@ const EgyptPaymentPage = () => {
             .eq("id", enrollment.id)
             .single();
           if (refreshed) {
-            setEnrollment(refreshed as any);
+            setEnrollment(refreshed);
             toast({ title: t("payment.statusUpdated"), description: refreshed.approval_status === "APPROVED" ? t("payment.alreadyApproved") : t("payment.statusChanged"), variant: "default" });
             return;
           }
@@ -456,8 +460,8 @@ const EgyptPaymentPage = () => {
       );
       track.purchase({ value: enrollment.amount, currency: enrollment.currency || "EGP" });
       toast({ title: t("payment.paymentSubmitted"), description: t("payment.paymentSubmittedDesc") });
-    } catch (err: any) {
-      toast({ title: t("payment.error"), description: err.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: t("payment.error"), description: errorMessage(error), variant: "destructive" });
     } finally {
       setSubmitting(false);
       setUploadProgress(null);
@@ -486,15 +490,15 @@ const EgyptPaymentPage = () => {
 
       const { error } = await supabase
         .from("enrollments")
-        .update({ receipt_url: path } as any)
+        .update({ receipt_url: path })
         .eq("id", enrollment.id);
       if (error) throw error;
 
       setLastFileName(file.name);
       setEnrollment((prev) => prev ? { ...prev, receipt_url: path } : null);
       toast({ title: t("payment.receiptReplaced"), description: t("payment.receiptReplacedDesc") });
-    } catch (err: any) {
-      toast({ title: t("payment.error"), description: err.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: t("payment.error"), description: errorMessage(error), variant: "destructive" });
     } finally {
       setReplacing(false);
     }

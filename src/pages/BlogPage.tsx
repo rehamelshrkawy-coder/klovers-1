@@ -190,9 +190,9 @@ const BlogPage = () => {
             </p>
           ) : (
             <>
-              <ol className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" role="list">
+              <ol className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visiblePosts.map((post, idx) => (
-                  <li key={post.id} role="listitem">
+                  <li key={post.id}>
                     <Link to={`/blog/${post.slug}`} className="group block h-full">
                       <article className="h-full rounded-2xl border border-border bg-card overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 flex flex-col">
 

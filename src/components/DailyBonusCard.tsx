@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,12 +25,7 @@ export function DailyBonusCard() {
   const [streakBonus, setStreakBonus] = useState(0);
   const [streakBonusLabel, setStreakBonusLabel] = useState("");
 
-  useEffect(() => {
-    if (!user) return;
-    checkDailyBonus();
-  }, [user?.id]);
-
-  const checkDailyBonus = async () => {
+  const checkDailyBonus = useCallback(async () => {
     if (!user) return;
     setLoading(true);
 
@@ -72,7 +67,12 @@ export function DailyBonusCard() {
     setStreakBonusLabel(bonusLabel);
 
     setLoading(false);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    void checkDailyBonus();
+  }, [checkDailyBonus, user]);
 
   const handleClaim = async () => {
     if (!user || claimed || claiming) return;

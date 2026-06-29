@@ -416,7 +416,8 @@ const PricingSection = () => {
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {tierCountries[tierKey].map((c) => (
-                        <span
+                        <button
+                          type="button"
                           key={c}
                           className={`text-xs px-2 py-0.5 rounded-full transition-colors cursor-pointer ${
                             selectedCountry === c
@@ -426,7 +427,7 @@ const PricingSection = () => {
                           onClick={() => handleCountryChange(c)}
                         >
                           {c}
-                        </span>
+                        </button>
                       ))}
                     </div>
                   </div>

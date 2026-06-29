@@ -41,7 +41,7 @@ const TrialConfirmPage = () => {
           .update({
             status: "confirmed_attendance",
             attendance_confirmed_at: new Date().toISOString(),
-          } as any)
+          })
           .eq("id", id)
           .eq("confirmation_token", token)
           .neq("status", "confirmed_attendance");

@@ -204,7 +204,7 @@ const LeadFunnelPanel: React.FC = () => {
         signups: delta(signups, prevSignups),
       },
     };
-  }, [funnelRows]);
+  }, [funnelRows, prevFunnelRows]);
 
   // Source breakdown for the "sources" tab
   const sourceBreakdown = useMemo(() => {

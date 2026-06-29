@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,12 +41,7 @@ export function StreakCalendar() {
   const [longestStreak, setLongestStreak] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) return;
-    fetchActivityDates();
-  }, [user?.id]);
-
-  const fetchActivityDates = async () => {
+  const fetchActivityDates = useCallback(async () => {
     if (!user) return;
     setLoading(true);
 
@@ -61,7 +56,7 @@ export function StreakCalendar() {
       .gte("created_at", threeMonthsAgo.toISOString());
 
     const dates = new Set<string>();
-    (xpData || []).forEach((r: any) => {
+    (xpData || []).forEach((r) => {
       dates.add(new Date(r.created_at).toISOString().split("T")[0]);
     });
     setActiveDates(dates);
@@ -79,7 +74,12 @@ export function StreakCalendar() {
     }
 
     setLoading(false);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    void fetchActivityDates();
+  }, [fetchActivityDates, user]);
 
   const weeks = getLast12Weeks();
   const today = new Date().toISOString().split("T")[0];

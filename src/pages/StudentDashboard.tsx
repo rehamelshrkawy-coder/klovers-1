@@ -55,7 +55,8 @@ import { Input } from "@/components/ui/input";
 import { toast, useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getLevelByKey } from "@/constants/levels";
-import WelcomeModal, { isOnboardingDone } from "@/components/WelcomeModal";
+import WelcomeModal from "@/components/WelcomeModal";
+import { isOnboardingDone } from "@/lib/onboarding";
 import { useCountUp } from "@/hooks/useCountUp";
 
 interface EnrollmentRecord {
@@ -173,7 +174,6 @@ const ProfileCard = ({
                   className="h-8 w-[180px] text-sm"
                   value={nameValue}
                   onChange={(e) => setNameValue(e.target.value)}
-                  autoFocus
                   onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
                 />
                 <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSaveName} disabled={saving}>
@@ -242,7 +242,7 @@ const StudentDashboard = () => {
       });
       clearNewBadges();
     }
-  }, [newBadges]);
+  }, [clearNewBadges, newBadges, uiToast]);
 
   const FIELD_MAP: Record<string, string> = {
     name: "Full name",
@@ -412,7 +412,7 @@ const StudentDashboard = () => {
       }
     };
     load();
-  }, [navigate, gateLoading, resetBlocked, retryCount]);
+  }, [navigate, gateLoading, resetBlocked, retryCount, t]);
 
   const handleItemCompleted = (key: string, _value: string) => {
     setChecklistItems((prev) =>
@@ -447,7 +447,7 @@ const StudentDashboard = () => {
     { label: "Day Streak", rawValue: gamification.streak.current_streak, sub: `Best: ${gamification.streak.longest_streak}d`, icon: FlameIcon, color: "text-orange-600 bg-orange-100 dark:text-orange-400 dark:bg-orange-900/30" },
     { label: "Lessons Done", rawValue: lessonsCompleted, icon: BookOpen, color: "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30" },
     { label: "League", rawValue: -1, icon: Trophy, color: "text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30" },
-  ], [gamification.totalXp, gamification.streak.current_streak, gamification.streak.longest_streak, lessonsCompleted, league, weeklyXp]);
+  ], [gamification.totalXp, gamification.streak.current_streak, gamification.streak.longest_streak, lessonsCompleted, weeklyXp]);
 
   const quickActions = useMemo(() => [
     { label: "Textbook", desc: "Continue lessons", emoji: "📚", path: "/textbook", bg: "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-blue-500/25" },

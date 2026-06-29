@@ -1052,7 +1052,6 @@ const GroupsManager = () => {
                           value={editNameValue}
                           onChange={(e) => setEditNameValue(e.target.value)}
                           className="h-7 text-sm w-48"
-                          autoFocus
                           onKeyDown={(e) => {
                             if (e.key === "Enter") saveEditName(g.id);
                             if (e.key === "Escape") cancelEditName();
@@ -1202,7 +1201,6 @@ const GroupsManager = () => {
                 value={studentSearch}
                 onChange={(e) => handleSearchStudents(e.target.value)}
                 className="pl-9"
-                autoFocus
               />
             </div>
 

@@ -9,6 +9,21 @@ import { toast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { safeInternalPath } from "@/lib/safeNavigation";
+import type { Database } from "@/integrations/supabase/types";
+
+type EnrollmentUpdate = Database["public"]["Tables"]["enrollments"]["Update"];
+
+function draftString(draft: Record<string, unknown>, ...keys: string[]): string | undefined {
+  for (const key of keys) {
+    const value = draft[key];
+    if (typeof value === "string" && value.trim()) return value;
+    if (Array.isArray(value) && value.every((item) => typeof item === "string")) {
+      return value.join(",");
+    }
+  }
+  return undefined;
+}
 
 const LoginPage = () => {
   useSEO({ title: "Login | Klovers Korean Academy", description: "Sign in to your Klovers account to access your Korean lessons, progress tracker, and student dashboard.", noindex: true });
@@ -17,7 +32,8 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirect");
+  const redirectParam = searchParams.get("redirect");
+  const redirectTo = redirectParam ? safeInternalPath(redirectParam) : null;
   const { t, language } = useLanguage();
   const isAr = language === "ar";
 
@@ -27,7 +43,7 @@ const LoginPage = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         const savedRedirect = localStorage.getItem("enroll_redirect");
-        const finalRedirect = redirectTo || savedRedirect || "/dashboard";
+        const finalRedirect = safeInternalPath(redirectTo || savedRedirect);
         if (savedRedirect) localStorage.removeItem("enroll_redirect");
         navigate(finalRedirect, { replace: true });
       }
@@ -37,7 +53,7 @@ const LoginPage = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         const savedRedirect = localStorage.getItem("enroll_redirect");
-        const finalRedirect = redirectTo || savedRedirect || "/dashboard";
+        const finalRedirect = safeInternalPath(redirectTo || savedRedirect);
         if (savedRedirect) localStorage.removeItem("enroll_redirect");
         navigate(finalRedirect, { replace: true });
       }
@@ -82,7 +98,7 @@ const LoginPage = () => {
         if (setting?.value) {
           await supabase
             .from("profiles")
-            .update({ reset_version: setting.value } as any)
+            .update({ reset_version: setting.value })
             .eq("user_id", data.user.id);
         }
       } catch { /* ignore */ }
@@ -91,27 +107,35 @@ const LoginPage = () => {
       try {
         const draftRaw = localStorage.getItem("enroll_draft");
         if (draftRaw) {
-          const draft = JSON.parse(draftRaw);
-          if (draft.level || draft.package_id || draft.preferred_day) {
-            const schedUpdate: Record<string, any> = {};
-            if (draft.level) schedUpdate.level = draft.level;
-            if (draft.package_id || draft.packageId) schedUpdate.package_id = draft.package_id || draft.packageId;
-            if (draft.preferred_day || draft.days) schedUpdate.preferred_day = draft.preferred_day || draft.days;
-            if (draft.preferred_time || draft.time) schedUpdate.preferred_time = draft.preferred_time || draft.time;
-            if (draft.timezone || draft.tz) schedUpdate.timezone = draft.timezone || draft.tz;
+          const parsedDraft: unknown = JSON.parse(draftRaw);
+          const draft = parsedDraft && typeof parsedDraft === "object"
+            ? parsedDraft as Record<string, unknown>
+            : {};
+          const level = draftString(draft, "level");
+          const packageId = draftString(draft, "package_id", "packageId");
+          const preferredDay = draftString(draft, "preferred_day", "days");
+          const preferredTime = draftString(draft, "preferred_time", "time");
+          const timezone = draftString(draft, "timezone", "tz");
+          if (level || packageId || preferredDay) {
+            const schedUpdate: EnrollmentUpdate = {};
+            if (level) schedUpdate.level = level;
+            if (packageId) schedUpdate.package_id = packageId;
+            if (preferredDay) schedUpdate.preferred_day = preferredDay;
+            if (preferredTime) schedUpdate.preferred_time = preferredTime;
+            if (timezone) schedUpdate.timezone = timezone;
 
             const { data: pending } = await supabase
               .from("enrollments")
               .select("id, level")
               .eq("user_id", data.user.id)
-              .in("status", ["PENDING", "PENDING_PAYMENT"] as any)
+              .in("status", ["PENDING", "PENDING_PAYMENT"])
               .order("created_at", { ascending: false })
               .limit(1);
 
             if (pending && pending.length > 0 && (!pending[0].level || pending[0].level === "")) {
               await supabase
                 .from("enrollments")
-                .update(schedUpdate as any)
+                .update(schedUpdate)
                 .eq("id", pending[0].id);
             }
             localStorage.removeItem("enroll_draft");
@@ -120,7 +144,7 @@ const LoginPage = () => {
       } catch { /* ignore draft sync errors */ }
 
       const savedRedirect = localStorage.getItem("enroll_redirect");
-      const finalRedirect = redirectTo || savedRedirect || "/dashboard";
+      const finalRedirect = safeInternalPath(redirectTo || savedRedirect);
       if (savedRedirect) localStorage.removeItem("enroll_redirect");
       navigate(finalRedirect);
     }
@@ -128,7 +152,7 @@ const LoginPage = () => {
 
   const handleSocialLogin = async (provider: "google") => {
     // Always save intended redirect so we can use it after OAuth callback
-    const intendedRedirect = redirectTo || "/dashboard";
+    const intendedRedirect = safeInternalPath(redirectTo);
     localStorage.setItem("enroll_redirect", intendedRedirect);
 
     try {

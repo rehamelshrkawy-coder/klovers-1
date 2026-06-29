@@ -4,6 +4,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ClipboardCheck, Gamepad2, BookOpen, X, ChevronRight, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { markOnboardingDone } from "@/lib/onboarding";
 
 const STEPS = [
   {
@@ -43,11 +44,6 @@ const STEPS = [
     ctaAr: "العب الآن",
   },
 ];
-
-const STORAGE_KEY = "klovers-onboarding-done";
-
-export const markOnboardingDone = () => localStorage.setItem(STORAGE_KEY, "1");
-export const isOnboardingDone = () => Boolean(localStorage.getItem(STORAGE_KEY));
 
 interface WelcomeModalProps {
   open: boolean;
@@ -110,7 +106,10 @@ const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
             {STEPS.map((_, i) => (
               <button
                 key={i}
+                type="button"
                 onClick={() => setStep(i)}
+                aria-label={`Go to welcome step ${i + 1}`}
+                aria-current={i === step ? "step" : undefined}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   i === step ? "w-6 bg-primary-foreground" : "w-2 bg-primary-foreground/40"
                 }`}
