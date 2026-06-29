@@ -1762,6 +1762,8 @@ export type Database = {
         Row: {
           level: string
           package_id: string | null
+          preferred_day_of_week: number | null
+          preferred_start_time: string | null
           requested_at: string
           updated_at: string
           user_id: string
@@ -1769,6 +1771,8 @@ export type Database = {
         Insert: {
           level?: string
           package_id?: string | null
+          preferred_day_of_week?: number | null
+          preferred_start_time?: string | null
           requested_at?: string
           updated_at?: string
           user_id: string
@@ -1776,6 +1780,8 @@ export type Database = {
         Update: {
           level?: string
           package_id?: string | null
+          preferred_day_of_week?: number | null
+          preferred_start_time?: string | null
           requested_at?: string
           updated_at?: string
           user_id?: string

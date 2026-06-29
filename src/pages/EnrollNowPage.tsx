@@ -30,8 +30,14 @@ import { useNavigate } from "react-router-dom";
 import { track } from "@/lib/tracking";
 import { convertSlotToTimezone } from "@/lib/admin-utils";
 import { setUserTimezone } from "@/lib/viewerTimezone";
+import type { Database } from "@/integrations/supabase/types";
 
 type Step = 1 | 2 | 3 | 4;
+type EnrollmentUpdate = Database["public"]["Tables"]["enrollments"]["Update"];
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Unexpected enrollment error";
+}
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -233,18 +239,18 @@ const EnrollNowPage = () => {
         .eq("is_active", true)
         .neq("course_type", "private")
         .order("day_of_week");
-      const rows = (data as any[]) || [];
+      const rows = data || [];
       if (rows.length === 0) { setLevelSlots([]); return; }
 
       // Compute seats_left per package (same pattern as SchedulePicker)
-      const pkgIds = rows.map((r: any) => r.id);
+      const pkgIds = rows.map((row) => row.id);
       const { data: groups } = await supabase
         .from("pkg_groups")
         .select("id, package_id")
         .in("package_id", pkgIds)
         .eq("is_active", true);
-      const groupList = (groups as any[]) || [];
-      const groupIds = groupList.map((g: any) => g.id);
+      const groupList = groups || [];
+      const groupIds = groupList.map((group) => group.id);
 
       const memberCounts: Record<string, number> = {};
       if (groupIds.length > 0) {
@@ -253,8 +259,8 @@ const EnrollNowPage = () => {
           .select("group_id")
           .in("group_id", groupIds)
           .eq("member_status", "active");
-        for (const m of (members as any[]) || []) {
-          memberCounts[m.group_id] = (memberCounts[m.group_id] || 0) + 1;
+        for (const member of members || []) {
+          memberCounts[member.group_id] = (memberCounts[member.group_id] || 0) + 1;
         }
       }
 
@@ -304,7 +310,7 @@ const EnrollNowPage = () => {
         .select("name")
         .eq("user_id", session.user.id)
         .maybeSingle();
-      const profileName = (profile as any)?.name || "";
+      const profileName = profile?.name || "";
       const fallbackName = (session.user.email || "").split("@")[0];
       setName(profileName || metaName || fallbackName);
 
@@ -445,7 +451,7 @@ const EnrollNowPage = () => {
       const { data, error } = await supabase.rpc("create_egypt_order", {
         _plan_type: classType,
         _duration: duration,
-      } as any);
+      });
       if (error) {
         const desc = error.message?.includes("not found") || error.code === "PGRST202"
           ? "Backend function 'create_egypt_order' is missing or not accessible. Please contact support."
@@ -455,7 +461,7 @@ const EnrollNowPage = () => {
       // Save schedule preferences + level to the enrollment and profile
       const enrollmentId = data as string;
         if (enrollmentId) {
-        const schedPrefs: any = {};
+        const schedPrefs: EnrollmentUpdate = {};
         if (preferredDays.length > 0) {
           schedPrefs.preferred_days = preferredDays;
           schedPrefs.preferred_day = preferredDays[0];
@@ -466,15 +472,16 @@ const EnrollNowPage = () => {
         if (selectedLevel) schedPrefs.level = normalizeLevel(selectedLevel);
         if (egyptPaymentMethod) schedPrefs.payment_method = egyptPaymentMethod;
         if (Object.keys(schedPrefs).length > 0) {
-          await supabase.from("enrollments").update(schedPrefs).eq("id", enrollmentId);
+          const { error: updateError } = await supabase.from("enrollments").update(schedPrefs).eq("id", enrollmentId);
+          if (updateError) throw updateError;
         }
         // Level sync to profile is handled by DB trigger on enrollments.level
       }
       track.initiateCheckout({ value: finalPrice ?? 0, currency: selectedCountry === "Egypt" ? "EGP" : "USD" });
       logLeadEvent({ source_type: "enroll", cta_label: "checkout", metadata: { value: finalPrice ?? 0, country: selectedCountry } });
       nav(`/pay/${enrollmentId}`);
-    } catch (err: any) {
-      toast({ title: t("enrollToasts.orderError"), description: err.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: t("enrollToasts.orderError"), description: errorMessage(error), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -592,7 +599,7 @@ const EnrollNowPage = () => {
       // Level sync to profile is handled by DB trigger on enrollments.level
 
       // B) Upsert enrollment BEFORE calling create-checkout (safety net)
-      const schedFields: Record<string, any> = {
+      const schedFields: EnrollmentUpdate = {
         level: normalizedLevel,
         preferred_day: preferredDays[0],
         timezone,
@@ -600,20 +607,30 @@ const EnrollNowPage = () => {
       };
       if (selectedPackageId && !selectedPackageId.startsWith("private-")) schedFields.package_id = selectedPackageId;
       if (preferredDays.length > 0) schedFields.preferred_days = preferredDays;
-      // Add student preference for scheduling (from step 3)
-      if (preferredDayOfWeek !== null) schedFields.preferred_day_of_week = preferredDayOfWeek;
-      if (preferredStartTime) schedFields.preferred_start_time = preferredStartTime;
+
+      const { error: preferenceError } = await supabase
+        .from("student_package_preferences")
+        .upsert({
+          user_id: session.user.id,
+          level: normalizedLevel,
+          package_id: selectedPackageId && !selectedPackageId.startsWith("private-") ? selectedPackageId : null,
+          preferred_day_of_week: preferredDayOfWeek,
+          preferred_start_time: preferredStartTime || null,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id" });
+      if (preferenceError) throw preferenceError;
 
       const { data: existingRows } = await supabase
         .from("enrollments")
         .select("id")
         .eq("user_id", session.user.id)
-        .in("status", ["PENDING", "PENDING_PAYMENT", "DRAFT"] as any)
+        .in("status", ["PENDING", "PENDING_PAYMENT", "DRAFT"])
         .order("created_at", { ascending: false })
         .limit(1);
 
       if (existingRows && existingRows.length > 0) {
-        await supabase.from("enrollments").update(schedFields as any).eq("id", existingRows[0].id);
+        const { error: updateError } = await supabase.from("enrollments").update(schedFields).eq("id", existingRows[0].id);
+        if (updateError) throw updateError;
       }
 
       const { data, error } = await supabase.functions.invoke("create-checkout", {
@@ -647,20 +664,21 @@ const EnrollNowPage = () => {
           .from("enrollments")
           .select("id")
           .eq("user_id", session.user.id)
-          .in("status", ["PENDING", "PENDING_PAYMENT", "DRAFT"] as any)
+          .in("status", ["PENDING", "PENDING_PAYMENT", "DRAFT"])
           .order("created_at", { ascending: false })
           .limit(1);
 
         if (postRows && postRows.length > 0) {
-          await supabase.from("enrollments").update(schedFields as any).eq("id", postRows[0].id);
+          const { error: updateError } = await supabase.from("enrollments").update(schedFields).eq("id", postRows[0].id);
+          if (updateError) throw updateError;
         }
 
         // Clear draft BEFORE opening Stripe (so user can't lose state on back-nav)
         localStorage.removeItem("enroll_draft");
         window.location.href = data.url;
       }
-    } catch (err: any) {
-      toast({ title: t("enrollToasts.checkoutError"), description: err.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: t("enrollToasts.checkoutError"), description: errorMessage(error), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -843,7 +861,7 @@ const EnrollNowPage = () => {
                 <Select value={timezone} onValueChange={(tz) => { setTimezone(tz); setUserTimezone(tz); }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {(Intl as any).supportedValuesOf("timeZone").map((tz: string) => (
+                    {Intl.supportedValuesOf("timeZone").map((tz) => (
                       <SelectItem key={tz} value={tz}>{tz.replace(/_/g, " ")}</SelectItem>
                     ))}
                   </SelectContent>
