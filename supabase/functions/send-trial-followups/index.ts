@@ -122,16 +122,26 @@ async function dispatchStage(
     }
     if (!b.email) { skipped++; continue; }
 
-    // For day-7, include a referral share link from the profile
-    let referralUrl: string | undefined;
-    if (stage === "day7" && b.user_id) {
+    // Fetch profile for unsubscribe check and token
+    let unsubscribeToken: string | undefined;
+    if (b.user_id) {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("unsubscribe_token")
+        .select("email_unsubscribed, unsubscribe_token")
         .eq("user_id", b.user_id)
         .maybeSingle();
+      if (profile?.email_unsubscribed) {
+        await supabase.from("trial_bookings").update({ [column]: new Date().toISOString() }).eq("id", b.id);
+        skipped++;
+        continue;
+      }
+      unsubscribeToken = profile?.unsubscribe_token ?? undefined;
+    }
+
+    // For day-7, include a referral share link
+    let referralUrl: string | undefined;
+    if (stage === "day7" && b.user_id) {
       referralUrl = `https://kloversegy.com/free-trial?ref=${b.user_id}`;
-      void profile; // unsubscribe_token fetched but handled in send-confirmation-email
     }
 
     try {
@@ -143,6 +153,7 @@ async function dispatchStage(
           template: STAGE_TEMPLATE[stage],
           level: b.level,
           ...(referralUrl ? { referral_url: referralUrl } : {}),
+          ...(unsubscribeToken ? { unsubscribe_token: unsubscribeToken } : {}),
         },
       });
       if (sendErr) throw new Error(sendErr.message);
