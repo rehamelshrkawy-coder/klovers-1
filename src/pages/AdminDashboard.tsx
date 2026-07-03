@@ -500,6 +500,7 @@ const AdminDashboard = () => {
   // invalidateAll() triggers targeted cache refresh instead of re-fetching everything.
 
   const handleDeleteStudent = async (userId: string) => {
+    if (!window.confirm("Permanently delete this student? This cannot be undone.")) return;
     const { error } = await supabase.from("profiles").delete().eq("user_id", userId);
     if (error) { toast({ title: "Error", description: "Failed to delete student.", variant: "destructive" }); return; }
     queryClient.invalidateQueries({ queryKey: ["admin", "student-overview"] });
@@ -621,12 +622,14 @@ const AdminDashboard = () => {
     if (sendingResend.has(key)) return;
     setSendingResend(prev => new Set(prev).add(key));
     try {
+      const tz = e.timezone ?? "";
+      const language = (tz.startsWith("Asia/") || tz.startsWith("Europe/") || tz.startsWith("America/")) ? "en" : "ar";
       const { error } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
           template: "payment_confirmed",
           email: e.profiles?.email,
           name: e.profiles?.name ?? "Student",
-          language: "ar",
+          language,
           plan_type: e.plan_type,
           duration: e.duration,
           sessions_total: e.sessions_total,
@@ -743,9 +746,7 @@ const AdminDashboard = () => {
       recipients.push({ email, name, language: lang });
     }
 
-    let sent = 0;
-    let failed = 0;
-    for (const r of recipients) {
+    const results = await Promise.allSettled(recipients.map(async (r) => {
       const { error } = await supabase.functions.invoke("send-confirmation-email", {
         body: {
           template: "class_link",
@@ -758,8 +759,10 @@ const AdminDashboard = () => {
           slot_timezone: classLinkSlotTimezone || undefined,
         },
       });
-      if (error) failed++; else sent++;
-    }
+      if (error) throw error;
+    }));
+    const sent = results.filter(r => r.status === "fulfilled").length;
+    const failed = results.filter(r => r.status === "rejected").length;
 
     setIsSendingClassLink(false);
 
@@ -875,32 +878,37 @@ const AdminDashboard = () => {
     if (!bulkSession) { setBulkApproving(false); return; }
     const ids = Array.from(selectedEnrollmentIds);
     let succeeded = 0;
-    let failed = 0;
+    const failedDetails: { id: string; reason: string }[] = [];
     for (const id of ids) {
       const enrollment = enrollments.find(e => e.id === id);
       if (!enrollment) continue;
       // Skip enrollments not yet placed by the matcher
-      if (!enrollment.matched_at) { failed++; continue; }
+      if (!enrollment.matched_at) { failedDetails.push({ id, reason: "not matched yet" }); continue; }
       // Skip manual-payment enrollments missing a receipt
       const isManual = enrollment.payment_provider === "egypt_manual" || enrollment.payment_provider === "manual";
       const hasReceipt = enrollment.receipt_url && enrollment.receipt_url.trim() !== "" && enrollment.receipt_url !== "manual";
-      if (isManual && !hasReceipt) { failed++; continue; }
+      if (isManual && !hasReceipt) { failedDetails.push({ id, reason: "no receipt" }); continue; }
       try {
         const { error } = await supabase.rpc("approve_enrollment", {
           _enrollment_id: id,
           _admin_id: bulkSession.user.id,
           _unit_price: null,
         });
-        if (error) { failed++; continue; }
+        if (error) { failedDetails.push({ id, reason: error.message || "rpc error" }); continue; }
         succeeded++;
-      } catch { failed++; }
+      } catch (err: any) { failedDetails.push({ id, reason: err?.message || "unknown error" }); }
     }
     setBulkApproving(false);
     setSelectedEnrollmentIds(new Set());
+    const failedCount = failedDetails.length;
+    const failedSummary = failedDetails
+      .slice(0, 3)
+      .map(f => `${f.id.slice(0, 8)}: ${f.reason}`)
+      .join("; ");
     toast({
       title: `Bulk approve complete`,
-      description: `${succeeded} approved${failed > 0 ? `, ${failed} failed` : ""}`,
-      variant: failed > 0 ? "destructive" : "default",
+      description: `${succeeded} approved${failedCount > 0 ? `, ${failedCount} failed — ${failedSummary}${failedCount > 3 ? " …" : ""}` : ""}`,
+      variant: failedCount > 0 ? "destructive" : "default",
     });
     invalidateAll();
   };

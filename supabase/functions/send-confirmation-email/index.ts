@@ -14,7 +14,7 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "trial_followup_day7" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation";
   class_link_url?: string;
   tx_ref?: string;
   payment_date?: string;
@@ -66,6 +66,18 @@ const LOGO_URL = "https://kloversegy.com/klovers-logo.jpg";
 const SITE_URL = "https://kloversegy.com";
 
 const FUNCTION_BASE = "https://ewtdgpbybkceokfohhyg.supabase.co/functions/v1";
+
+const CRON_SECRET_VAL = Deno.env.get("CRON_SECRET") ?? "";
+const SERVICE_ROLE_KEY_VAL = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+function isAuthorized(req: Request): boolean {
+  const auth = req.headers.get("Authorization") ?? "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : auth;
+  if (!token) return false;
+  if (CRON_SECRET_VAL && token === CRON_SECRET_VAL) return true;
+  if (SERVICE_ROLE_KEY_VAL && token === SERVICE_ROLE_KEY_VAL) return true;
+  return false;
+}
 
 function unsubscribeFooter(token: string | undefined, isAr: boolean): string {
   // Always include an unsubscribe link — required by CAN-SPAM / PDPL.
@@ -842,6 +854,7 @@ function buildTrialPrepEmail(p: EmailPayload) {
           <li>☕ خذ حاجة تشربها — الحصة 45 دقيقة</li>
         </ul>
         <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">في أي سؤال؟ رد على الإيميل ده أو راسلنا واتساب.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -864,6 +877,7 @@ function buildTrialPrepEmail(p: EmailPayload) {
         <li>☕ Grab a drink — it's a 45-minute session</li>
       </ul>
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Any questions? Reply to this email or message us on WhatsApp.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -890,6 +904,7 @@ function buildTrialFollowupDay1Email(p: EmailPayload) {
           ${brandButton("شوف الخطط", pricingUrl)}
         </div>
         <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">عندك أسئلة أو استفسارات عن أنسب خطة؟ رد على الإيميل ده أو راسلنا واتساب وهنساعدك تختار.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -911,6 +926,7 @@ function buildTrialFollowupDay1Email(p: EmailPayload) {
         ${brandButton("See the plans", pricingUrl)}
       </div>
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Questions, or want help picking a plan? Reply to this email or message us on WhatsApp — we'll help you choose.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -932,6 +948,7 @@ function buildTrialFollowupDay3Email(p: EmailPayload) {
         <p style="text-align: center; color: ${BRAND_MUTED}; font-size: 13px;">أو <a href="${pricingUrl}" style="color: ${BRAND_DARK};">شوف الخطط بنفسك</a></p>
         <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
         <p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">ده آخر تذكير — مش هنبعتلك إيميلات متابعة تانية بعد كده.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -947,6 +964,7 @@ function buildTrialFollowupDay3Email(p: EmailPayload) {
       <p style="text-align: center; color: ${BRAND_MUTED}; font-size: 13px;">Or <a href="${pricingUrl}" style="color: ${BRAND_DARK};">browse the plans yourself</a></p>
       <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
       <p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">This is our last nudge — we won't keep emailing you after this.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -1375,6 +1393,13 @@ function buildClassFeedbackEmail(p: EmailPayload) {
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  if (!isAuthorized(req)) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {

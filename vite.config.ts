@@ -26,6 +26,17 @@ export default defineConfig(() => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  test: {
+    coverage: {
+      provider: 'v8',
+      thresholds: {
+        lines: 40,
+        functions: 40,
+        branches: 35,
+        statements: 40,
+      },
+    },
+  },
   build: {
     // Increase chunk size warning limit (avoids noise, not a problem for SPA)
     chunkSizeWarningLimit: 800,
