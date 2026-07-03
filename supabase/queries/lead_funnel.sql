@@ -22,16 +22,17 @@ group by 1
 order by total desc;
 
 -- 4. Full funnel (all-time)
--- Note: trial_booked / enrollment_completed columns omitted from the
--- production view because trial_bookings/profiles lack an email column to
--- join on. Add them back once that schema gap is closed.
 select
   count(*)                                          as sessions,
   count(*) filter (where clicked_whatsapp)          as whatsapp_clicks,
   count(*) filter (where started_placement)         as placement_starts,
   count(*) filter (where clicked_free_trial)        as free_trial_clicks,
   count(*) filter (where viewed_pricing_cta)        as pricing_views,
-  count(*) filter (where signup_completed)          as signups
+  count(*) filter (where signup_completed)          as signups,
+  count(*) filter (where trial_booked)              as trial_bookings,
+  count(*) filter (where enrollment_completed)      as paid_conversions,
+  round(100.0 * count(*) filter (where enrollment_completed)
+    / nullif(count(*) filter (where trial_booked), 0), 1) as trial_to_paid_pct
 from lead_funnel;
 
 -- 5. WhatsApp click breakdown by source page (which buttons get used)
