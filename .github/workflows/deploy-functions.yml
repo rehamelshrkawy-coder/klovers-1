@@ -6,6 +6,11 @@ on:
       - main
   workflow_dispatch:
 
+# Staging: push to `staging` branch → deploys to staging Supabase project (deploy-staging.yml)
+# Production: push to `main` branch → deploys to production Supabase project (this file)
+# Required secrets for staging: STAGING_SUPABASE_PROJECT_REF, STAGING_SUPABASE_DB_PASSWORD
+# Required secrets for both: SUPABASE_ACCESS_TOKEN
+
 jobs:
   test:
     name: Run Tests
