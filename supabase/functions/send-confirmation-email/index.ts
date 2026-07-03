@@ -655,19 +655,19 @@ function buildTrialConfirmedEmail(p: EmailPayload) {
     };
   }
   return {
-    subject: "✅ You're booked! Your free 30-min Korean trial class — KLovers",
+    subject: "✅ You're booked! Your free 45-min Korean trial class — KLovers",
     html: brandWrapper(`
       <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 🎉</h1>
-      <p style="color: ${BRAND_TEXT}; font-size: 15px; margin-bottom: 4px;">Your <strong>free 30-minute Korean trial class</strong> is confirmed. We can't wait to meet you!</p>
+      <p style="color: ${BRAND_TEXT}; font-size: 15px; margin-bottom: 4px;">Your <strong>free 45-minute Korean trial class</strong> is confirmed. We can't wait to meet you!</p>
       ${brandTable([
         ["📅 Date", p.trial_date || ""],
         ["⏰ Time", p.trial_time || ""],
         ["🌍 Timezone", tz],
         ["📚 Level", p.level || "Beginner"],
-        ["⏱ Duration", "30 minutes"],
+        ["⏱ Duration", "45 minutes"],
       ])}
       ${calBtn}
-      <h3 style="color: ${BRAND_DARK}; font-size: 16px; margin-top: 28px;">What happens in your 30 minutes?</h3>
+      <h3 style="color: ${BRAND_DARK}; font-size: 16px; margin-top: 28px;">What happens in your 45 minutes?</h3>
       <ul style="color: ${BRAND_TEXT}; padding-left: 20px; line-height: 1.9;">
         <li>🧑‍🏫 <strong>Meet your teacher</strong> — a real live session, not a recording</li>
         <li>📊 <strong>Level check</strong> — we figure out exactly where you are</li>
@@ -675,7 +675,7 @@ function buildTrialConfirmedEmail(p: EmailPayload) {
         <li>🗺️ <strong>Your learning roadmap</strong> — we show you the fastest path to fluency</li>
       </ul>
       <div style="background: #fffff0; border-left: 4px solid ${BRAND_YELLOW}; border-radius: 6px; padding: 14px 18px; margin: 24px 0;">
-        <p style="margin: 0; color: ${BRAND_DARK}; font-size: 14px;"><strong>No prep needed.</strong> Just show up with 30 minutes and an open mind. We'll handle the rest.</p>
+        <p style="margin: 0; color: ${BRAND_DARK}; font-size: 14px;"><strong>No prep needed.</strong> Just show up with 45 minutes and an open mind. We'll handle the rest.</p>
       </div>
       ${p.class_link_url
         ? `<div style="margin:24px 0;text-align:center;">
@@ -967,6 +967,50 @@ function buildTrialFollowupDay3Email(p: EmailPayload) {
       ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
+}
+
+function buildTrialFollowupDay7Email(p: EmailPayload) {
+  const isAr = (p.language || "ar") === "ar";
+  const name = p.name || (isAr ? "صديقي" : "there");
+  const referralUrl = (p as any).referral_url as string | undefined;
+
+  if (isAr) {
+    const content = `
+      <h2 style="color:#1a1a1a;font-size:20px;">كيف كانت تجربتك مع KLovers؟ 🌸</h2>
+      <p>مرحباً ${name}،</p>
+      <p>مضى أسبوع على تجربتك التعريفية معنا — نحن فضوليون! كيف كانت التجربة؟</p>
+      <p>هل بدأت تلاحظ فرقاً في فهمك للكورية؟ نحب أن نسمع رأيك.</p>
+      ${referralUrl ? `
+      <div style="background:#f9f9f9;border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin:20px 0;text-align:center;">
+        <p style="font-weight:bold;margin:0 0 8px;">🎁 شارك KLovers مع أصدقائك!</p>
+        <p style="font-size:13px;color:#666;margin:0 0 12px;">كل صديق يسجل عبر رابطك يمنحك مكافأة خاصة.</p>
+        <a href="${referralUrl}" style="display:inline-block;background:#FFFF00;color:#000;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">شارك الرابط</a>
+      </div>` : ""}
+      <div style="margin:24px 0;text-align:center;">
+        <a href="https://kloversegy.com/free-trial" style="display:inline-block;background:#FFFF00;color:#000000;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px;border:2px solid #000000;">احجز دورتك الآن</a>
+      </div>
+      ${unsubscribeFooter(p.unsubscribe_token, true)}
+    `;
+    return { subject: "كيف كانت تجربتك مع KLovers؟ 🌸", html: brandWrapper(content, true) };
+  }
+
+  const content = `
+    <h2 style="color:#1a1a1a;font-size:20px;">How's your Korean journey going? 🌸</h2>
+    <p>Hi ${name},</p>
+    <p>It's been a week since your trial class with us — we're curious! How did you find it?</p>
+    <p>Have you noticed any difference in how you understand Korean? We'd love to hear from you.</p>
+    ${referralUrl ? `
+    <div style="background:#f9f9f9;border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin:20px 0;text-align:center;">
+      <p style="font-weight:bold;margin:0 0 8px;">🎁 Share KLovers with friends!</p>
+      <p style="font-size:13px;color:#666;margin:0 0 12px;">Every friend who signs up through your link earns you a special reward.</p>
+      <a href="${referralUrl}" style="display:inline-block;background:#FFFF00;color:#000;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Share your link</a>
+    </div>` : ""}
+    <div style="margin:24px 0;text-align:center;">
+      <a href="https://kloversegy.com/free-trial" style="display:inline-block;background:#FFFF00;color:#000000;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px;border:2px solid #000000;">Book Your Course Now</a>
+    </div>
+    ${unsubscribeFooter(p.unsubscribe_token, false)}
+  `;
+  return { subject: "How's your Korean journey going? 🌸", html: brandWrapper(content, false) };
 }
 
 function buildPaymentConfirmedEmail(p: EmailPayload) {
@@ -1482,6 +1526,9 @@ serve(async (req) => {
         break;
       case "trial_followup_day3":
         ({ subject, html } = buildTrialFollowupDay3Email(payload));
+        break;
+      case "trial_followup_day7":
+        ({ subject, html } = buildTrialFollowupDay7Email(payload));
         break;
       case "group_forming":
         ({ subject, html } = buildGroupFormingEmail(payload));
