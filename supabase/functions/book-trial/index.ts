@@ -29,7 +29,15 @@ async function checkRateLimit(
   });
   if (error) {
     // Fail open — don't block legitimate requests if the table/function is missing.
+    // But surface it: a silent fail-open means abuse protection is effectively
+    // off, so flag it in admin_notifications instead of only console.warn.
     console.warn("[book-trial] rate limit check error:", error.message);
+    try {
+      await supabase.from("admin_notifications").insert({
+        message: `Trial rate limiter is failing open (identifier=${identifier}): ${error.message}`,
+        type: "trial_rate_limit_error",
+      });
+    } catch { /* never let alerting break the booking flow */ }
     return false;
   }
   // Returns true if the caller is rate-limited (attempt_count > max)
@@ -196,11 +204,18 @@ Deno.serve(async (req) => {
     const slotDurationMin: number = _slot?.duration_min ?? 30;
     const meetingUrl: string | null = _slot?.meeting_url ?? null;
 
-    // Registrations close 1 day before the class (compare in MYT, UTC+8)
-    const mytNow = new Date(Date.now() + 8 * 60 * 60 * 1000);
-    const mytDayStr = mytNow.toISOString().split("T")[0];
+    // Registrations close 1 day before the class, compared in the slot's own
+    // timezone (not a hardcoded region) — trial cohorts have moved timezones
+    // before (MYT batch replaced an earlier Cairo-anchored one) and a fixed
+    // UTC offset silently goes stale whenever that happens again.
+    const todayInSlotTz = new Intl.DateTimeFormat("en-CA", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
     const trialMs = new Date(trialDate + "T00:00:00Z").getTime();
-    const todayMs = new Date(mytDayStr + "T00:00:00Z").getTime();
+    const todayMs = new Date(todayInSlotTz + "T00:00:00Z").getTime();
     if (Math.round((trialMs - todayMs) / 86_400_000) <= 1) {
       return new Response(
         JSON.stringify({ ok: false, success: false, error: "Booking is closed — registrations close 1 day before the class." }),
