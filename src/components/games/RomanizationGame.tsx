@@ -121,7 +121,7 @@ const RomanizationGame = ({ onGameComplete }: { onGameComplete?: (score: number,
             {!feedback && <Button onClick={handleSubmit}>Check</Button>}
           </div>
           {feedback && (
-            <p className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
+            <p role="alert" className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
               {feedback === "correct" ? "✅ Correct! +5 XP" : `❌ Answer: ${q.romanization}`}
             </p>
           )}

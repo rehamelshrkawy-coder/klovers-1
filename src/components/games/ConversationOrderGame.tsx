@@ -179,7 +179,7 @@ const ConversationOrderGame = ({ onGameComplete }: { onGameComplete?: (score: nu
     <div className="flex flex-col gap-5 max-w-xl mx-auto px-2">
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>Round {round + 1} of {totalRounds}</span>
-        <span className="font-medium text-foreground">{score} correct</span>
+        <span className="font-medium text-foreground" aria-live="polite" aria-atomic="true">{score} correct</span>
       </div>
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${(round / totalRounds) * 100}%` }} />
@@ -214,8 +214,8 @@ const ConversationOrderGame = ({ onGameComplete }: { onGameComplete?: (score: nu
                 </div>
                 {!submitted && (
                   <div className="flex flex-col gap-0.5 flex-shrink-0">
-                    <button onClick={() => moveUp(idx)} disabled={idx === 0} className="p-1 rounded hover:bg-muted disabled:opacity-20 text-muted-foreground text-xs">▲</button>
-                    <button onClick={() => moveDown(idx)} disabled={idx === shuffledLines.length - 1} className="p-1 rounded hover:bg-muted disabled:opacity-20 text-muted-foreground text-xs">▼</button>
+                    <button onClick={() => moveUp(idx)} disabled={idx === 0} aria-label={`Move line ${idx + 1} up`} className="p-1 rounded hover:bg-muted disabled:opacity-20 text-muted-foreground text-xs">▲</button>
+                    <button onClick={() => moveDown(idx)} disabled={idx === shuffledLines.length - 1} aria-label={`Move line ${idx + 1} down`} className="p-1 rounded hover:bg-muted disabled:opacity-20 text-muted-foreground text-xs">▼</button>
                   </div>
                 )}
                 {submitted && (
@@ -230,7 +230,7 @@ const ConversationOrderGame = ({ onGameComplete }: { onGameComplete?: (score: nu
       </div>
 
       {submitted && !isCorrect && (
-        <Card className="p-3 border-l-4 border-amber-500 bg-amber-50 dark:bg-amber-950/30 text-sm">
+        <Card role="alert" className="p-3 border-l-4 border-amber-500 bg-amber-50 dark:bg-amber-950/30 text-sm">
           <p className="font-semibold mb-1">Correct order:</p>
           {scene.lines.map((l, i) => (
             <p key={i} className="text-xs text-muted-foreground">{i + 1}. ({l.speaker}) {l.korean}</p>
