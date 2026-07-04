@@ -112,7 +112,7 @@ const SentenceBuilderGame = ({ onGameComplete }: { onGameComplete?: (score: numb
       <div className="max-w-lg mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <Badge variant="outline">{t("games.round")} {total + 1}/{rounds}</Badge>
-          <Badge variant="secondary"><Sparkles className="h-3 w-3 mr-1" />{score * 5} XP</Badge>
+          <Badge variant="secondary" aria-live="polite" aria-atomic="true"><Sparkles className="h-3 w-3 mr-1" aria-hidden="true" />{score * 5} XP</Badge>
         </div>
 
         <Card className="p-6 space-y-4">
@@ -122,18 +122,18 @@ const SentenceBuilderGame = ({ onGameComplete }: { onGameComplete?: (score: numb
           <div className="min-h-[48px] border-2 border-dashed border-border rounded-lg p-3 flex flex-wrap gap-2">
             {placed.length === 0 && <span className="text-muted-foreground text-sm">{t("games.sentencePlaceholder")}</span>}
             {placed.map((word, i) => (
-              <button key={i} onClick={() => handleRemoveWord(i)} className="px-3 py-1.5 bg-primary/10 text-foreground rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors">{word}</button>
+              <button key={i} onClick={() => handleRemoveWord(i)} aria-label={`Remove word: ${word}`} className="px-3 py-1.5 bg-primary/10 text-foreground rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors">{word}</button>
             ))}
           </div>
 
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex flex-wrap gap-2 justify-center" role="group" aria-label="Available words — click to add to sentence">
             {available.map((word, i) => (
-              <button key={i} onClick={() => handleWordClick(word)} className="px-3 py-1.5 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors border border-border">{word}</button>
+              <button key={i} onClick={() => handleWordClick(word)} aria-label={`Add word: ${word}`} className="px-3 py-1.5 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors border border-border">{word}</button>
             ))}
           </div>
 
           {feedback && (
-            <div className={`p-3 rounded-lg text-center ${feedback === "correct" ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-destructive/10 text-destructive"}`}>
+            <div role="alert" className={`p-3 rounded-lg text-center ${feedback === "correct" ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-destructive/10 text-destructive"}`}>
               {feedback === "correct" ? t("games.correctFeedback") : t("games.sentenceCorrectOrder").replace("{order}", currentSentence.correct.join(" "))}
             </div>
           )}

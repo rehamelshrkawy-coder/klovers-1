@@ -65,7 +65,7 @@ const TimeTellerGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
       <div className="max-w-lg mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <Badge variant="outline">{t("games.round")} {round + 1}/{totalRounds}</Badge>
-          <Badge variant="secondary"><Sparkles className="h-3 w-3 mr-1" />{score * 5} XP</Badge>
+          <Badge variant="secondary" aria-live="polite" aria-atomic="true"><Sparkles className="h-3 w-3 mr-1" aria-hidden="true" />{score * 5} XP</Badge>
         </div>
         <Card className="p-6 text-center space-y-4">
           <Clock className="h-10 w-10 mx-auto text-muted-foreground" />

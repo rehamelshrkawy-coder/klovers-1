@@ -104,7 +104,7 @@ const ReadingChoiceGame = ({ onGameComplete }: { onGameComplete?: (score: number
           <Badge variant="outline">Round {round + 1}/{totalRounds}</Badge>
           <div className="flex items-center gap-2">
             {usingLesson && <Badge variant="outline" className="text-xs">📚 From your lessons</Badge>}
-            <Badge variant="secondary"><Sparkles className="h-3 w-3 mr-1" />{score * 5} XP</Badge>
+            <Badge variant="secondary" aria-live="polite" aria-atomic="true"><Sparkles className="h-3 w-3 mr-1" aria-hidden="true" />{score * 5} XP</Badge>
           </div>
         </div>
         <Card className="p-6 text-center space-y-4">
