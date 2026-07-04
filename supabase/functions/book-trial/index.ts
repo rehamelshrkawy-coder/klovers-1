@@ -204,7 +204,7 @@ Deno.serve(async (req) => {
     if (Math.round((trialMs - todayMs) / 86_400_000) <= 1) {
       return new Response(
         JSON.stringify({ ok: false, success: false, error: "Booking is closed — registrations close 1 day before the class." }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -324,7 +324,7 @@ Deno.serve(async (req) => {
             success: false,
             error: "You already have a trial class booked. Check your email for details.",
           }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       // Conflict trigger: trial time overlaps an existing enrolled class
@@ -335,18 +335,17 @@ Deno.serve(async (req) => {
             success: false,
             error: "This trial time overlaps with one of your existing classes. Please pick a different slot or contact us on WhatsApp.",
           }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      // Surface the real DB error in the response body instead of throwing a
-      // generic 500 — this lets the UI show a meaningful message and lets us
-      // see the error code/message without needing server-side log access.
+      // Unexpected DB error — surface the error details but use 500 so callers
+      // know this is not a business-rule rejection.
       const errMsg = bookingError?.message ?? "Failed to insert trial booking";
       const errCode = bookingError?.code ?? "unknown";
       console.error("book-trial insert error:", errCode, errMsg, JSON.stringify(bookingError));
       return new Response(
         JSON.stringify({ ok: false, success: false, error: errMsg, error_code: errCode }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

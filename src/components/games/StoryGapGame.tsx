@@ -278,12 +278,12 @@ const StoryGapGame = ({ onGameComplete }: { onGameComplete?: (score: number, tot
       </div>
 
       {selected && (
-        <Card className={`p-3 border-l-4 text-sm ${selected === gap.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
+        <Card role="alert" className={`p-3 border-l-4 text-sm ${selected === gap.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
           <p className="font-semibold">{selected === gap.correct ? `✅ Correct! "${gap.correct}"` : `❌ Answer: "${gap.correct}"`}</p>
         </Card>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2" role="group" aria-label="Choose the correct word for this gap">
         {gap.options.map(opt => {
           let extra = "";
           if (selected) {
@@ -292,6 +292,8 @@ const StoryGapGame = ({ onGameComplete }: { onGameComplete?: (score: number, tot
           }
           return (
             <button key={opt} onClick={() => handleSelect(opt)} disabled={!!selected}
+              aria-label={opt}
+              aria-pressed={selected === opt ? true : undefined}
               className={`w-full text-center px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-150 ${selected ? extra || "border-border opacity-50" : "border-border hover:border-primary hover:bg-primary/5"}`}>
               {opt}
             </button>

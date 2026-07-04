@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, lazy, Suspense } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -368,7 +369,9 @@ const GamesPage = () => {
 
         {/* Active game */}
         <div id="active-game-area" className="border-t border-border scroll-mt-20">
-          {renderGame()}
+          <ErrorBoundary>
+            {renderGame()}
+          </ErrorBoundary>
         </div>
         <FinalCTA />
       </main>

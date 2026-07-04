@@ -432,7 +432,7 @@ const AdminAttendancePanel = ({
             <CalendarCheck className="h-5 w-5" />
             Attendance — {studentName}
           </CardTitle>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose} aria-label="Close attendance panel">
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -518,13 +518,13 @@ const AdminAttendancePanel = ({
                     <option value="3">3mo</option>
                     <option value="6">6mo</option>
                   </select>
-                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSavePlan} disabled={saving}><Check className="h-3 w-3" /></Button>
-                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingPlan(false)}><X className="h-3 w-3" /></Button>
+                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSavePlan} disabled={saving} aria-label="Save plan"><Check className="h-3 w-3" /></Button>
+                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingPlan(false)} aria-label="Cancel edit plan"><X className="h-3 w-3" /></Button>
                 </div>
               ) : (
                 <div className="flex items-center gap-1">
                   <span className="font-medium">{enrollment.plan_type} {enrollment.duration}mo</span>
-                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => { setEditPlanType(enrollment.plan_type); setEditDuration(String(enrollment.duration)); setEditingPlan(true); }}>
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => { setEditPlanType(enrollment.plan_type); setEditDuration(String(enrollment.duration)); setEditingPlan(true); }} aria-label="Edit plan">
                     <Pencil className="h-3 w-3" />
                   </Button>
                 </div>
@@ -536,13 +536,13 @@ const AdminAttendancePanel = ({
               {editingPaid ? (
                 <div className="flex items-center gap-1">
                   <Input type="number" step="0.01" value={editPaid} onChange={(e) => setEditPaid(e.target.value)} className="h-6 w-20 text-xs" />
-                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSavePaid} disabled={saving}><Check className="h-3 w-3" /></Button>
-                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingPaid(false)}><X className="h-3 w-3" /></Button>
+                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSavePaid} disabled={saving} aria-label="Save paid amount"><Check className="h-3 w-3" /></Button>
+                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingPaid(false)} aria-label="Cancel edit paid amount"><X className="h-3 w-3" /></Button>
                 </div>
               ) : (
                 <div className="flex items-center gap-1">
                   <span className="font-medium">{currLabel}{Math.round(enrollment.amount).toLocaleString()}</span>
-                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => { setEditPaid(String(enrollment.amount)); setEditingPaid(true); }}>
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => { setEditPaid(String(enrollment.amount)); setEditingPaid(true); }} aria-label="Edit paid amount">
                     <Pencil className="h-3 w-3" />
                   </Button>
                 </div>
@@ -560,13 +560,13 @@ const AdminAttendancePanel = ({
               {editingRemaining ? (
                 <div className="flex items-center gap-1">
                   <Input type="number" value={editRemaining} onChange={(e) => setEditRemaining(e.target.value)} className="h-6 w-16 text-xs" />
-                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSaveRemaining} disabled={saving}><Check className="h-3 w-3" /></Button>
-                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingRemaining(false)}><X className="h-3 w-3" /></Button>
+                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSaveRemaining} disabled={saving} aria-label="Save remaining sessions"><Check className="h-3 w-3" /></Button>
+                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingRemaining(false)} aria-label="Cancel edit remaining sessions"><X className="h-3 w-3" /></Button>
                 </div>
               ) : (
                 <div className="flex items-center gap-1">
                   <span className="font-medium">{enrollment.sessions_remaining}</span>
-                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => { setEditRemaining(String(enrollment.sessions_remaining)); setEditingRemaining(true); }}>
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => { setEditRemaining(String(enrollment.sessions_remaining)); setEditingRemaining(true); }} aria-label="Edit remaining sessions">
                     <Pencil className="h-3 w-3" />
                   </Button>
                 </div>
@@ -577,13 +577,13 @@ const AdminAttendancePanel = ({
               {editingUnitPrice ? (
                 <div className="flex items-center gap-1">
                   <Input type="number" step="0.01" value={editUnitPrice} onChange={(e) => setEditUnitPrice(e.target.value)} className="h-6 w-20 text-xs" />
-                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSaveUnitPrice} disabled={saving}><Check className="h-3 w-3" /></Button>
-                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingUnitPrice(false)}><X className="h-3 w-3" /></Button>
+                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleSaveUnitPrice} disabled={saving} aria-label="Save unit price"><Check className="h-3 w-3" /></Button>
+                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingUnitPrice(false)} aria-label="Cancel edit unit price"><X className="h-3 w-3" /></Button>
                 </div>
               ) : (
                 <div className="flex items-center gap-1">
                   <span className="font-medium">{currLabel}{Math.round(enrollment.unit_price).toLocaleString()}</span>
-                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => { setEditUnitPrice(String(enrollment.unit_price)); setEditingUnitPrice(true); }}>
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => { setEditUnitPrice(String(enrollment.unit_price)); setEditingUnitPrice(true); }} aria-label="Edit unit price">
                     <Pencil className="h-3 w-3" />
                   </Button>
                 </div>
@@ -632,10 +632,10 @@ const AdminAttendancePanel = ({
                   {editingDate === `${r.source}-${r.id}` ? (
                     <div className="flex items-center gap-1">
                       <Input type="date" value={editNewDate} onChange={(e) => setEditNewDate(e.target.value)} className="h-6 text-xs w-36" />
-                      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handleEditDate(r.session_date)} disabled={saving}>
+                      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handleEditDate(r.session_date)} disabled={saving} aria-label="Save date edit">
                         <Check className="h-3 w-3" />
                       </Button>
-                      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingDate(null)}>
+                      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingDate(null)} aria-label="Cancel date edit">
                         <X className="h-3 w-3" />
                       </Button>
                     </div>
@@ -655,13 +655,13 @@ const AdminAttendancePanel = ({
                 {editingDate !== `${r.source}-${r.id}` && (
                   <div className="flex items-center gap-1">
                     {r.source === "Admin" && (
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditingDate(`${r.source}-${r.id}`); setEditNewDate(r.session_date); }}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditingDate(`${r.source}-${r.id}`); setEditNewDate(r.session_date); }} aria-label={`Edit session date ${r.session_date}`}>
                         <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                       </Button>
                     )}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Delete session ${r.session_date}`}>
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </Button>
                       </AlertDialogTrigger>

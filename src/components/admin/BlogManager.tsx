@@ -481,24 +481,24 @@ const BlogManager = () => {
                   </TableCell>
                   <TableCell className="text-right space-x-1">
                     {post.lang === "en" && (
-                      <Button variant="ghost" size="icon" onClick={() => handleTranslate(post)} disabled={translating === post.id} title="Translate to Arabic">
+                      <Button variant="ghost" size="icon" onClick={() => handleTranslate(post)} disabled={translating === post.id} title="Translate to Arabic" aria-label="Translate to Arabic">
                         <Languages className={`h-4 w-4 ${translating === post.id ? "animate-spin" : ""}`} />
                       </Button>
                     )}
                     {post.lang === "ar" && post.slug.endsWith("-ar") && !enSlugs.has(post.slug.replace(/-ar$/, "")) && (
-                      <Button variant="ghost" size="icon" onClick={() => handleTranslateToEn(post)} disabled={translating === post.id} title="Translate to English">
+                      <Button variant="ghost" size="icon" onClick={() => handleTranslateToEn(post)} disabled={translating === post.id} title="Translate to English" aria-label="Translate to English">
                         <Languages className={`h-4 w-4 text-blue-600 ${translating === post.id ? "animate-spin" : ""}`} />
                       </Button>
                     )}
-                    <Button variant="ghost" size="icon" onClick={() => togglePublish(post)} title={post.published ? "Unpublish" : "Publish"}>
+                    <Button variant="ghost" size="icon" onClick={() => togglePublish(post)} title={post.published ? "Unpublish" : "Publish"} aria-label={post.published ? "Unpublish post" : "Publish post"}>
                       {post.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(post)}>
+                    <Button variant="ghost" size="icon" onClick={() => openEdit(post)} aria-label="Edit post">
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                        <Button variant="ghost" size="icon" aria-label="Delete post"><Trash2 className="h-4 w-4 text-destructive" /></Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
@@ -632,9 +632,9 @@ const BlogManager = () => {
                 <div className="space-y-2">
                   <div className="flex gap-2">
                     <Input value={editing.hero_image || ""} onChange={(e) => setEditing((prev) => ({ ...prev, hero_image: e.target.value }))} placeholder="URL or upload" className="flex-1" />
-                    <Button variant="outline" size="icon" asChild className="relative" disabled={uploading}>
+                    <Button variant="outline" size="icon" asChild className="relative" disabled={uploading} aria-label="Upload hero image 1">
                       <label>
-                        <Upload className="h-4 w-4" />
+                        <Upload className="h-4 w-4" aria-hidden="true" />
                         <input type="file" accept="image/*" className="sr-only" onChange={(e) => handleImageUpload(e, 1)} />
                       </label>
                     </Button>
@@ -671,9 +671,9 @@ const BlogManager = () => {
                 <div className="space-y-2">
                   <div className="flex gap-2">
                     <Input value={editing.hero_image_2 || ""} onChange={(e) => setEditing((prev) => ({ ...prev, hero_image_2: e.target.value }))} placeholder="URL or upload" className="flex-1" />
-                    <Button variant="outline" size="icon" asChild className="relative" disabled={uploading2}>
+                    <Button variant="outline" size="icon" asChild className="relative" disabled={uploading2} aria-label="Upload hero image 2">
                       <label>
-                        <Upload className="h-4 w-4" />
+                        <Upload className="h-4 w-4" aria-hidden="true" />
                         <input type="file" accept="image/*" className="sr-only" onChange={(e) => handleImageUpload(e, 2)} />
                       </label>
                     </Button>

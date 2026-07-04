@@ -207,7 +207,7 @@ const DialogueFillGame = ({ onGameComplete }: { onGameComplete?: (score: number,
       {/* Progress */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>Scene {round + 1} of {totalRounds}</span>
-        <span className="font-medium text-foreground">{score} correct</span>
+        <span className="font-medium text-foreground" aria-live="polite" aria-atomic="true">{score} correct</span>
       </div>
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${((round) / totalRounds) * 100}%` }} />
@@ -252,16 +252,15 @@ const DialogueFillGame = ({ onGameComplete }: { onGameComplete?: (score: number,
 
       {/* Feedback */}
       {selected && (
-        <Card className={`p-3 border-l-4 text-sm ${selected === scene.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
+        <Card role="alert" className={`p-3 border-l-4 text-sm ${selected === scene.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
           <p className="font-semibold mb-1">{selected === scene.correct ? "✅ Correct!" : `❌ The answer was: ${scene.correct}`}</p>
           <p className="text-muted-foreground text-xs">{scene.explanation}</p>
         </Card>
       )}
 
       {/* Options */}
-      <div className="grid grid-cols-1 gap-2">
+      <div className="grid grid-cols-1 gap-2" role="group" aria-label="Choose the correct response">
         {scene.options.map(opt => {
-          let variant: "outline" | "default" | "destructive" = "outline";
           let extra = "";
           if (selected) {
             if (opt === scene.correct) extra = "border-green-500 bg-green-50 dark:bg-green-950/30 text-green-800 dark:text-green-200";
@@ -272,6 +271,8 @@ const DialogueFillGame = ({ onGameComplete }: { onGameComplete?: (score: number,
               key={opt}
               onClick={() => handleSelect(opt)}
               disabled={!!selected}
+              aria-label={opt}
+              aria-pressed={selected === opt ? true : undefined}
               className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm transition-all duration-150 font-medium ${selected ? extra || "border-border text-muted-foreground opacity-60" : "border-border hover:border-primary hover:bg-primary/5"}`}
             >
               {opt}
