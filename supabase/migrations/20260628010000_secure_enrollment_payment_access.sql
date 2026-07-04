@@ -11,11 +11,14 @@ CREATE POLICY "Users can view own enrollments"
     OR public.has_role(auth.uid(), 'admin'::public.app_role)
   );
 
-CREATE OR REPLACE FUNCTION public.get_enrollment_for_payment(p_enrollment_id uuid)
+-- Return signature is changing (dropping the never-existent class_type
+-- column), so REPLACE isn't enough — Postgres requires a drop first.
+DROP FUNCTION IF EXISTS public.get_enrollment_for_payment(uuid);
+
+CREATE FUNCTION public.get_enrollment_for_payment(p_enrollment_id uuid)
 RETURNS TABLE (
   id uuid,
   plan_type text,
-  class_type text,
   duration integer,
   amount numeric,
   currency text,
@@ -35,7 +38,6 @@ AS $$
   SELECT
     e.id,
     e.plan_type,
-    e.class_type,
     e.duration,
     e.amount,
     e.currency,
