@@ -42,6 +42,10 @@ const Header = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    // These belong to the just-ended session — clear them so they can't
+    // redirect the next person to sign in on this device to someone else's page.
+    localStorage.removeItem("enroll_redirect");
+    localStorage.removeItem("enroll_draft");
     navigate("/");
   };
 

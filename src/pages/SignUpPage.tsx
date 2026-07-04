@@ -122,6 +122,9 @@ const SignUpPage = () => {
     // Auto-confirmed: redirect immediately
     if (data.session) {
       const finalRedirect = redirectTo || "/dashboard";
+      // Already consumed via redirectTo above — clear it so it can't leak
+      // into a future session on this browser (e.g. after sign-out).
+      localStorage.removeItem("enroll_redirect");
       navigate(finalRedirect);
     } else {
       navigate(redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : "/login");
