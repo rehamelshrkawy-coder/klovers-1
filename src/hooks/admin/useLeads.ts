@@ -17,7 +17,7 @@ export function useLeads({ overviewByEmail }: UseLeadsOptions = {}) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("leads")
-        .select("*")
+        .select("id, name, email, phone, status, source, created_at, notes, country")
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;

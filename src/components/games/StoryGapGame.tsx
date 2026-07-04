@@ -253,7 +253,7 @@ const StoryGapGame = ({ onGameComplete }: { onGameComplete?: (score: number, tot
     <div className="flex flex-col gap-5 max-w-xl mx-auto px-2">
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>Story {storyIdx + 1}/{stories.length} · Gap {gapIdx + 1}/{story.gaps.length}</span>
-        <span className="font-medium text-foreground">{totalScore} correct</span>
+        <span className="font-medium text-foreground" aria-live="polite" aria-atomic="true">{totalScore} correct</span>
       </div>
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${(gapIdx / story.gaps.length) * 100}%` }} />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [status, setStatus] = useState<"loading" | "authorized" | "unauthorized">("loading");
@@ -35,7 +36,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
+        <div className="space-y-4 p-8">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+        </div>
       </div>
     );
   }

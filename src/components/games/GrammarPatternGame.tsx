@@ -300,7 +300,7 @@ const GrammarPatternGame = ({ onGameComplete }: { onGameComplete?: (score: numbe
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>{level.emoji} {level.title}</span>
-        <span className="font-medium text-foreground">{score} correct</span>
+        <span className="font-medium text-foreground" aria-live="polite" aria-atomic="true">{score} correct</span>
       </div>
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${(qIndex / level.questions.length) * 100}%` }} />
@@ -322,13 +322,13 @@ const GrammarPatternGame = ({ onGameComplete }: { onGameComplete?: (score: numbe
       </Card>
 
       {selected && (
-        <Card className={`p-3 border-l-4 text-sm ${selected === q.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
+        <Card role="alert" className={`p-3 border-l-4 text-sm ${selected === q.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
           <p className="font-semibold mb-1">{selected === q.correct ? "✅ Correct!" : `❌ Answer: ${q.correct}`}</p>
           <p className="text-xs text-muted-foreground">{q.explanation}</p>
         </Card>
       )}
 
-      <div className="grid grid-cols-1 gap-2">
+      <div className="grid grid-cols-1 gap-2" role="group" aria-label="Choose the correct answer">
         {q.options.map(opt => {
           let extra = "";
           if (selected) {
@@ -340,6 +340,8 @@ const GrammarPatternGame = ({ onGameComplete }: { onGameComplete?: (score: numbe
               key={opt}
               onClick={() => handleSelect(opt)}
               disabled={!!selected}
+              aria-label={opt}
+              aria-pressed={selected === opt ? true : undefined}
               className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-150 ${selected ? extra || "border-border opacity-50" : "border-border hover:border-primary hover:bg-primary/5"}`}
             >
               {opt}

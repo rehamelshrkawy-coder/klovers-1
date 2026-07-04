@@ -17,7 +17,9 @@ export function useEnrollments({ profileMap }: UseEnrollmentsOptions = {}) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("enrollments")
-        .select("*")
+        .select(
+          "id, user_id, plan_type, duration, classes_included, amount, unit_price, tx_ref, receipt_url, status, payment_status, approval_status, payment_provider, admin_review_required, sessions_remaining, created_at, currency, due_at, payment_date, payment_method, preferred_days, preferred_day, preferred_time, timezone, level, package_id, enrollment_status, sessions_total, negative_since, matched_at, approval_email_sent_at, payment_email_sent_at, class_link_sent_at, first_class_date, forming_escalation_sent_at, rejection_followup_sent_at, pre_class_reminder_sent_at, class_feedback_sent_at"
+        )
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
