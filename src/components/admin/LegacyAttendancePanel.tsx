@@ -150,7 +150,7 @@ const LegacyAttendancePanel = ({
             Attendance — {studentName}
             {packageName && <span className="text-xs text-muted-foreground font-normal">({packageName})</span>}
           </CardTitle>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose} aria-label="Close attendance panel">
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -210,7 +210,7 @@ const LegacyAttendancePanel = ({
                 </div>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Delete attendance record for ${r.session_date}`}>
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
                   </AlertDialogTrigger>

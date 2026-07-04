@@ -34,6 +34,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AdminKpiStrip } from "@/components/admin/AdminKpiStrip";
+import { AdminInsightsCollapsible } from "@/components/admin/AdminInsightsCollapsible";
 
 // Lazy-load heavy tab components — each loads only when its tab is first opened
 const BlogManager = lazy(() => import("@/components/admin/BlogManager"));
@@ -52,7 +53,7 @@ const AdminSettings = lazy(() => import("@/components/admin/AdminSettings"));
 const PlacementTestsManager = lazy(() => import("@/components/admin/PlacementTestsManager"));
 const SalesAnalytics = lazy(() => import("@/components/admin/SalesAnalytics"));
 const SessionAttendanceManager = lazy(() => import("@/components/admin/SessionAttendanceManager"));
-const StudentHealthPanel = lazy(() => import("@/components/admin/StudentHealthPanel"));
+// StudentHealthPanel is loaded lazily inside AdminInsightsCollapsible with its own Suspense boundary
 const PromoCodesManager = lazy(() => import("@/components/admin/PromoCodesManager"));
 const SeoOrchestrationPanel = lazy(() => import("@/components/admin/SeoOrchestrationPanel"));
 const ImageAuditPanel = lazy(() => import("@/components/admin/ImageAuditPanel"));
@@ -69,8 +70,6 @@ const TabLoader = () => (
 );
 
 // Lead, Enrollment, AttendanceReq, OverviewRow — imported from @/types/admin
-
-const STATUS_OPTIONS = ["new", "trial_booked", "contacted", "enrolled", "rejected", "lost"];
 
 // ── Trial Interest Confirmation Campaign Card ─────────────────────────────────
 function TrialInterestConfirmationCard() {
