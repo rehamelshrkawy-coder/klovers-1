@@ -144,7 +144,7 @@ const WordScrambleGame = ({ onGameComplete }: { onGameComplete?: (score: number,
             />
             {!feedback && <Button onClick={handleSubmit}>{t("games.scrambleCheck")}</Button>}
           </div>
-          {feedback && <p className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
+          {feedback && <p role="alert" className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
             {feedback === "correct" ? t("games.correctFeedback") : t("games.wrongPrefix").replace("{answer}", q.answer)}
           </p>}
         </Card>

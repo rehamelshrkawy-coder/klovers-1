@@ -81,9 +81,11 @@ const ColorMatchGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
           <p className="text-sm text-muted-foreground">{t("games.colorsPrompt")}</p>
           <div className="w-24 h-24 rounded-2xl mx-auto border border-border shadow-sm" style={{ backgroundColor: qData.question.hex }} />
           <p className="text-3xl font-bold text-foreground">{qData.question.korean}</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3" role="group" aria-label="Choose the correct color name">
             {qData.options.map(opt => (
               <button key={opt} onClick={() => handleAnswer(opt)} disabled={!!feedback}
+                aria-label={opt}
+                aria-pressed={selected === opt ? true : undefined}
                 className={`p-3 rounded-lg font-semibold border-2 transition-all ${
                   feedback && opt === qData.question.english ? "border-green-500 bg-green-500/10 text-foreground" :
                   feedback && opt === selected ? "border-destructive bg-destructive/10 text-foreground" :
@@ -91,7 +93,7 @@ const ColorMatchGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
                 }`}>{opt}</button>
             ))}
           </div>
-          {feedback && <p className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
+          {feedback && <p role="alert" className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
             {feedback === "correct" ? t("games.correctFeedback") : t("games.colorsWrong").replace("{answer}", qData.question.english)}
           </p>}
         </Card>

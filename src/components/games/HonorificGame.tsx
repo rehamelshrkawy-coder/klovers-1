@@ -175,7 +175,7 @@ const HonorificGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
     <div className="flex flex-col gap-5 max-w-xl mx-auto px-2">
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>Question {round + 1} of {totalRounds}</span>
-        <span className="font-medium text-foreground">{score} correct</span>
+        <span className="font-medium text-foreground" aria-live="polite" aria-atomic="true">{score} correct</span>
       </div>
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${(round / totalRounds) * 100}%` }} />
@@ -194,13 +194,13 @@ const HonorificGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
       </Card>
 
       {selected && (
-        <Card className={`p-3 border-l-4 text-sm ${selected === q.honorific ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
+        <Card role="alert" className={`p-3 border-l-4 text-sm ${selected === q.honorific ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
           <p className="font-semibold mb-1">{selected === q.honorific ? "✅ Correct!" : `❌ Answer: ${q.honorific}`}</p>
           <p className="text-xs text-muted-foreground">{q.explanation}</p>
         </Card>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2" role="group" aria-label="Choose the correct honorific form">
         {q.options.map(opt => {
           let extra = "";
           if (selected) {
@@ -209,6 +209,8 @@ const HonorificGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
           }
           return (
             <button key={opt} onClick={() => handleSelect(opt)} disabled={!!selected}
+              aria-label={opt}
+              aria-pressed={selected === opt ? true : undefined}
               className={`w-full text-center px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-150 ${selected ? extra || "border-border opacity-50" : "border-border hover:border-primary hover:bg-primary/5"}`}>
               {opt}
             </button>

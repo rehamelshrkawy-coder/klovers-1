@@ -41,13 +41,19 @@ describe("getLeadStatusBadgeClass", () => {
     expect(getLeadStatusBadgeClass("rejected")).toBe(getLeadStatusBadgeClass("lost"));
   });
 
-  it("dark-mode variant is included in every status", () => {
-    const statuses = ["enrolled", "trial_booked", "rejected", "lost", "contacted", "new"];
-    for (const s of statuses) {
+  it("dark-mode variant is included for color-coded statuses", () => {
+    // These statuses have explicit color overrides that include dark: variants
+    const coloredStatuses = ["enrolled", "trial_booked", "rejected", "lost", "contacted"];
+    for (const s of coloredStatuses) {
       const cls = getLeadStatusBadgeClass(s);
-      // All badges include dark: classes for consistent theming
       expect(cls, `${s} missing dark: class`).toContain("dark:");
     }
+  });
+
+  it("'new' (default) status uses semantic color tokens without dark: override", () => {
+    // The default/new status deliberately uses muted tokens that theme automatically
+    const cls = getLeadStatusBadgeClass("new");
+    expect(cls).toContain("muted");
   });
 });
 

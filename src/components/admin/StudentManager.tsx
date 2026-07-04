@@ -682,6 +682,7 @@ const StudentManager = () => {
                               variant="ghost"
                               className="h-6 w-6 shrink-0 text-muted-foreground hover:text-primary"
                               title="Manually enroll"
+                              aria-label={`Manually enroll ${u.name || u.email}`}
                               onClick={() => openManualEnroll(u)}
                             >
                               <UserPlus className="h-3.5 w-3.5" />

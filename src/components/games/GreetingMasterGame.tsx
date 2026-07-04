@@ -70,9 +70,11 @@ const GreetingMasterGame = ({ onGameComplete }: { onGameComplete?: (score: numbe
         <Card className="p-6 text-center space-y-4">
           <p className="text-sm text-muted-foreground">{t("games.greetingsPrompt")}</p>
           <p className="text-xl font-bold text-foreground">"{q.situation}"</p>
-          <div className="grid gap-3">
+          <div className="grid gap-3" role="group" aria-label="Choose the correct greeting">
             {shuffleArray(q.options).map(opt => (
               <button key={opt} onClick={() => handleAnswer(opt)} disabled={!!feedback}
+                aria-label={opt}
+                aria-pressed={selected === opt ? true : undefined}
                 className={`p-3 rounded-lg font-semibold border-2 transition-all text-lg ${
                   feedback && opt === q.answer ? "border-green-500 bg-green-500/10 text-foreground" :
                   feedback && opt === selected ? "border-destructive bg-destructive/10 text-foreground" :
@@ -80,7 +82,7 @@ const GreetingMasterGame = ({ onGameComplete }: { onGameComplete?: (score: numbe
                 }`}>{opt}</button>
             ))}
           </div>
-          {feedback && <p className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
+          {feedback && <p role="alert" className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
             {feedback === "correct" ? "✅ 잘했어요! +5 XP" : t("games.wrongPrefix").replace("{answer}", q.answer)}
           </p>}
         </Card>

@@ -124,9 +124,11 @@ const FillBlankGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
         <Card className="p-6 text-center space-y-4">
           <p className="text-sm text-muted-foreground">{t("games.fillblankPrompt").replace("{hint}", q.hint)}</p>
           <p className="text-2xl font-bold text-foreground">{q.sentence.replace("___", " ____ ")}</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3" role="group" aria-label="Choose the correct word to fill the blank">
             {shuffleArray(q.options).map(opt => (
               <button key={opt} onClick={() => handleAnswer(opt)} disabled={!!feedback}
+                aria-label={opt}
+                aria-pressed={selected === opt ? true : undefined}
                 className={`p-3 rounded-lg font-semibold border-2 transition-all text-xl ${
                   feedback && opt === q.blank ? "border-green-500 bg-green-500/10 text-foreground" :
                   feedback && opt === selected ? "border-destructive bg-destructive/10 text-foreground" :
@@ -134,7 +136,7 @@ const FillBlankGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
                 }`}>{opt}</button>
             ))}
           </div>
-          {feedback && <p className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
+          {feedback && <p role="alert" className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
             {feedback === "correct" ? t("games.correctFeedback") : t("games.wrongPrefix").replace("{answer}", q.blank)}
           </p>}
         </Card>

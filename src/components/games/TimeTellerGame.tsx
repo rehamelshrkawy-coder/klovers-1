@@ -71,9 +71,11 @@ const TimeTellerGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
           <Clock className="h-10 w-10 mx-auto text-muted-foreground" />
           <p className="text-sm text-muted-foreground">{t("games.timePrompt")}</p>
           <p className="text-3xl font-bold text-foreground">{q.korean}</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3" role="group" aria-label="Choose the correct time">
             {shuffleArray(q.options).map(opt => (
               <button key={opt} onClick={() => handleAnswer(opt)} disabled={!!feedback}
+                aria-label={opt}
+                aria-pressed={selected === opt ? true : undefined}
                 className={`p-4 rounded-lg font-bold text-2xl border-2 transition-all ${
                   feedback && opt === q.answer ? "border-green-500 bg-green-500/10 text-foreground" :
                   feedback && opt === selected ? "border-destructive bg-destructive/10 text-foreground" :
@@ -81,7 +83,7 @@ const TimeTellerGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
                 }`}>{opt}</button>
             ))}
           </div>
-          {feedback && <p className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
+          {feedback && <p role="alert" className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
             {feedback === "correct" ? t("games.correctFeedback") : t("games.wrongPrefix").replace("{answer}", q.answer)}
           </p>}
         </Card>

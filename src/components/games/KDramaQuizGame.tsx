@@ -124,9 +124,11 @@ const KDramaQuizGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
           <p className="text-sm text-muted-foreground">{t("games.kdramaPrompt")}</p>
           <p className="text-4xl font-bold text-foreground">{q.korean}</p>
           <p className="text-xs text-muted-foreground">{t("games.kdramaMeaning")}</p>
-          <div className="grid gap-3">
+          <div className="grid gap-3" role="group" aria-label="Choose the correct meaning">
             {q.options.map(opt => (
               <button key={opt} onClick={() => handleAnswer(opt)} disabled={!!feedback}
+                aria-label={opt}
+                aria-pressed={selected === opt ? true : undefined}
                 className={`p-3 rounded-lg font-medium border-2 transition-all text-left ${
                   feedback && opt === q.answer ? "border-green-500 bg-green-500/10 text-foreground" :
                   feedback && opt === selected ? "border-destructive bg-destructive/10 text-foreground" :
@@ -134,7 +136,7 @@ const KDramaQuizGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
                 }`}>{opt}</button>
             ))}
           </div>
-          {feedback && <p className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
+          {feedback && <p role="alert" className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
             {feedback === "correct" ? "✅ 대박! +5 XP" : t("games.wrongPrefix").replace("{answer}", q.answer)}
           </p>}
         </Card>

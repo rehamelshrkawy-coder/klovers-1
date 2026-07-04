@@ -93,9 +93,11 @@ const NumbersGame = ({ onGameComplete }: { onGameComplete?: (score: number, tota
           <p className="text-sm text-muted-foreground">{t("games.numbersPrompt")}</p>
           <p className="text-4xl font-bold text-foreground">{useNative ? q.korean : q.sino}</p>
           <p className="text-xs text-muted-foreground">{useNative ? t("games.nativeKorean") : t("games.sinoKorean")}</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3" role="group" aria-label="Choose the correct number">
             {options.map(opt => (
               <button key={opt} onClick={() => handleAnswer(opt)} disabled={!!feedback}
+                aria-label={String(opt)}
+                aria-pressed={selected === opt ? true : undefined}
                 className={`p-4 rounded-lg text-xl font-bold border-2 transition-all ${
                   feedback && opt === q.value ? "border-green-500 bg-green-500/10 text-foreground" :
                   feedback && opt === selected && opt !== q.value ? "border-destructive bg-destructive/10 text-foreground" :
@@ -103,7 +105,7 @@ const NumbersGame = ({ onGameComplete }: { onGameComplete?: (score: number, tota
                 }`}>{opt}</button>
             ))}
           </div>
-          {feedback && <p className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
+          {feedback && <p role="alert" className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
             {feedback === "correct" ? t("games.correctFeedback") : t("games.numbersWrong").replace("{value}", String(q.value))}
           </p>}
         </Card>

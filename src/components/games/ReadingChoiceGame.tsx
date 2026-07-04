@@ -111,9 +111,11 @@ const ReadingChoiceGame = ({ onGameComplete }: { onGameComplete?: (score: number
           <p className="text-sm text-muted-foreground">Choose the Korean word for:</p>
           <p className="text-4xl font-bold text-foreground">{q.meaning}</p>
           <p className="text-sm text-muted-foreground italic">{q.romanization}</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3" role="group" aria-label="Choose the correct Korean word">
             {q.options.map(opt => (
               <button key={opt} onClick={() => handleAnswer(opt)} disabled={!!feedback}
+                aria-label={opt}
+                aria-pressed={selected === opt ? true : undefined}
                 className={`p-3 rounded-lg font-bold border-2 transition-all text-2xl ${
                   feedback && opt === q.answer ? "border-green-500 bg-green-500/10 text-foreground" :
                   feedback && opt === selected ? "border-destructive bg-destructive/10 text-foreground" :
@@ -121,7 +123,7 @@ const ReadingChoiceGame = ({ onGameComplete }: { onGameComplete?: (score: number
                 }`}>{opt}</button>
             ))}
           </div>
-          {feedback && <p className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
+          {feedback && <p role="alert" className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
             {feedback === "correct" ? "✅ Correct! +5 XP" : `❌ Answer: ${q.answer}`}
           </p>}
         </Card>

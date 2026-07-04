@@ -109,9 +109,11 @@ const SentenceReadGame = ({ onGameComplete }: { onGameComplete?: (score: number,
         <Card className="p-6 space-y-4">
           <p className="text-sm text-muted-foreground flex items-center gap-1"><BookOpen className="h-4 w-4" /> Read and choose the correct meaning:</p>
           <p className="text-2xl font-bold text-foreground text-center">{q.question}</p>
-          <div className="grid gap-3">
+          <div className="grid gap-3" role="group" aria-label="Choose the correct meaning for this sentence">
             {shuffleArray(q.options).map(opt => (
               <button key={opt} onClick={() => handleAnswer(opt)} disabled={!!feedback}
+                aria-label={opt}
+                aria-pressed={selected === opt ? true : undefined}
                 className={`p-3 rounded-lg font-medium border-2 transition-all text-left text-sm ${
                   feedback && opt === q.answer ? "border-green-500 bg-green-500/10 text-foreground" :
                   feedback && opt === selected ? "border-destructive bg-destructive/10 text-foreground" :
@@ -120,7 +122,7 @@ const SentenceReadGame = ({ onGameComplete }: { onGameComplete?: (score: number,
             ))}
           </div>
           {feedback && (
-            <div className={`p-3 rounded-lg text-sm ${feedback === "correct" ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-destructive/10 text-destructive"}`}>
+            <div role="alert" className={`p-3 rounded-lg text-sm ${feedback === "correct" ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-destructive/10 text-destructive"}`}>
               {feedback === "correct" ? "✅ Correct! +5 XP" : `❌ Answer: ${q.answer}`}
               {q.explanation && <p className="text-muted-foreground text-xs mt-1">{q.explanation}</p>}
             </div>

@@ -138,9 +138,11 @@ const SpeedReadGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
           ) : (
             <>
               <p className="text-sm text-muted-foreground">What did that word mean?</p>
-              <div className="grid grid-cols-2 gap-3 w-full">
+              <div className="grid grid-cols-2 gap-3 w-full" role="group" aria-label="Choose the correct meaning">
                 {q.options.map(opt => (
                   <button key={opt} onClick={() => handleAnswer(opt)} disabled={!!feedback}
+                    aria-label={opt}
+                    aria-pressed={selected === opt ? true : undefined}
                     className={`p-3 rounded-lg font-medium border-2 transition-all text-sm text-left ${
                       feedback && opt === q.meaning ? "border-green-500 bg-green-500/10 text-foreground" :
                       feedback && opt === selected ? "border-destructive bg-destructive/10 text-foreground" :
@@ -148,7 +150,7 @@ const SpeedReadGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
                     }`}>{opt}</button>
                 ))}
               </div>
-              {feedback && <p className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
+              {feedback && <p role="alert" className={feedback === "correct" ? "text-green-600 dark:text-green-400 font-medium" : "text-destructive font-medium"}>
                 {feedback === "correct" ? "✅ Correct! +5 XP" : `❌ Answer: ${q.meaning}`}
               </p>}
             </>
