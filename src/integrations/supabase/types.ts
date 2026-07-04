@@ -585,7 +585,6 @@ export type Database = {
           approval_status: string
           classes_included: number
           class_link_sent_at: string | null
-          class_type: string | null
           created_at: string
           currency: string
           due_at: string | null
@@ -632,7 +631,6 @@ export type Database = {
           approval_status?: string
           classes_included: number
           class_link_sent_at?: string | null
-          class_type?: string | null
           created_at?: string
           currency?: string
           due_at?: string | null
@@ -679,7 +677,6 @@ export type Database = {
           approval_status?: string
           classes_included?: number
           class_link_sent_at?: string | null
-          class_type?: string | null
           created_at?: string
           currency?: string
           due_at?: string | null
@@ -3010,7 +3007,6 @@ export type Database = {
         Returns: {
           amount: number
           approval_status: string
-          class_type: string | null
           classes_included: number
           currency: string
           due_at: string | null
