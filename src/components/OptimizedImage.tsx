@@ -73,7 +73,7 @@ const OptimizedImage = ({
   const effectiveSizes =
     sizes || (isCard ? DEFAULT_SIZES_CARD : effectiveIsHero ? DEFAULT_SIZES_HERO : DEFAULT_SIZES_HERO);
 
-  const isValidUrl = src && (src.startsWith("http://") || src.startsWith("https://"));
+  const isValidUrl = src && (src.startsWith("http://") || src.startsWith("https://") || src.startsWith("/"));
 
   // Fallback UI for missing/broken images
   const fallbackContent = (
