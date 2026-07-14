@@ -67,7 +67,7 @@ const BlogPage = () => {
         .eq("lang", language)
         .order("seo_score", { ascending: false, nullsFirst: false })
         .order("published_at", { ascending: false })
-        .limit(60);
+        .limit(100);
       if (error) throw new Error(error.message);
       return (data as BlogPost[]) || [];
     },
