@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkAndSendTrialCapacityAlert } from "../_shared/trialCapacityAlert.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,7 +47,12 @@ async function checkRateLimit(
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-/** Compute the next occurrence of a given day_of_week (0=Sun) from today. */
+/**
+ * Compute the next occurrence of a given day_of_week (0=Sun) from today,
+ * constrained to the first calendar week (days 1-7) of a month — trials
+ * only run in that window now, so this fallback (used only when the
+ * frontend doesn't pass an explicit trial_date) must never land outside it.
+ */
 function nextDateForDay(dayOfWeek: number): string {
   const today = new Date();
   const todayDay = today.getUTCDay();
@@ -54,6 +60,9 @@ function nextDateForDay(dayOfWeek: number): string {
   if (diff <= 0) diff += 7; // always at least 1 day in the future
   const next = new Date(today);
   next.setUTCDate(today.getUTCDate() + diff);
+  while (next.getUTCDate() > 7) {
+    next.setUTCDate(next.getUTCDate() + 7);
+  }
   return next.toISOString().split("T")[0]; // YYYY-MM-DD
 }
 
@@ -200,7 +209,7 @@ Deno.serve(async (req) => {
       .eq("start_time", start_time)
       .maybeSingle();
     const _slot = slotTzRow as { timezone?: string | null; duration_min?: number | null; meeting_url?: string | null } | null;
-    const timezone: string = _slot?.timezone || "Asia/Kuala_Lumpur";
+    const timezone: string = _slot?.timezone || "Asia/Ho_Chi_Minh";
     const slotDurationMin: number = _slot?.duration_min ?? 30;
     const meetingUrl: string | null = _slot?.meeting_url ?? null;
 
@@ -399,6 +408,18 @@ Deno.serve(async (req) => {
         type: "trial",
       });
     } catch { /* non-critical */ }
+
+    // 3b. Unauthenticated bookings are inserted as 'confirmed' immediately —
+    // check whether this just completed the group's 4th confirmed spot for
+    // this occurrence, and if so alert the teacher + this student. Best
+    // effort: never blocks or affects the booking response.
+    if (bookingStatus === "confirmed") {
+      try {
+        await checkAndSendTrialCapacityAlert(supabase, trialDate, start_time);
+      } catch (e) {
+        console.warn("checkAndSendTrialCapacityAlert failed:", e);
+      }
+    }
 
     // 4. Build calendar URL for the response
     const calendarUrl = buildCalendarUrl({
