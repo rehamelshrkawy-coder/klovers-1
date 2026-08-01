@@ -51,6 +51,15 @@ const TrialConfirmPage = () => {
           return;
         }
         setState("success");
+
+        // Best-effort: this confirmation may have just completed the
+        // group's 4th confirmed spot for this occurrence. Never blocks the
+        // UI; errors are swallowed inside the function itself.
+        if (booking.trial_date && booking.start_time) {
+          supabase.functions.invoke("trial-capacity-alert", {
+            body: { trial_date: booking.trial_date, start_time: booking.start_time },
+          }).catch(() => { /* best-effort, ignore */ });
+        }
       }
 
       // Try to fetch the Google Meet link from the trial slot

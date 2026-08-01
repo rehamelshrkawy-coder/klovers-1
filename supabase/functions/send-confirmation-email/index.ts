@@ -15,7 +15,7 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation" | "trial_group_full";
   class_link_url?: string;
   tx_ref?: string;
   payment_date?: string;
@@ -52,6 +52,9 @@ interface EmailPayload {
   booking_id?: string;
   confirmation_token?: string;
   meeting_url?: string;
+  class_language?: string;
+  confirmed_count?: number;
+  trial_day_name?: string;
 }
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -1113,6 +1116,43 @@ function buildTrialAttendanceConfirmationEmail(p: EmailPayload) {
   };
 }
 
+function buildTrialGroupFullEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const isArabicClass = p.class_language === "arabic";
+  const dayDate = [p.trial_day_name, p.trial_date].filter(Boolean).join(" ");
+  const tzLabel = (p.trial_timezone || "Asia/Ho_Chi_Minh").replace(/_/g, " ");
+  const count = p.confirmed_count ?? 4;
+
+  if (isAr) {
+    return {
+      subject: "KLovers — اكتملت مجموعة حصتك التجريبية! 🎉",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! 🎉</h1>
+        <p>خبر حلو — مجموعة حصتك التجريبية (${isArabicClass ? "عربي" : "إنجليزي"}) اكتملت بـ ${count} طلاب مؤكدين!</p>
+        <div style="background: ${BRAND_GRAY}; padding: 12px 16px; border-radius: 6px; margin: 12px 0; text-align: center;">
+          <p style="margin: 0; font-size: 16px; font-weight: bold;">📅 ${dayDate}</p>
+          <p style="margin: 4px 0 0;">🕒 ${p.trial_time} (${tzLabel})</p>
+        </div>
+        <p>احنا متحمسين نشوفك في الحصة! لو عندك أي سؤال رد على الإيميل ده أو راسلنا واتساب.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — your trial class group is full! 🎉",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 🎉</h1>
+      <p>Great news — your ${isArabicClass ? "Arabic" : "English"} trial class group is now full with ${count} confirmed students!</p>
+      <div style="background: ${BRAND_GRAY}; padding: 12px 16px; border-radius: 6px; margin: 12px 0; text-align: center;">
+        <p style="margin: 0; font-size: 16px; font-weight: bold;">📅 ${dayDate}</p>
+        <p style="margin: 4px 0 0;">🕒 ${p.trial_time} (${tzLabel})</p>
+      </div>
+      <p>We can't wait to see you in class! Any questions? Reply to this email or message us on WhatsApp.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
+    `, false),
+  };
+}
+
 // Post-trial nurture sequence. Three stages, shared shell.
 function buildTrialPrepEmail(p: EmailPayload) {
   const isAr = p.language === "ar";
@@ -1784,6 +1824,9 @@ serve(async (req) => {
         if (attendResult.icsAttachment) emailAttachments = [attendResult.icsAttachment];
         break;
       }
+      case "trial_group_full":
+        ({ subject, html } = buildTrialGroupFullEmail(payload));
+        break;
       case "enrollment":
       default:
         ({ subject, html } = buildEnrollmentEmail(payload));

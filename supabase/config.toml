@@ -1,5 +1,8 @@
 project_id = "ewtdgpbybkceokfohhyg"
 
+[functions.trial-capacity-alert]
+verify_jwt = false
+
 [functions.send-name-collection-email]
 verify_jwt = false
 

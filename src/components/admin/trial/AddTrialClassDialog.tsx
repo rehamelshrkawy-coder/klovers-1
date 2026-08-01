@@ -35,7 +35,7 @@ const defaultForm = (): Form => ({
   startTime: '17:30',
   durationMin: 30,
   capacity: 15,
-  timezone: 'Africa/Cairo',
+  timezone: 'Asia/Ho_Chi_Minh',
   meetingUrl: '',
 });
 
@@ -194,7 +194,7 @@ export default function AddTrialClassDialog() {
                 onChange={(e) =>
                   setForm({ ...form, timezone: e.target.value })
                 }
-                placeholder="Africa/Cairo"
+                placeholder="Asia/Ho_Chi_Minh"
               />
             </div>
           </div>
