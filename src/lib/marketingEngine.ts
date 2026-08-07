@@ -107,7 +107,7 @@ export function enrollUrl(campaign: CampaignDirection, postType: MonthlyPostType
 
 export function whatsappUrl(campaign: CampaignDirection, postType: MonthlyPostType): string {
   const msg = encodeURIComponent("Hi! I saw your post and I'm interested in learning Korean with Klovers 🇰🇷");
-  return `wa.me/601121777560?text=${msg}`;
+  return `wa.me/201010003084?text=${msg}`;
 }
 
 export function trialUrl(campaign: CampaignDirection): string {
