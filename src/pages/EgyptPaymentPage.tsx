@@ -18,7 +18,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const METHOD_DETAIL_KEYS: Record<string, { labelKey: string; value: string }> = {
   vodafone_cash: { labelKey: "payment.sendToVodafone", value: "+201010003084" },
-  instapay:      { labelKey: "payment.transferToBank", value: "00601121777560" },
+  instapay:      { labelKey: "payment.transferToBank", value: "00201010003084" },
 };
 
 interface EnrollmentData {

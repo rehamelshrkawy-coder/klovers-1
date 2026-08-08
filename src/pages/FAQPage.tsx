@@ -170,7 +170,7 @@ const FAQPage = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button variant="outline" asChild>
-                  <a href="https://wa.me/601121777560?text=Hi!%20I%20have%20a%20question%20about%20Klovers." onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp("https://wa.me/601121777560?text=Hi!%20I%20have%20a%20question%20about%20Klovers.", { cta_label: "faq_contact" }); }} target="_blank" rel="noopener noreferrer">
+                  <a href="https://wa.me/201010003084?text=Hi!%20I%20have%20a%20question%20about%20Klovers." onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp("https://wa.me/201010003084?text=Hi!%20I%20have%20a%20question%20about%20Klovers.", { cta_label: "faq_contact" }); }} target="_blank" rel="noopener noreferrer">
                     <MessageCircle className="mr-2 h-4 w-4" />
                     WhatsApp
                   </a>

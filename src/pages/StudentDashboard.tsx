@@ -685,8 +685,8 @@ const StudentDashboard = () => {
                 );
               })()}
               <a
-                href={`https://wa.me/601121777560?text=${encodeURIComponent("Hi! I'd like to book my next Korean class.")}`}
-                onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(`https://wa.me/601121777560?text=${encodeURIComponent("Hi! I'd like to book my next Korean class.")}`, { cta_label: "dashboard_book" }); }}
+                href={`https://wa.me/201010003084?text=${encodeURIComponent("Hi! I'd like to book my next Korean class.")}`}
+                onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(`https://wa.me/201010003084?text=${encodeURIComponent("Hi! I'd like to book my next Korean class.")}`, { cta_label: "dashboard_book" }); }}
                 target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 text-[#1a9e4f] dark:text-[#4ade80] rounded-xl px-3.5 py-2.5 transition-all text-sm font-medium"
               >

@@ -140,7 +140,7 @@ const Index = () => {
       logo: "https://kloversegy.com/klovers-logo.jpg",
       description: "Online Korean language school teaching Arabic speakers. Live classes, small groups, A1–C2 levels.",
       email: "koreanlovers.net@gmail.com",
-      telephone: "+601121777560",
+      telephone: "+201010003084",
       sameAs: [
         "https://www.facebook.com/Klovers.net/",
         "https://www.tiktok.com/@klovers.net",
