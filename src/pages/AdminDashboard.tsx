@@ -519,6 +519,7 @@ const AdminDashboard = () => {
   // invalidateAll() triggers targeted cache refresh instead of re-fetching everything.
 
   const handleDeleteStudent = async (userId: string) => {
+    if (!window.confirm("Permanently delete this student record? This cannot be undone.")) return;
     const { error } = await supabase.from("profiles").delete().eq("user_id", userId);
     if (error) { toast({ title: "Error", description: "Failed to delete student.", variant: "destructive" }); return; }
     queryClient.invalidateQueries({ queryKey: ["admin", "student-overview"] });
@@ -645,7 +646,7 @@ const AdminDashboard = () => {
           template: "payment_confirmed",
           email: e.profiles?.email,
           name: e.profiles?.name ?? "Student",
-          language: "ar",
+          language: approvalEmailLanguage(e.timezone ?? ""),
           plan_type: e.plan_type,
           duration: e.duration,
           sessions_total: e.sessions_total,
@@ -762,23 +763,24 @@ const AdminDashboard = () => {
       recipients.push({ email, name, language: lang });
     }
 
-    let sent = 0;
-    let failed = 0;
-    for (const r of recipients) {
-      const { error } = await supabase.functions.invoke("send-confirmation-email", {
-        body: {
-          template: "class_link",
-          email: r.email,
-          name: r.name,
-          language: r.language,
-          class_link_url: classLinkUrl.trim(),
-          slot_day: classLinkSlotDay.trim() || undefined,
-          slot_time: classLinkSlotTime.trim() || undefined,
-          slot_timezone: classLinkSlotTimezone || undefined,
-        },
-      });
-      if (error) failed++; else sent++;
-    }
+    const results = await Promise.allSettled(
+      recipients.map(r =>
+        supabase.functions.invoke("send-confirmation-email", {
+          body: {
+            template: "class_link",
+            email: r.email,
+            name: r.name,
+            language: r.language,
+            class_link_url: classLinkUrl.trim(),
+            slot_day: classLinkSlotDay.trim() || undefined,
+            slot_time: classLinkSlotTime.trim() || undefined,
+            slot_timezone: classLinkSlotTimezone || undefined,
+          },
+        })
+      )
+    );
+    const sent = results.filter(r => r.status === "fulfilled" && !r.value.error).length;
+    const failed = results.length - sent;
 
     setIsSendingClassLink(false);
 
@@ -894,32 +896,35 @@ const AdminDashboard = () => {
     if (!bulkSession) { setBulkApproving(false); return; }
     const ids = Array.from(selectedEnrollmentIds);
     let succeeded = 0;
-    let failed = 0;
+    const failures: { name: string; reason: string }[] = [];
     for (const id of ids) {
       const enrollment = enrollments.find(e => e.id === id);
       if (!enrollment) continue;
+      const label = enrollment.profiles?.name || enrollment.profiles?.email || id;
       // Skip enrollments not yet placed by the matcher
-      if (!enrollment.matched_at) { failed++; continue; }
+      if (!enrollment.matched_at) { failures.push({ name: label, reason: "not yet matched" }); continue; }
       // Skip manual-payment enrollments missing a receipt
       const isManual = enrollment.payment_provider === "egypt_manual" || enrollment.payment_provider === "manual";
       const hasReceipt = enrollment.receipt_url && enrollment.receipt_url.trim() !== "" && enrollment.receipt_url !== "manual";
-      if (isManual && !hasReceipt) { failed++; continue; }
+      if (isManual && !hasReceipt) { failures.push({ name: label, reason: "missing receipt" }); continue; }
       try {
         const { error } = await supabase.rpc("approve_enrollment", {
           _enrollment_id: id,
           _admin_id: bulkSession.user.id,
           _unit_price: null,
         });
-        if (error) { failed++; continue; }
+        if (error) { failures.push({ name: label, reason: error.message }); continue; }
         succeeded++;
-      } catch { failed++; }
+      } catch (err) {
+        failures.push({ name: label, reason: err instanceof Error ? err.message : String(err) });
+      }
     }
     setBulkApproving(false);
     setSelectedEnrollmentIds(new Set());
     toast({
       title: `Bulk approve complete`,
-      description: `${succeeded} approved${failed > 0 ? `, ${failed} failed` : ""}`,
-      variant: failed > 0 ? "destructive" : "default",
+      description: `${succeeded} approved${failures.length > 0 ? `, ${failures.length} failed: ${failures.map(f => `${f.name} (${f.reason})`).join(", ")}` : ""}`,
+      variant: failures.length > 0 ? "destructive" : "default",
     });
     invalidateAll();
   };
