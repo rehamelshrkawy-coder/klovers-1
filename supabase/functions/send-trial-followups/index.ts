@@ -120,16 +120,23 @@ async function dispatchStage(
     }
     if (!b.email) { skipped++; continue; }
 
-    // For day-7, include a referral share link from the profile
+    // Respect unsubscribe preference and fetch the token so every stage's
+    // email includes a working one-click unsubscribe link.
+    let unsubscribeToken: string | undefined;
     let referralUrl: string | undefined;
-    if (stage === "day7" && b.user_id) {
+    if (b.user_id) {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("unsubscribe_token")
+        .select("unsubscribe_token, email_unsubscribed")
         .eq("user_id", b.user_id)
         .maybeSingle();
-      referralUrl = `https://kloversegy.com/free-trial?ref=${b.user_id}`;
-      void profile; // unsubscribe_token fetched but handled in send-confirmation-email
+      if (profile?.email_unsubscribed) {
+        await supabase.from("trial_bookings").update({ [column]: new Date().toISOString() }).eq("id", b.id);
+        skipped++;
+        continue;
+      }
+      unsubscribeToken = profile?.unsubscribe_token ?? undefined;
+      if (stage === "day7") referralUrl = `https://kloversegy.com/free-trial?ref=${b.user_id}`;
     }
 
     try {
@@ -140,6 +147,7 @@ async function dispatchStage(
           language: pickLanguage(b.class_language),
           template: STAGE_TEMPLATE[stage],
           level: b.level,
+          ...(unsubscribeToken ? { unsubscribe_token: unsubscribeToken } : {}),
           ...(referralUrl ? { referral_url: referralUrl } : {}),
         },
       });

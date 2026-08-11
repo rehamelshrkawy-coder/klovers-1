@@ -15,7 +15,7 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation" | "trial_group_full";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "trial_followup_day7" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation" | "trial_group_full";
   class_link_url?: string;
   tx_ref?: string;
   payment_date?: string;
@@ -55,6 +55,7 @@ interface EmailPayload {
   class_language?: string;
   confirmed_count?: number;
   trial_day_name?: string;
+  referral_url?: string;
 }
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -1177,6 +1178,7 @@ function buildTrialPrepEmail(p: EmailPayload) {
           <li>☕ خذ حاجة تشربها — الحصة 45 دقيقة</li>
         </ul>
         <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">في أي سؤال؟ رد على الإيميل ده أو راسلنا واتساب.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -1199,6 +1201,7 @@ function buildTrialPrepEmail(p: EmailPayload) {
         <li>☕ Grab a drink — it's a 45-minute session</li>
       </ul>
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Any questions? Reply to this email or message us on WhatsApp.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -1225,6 +1228,7 @@ function buildTrialFollowupDay1Email(p: EmailPayload) {
           ${brandButton("شوف الخطط", pricingUrl)}
         </div>
         <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">عندك أسئلة أو استفسارات عن أنسب خطة؟ رد على الإيميل ده أو راسلنا واتساب وهنساعدك تختار.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -1246,6 +1250,7 @@ function buildTrialFollowupDay1Email(p: EmailPayload) {
         ${brandButton("See the plans", pricingUrl)}
       </div>
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Questions, or want help picking a plan? Reply to this email or message us on WhatsApp — we'll help you choose.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -1266,7 +1271,8 @@ function buildTrialFollowupDay3Email(p: EmailPayload) {
         </div>
         <p style="text-align: center; color: ${BRAND_MUTED}; font-size: 13px;">أو <a href="${pricingUrl}" style="color: ${BRAND_DARK};">شوف الخطط بنفسك</a></p>
         <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
-        <p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">ده آخر تذكير — مش هنبعتلك إيميلات متابعة تانية بعد كده.</p>
+        <p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">هيوصلك تشيك-إن واحد بعد كده الأسبوع الجاي، وبعدها نسيبك في هدوء.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -1281,7 +1287,50 @@ function buildTrialFollowupDay3Email(p: EmailPayload) {
       </div>
       <p style="text-align: center; color: ${BRAND_MUTED}; font-size: 13px;">Or <a href="${pricingUrl}" style="color: ${BRAND_DARK};">browse the plans yourself</a></p>
       <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
-      <p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">This is our last nudge — we won't keep emailing you after this.</p>
+      <p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">One more check-in next week, then we'll leave you be.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
+    `, false),
+  };
+}
+
+function buildTrialFollowupDay7Email(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const pricingUrl = `${SITE_URL}/pricing`;
+  const referralUrl = p.referral_url ?? `${SITE_URL}/free-trial`;
+  if (isAr) {
+    return {
+      subject: "KLovers — عامل إيه بعد الحصة التجريبية؟ 🌱",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}!</h1>
+        <p>مرّ أسبوع على حصتك التجريبية معانا. حابين نعرف رأيك، ولو حابب تكمل معانا الخطط لسه متاحة.</p>
+        <div style="margin: 20px 0; text-align: center;">
+          ${brandButton("شوف الخطط", pricingUrl)}
+        </div>
+        <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+          <p style="margin: 0 0 8px; font-weight: bold;">🎁 اعرف صحابك على KLovers</p>
+          <p style="margin: 0; color: ${BRAND_TEXT}; font-size: 13px;">شارك رابط الحصة التجريبية المجانية مع أي حد حابب يتعلم كورية:</p>
+          <p style="margin: 8px 0 0; font-size: 13px;"><a href="${referralUrl}" style="color: ${BRAND_DARK}; font-weight: bold;">${referralUrl}</a></p>
+        </div>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">أي سؤال؟ رد على الإيميل ده أو راسلنا واتساب.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — how's it going since your trial? 🌱",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}!</h1>
+      <p>It's been a week since your trial class. We'd love to hear how it went — and our plans are still open if you'd like to keep learning with us.</p>
+      <div style="margin: 20px 0; text-align: center;">
+        ${brandButton("See the plans", pricingUrl)}
+      </div>
+      <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+        <p style="margin: 0 0 8px; font-weight: bold;">🎁 Know someone learning Korean?</p>
+        <p style="margin: 0; color: ${BRAND_TEXT}; font-size: 13px;">Share your free trial link with a friend:</p>
+        <p style="margin: 8px 0 0; font-size: 13px;"><a href="${referralUrl}" style="color: ${BRAND_DARK}; font-weight: bold;">${referralUrl}</a></p>
+      </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Any questions? Reply to this email or message us on WhatsApp.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -1798,6 +1847,9 @@ serve(async (req) => {
         break;
       case "trial_followup_day3":
         ({ subject, html } = buildTrialFollowupDay3Email(payload));
+        break;
+      case "trial_followup_day7":
+        ({ subject, html } = buildTrialFollowupDay7Email(payload));
         break;
       case "group_forming":
         ({ subject, html } = buildGroupFormingEmail(payload));
