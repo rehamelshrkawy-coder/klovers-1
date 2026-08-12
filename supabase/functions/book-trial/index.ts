@@ -49,19 +49,22 @@ const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frid
 
 /**
  * Compute the next occurrence of a given day_of_week (0=Sun) from today,
- * constrained to the first calendar week (days 1-7) of a month — trials
- * only run in that window now, so this fallback (used only when the
- * frontend doesn't pass an explicit trial_date) must never land outside it.
+ * constrained to the admin-configured monthly window (trial_settings.
+ * window_start_day/window_end_day — NULL/NULL means no restriction). This
+ * is only a fallback for when the frontend doesn't pass an explicit
+ * trial_date; the normal path always books a specific dated trial_slots row.
  */
-function nextDateForDay(dayOfWeek: number): string {
+function nextDateForDay(dayOfWeek: number, windowStartDay: number | null, windowEndDay: number | null): string {
   const today = new Date();
   const todayDay = today.getUTCDay();
   let diff = dayOfWeek - todayDay;
   if (diff <= 0) diff += 7; // always at least 1 day in the future
   const next = new Date(today);
   next.setUTCDate(today.getUTCDate() + diff);
-  while (next.getUTCDate() > 7) {
-    next.setUTCDate(next.getUTCDate() + 7);
+  if (windowStartDay != null && windowEndDay != null) {
+    while (next.getUTCDate() > windowEndDay || next.getUTCDate() < windowStartDay) {
+      next.setUTCDate(next.getUTCDate() + 7);
+    }
   }
   return next.toISOString().split("T")[0]; // YYYY-MM-DD
 }
@@ -197,9 +200,19 @@ Deno.serve(async (req) => {
     const finalName = (resolvedName || name || "").trim() || effectiveEmail.split("@")[0];
     const normalizedEmail = effectiveEmail.trim().toLowerCase();
     // Use the actual group date from the frontend if provided; fall back to computing the next occurrence.
-    const trialDate = (bodyTrialDate && /^\d{4}-\d{2}-\d{2}$/.test(bodyTrialDate))
-      ? bodyTrialDate
-      : nextDateForDay(day_of_week);
+    let trialDate = bodyTrialDate && /^\d{4}-\d{2}-\d{2}$/.test(bodyTrialDate) ? bodyTrialDate : null;
+    if (!trialDate) {
+      const { data: settingsRow } = await supabase
+        .from("trial_settings")
+        .select("window_start_day, window_end_day")
+        .eq("id", 1)
+        .maybeSingle();
+      trialDate = nextDateForDay(
+        day_of_week,
+        settingsRow?.window_start_day ?? null,
+        settingsRow?.window_end_day ?? null,
+      );
+    }
 
     // Look up slot metadata in one query (timezone, duration, meeting link).
     const { data: slotTzRow } = await supabase
@@ -282,11 +295,11 @@ Deno.serve(async (req) => {
     // Unauthenticated path only closes TBA placeholders; real bookings there hit
     // 23505 and return a friendly message.
     // Look up existing booking — prefer user_id match (reliable), fall back to email.
-    let existingBooking: { id: string; start_time: string | null; trial_date: string | null; is_tba: boolean | null } | null = null;
+    let existingBooking: { id: string; start_time: string | null; trial_date: string | null; is_tba: boolean | null; rollover_status: string | null } | null = null;
     if (resolvedUserId) {
       const { data, error: e1 } = await supabase
         .from("trial_bookings")
-        .select("id, start_time, trial_date, is_tba")
+        .select("id, start_time, trial_date, is_tba, rollover_status")
         .eq("user_id", resolvedUserId)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -297,7 +310,7 @@ Deno.serve(async (req) => {
     if (!existingBooking) {
       const { data, error: e2 } = await supabase
         .from("trial_bookings")
-        .select("id, start_time, trial_date, is_tba")
+        .select("id, start_time, trial_date, is_tba, rollover_status")
         .eq("email", normalizedEmail)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -313,10 +326,15 @@ Deno.serve(async (req) => {
         existingBooking.start_time === "TBA" ||
         existingBooking.trial_date === "2099-12-31");
 
+    // A booking whose group never reached the minimum to run isn't an active
+    // booking anymore — treat it like a TBA placeholder so the student (authed
+    // or not) can freely pick a new date instead of hitting "already booked".
+    const isRollover = !!existingBooking && existingBooking.rollover_status != null;
+
     // Authenticated rebook: mark previous booking cancelled (any kind) to allow
     // slot change while preserving changed_at/cancelled_at for admin.
-    // Unauthenticated: only close TBA placeholders.
-    const shouldCloseExisting = existingBooking && (authed || isTbaPlaceholder);
+    // Unauthenticated: only close TBA placeholders (or rollover bookings).
+    const shouldCloseExisting = existingBooking && (authed || isTbaPlaceholder || isRollover);
     if (shouldCloseExisting) {
       const auditUpdate = await supabase
         .from("trial_bookings")

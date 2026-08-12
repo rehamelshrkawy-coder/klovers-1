@@ -191,6 +191,76 @@ export function useCreateTrialSlot() {
   });
 }
 
+export function useUpdateTrialSlot() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: {
+      slotId: string;
+      trialDate?: string;
+      startTime?: string;
+      durationMin?: number;
+      capacity?: number;
+      minToRun?: number | null;
+      classLanguage?: 'arabic' | 'english';
+      sessionPeriod?: 'morning' | 'evening' | 'daytime';
+      timezone?: string;
+      meetingUrl?: string | null;
+      lifecycle?: 'active' | 'archived' | 'retired';
+    }) => {
+      const { data, error } = await supabase.rpc('fn_update_trial_slot', {
+        p_slot_id: args.slotId,
+        p_trial_date: args.trialDate ?? null,
+        p_start_time: args.startTime ?? null,
+        p_duration_min: args.durationMin ?? null,
+        p_capacity: args.capacity ?? null,
+        p_min_to_run: args.minToRun ?? null,
+        p_class_language: args.classLanguage ?? null,
+        p_session_period: args.sessionPeriod ?? null,
+        p_timezone: args.timezone ?? null,
+        p_meeting_url: args.meetingUrl ?? null,
+        p_lifecycle: args.lifecycle ?? null,
+        p_clear_min_to_run: args.minToRun === null,
+        p_clear_meeting_url: args.meetingUrl === null,
+      });
+      if (error) throw error;
+      return data as TrialSlotRow;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEYS.slotsRaw });
+      qc.invalidateQueries({ queryKey: KEYS.upcomingSlots });
+      qc.invalidateQueries({ queryKey: KEYS.suggestions });
+    },
+  });
+}
+
+export function useUpdateTrialSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: {
+      minGroupSize?: number;
+      windowStartDay?: number | null;
+      windowEndDay?: number | null;
+    }) => {
+      const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+      if (args.minGroupSize !== undefined) patch.min_group_size = args.minGroupSize;
+      if (args.windowStartDay !== undefined) patch.window_start_day = args.windowStartDay;
+      if (args.windowEndDay !== undefined) patch.window_end_day = args.windowEndDay;
+
+      const { data, error } = await supabase
+        .from('trial_settings')
+        .update(patch)
+        .eq('id', 1)
+        .select('*')
+        .single();
+      if (error) throw error;
+      return data as TrialSettings;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEYS.settings });
+    },
+  });
+}
+
 export function useUpdateSlotMeetingUrl() {
   const qc = useQueryClient();
   return useMutation({
