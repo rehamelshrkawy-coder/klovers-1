@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { getLeadStatusBadgeClass } from "@/lib/badge-styles";
 import { exportCSV as exportCSVUtil, ADMIN_PAGE_SIZE as PAGE_SIZE } from "@/lib/admin-utils";
-import { TRIAL_CONFIRMATION_EMAIL_ENABLED } from "@/lib/siteConfig";
+import { sendTrialConfirmationEmail } from "@/lib/trialConfirmationEmail";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -256,46 +256,21 @@ const LeadsPanel: React.FC = () => {
         .limit(1)
         .maybeSingle();
 
+      let emailSent = false;
       if (booking) {
-        const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        const dayName = DAY_NAMES[booking.day_of_week] || "";
-        const [h, m] = (booking.start_time || "18:00").split(":").map(Number);
-        const ampm = h >= 12 ? "PM" : "AM";
-        const h12 = h % 12 || 12;
-        const time12 = `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
-        const tz = booking.timezone || "Africa/Cairo";
-
-        // Build calendar URL
-        const dateClean = (booking.trial_date || "").replace(/-/g, "");
-        const start = `${dateClean}T${String(h).padStart(2, "0")}${String(m).padStart(2, "0")}00`;
-        const endH = h + Math.floor((m + 45) / 60);
-        const endM = (m + 45) % 60;
-        const end = `${dateClean}T${String(endH).padStart(2, "0")}${String(endM).padStart(2, "0")}00`;
-        const calParams = new URLSearchParams({ action: "TEMPLATE", text: "Free Korean Trial Class — Klovers Academy", dates: `${start}/${end}`, details: `Level: ${lead.level || "Beginner"}`, ctz: tz });
-        const calendarUrl = `https://calendar.google.com/calendar/render?${calParams.toString()}`;
-
-        const trialDateFormatted = new Date(booking.trial_date + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-
-        // 4. Send confirmation email — gated by feature flag
-        if (TRIAL_CONFIRMATION_EMAIL_ENABLED) {
-          await supabase.functions.invoke("send-confirmation-email", {
-            body: {
-              template: "trial_confirmed",
-              email: lead.email,
-              name: lead.name || lead.email,
-              level: lead.level,
-              trial_date: trialDateFormatted,
-              trial_time: time12,
-              trial_timezone: tz,
-              calendar_url: calendarUrl,
-              language: "ar",
-            },
-          });
-        }
+        // 4. Send confirmation email (best effort) — gated by feature flag
+        emailSent = await sendTrialConfirmationEmail({
+          email: lead.email,
+          name: lead.name || lead.email,
+          level: lead.level,
+          trial_date: booking.trial_date,
+          start_time: booking.start_time || "18:00",
+          timezone: booking.timezone,
+        });
       }
 
       queryClient.invalidateQueries({ queryKey: ["admin", "leads"] });
-      toast({ title: "Trial approved", description: TRIAL_CONFIRMATION_EMAIL_ENABLED ? `${lead.name} has been notified via email.` : `${lead.name} approved (email disabled).` });
+      toast({ title: "Trial approved", description: emailSent ? `${lead.name} has been notified via email.` : `${lead.name} approved (email disabled).` });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {

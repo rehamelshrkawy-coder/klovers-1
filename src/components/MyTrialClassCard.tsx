@@ -15,6 +15,7 @@ interface TrialBookingRow {
   level: string | null;
   status: "pending" | "confirmed";
   is_tba: boolean | null;
+  rollover_status: "pending_notification" | "notified" | null;
 }
 
 const TRIAL_DURATION_MIN = 45;
@@ -44,7 +45,7 @@ const MyTrialClassCard = () => {
 
       const { data } = await supabase
         .from("trial_bookings")
-        .select("id, trial_date, start_time, timezone, level, status, is_tba")
+        .select("id, trial_date, start_time, timezone, level, status, is_tba, rollover_status")
         .eq("user_id", session.user.id)
         .in("status", ["pending", "confirmed"])
         .order("trial_date", { ascending: true })
@@ -68,6 +69,42 @@ const MyTrialClassCard = () => {
   }
 
   if (!booking) return null;
+
+  // Group didn't reach the minimum to run — not a no-show, not lost, just
+  // needs a new date once next month's schedule is up.
+  if (booking.rollover_status) {
+    return (
+      <Card className="border-amber-300/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Clock3 className="h-4 w-4 text-amber-500" />
+            My Trial Class
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-foreground text-base leading-tight">Your trial was postponed</p>
+                <p className="text-sm text-amber-700 dark:text-amber-400 mt-1 leading-relaxed">
+                  {booking.rollover_status === "notified"
+                    ? "Your group didn't reach enough students, but your spot is still yours — pick a new date below."
+                    : "Your group didn't reach enough students to run. We'll email you as soon as new dates open up, or you can pick one now."}
+                </p>
+                <a
+                  href="/trial-booking"
+                  className="mt-3 inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-4 py-2 rounded-lg shadow transition-all text-sm"
+                >
+                  Book a new trial date
+                </a>
+              </div>
+              <Badge className="bg-amber-500 flex-shrink-0">Postponed</Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // TBA placeholder — user is on waitlist, no confirmed date yet
   if (booking.is_tba) {

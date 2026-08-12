@@ -27,7 +27,7 @@ const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frid
 import { LEVEL_KEYS, mapLegacyLevel, getLevelShortLabel, LEVEL_SELECT_OPTIONS } from "@/constants/levels";
 import { formatTime, convertSlotToTimezone } from "@/lib/admin-utils";
 import { ADMIN_TIMEZONE } from "@/constants/scheduling";
-import { TRIAL_CONFIRMATION_EMAIL_ENABLED } from "@/lib/siteConfig";
+import { sendTrialConfirmationEmail } from "@/lib/trialConfirmationEmail";
 import type { PkgGroup } from "@/types/admin";
 const LEVELS = LEVEL_KEYS;
 
@@ -1702,46 +1702,21 @@ const TrialBookingsManager = () => {
       }
 
       // 3. Send confirmation email (best effort) — gated by feature flag
-      if (TRIAL_CONFIRMATION_EMAIL_ENABLED) try {
-        const [h, m] = (booking.start_time || "18:00").split(":").map(Number);
-        const ampm = h >= 12 ? "PM" : "AM";
-        const h12 = h % 12 || 12;
-        const time12 = `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
-        const tz = booking.timezone || "Africa/Cairo";
-        const dateClean = (booking.trial_date || "").replace(/-/g, "");
-        const start = `${dateClean}T${String(h).padStart(2, "0")}${String(m).padStart(2, "0")}00`;
-        const endH = h + Math.floor((m + 45) / 60);
-        const endM = (m + 45) % 60;
-        const end = `${dateClean}T${String(endH).padStart(2, "0")}${String(endM).padStart(2, "0")}00`;
-        const calParams = new URLSearchParams({
-          action: "TEMPLATE",
-          text: "Free Korean Trial Class — Klovers Academy",
-          dates: `${start}/${end}`,
-          details: `Level: ${booking.level || "Beginner"}`,
-          ctz: tz,
-        });
-        const calendarUrl = `https://calendar.google.com/calendar/render?${calParams.toString()}`;
-        const trialDateFormatted = new Date(booking.trial_date + "T00:00:00").toLocaleDateString("en-US", {
-          weekday: "long", month: "long", day: "numeric",
-        });
-        await supabase.functions.invoke("send-confirmation-email", {
-          body: {
-            template: "trial_confirmed",
-            email: booking.email,
-            name: booking.name || booking.email,
-            level: booking.level,
-            trial_date: trialDateFormatted,
-            trial_time: time12,
-            trial_timezone: tz,
-            calendar_url: calendarUrl,
-            language: "ar",
-          },
+      let emailSent = false;
+      try {
+        emailSent = await sendTrialConfirmationEmail({
+          email: booking.email,
+          name: booking.name || booking.email,
+          level: booking.level,
+          trial_date: booking.trial_date,
+          start_time: booking.start_time || "18:00",
+          timezone: booking.timezone,
         });
       } catch (emailErr) {
         console.error("send-confirmation-email failed:", emailErr);
       }
 
-      toast({ title: "Trial confirmed", description: TRIAL_CONFIRMATION_EMAIL_ENABLED ? `${booking.name} notified — ${date}.` : `${booking.name} confirmed (email disabled) — ${date}.` });
+      toast({ title: "Trial confirmed", description: emailSent ? `${booking.name} notified — ${date}.` : `${booking.name} confirmed (email disabled) — ${date}.` });
       fetchData();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });

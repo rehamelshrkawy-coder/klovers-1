@@ -2510,8 +2510,11 @@ export type Database = {
           is_tba: boolean
           level: string | null
           name: string
+          next_trial_month: string | null
           phone: string | null
           rebook_email_sent_at: string | null
+          rollover_notified_at: string | null
+          rollover_status: string | null
           start_time: string | null
           status: string | null
           timezone: string | null
@@ -2542,8 +2545,11 @@ export type Database = {
           is_tba?: boolean
           level?: string | null
           name: string
+          next_trial_month?: string | null
           phone?: string | null
           rebook_email_sent_at?: string | null
+          rollover_notified_at?: string | null
+          rollover_status?: string | null
           start_time?: string | null
           status?: string | null
           timezone?: string | null
@@ -2574,8 +2580,11 @@ export type Database = {
           is_tba?: boolean
           level?: string | null
           name?: string
+          next_trial_month?: string | null
           phone?: string | null
           rebook_email_sent_at?: string | null
+          rollover_notified_at?: string | null
+          rollover_status?: string | null
           start_time?: string | null
           status?: string | null
           timezone?: string | null
@@ -2624,23 +2633,32 @@ export type Database = {
         Row: {
           default_duration_min: number
           id: number
+          min_group_size: number
           program_start_date: string | null
           suggestion_weeks: number
           updated_at: string
+          window_end_day: number | null
+          window_start_day: number | null
         }
         Insert: {
           default_duration_min?: number
           id?: number
+          min_group_size?: number
           program_start_date?: string | null
           suggestion_weeks?: number
           updated_at?: string
+          window_end_day?: number | null
+          window_start_day?: number | null
         }
         Update: {
           default_duration_min?: number
           id?: number
+          min_group_size?: number
           program_start_date?: string | null
           suggestion_weeks?: number
           updated_at?: string
+          window_end_day?: number | null
+          window_start_day?: number | null
         }
         Relationships: []
       }
@@ -2656,7 +2674,10 @@ export type Database = {
           is_active: boolean
           lifecycle: string | null
           meeting_url: string | null
+          min_run_checked_at: string | null
+          min_to_run: number | null
           notes: string | null
+          session_period: string | null
           start_time: string
           timezone: string
           trial_date: string | null
@@ -2673,7 +2694,10 @@ export type Database = {
           is_active?: boolean
           lifecycle?: string | null
           meeting_url?: string | null
+          min_run_checked_at?: string | null
+          min_to_run?: number | null
           notes?: string | null
+          session_period?: string | null
           start_time: string
           timezone?: string
           trial_date?: string | null
@@ -2690,7 +2714,10 @@ export type Database = {
           is_active?: boolean
           lifecycle?: string | null
           meeting_url?: string | null
+          min_run_checked_at?: string | null
+          min_to_run?: number | null
           notes?: string | null
+          session_period?: string | null
           start_time?: string
           timezone?: string
           trial_date?: string | null
@@ -2794,8 +2821,11 @@ export type Database = {
           is_tba: boolean | null
           level: string | null
           name: string | null
+          next_trial_month: string | null
           phone: string | null
           program_phase: string | null
+          rollover_notified_at: string | null
+          rollover_status: string | null
           slot_capacity: number | null
           slot_duration_min: number | null
           slot_exists: boolean | null
@@ -2819,11 +2849,14 @@ export type Database = {
           day_name: string | null
           day_of_week: number | null
           duration_min: number | null
+          is_active: boolean | null
           is_full: boolean | null
           lifecycle: string | null
           meeting_url: string | null
+          min_to_run: number | null
           occurrence_date: string | null
           seats_left: number | null
+          session_period: string | null
           slot_id: string | null
           start_time: string | null
           timezone: string | null
@@ -2980,6 +3013,37 @@ export type Database = {
       fn_retire_trial_slot: {
         Args: { p_new_lifecycle?: string; p_slot_id: string }
         Returns: Database["public"]["Tables"]["trial_slots"]["Row"]
+      }
+      fn_update_trial_slot: {
+        Args: {
+          p_capacity?: number | null
+          p_class_language?: string | null
+          p_clear_meeting_url?: boolean
+          p_clear_min_to_run?: boolean
+          p_duration_min?: number | null
+          p_lifecycle?: string | null
+          p_meeting_url?: string | null
+          p_min_to_run?: number | null
+          p_session_period?: string | null
+          p_slot_id: string
+          p_start_time?: string | null
+          p_timezone?: string | null
+          p_trial_date?: string | null
+        }
+        Returns: Database["public"]["Tables"]["trial_slots"]["Row"]
+      }
+      claim_trial_min_run_check: {
+        Args: { p_start_time: string; p_trial_date: string }
+        Returns: {
+          affected_bookings: number
+          confirmed_count: number
+          min_required: number
+          should_rollover: boolean
+        }[]
+      }
+      run_trial_min_group_checks: {
+        Args: never
+        Returns: undefined
       }
       fn_set_trial_program_start_date: {
         Args: { p_date: string | null }
