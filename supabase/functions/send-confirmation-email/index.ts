@@ -15,7 +15,7 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "trial_followup_day7" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation" | "trial_group_full";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "trial_followup_day7" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation" | "trial_group_full" | "trial_rollover";
   class_link_url?: string;
   tx_ref?: string;
   payment_date?: string;
@@ -56,6 +56,8 @@ interface EmailPayload {
   confirmed_count?: number;
   trial_day_name?: string;
   referral_url?: string;
+  previous_trial_date?: string;
+  booking_url?: string;
 }
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -1154,6 +1156,41 @@ function buildTrialGroupFullEmail(p: EmailPayload) {
   };
 }
 
+function buildTrialRolloverEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const bookingUrl = p.booking_url || `${SITE_URL}/trial-booking`;
+  const prevDate = p.previous_trial_date || "";
+
+  if (isAr) {
+    return {
+      subject: "KLovers — حصتك التجريبية اتأجلت، فيه مواعيد جديدة! 📅",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}!</h1>
+        <p>حصتك التجريبية${prevDate ? ` يوم ${prevDate}` : ""} ما اتقيّمتش لأن مجموعتك ما وصلتش لعدد الطلاب المطلوب — مش لسبب راجع لك، وحصتك <strong>مش ضايعة</strong>.</p>
+        <p>دلوقتي فيه مواعيد جديدة متاحة، واحنا محتفظين بحجزك. اختار الميعاد اللي يناسبك:</p>
+        <div style="margin: 20px 0; text-align: center;">
+          ${brandButton("اختار ميعاد جديد", bookingUrl)}
+        </div>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">أي سؤال؟ رد على الإيميل ده أو راسلنا واتساب.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — your trial was postponed, new dates are up! 📅",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}!</h1>
+      <p>Your trial class${prevDate ? ` on ${prevDate}` : ""} didn't run because that group didn't reach the number of students we need to hold it — this wasn't anything on your end, and your trial spot <strong>hasn't been used up</strong>.</p>
+      <p>New trial dates are available now, and we've kept your booking on file. Pick whichever works for you:</p>
+      <div style="margin: 20px 0; text-align: center;">
+        ${brandButton("Pick a new date", bookingUrl)}
+      </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Any questions? Reply to this email or message us on WhatsApp.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
+    `, false),
+  };
+}
+
 // Post-trial nurture sequence. Three stages, shared shell.
 function buildTrialPrepEmail(p: EmailPayload) {
   const isAr = p.language === "ar";
@@ -1878,6 +1915,9 @@ serve(async (req) => {
       }
       case "trial_group_full":
         ({ subject, html } = buildTrialGroupFullEmail(payload));
+        break;
+      case "trial_rollover":
+        ({ subject, html } = buildTrialRolloverEmail(payload));
         break;
       case "enrollment":
       default:
