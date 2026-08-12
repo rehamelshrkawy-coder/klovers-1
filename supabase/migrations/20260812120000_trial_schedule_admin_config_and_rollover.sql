@@ -75,7 +75,11 @@ COMMENT ON COLUMN public.trial_bookings.next_trial_month IS
   'First-of-month date of the schedule the student was pointed to when notified, for admin visibility/reporting.';
 
 -- ── 4. get_trial_availability(): window from trial_settings, not hardcoded ─
-CREATE OR REPLACE FUNCTION public.get_trial_availability(p_language text DEFAULT NULL::text)
+-- Return type is changing (added session_period), so CREATE OR REPLACE isn't
+-- enough — Postgres requires an explicit drop of the OUT-parameter signature.
+DROP FUNCTION IF EXISTS public.get_trial_availability(text);
+
+CREATE FUNCTION public.get_trial_availability(p_language text DEFAULT NULL::text)
 RETURNS TABLE(day_of_week integer, start_time text, booked_count bigint, capacity integer, duration_min integer, timezone text, next_trial_date date, class_language text, session_period text)
 LANGUAGE sql
 STABLE
@@ -414,7 +418,12 @@ $$;
 -- switched to one-off dated rows. It was showing admins fabricated dates
 -- instead of the real trial_date. Fixing this is required for the new
 -- schedule-editor UI to display correct dates.
-CREATE OR REPLACE VIEW public.v_trial_slots_admin AS
+-- Column set/order is changing from the previous definition (new columns
+-- inserted mid-list, not appended), which CREATE OR REPLACE VIEW disallows —
+-- drop and recreate instead.
+DROP VIEW IF EXISTS public.v_trial_slots_admin;
+
+CREATE VIEW public.v_trial_slots_admin AS
 SELECT
   ts.id AS slot_id,
   ts.day_of_week,
