@@ -2024,21 +2024,17 @@ const TrialBookingsManager = () => {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const SchedulingManager = () => {
-  const [activeTab, setActiveTab] = useState("packages");
+  const [activeTab, setActiveTab] = useState("trial-classes");
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabsList className="mb-4">
-        <TabsTrigger value="packages">Teacher Available Slots</TabsTrigger>
-        <TabsTrigger value="groups">Groups</TabsTrigger>
-        <TabsTrigger value="waitlist">Waitlist</TabsTrigger>
+        {/* Level-class tabs (Teacher Available Slots / Groups / Waitlist) are hidden for now —
+            only trial scheduling is exposed. Their components are still defined above for a quick revert. */}
         <TabsTrigger value="config">Private Config</TabsTrigger>
         <TabsTrigger value="trials">Trial Bookings</TabsTrigger>
         <TabsTrigger value="trial-classes">Trial Classes</TabsTrigger>
         <TabsTrigger value="notifications"><Bell className="h-4 w-4 mr-1" /> Notifications</TabsTrigger>
       </TabsList>
-      <TabsContent value="packages"><PackagesManager onSwitchToGroups={() => setActiveTab("groups")} /></TabsContent>
-      <TabsContent value="groups"><GroupsManager /></TabsContent>
-      <TabsContent value="waitlist"><WaitlistManager /></TabsContent>
       <TabsContent value="config"><PrivateTimeConfig /></TabsContent>
       <TabsContent value="trials"><TrialBookingsManager /></TabsContent>
       <TabsContent value="trial-classes"><TrialClassesTab /></TabsContent>
