@@ -16,7 +16,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { CheckCircle, Mail, RefreshCw, Users, XCircle, Pencil, ChevronDown, ChevronUp, CalendarCog } from "lucide-react";
+import { CheckCircle, Mail, RefreshCw, Users, XCircle, Pencil, ChevronDown, ChevronUp, CalendarCog, Copy } from "lucide-react";
 import { formatTime, convertDateTimeToTimezone } from "@/lib/admin-utils";
 import { getAdminTimezone } from "@/lib/viewerTimezone";
 import { getLevelShortLabel } from "@/constants/levels";
@@ -472,6 +472,56 @@ const TrialClassesManager = () => {
     setBulkBusy(false);
   };
 
+  // ── Duplicate unscheduled bookings (same email, more than one active TBA row) ──
+  const tbaDuplicateGroups = useMemo(() => {
+    const activeTba = bookings.filter((b) => isTbaBooking(b) && b.status !== "cancelled" && b.email);
+    const byEmail: Record<string, TrialBooking[]> = {};
+    activeTba.forEach((b) => {
+      const key = b.email.toLowerCase();
+      (byEmail[key] ||= []).push(b);
+    });
+    return Object.values(byEmail).filter((group) => group.length > 1);
+  }, [bookings]);
+  const duplicateExtraCount = tbaDuplicateGroups.reduce((n, g) => n + g.length - 1, 0);
+
+  const handleClearDuplicates = async () => {
+    if (tbaDuplicateGroups.length === 0) return;
+    setBulkBusy(true);
+    let cancelled = 0, failed = 0;
+    for (const group of tbaDuplicateGroups) {
+      // Keep the oldest booking per email, cancel the rest as duplicates.
+      const sorted = [...group].sort(
+        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+      const duplicates = sorted.slice(1);
+      for (const dup of duplicates) {
+        const { error } = await supabase
+          .from("trial_bookings")
+          .update({
+            status: "cancelled",
+            cancelled_at: new Date().toISOString(),
+            cancel_reason: "duplicate_entry",
+          } as any)
+          .eq("id", dup.id);
+        if (error) {
+          if (!isMissingAuditColumn(error)) { failed++; continue; }
+          const fallback = await supabase
+            .from("trial_bookings")
+            .update({ status: "cancelled" } as any)
+            .eq("id", dup.id);
+          if (fallback.error) { failed++; continue; }
+        }
+        cancelled++;
+      }
+    }
+    toast({
+      title: "Duplicates cleared",
+      description: `${cancelled} duplicate booking${cancelled === 1 ? "" : "s"} cancelled${failed ? `, ${failed} failed` : ""}.`,
+    });
+    fetchData();
+    setBulkBusy(false);
+  };
+
   const handleAcceptAllPending = async () => {
     const pending = bookings.filter((b) => b.status === "pending");
     if (pending.length === 0) {
@@ -794,6 +844,34 @@ const TrialClassesManager = () => {
                       {session.items.length} booked
                     </span>
                     <span>{confirmed} confirmed · {active} active</span>
+                    {isTbaSession && duplicateExtraCount > 0 && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7"
+                            disabled={bulkBusy}
+                            title={`${tbaDuplicateGroups.length} email${tbaDuplicateGroups.length === 1 ? "" : "s"} have more than one unscheduled booking`}
+                          >
+                            <Copy className="h-3.5 w-3.5 mr-1" />
+                            Clear duplicates ({duplicateExtraCount})
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Clear duplicate unscheduled bookings?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {tbaDuplicateGroups.length} email{tbaDuplicateGroups.length === 1 ? "" : "s"} have more than one unscheduled booking. This keeps the oldest booking per email and cancels the other {duplicateExtraCount}.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleClearDuplicates}>Clear {duplicateExtraCount}</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                     {isTbaSession && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
