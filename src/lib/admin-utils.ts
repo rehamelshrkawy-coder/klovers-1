@@ -128,6 +128,20 @@ export function convertDateTimeToTimezone(
   };
 }
 
+/**
+ * Resolve a specific `YYYY-MM-DD` + `HH:MM` wall-time in `sourceTz` to the
+ * UTC instant it represents. Use this (not string concatenation) whenever a
+ * slot's real moment in time is needed — e.g. to feed `toLocaleString` with
+ * an arbitrary target locale/timezone, or to build a schema.org ISO date.
+ */
+export function toUtcInstant(dateStr: string, timeHHMM: string, sourceTz: string): Date {
+  const [y, mo, d] = dateStr.split("-").map(Number);
+  const [h, mi] = timeHHMM.split(":").map(Number);
+  const guess = Date.UTC(y, mo - 1, d, h, mi);
+  const offset = tzOffsetMs(new Date(guess), sourceTz);
+  return new Date(guess - offset);
+}
+
 // ── Attendance status colors ─────────────────────────────────────────────────
 
 /** Ring + background classes for attendance status badges. */

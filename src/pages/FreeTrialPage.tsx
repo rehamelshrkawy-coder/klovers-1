@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,6 +11,7 @@ import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { Gift, Users, Clock, Star, ArrowRight, Video, ClipboardList, Sparkles, CalendarDays, AlertCircle, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import AvatarInitials from "@/components/AvatarInitials";
+import { toUtcInstant } from "@/lib/admin-utils";
 
 const Stars = ({ count = 5 }: { count?: number }) => (
   <div className="flex gap-0.5" role="img" aria-label={`${count} out of 5 stars`}>
@@ -37,25 +38,29 @@ const FreeTrialPage = () => {
     { icon: Sparkles,      num: "3", text: t("trialBooking.expectItem3") },
   ];
 
-  /** 4 official trial class timestamps (MYT / UTC+8). */
-  const TRIAL_INSTANTS_MYT = [
-    "2026-05-29T01:00:00+08:00",
-    "2026-05-30T23:00:00+08:00",
-    "2026-06-02T23:00:00+08:00",
-    "2026-06-07T09:00:00+08:00",
-  ];
+  const userTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return "Asia/Ho_Chi_Minh"; } })();
 
-  const userTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return "Asia/Kuala_Lumpur"; } })();
+  // Live trial slots — replaces a previously hardcoded date array that
+  // silently went stale once every listed session was in the past. Source
+  // of truth is the same get_trial_availability RPC the real booking page
+  // (TrialSlotPicker) already uses, so this can never drift from what's
+  // actually bookable.
+  interface LiveTrialSlot {
+    next_trial_date: string;
+    start_time: string;
+    timezone: string | null;
+    booked_count: number;
+    capacity: number;
+    duration_min: number | null;
+  }
+  const [liveSlots, setLiveSlots] = useState<LiveTrialSlot[]>([]);
 
-  const SLOT_HIGHLIGHTS = TRIAL_INSTANTS_MYT
-    .map((iso) => {
-      const d = new Date(iso);
-      if (d.getTime() <= Date.now()) return null;
-      const day = d.toLocaleDateString(isAr ? "ar-EG" : "en-US", { weekday: "long", month: "short", day: "numeric", timeZone: userTz });
-      const time = d.toLocaleTimeString(isAr ? "ar-EG" : "en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: userTz });
-      return { day, time };
-    })
-    .filter(Boolean) as { day: string; time: string }[];
+  const SLOT_HIGHLIGHTS = useMemo(() => liveSlots.map((s) => {
+    const instant = toUtcInstant(s.next_trial_date, s.start_time, s.timezone || "Asia/Ho_Chi_Minh");
+    const day = instant.toLocaleDateString(isAr ? "ar-EG" : "en-US", { weekday: "long", month: "short", day: "numeric", timeZone: userTz });
+    const time = instant.toLocaleTimeString(isAr ? "ar-EG" : "en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: userTz });
+    return { day, time };
+  }), [liveSlots, isAr, userTz]);
 
   const TESTIMONIALS: { quote: string; name: string; role: string }[] = [
     {
@@ -77,6 +82,29 @@ const FreeTrialPage = () => {
   });
 
   useEffect(() => {
+    // Wait for live slots to load before injecting — an empty/stale
+    // schedule is worse than a schema that renders a beat later once
+    // real data (via get_trial_availability) has arrived.
+    if (liveSlots.length === 0) return;
+
+    const hasCourseInstance = liveSlots.map((s) => {
+      const start = toUtcInstant(s.next_trial_date, s.start_time, s.timezone || "Asia/Ho_Chi_Minh");
+      const end = new Date(start.getTime() + (s.duration_min ?? 30) * 60_000);
+      return { "@type": "CourseInstance", courseMode: "online", startDate: start.toISOString(), endDate: end.toISOString() };
+    });
+    const earliestStart = hasCourseInstance
+      .map((c) => c.startDate)
+      .sort()[0];
+
+    // Weekday names come straight from each slot's calendar date, which is
+    // timezone-independent — no hardcoded copy that can go stale.
+    const weekdays = Array.from(new Set(
+      liveSlots.map((s) => new Date(`${s.next_trial_date}T00:00:00Z`).toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" }))
+    ));
+    const scheduleLine = weekdays.length > 0
+      ? `We currently run trial classes every ${weekdays.join(", ")}. All times are automatically shown in your local timezone when you visit the booking page.`
+      : "Times are automatically shown in your local timezone when you visit the booking page.";
+
     const el = document.createElement("script");
     el.id = "free-trial-jsonld";
     el.setAttribute("type", "application/ld+json");
@@ -98,12 +126,7 @@ const FreeTrialPage = () => {
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "category": "Free Trial" },
         "inLanguage": "ko",
         "url": "https://kloversegy.com/free-trial",
-        "hasCourseInstance": [
-          { "@type": "CourseInstance", "courseMode": "online", "startDate": "2026-05-29T01:00:00+08:00", "endDate": "2026-05-29T01:30:00+08:00" },
-          { "@type": "CourseInstance", "courseMode": "online", "startDate": "2026-05-30T23:00:00+08:00", "endDate": "2026-05-30T23:30:00+08:00" },
-          { "@type": "CourseInstance", "courseMode": "online", "startDate": "2026-06-02T23:00:00+08:00", "endDate": "2026-06-02T23:30:00+08:00" },
-          { "@type": "CourseInstance", "courseMode": "online", "startDate": "2026-06-07T09:00:00+08:00", "endDate": "2026-06-07T09:30:00+08:00" },
-        ],
+        "hasCourseInstance": hasCourseInstance,
       },
       {
         "@context": "https://schema.org",
@@ -114,6 +137,7 @@ const FreeTrialPage = () => {
         "eventStatus": "https://schema.org/EventScheduled",
         "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
         "organizer": { "@type": "Organization", "name": "Klovers Korean Academy", "url": "https://kloversegy.com" },
+        "startDate": earliestStart,
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "validFrom": new Date().toISOString() },
         "location": { "@type": "VirtualLocation", "url": "https://kloversegy.com/free-trial" },
       },
@@ -123,7 +147,7 @@ const FreeTrialPage = () => {
         "mainEntity": [
           { "@type": "Question", "name": "Is the trial class really free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — completely free, no credit card required. You attend a 30-minute live class with a real teacher." } },
           { "@type": "Question", "name": "What level do I need to be?", "acceptedAnswer": { "@type": "Answer", "text": "Any level is welcome. Most students start from zero (Hangul). The teacher will assess your level during the class." } },
-          { "@type": "Question", "name": "When are the trial classes?", "acceptedAnswer": { "@type": "Answer", "text": "Upcoming sessions: July 3, July 4, July 5, and July 7 2026. All times are automatically shown in your local timezone when you visit the booking page." } },
+          { "@type": "Question", "name": "When are the trial classes?", "acceptedAnswer": { "@type": "Answer", "text": scheduleLine } },
           { "@type": "Question", "name": "How do I book?", "acceptedAnswer": { "@type": "Answer", "text": "Click 'Book My Free Class', choose a day, and confirm. You'll receive an email with the class link and a Google Calendar invite." } },
           { "@type": "Question", "name": "What happens after the trial?", "acceptedAnswer": { "@type": "Answer", "text": "After your trial you'll receive a level recommendation and pricing options if you'd like to continue with a full course." } },
         ],
@@ -131,7 +155,7 @@ const FreeTrialPage = () => {
     ]);
     document.head.appendChild(el);
     return () => { el.remove(); };
-  }, []);
+  }, [liveSlots]);
 
   const navigate = useNavigate();
   const { user, loading } = useAuth();
@@ -154,11 +178,12 @@ const FreeTrialPage = () => {
   useEffect(() => {
     supabase.rpc("get_trial_availability").then(({ data }) => {
       if (!data || data.length === 0) return;
-      const total = (data as { booked_count: number; capacity: number; next_trial_date: string }[])
-        .reduce((sum, row) => sum + (row.capacity - row.booked_count), 0);
+      const rows = data as LiveTrialSlot[];
+      setLiveSlots(rows);
+      const total = rows.reduce((sum, row) => sum + (row.capacity - row.booked_count), 0);
       setSpotsRemaining(total);
       // Deadline = earliest next_trial_date minus 1 day (booking cutoff)
-      const earliest = data[0].next_trial_date as string;
+      const earliest = rows[0].next_trial_date;
       if (earliest) {
         const deadlineMs = new Date(earliest + "T00:00:00Z").getTime() - 86_400_000;
         const days = Math.max(0, Math.ceil((deadlineMs - Date.now()) / 86_400_000));
