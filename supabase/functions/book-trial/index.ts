@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkAndSendTrialCapacityAlert } from "../_shared/trialCapacityAlert.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,7 +30,15 @@ async function checkRateLimit(
   });
   if (error) {
     // Fail open — don't block legitimate requests if the table/function is missing.
+    // But surface it: a silent fail-open means abuse protection is effectively
+    // off, so flag it in admin_notifications instead of only console.warn.
     console.warn("[book-trial] rate limit check error:", error.message);
+    try {
+      await supabase.from("admin_notifications").insert({
+        message: `Trial rate limiter is failing open (identifier=${identifier}): ${error.message}`,
+        type: "trial_rate_limit_error",
+      });
+    } catch { /* never let alerting break the booking flow */ }
     return false;
   }
   // Returns true if the caller is rate-limited (attempt_count > max)
@@ -38,14 +47,25 @@ async function checkRateLimit(
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-/** Compute the next occurrence of a given day_of_week (0=Sun) from today. */
-function nextDateForDay(dayOfWeek: number): string {
+/**
+ * Compute the next occurrence of a given day_of_week (0=Sun) from today,
+ * constrained to the admin-configured monthly window (trial_settings.
+ * window_start_day/window_end_day — NULL/NULL means no restriction). This
+ * is only a fallback for when the frontend doesn't pass an explicit
+ * trial_date; the normal path always books a specific dated trial_slots row.
+ */
+function nextDateForDay(dayOfWeek: number, windowStartDay: number | null, windowEndDay: number | null): string {
   const today = new Date();
   const todayDay = today.getUTCDay();
   let diff = dayOfWeek - todayDay;
   if (diff <= 0) diff += 7; // always at least 1 day in the future
   const next = new Date(today);
   next.setUTCDate(today.getUTCDate() + diff);
+  if (windowStartDay != null && windowEndDay != null) {
+    while (next.getUTCDate() > windowEndDay || next.getUTCDate() < windowStartDay) {
+      next.setUTCDate(next.getUTCDate() + 7);
+    }
+  }
   return next.toISOString().split("T")[0]; // YYYY-MM-DD
 }
 
@@ -180,9 +200,19 @@ Deno.serve(async (req) => {
     const finalName = (resolvedName || name || "").trim() || effectiveEmail.split("@")[0];
     const normalizedEmail = effectiveEmail.trim().toLowerCase();
     // Use the actual group date from the frontend if provided; fall back to computing the next occurrence.
-    const trialDate = (bodyTrialDate && /^\d{4}-\d{2}-\d{2}$/.test(bodyTrialDate))
-      ? bodyTrialDate
-      : nextDateForDay(day_of_week);
+    let trialDate = bodyTrialDate && /^\d{4}-\d{2}-\d{2}$/.test(bodyTrialDate) ? bodyTrialDate : null;
+    if (!trialDate) {
+      const { data: settingsRow } = await supabase
+        .from("trial_settings")
+        .select("window_start_day, window_end_day")
+        .eq("id", 1)
+        .maybeSingle();
+      trialDate = nextDateForDay(
+        day_of_week,
+        settingsRow?.window_start_day ?? null,
+        settingsRow?.window_end_day ?? null,
+      );
+    }
 
     // Look up slot metadata in one query (timezone, duration, meeting link).
     const { data: slotTzRow } = await supabase
@@ -192,15 +222,22 @@ Deno.serve(async (req) => {
       .eq("start_time", start_time)
       .maybeSingle();
     const _slot = slotTzRow as { timezone?: string | null; duration_min?: number | null; meeting_url?: string | null } | null;
-    const timezone: string = _slot?.timezone || "Asia/Kuala_Lumpur";
+    const timezone: string = _slot?.timezone || "Asia/Ho_Chi_Minh";
     const slotDurationMin: number = _slot?.duration_min ?? 30;
     const meetingUrl: string | null = _slot?.meeting_url ?? null;
 
-    // Registrations close 1 day before the class (compare in MYT, UTC+8)
-    const mytNow = new Date(Date.now() + 8 * 60 * 60 * 1000);
-    const mytDayStr = mytNow.toISOString().split("T")[0];
+    // Registrations close 1 day before the class, compared in the slot's own
+    // timezone (not a hardcoded region) — trial cohorts have moved timezones
+    // before (MYT batch replaced an earlier Cairo-anchored one) and a fixed
+    // UTC offset silently goes stale whenever that happens again.
+    const todayInSlotTz = new Intl.DateTimeFormat("en-CA", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
     const trialMs = new Date(trialDate + "T00:00:00Z").getTime();
-    const todayMs = new Date(mytDayStr + "T00:00:00Z").getTime();
+    const todayMs = new Date(todayInSlotTz + "T00:00:00Z").getTime();
     if (Math.round((trialMs - todayMs) / 86_400_000) <= 1) {
       return new Response(
         JSON.stringify({ ok: false, success: false, error: "Booking is closed — registrations close 1 day before the class." }),
@@ -258,11 +295,11 @@ Deno.serve(async (req) => {
     // Unauthenticated path only closes TBA placeholders; real bookings there hit
     // 23505 and return a friendly message.
     // Look up existing booking — prefer user_id match (reliable), fall back to email.
-    let existingBooking: { id: string; start_time: string | null; trial_date: string | null; is_tba: boolean | null } | null = null;
+    let existingBooking: { id: string; start_time: string | null; trial_date: string | null; is_tba: boolean | null; rollover_status: string | null } | null = null;
     if (resolvedUserId) {
       const { data, error: e1 } = await supabase
         .from("trial_bookings")
-        .select("id, start_time, trial_date, is_tba")
+        .select("id, start_time, trial_date, is_tba, rollover_status")
         .eq("user_id", resolvedUserId)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -273,7 +310,7 @@ Deno.serve(async (req) => {
     if (!existingBooking) {
       const { data, error: e2 } = await supabase
         .from("trial_bookings")
-        .select("id, start_time, trial_date, is_tba")
+        .select("id, start_time, trial_date, is_tba, rollover_status")
         .eq("email", normalizedEmail)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -289,10 +326,15 @@ Deno.serve(async (req) => {
         existingBooking.start_time === "TBA" ||
         existingBooking.trial_date === "2099-12-31");
 
+    // A booking whose group never reached the minimum to run isn't an active
+    // booking anymore — treat it like a TBA placeholder so the student (authed
+    // or not) can freely pick a new date instead of hitting "already booked".
+    const isRollover = !!existingBooking && existingBooking.rollover_status != null;
+
     // Authenticated rebook: mark previous booking cancelled (any kind) to allow
     // slot change while preserving changed_at/cancelled_at for admin.
-    // Unauthenticated: only close TBA placeholders.
-    const shouldCloseExisting = existingBooking && (authed || isTbaPlaceholder);
+    // Unauthenticated: only close TBA placeholders (or rollover bookings).
+    const shouldCloseExisting = existingBooking && (authed || isTbaPlaceholder || isRollover);
     if (shouldCloseExisting) {
       const auditUpdate = await supabase
         .from("trial_bookings")
@@ -384,6 +426,18 @@ Deno.serve(async (req) => {
         type: "trial",
       });
     } catch { /* non-critical */ }
+
+    // 3b. Unauthenticated bookings are inserted as 'confirmed' immediately —
+    // check whether this just completed the group's 4th confirmed spot for
+    // this occurrence, and if so alert the teacher + this student. Best
+    // effort: never blocks or affects the booking response.
+    if (bookingStatus === "confirmed") {
+      try {
+        await checkAndSendTrialCapacityAlert(supabase, trialDate, start_time);
+      } catch (e) {
+        console.warn("checkAndSendTrialCapacityAlert failed:", e);
+      }
+    }
 
     // 4. Build calendar URL for the response
     const calendarUrl = buildCalendarUrl({

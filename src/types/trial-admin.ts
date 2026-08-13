@@ -74,6 +74,8 @@ export interface AdminTrialSlotOccurrence {
   lifecycle: TrialSlotLifecycle;
   meeting_url: string | null;
   class_language: string | null;
+  min_to_run: number | null;
+  session_period: TrialSessionPeriod | null;
 }
 
 // fn_suggest_trial_slots
@@ -91,12 +93,17 @@ export interface TrialSlotSuggestion {
   would_replace_full_slot: boolean;
 }
 
+export type TrialSessionPeriod = 'morning' | 'evening' | 'daytime';
+
 // trial_settings
 export interface TrialSettings {
   id: number;
   program_start_date: string | null;
   default_duration_min: number;
   suggestion_weeks: number;
+  min_group_size: number;
+  window_start_day: number | null;
+  window_end_day: number | null;
   updated_at: string;
 }
 
@@ -112,6 +119,11 @@ export interface TrialSlotRow {
   lifecycle: TrialSlotLifecycle;
   archived_at: string | null;
   notes: string | null;
+  trial_date: string | null;
+  meeting_url: string | null;
+  class_language: 'arabic' | 'english' | null;
+  min_to_run: number | null;
+  session_period: TrialSessionPeriod | null;
   created_at: string;
   updated_at: string;
 }

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { authorizationError, authorizeRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,7 +15,7 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "trial_followup_day7" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation" | "trial_group_full" | "trial_rollover";
   class_link_url?: string;
   tx_ref?: string;
   payment_date?: string;
@@ -51,6 +52,12 @@ interface EmailPayload {
   booking_id?: string;
   confirmation_token?: string;
   meeting_url?: string;
+  class_language?: string;
+  confirmed_count?: number;
+  trial_day_name?: string;
+  referral_url?: string;
+  previous_trial_date?: string;
+  booking_url?: string;
 }
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -1112,6 +1119,78 @@ function buildTrialAttendanceConfirmationEmail(p: EmailPayload) {
   };
 }
 
+function buildTrialGroupFullEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const isArabicClass = p.class_language === "arabic";
+  const dayDate = [p.trial_day_name, p.trial_date].filter(Boolean).join(" ");
+  const tzLabel = (p.trial_timezone || "Asia/Ho_Chi_Minh").replace(/_/g, " ");
+  const count = p.confirmed_count ?? 4;
+
+  if (isAr) {
+    return {
+      subject: "KLovers — اكتملت مجموعة حصتك التجريبية! 🎉",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! 🎉</h1>
+        <p>خبر حلو — مجموعة حصتك التجريبية (${isArabicClass ? "عربي" : "إنجليزي"}) اكتملت بـ ${count} طلاب مؤكدين!</p>
+        <div style="background: ${BRAND_GRAY}; padding: 12px 16px; border-radius: 6px; margin: 12px 0; text-align: center;">
+          <p style="margin: 0; font-size: 16px; font-weight: bold;">📅 ${dayDate}</p>
+          <p style="margin: 4px 0 0;">🕒 ${p.trial_time} (${tzLabel})</p>
+        </div>
+        <p>احنا متحمسين نشوفك في الحصة! لو عندك أي سؤال رد على الإيميل ده أو راسلنا واتساب.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — your trial class group is full! 🎉",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 🎉</h1>
+      <p>Great news — your ${isArabicClass ? "Arabic" : "English"} trial class group is now full with ${count} confirmed students!</p>
+      <div style="background: ${BRAND_GRAY}; padding: 12px 16px; border-radius: 6px; margin: 12px 0; text-align: center;">
+        <p style="margin: 0; font-size: 16px; font-weight: bold;">📅 ${dayDate}</p>
+        <p style="margin: 4px 0 0;">🕒 ${p.trial_time} (${tzLabel})</p>
+      </div>
+      <p>We can't wait to see you in class! Any questions? Reply to this email or message us on WhatsApp.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
+    `, false),
+  };
+}
+
+function buildTrialRolloverEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const bookingUrl = p.booking_url || `${SITE_URL}/trial-booking`;
+  const prevDate = p.previous_trial_date || "";
+
+  if (isAr) {
+    return {
+      subject: "KLovers — حصتك التجريبية اتأجلت، فيه مواعيد جديدة! 📅",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}!</h1>
+        <p>حصتك التجريبية${prevDate ? ` يوم ${prevDate}` : ""} ما اتقيّمتش لأن مجموعتك ما وصلتش لعدد الطلاب المطلوب — مش لسبب راجع لك، وحصتك <strong>مش ضايعة</strong>.</p>
+        <p>دلوقتي فيه مواعيد جديدة متاحة، واحنا محتفظين بحجزك. اختار الميعاد اللي يناسبك:</p>
+        <div style="margin: 20px 0; text-align: center;">
+          ${brandButton("اختار ميعاد جديد", bookingUrl)}
+        </div>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">أي سؤال؟ رد على الإيميل ده أو راسلنا واتساب.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — your trial was postponed, new dates are up! 📅",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}!</h1>
+      <p>Your trial class${prevDate ? ` on ${prevDate}` : ""} didn't run because that group didn't reach the number of students we need to hold it — this wasn't anything on your end, and your trial spot <strong>hasn't been used up</strong>.</p>
+      <p>New trial dates are available now, and we've kept your booking on file. Pick whichever works for you:</p>
+      <div style="margin: 20px 0; text-align: center;">
+        ${brandButton("Pick a new date", bookingUrl)}
+      </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Any questions? Reply to this email or message us on WhatsApp.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
+    `, false),
+  };
+}
+
 // Post-trial nurture sequence. Three stages, shared shell.
 function buildTrialPrepEmail(p: EmailPayload) {
   const isAr = p.language === "ar";
@@ -1136,6 +1215,7 @@ function buildTrialPrepEmail(p: EmailPayload) {
           <li>☕ خذ حاجة تشربها — الحصة 45 دقيقة</li>
         </ul>
         <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">في أي سؤال؟ رد على الإيميل ده أو راسلنا واتساب.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -1158,6 +1238,7 @@ function buildTrialPrepEmail(p: EmailPayload) {
         <li>☕ Grab a drink — it's a 45-minute session</li>
       </ul>
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Any questions? Reply to this email or message us on WhatsApp.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -1184,6 +1265,7 @@ function buildTrialFollowupDay1Email(p: EmailPayload) {
           ${brandButton("شوف الخطط", pricingUrl)}
         </div>
         <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">عندك أسئلة أو استفسارات عن أنسب خطة؟ رد على الإيميل ده أو راسلنا واتساب وهنساعدك تختار.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -1205,6 +1287,7 @@ function buildTrialFollowupDay1Email(p: EmailPayload) {
         ${brandButton("See the plans", pricingUrl)}
       </div>
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Questions, or want help picking a plan? Reply to this email or message us on WhatsApp — we'll help you choose.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -1225,7 +1308,8 @@ function buildTrialFollowupDay3Email(p: EmailPayload) {
         </div>
         <p style="text-align: center; color: ${BRAND_MUTED}; font-size: 13px;">أو <a href="${pricingUrl}" style="color: ${BRAND_DARK};">شوف الخطط بنفسك</a></p>
         <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
-        <p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">ده آخر تذكير — مش هنبعتلك إيميلات متابعة تانية بعد كده.</p>
+        <p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">هيوصلك تشيك-إن واحد بعد كده الأسبوع الجاي، وبعدها نسيبك في هدوء.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
     };
   }
@@ -1240,7 +1324,50 @@ function buildTrialFollowupDay3Email(p: EmailPayload) {
       </div>
       <p style="text-align: center; color: ${BRAND_MUTED}; font-size: 13px;">Or <a href="${pricingUrl}" style="color: ${BRAND_DARK};">browse the plans yourself</a></p>
       <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 24px 0;">
-      <p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">This is our last nudge — we won't keep emailing you after this.</p>
+      <p style="color: ${BRAND_MUTED}; font-size: 12px; text-align: center;">One more check-in next week, then we'll leave you be.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
+    `, false),
+  };
+}
+
+function buildTrialFollowupDay7Email(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const pricingUrl = `${SITE_URL}/pricing`;
+  const referralUrl = p.referral_url ?? `${SITE_URL}/free-trial`;
+  if (isAr) {
+    return {
+      subject: "KLovers — عامل إيه بعد الحصة التجريبية؟ 🌱",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}!</h1>
+        <p>مرّ أسبوع على حصتك التجريبية معانا. حابين نعرف رأيك، ولو حابب تكمل معانا الخطط لسه متاحة.</p>
+        <div style="margin: 20px 0; text-align: center;">
+          ${brandButton("شوف الخطط", pricingUrl)}
+        </div>
+        <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+          <p style="margin: 0 0 8px; font-weight: bold;">🎁 اعرف صحابك على KLovers</p>
+          <p style="margin: 0; color: ${BRAND_TEXT}; font-size: 13px;">شارك رابط الحصة التجريبية المجانية مع أي حد حابب يتعلم كورية:</p>
+          <p style="margin: 8px 0 0; font-size: 13px;"><a href="${referralUrl}" style="color: ${BRAND_DARK}; font-weight: bold;">${referralUrl}</a></p>
+        </div>
+        <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">أي سؤال؟ رد على الإيميل ده أو راسلنا واتساب.</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — how's it going since your trial? 🌱",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}!</h1>
+      <p>It's been a week since your trial class. We'd love to hear how it went — and our plans are still open if you'd like to keep learning with us.</p>
+      <div style="margin: 20px 0; text-align: center;">
+        ${brandButton("See the plans", pricingUrl)}
+      </div>
+      <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
+        <p style="margin: 0 0 8px; font-weight: bold;">🎁 Know someone learning Korean?</p>
+        <p style="margin: 0; color: ${BRAND_TEXT}; font-size: 13px;">Share your free trial link with a friend:</p>
+        <p style="margin: 8px 0 0; font-size: 13px;"><a href="${referralUrl}" style="color: ${BRAND_DARK}; font-weight: bold;">${referralUrl}</a></p>
+      </div>
+      <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Any questions? Reply to this email or message us on WhatsApp.</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
 }
@@ -1670,6 +1797,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  const authorization = await authorizeRequest(req, "admin-or-service");
+  if (!authorization.ok) return authorizationError(authorization, corsHeaders);
 
   try {
     if (!RESEND_API_KEY) {
@@ -1756,6 +1885,9 @@ serve(async (req) => {
       case "trial_followup_day3":
         ({ subject, html } = buildTrialFollowupDay3Email(payload));
         break;
+      case "trial_followup_day7":
+        ({ subject, html } = buildTrialFollowupDay7Email(payload));
+        break;
       case "group_forming":
         ({ subject, html } = buildGroupFormingEmail(payload));
         break;
@@ -1781,6 +1913,12 @@ serve(async (req) => {
         if (attendResult.icsAttachment) emailAttachments = [attendResult.icsAttachment];
         break;
       }
+      case "trial_group_full":
+        ({ subject, html } = buildTrialGroupFullEmail(payload));
+        break;
+      case "trial_rollover":
+        ({ subject, html } = buildTrialRolloverEmail(payload));
+        break;
       case "enrollment":
       default:
         ({ subject, html } = buildEnrollmentEmail(payload));
