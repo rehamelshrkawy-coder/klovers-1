@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import { Check, X, RefreshCw, CalendarPlus, Loader2 } from "lucide-react";
-import { TRIAL_CONFIRMATION_EMAIL_ENABLED } from "@/lib/siteConfig";
+import { sendTrialConfirmationEmail } from "@/lib/trialConfirmationEmail";
 import { convertDateTimeToTimezone } from "@/lib/admin-utils";
 import { getAdminTimezone } from "@/lib/viewerTimezone";
 
@@ -93,39 +93,20 @@ const TrialRequestsPanel = () => {
         .eq("id", booking.id);
       if (updateError) throw updateError;
 
-      // Build calendar URL for the email
-      const calendarUrl = booking.trial_date && booking.start_time
-        ? buildCalendarUrl({
-            title: "Free Korean Trial Class â Klovers Academy",
-            date: booking.trial_date,
-            time: booking.start_time,
-            durationMin: 45,
-            description: `Trial class with Klovers Academy.\nLevel: ${booking.level || "Beginner"}\nhttps://kloversegy.com`,
-            timezone: booking.timezone || "Africa/Cairo",
-          })
-        : "";
-
-      // Send confirmation email
-      const trialDateFormatted = booking.trial_date
-        ? new Date(booking.trial_date + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
-        : "";
-
-      if (TRIAL_CONFIRMATION_EMAIL_ENABLED) {
-        await supabase.functions.invoke("send-confirmation-email", {
-          body: {
-            template: "trial_confirmed",
-            email: booking.email,
-            name: booking.name,
-            trial_date: trialDateFormatted,
-            trial_time: booking.start_time ? formatTime12h(booking.start_time) : "",
-            trial_timezone: booking.timezone || "Africa/Cairo",
-            level: booking.level || "Beginner",
-            calendar_url: calendarUrl,
-          },
+      // Send confirmation email (best effort) — gated by feature flag
+      let emailSent = false;
+      if (booking.trial_date && booking.start_time) {
+        emailSent = await sendTrialConfirmationEmail({
+          email: booking.email,
+          name: booking.name,
+          level: booking.level,
+          trial_date: booking.trial_date,
+          start_time: booking.start_time,
+          timezone: booking.timezone,
         });
       }
 
-      toast({ title: "Approved", description: TRIAL_CONFIRMATION_EMAIL_ENABLED ? `Trial confirmed for ${booking.name}. Confirmation email sent.` : `Trial confirmed for ${booking.name} (email disabled).` });
+      toast({ title: "Approved", description: emailSent ? `Trial confirmed for ${booking.name}. Confirmation email sent.` : `Trial confirmed for ${booking.name} (email disabled).` });
       fetchBookings();
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to approve", variant: "destructive" });

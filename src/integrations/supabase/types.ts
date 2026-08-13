@@ -10,10 +10,74 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.4"
   }
   public: {
     Tables: {
+      achievement_milestones: {
+        Row: {
+          achieved_at: string | null
+          created_at: string | null
+          id: number
+          is_achieved: boolean | null
+          milestone_name: string
+          milestone_tier: number
+          milestone_type: string
+          progress_value: number | null
+          target_value: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achieved_at?: string | null
+          created_at?: string | null
+          id?: number
+          is_achieved?: boolean | null
+          milestone_name: string
+          milestone_tier: number
+          milestone_type: string
+          progress_value?: number | null
+          target_value: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achieved_at?: string | null
+          created_at?: string | null
+          id?: number
+          is_achieved?: boolean | null
+          milestone_name?: string
+          milestone_tier?: number
+          milestone_type?: string
+          progress_value?: number | null
+          target_value?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievement_milestones_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_student_overview"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "achievement_milestones_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_student_status_overview"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "achievement_milestones_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       admin_attendance_log: {
         Row: {
           created_at: string
@@ -344,6 +408,55 @@ export type Database = {
             referencedRelation: "courses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "batches_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "batches_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      blog_comments: {
+        Row: {
+          approved: boolean
+          author_name: string
+          body: string
+          created_at: string
+          id: string
+          post_id: string
+        }
+        Insert: {
+          approved?: boolean
+          author_name: string
+          body: string
+          created_at?: string
+          id?: string
+          post_id: string
+        }
+        Update: {
+          approved?: boolean
+          author_name?: string
+          body?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
         ]
       }
       blog_posts: {
@@ -355,6 +468,7 @@ export type Database = {
           cta_text: string | null
           cta_url: string | null
           description: string
+          featured: boolean
           hero_alt: string | null
           hero_alt_2: string | null
           hero_caption: string | null
@@ -366,10 +480,12 @@ export type Database = {
           lang: string
           published: boolean
           published_at: string | null
+          seo_priority: number
           seo_score: number | null
           slug: string
           title: string
           updated_at: string
+          view_count: number
         }
         Insert: {
           article_type?: string
@@ -379,6 +495,7 @@ export type Database = {
           cta_text?: string | null
           cta_url?: string | null
           description?: string
+          featured?: boolean
           hero_alt?: string | null
           hero_alt_2?: string | null
           hero_caption?: string | null
@@ -390,10 +507,12 @@ export type Database = {
           lang?: string
           published?: boolean
           published_at?: string | null
+          seo_priority?: number
           seo_score?: number | null
           slug: string
           title: string
           updated_at?: string
+          view_count?: number
         }
         Update: {
           article_type?: string
@@ -403,6 +522,7 @@ export type Database = {
           cta_text?: string | null
           cta_url?: string | null
           description?: string
+          featured?: boolean
           hero_alt?: string | null
           hero_alt_2?: string | null
           hero_caption?: string | null
@@ -414,9 +534,162 @@ export type Database = {
           lang?: string
           published?: boolean
           published_at?: string | null
+          seo_priority?: number
           seo_score?: number | null
           slug?: string
           title?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
+      book_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          available_from: string
+          book_id: string
+          enrollment_id: string | null
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          available_from: string
+          book_id?: string
+          enrollment_id?: string | null
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          available_from?: string
+          book_id?: string
+          enrollment_id?: string | null
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_assignments_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "admin_student_overview"
+            referencedColumns: ["enrollment_id"]
+          },
+          {
+            foreignKeyName: "book_assignments_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "admin_student_status_overview"
+            referencedColumns: ["active_enrollment_id"]
+          },
+          {
+            foreignKeyName: "book_assignments_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkout_recovery_emails: {
+        Row: {
+          clicked_at: string | null
+          converted_at: string | null
+          created_at: string
+          email: string
+          error_message: string | null
+          id: string
+          lead_id: string
+          opened_at: string | null
+          provider_message_id: string | null
+          scheduled_for: string | null
+          send_status: string
+          sent_at: string | null
+          stage: number
+          unsubscribed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          clicked_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          email: string
+          error_message?: string | null
+          id?: string
+          lead_id: string
+          opened_at?: string | null
+          provider_message_id?: string | null
+          scheduled_for?: string | null
+          send_status?: string
+          sent_at?: string | null
+          stage: number
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          clicked_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          email?: string
+          error_message?: string | null
+          id?: string
+          lead_id?: string
+          opened_at?: string | null
+          provider_message_id?: string | null
+          scheduled_for?: string | null
+          send_status?: string
+          sent_at?: string | null
+          stage?: number
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkout_recovery_emails_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "checkout_recovery_tracker"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "checkout_recovery_emails_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_levels: {
+        Row: {
+          created_at: string
+          display_label: string
+          is_active: boolean
+          key: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_label: string
+          is_active?: boolean
+          key: string
+          sort_order: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_label?: string
+          is_active?: boolean
+          key?: string
+          sort_order?: number
           updated_at?: string
         }
         Relationships: []
@@ -452,7 +725,22 @@ export type Database = {
           title?: string
           type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "courses_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "courses_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       egp_prices: {
         Row: {
@@ -498,6 +786,73 @@ export type Database = {
           subject?: string
         }
         Relationships: []
+      }
+      email_logs: {
+        Row: {
+          bounced_at: string | null
+          complained_at: string | null
+          created_at: string | null
+          delivered_at: string | null
+          enrollment_id: string | null
+          error: string | null
+          id: string
+          resend_id: string | null
+          status: string
+          template: string
+          to_email: string
+          to_name: string | null
+        }
+        Insert: {
+          bounced_at?: string | null
+          complained_at?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          enrollment_id?: string | null
+          error?: string | null
+          id?: string
+          resend_id?: string | null
+          status: string
+          template: string
+          to_email: string
+          to_name?: string | null
+        }
+        Update: {
+          bounced_at?: string | null
+          complained_at?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          enrollment_id?: string | null
+          error?: string | null
+          id?: string
+          resend_id?: string | null
+          status?: string
+          template?: string
+          to_email?: string
+          to_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_logs_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "admin_student_overview"
+            referencedColumns: ["enrollment_id"]
+          },
+          {
+            foreignKeyName: "email_logs_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "admin_student_status_overview"
+            referencedColumns: ["active_enrollment_id"]
+          },
+          {
+            foreignKeyName: "email_logs_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_sends: {
         Row: {
@@ -545,15 +900,28 @@ export type Database = {
       }
       enrollments: {
         Row: {
+          acquisition_source: string | null
+          admin_notes: string | null
           admin_review_required: boolean
           amount: number
+          approval_email_sent_at: string | null
           approval_status: string
+          assigned_day: string | null
+          assigned_time: string | null
+          assigned_timezone: string | null
+          class_feedback_sent_at: string | null
+          class_link_sent_at: string | null
           classes_included: number
           created_at: string
           currency: string
+          deleted_at: string | null
+          deleted_by: string | null
           due_at: string | null
           duration: number
           enrollment_status: string
+          first_class_date: string | null
+          forming_email_sent_at: string | null
+          forming_escalation_sent_at: string | null
           id: string
           last_reminder_at: string | null
           level: string | null
@@ -562,21 +930,27 @@ export type Database = {
           negative_since: string | null
           package_id: string | null
           payment_date: string | null
+          payment_email_sent_at: string | null
           payment_method: string | null
           payment_provider: string | null
           payment_status: string
           plan_type: string
+          pre_class_reminder_sent_at: string | null
           preferred_day: string | null
           preferred_days: string[] | null
           preferred_start: string | null
           preferred_time: string | null
+          receipt_nudge_sent_at: string | null
           receipt_url: string
+          rejection_followup_sent_at: string | null
           reminder_count: number
           reviewed_at: string | null
           reviewed_by: string | null
           sessions_remaining: number
           sessions_total: number
           slot_id: string | null
+          slot_rejection_at: string | null
+          slot_rejection_reason: string | null
           status: string
           stripe_payment_intent_id: string | null
           timezone: string | null
@@ -585,15 +959,28 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          acquisition_source?: string | null
+          admin_notes?: string | null
           admin_review_required?: boolean
           amount: number
+          approval_email_sent_at?: string | null
           approval_status?: string
+          assigned_day?: string | null
+          assigned_time?: string | null
+          assigned_timezone?: string | null
+          class_feedback_sent_at?: string | null
+          class_link_sent_at?: string | null
           classes_included: number
           created_at?: string
           currency?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           due_at?: string | null
           duration: number
           enrollment_status?: string
+          first_class_date?: string | null
+          forming_email_sent_at?: string | null
+          forming_escalation_sent_at?: string | null
           id?: string
           last_reminder_at?: string | null
           level?: string | null
@@ -602,21 +989,27 @@ export type Database = {
           negative_since?: string | null
           package_id?: string | null
           payment_date?: string | null
+          payment_email_sent_at?: string | null
           payment_method?: string | null
           payment_provider?: string | null
           payment_status?: string
           plan_type: string
+          pre_class_reminder_sent_at?: string | null
           preferred_day?: string | null
           preferred_days?: string[] | null
           preferred_start?: string | null
           preferred_time?: string | null
+          receipt_nudge_sent_at?: string | null
           receipt_url: string
+          rejection_followup_sent_at?: string | null
           reminder_count?: number
           reviewed_at?: string | null
           reviewed_by?: string | null
           sessions_remaining?: number
           sessions_total?: number
           slot_id?: string | null
+          slot_rejection_at?: string | null
+          slot_rejection_reason?: string | null
           status?: string
           stripe_payment_intent_id?: string | null
           timezone?: string | null
@@ -625,15 +1018,28 @@ export type Database = {
           user_id: string
         }
         Update: {
+          acquisition_source?: string | null
+          admin_notes?: string | null
           admin_review_required?: boolean
           amount?: number
+          approval_email_sent_at?: string | null
           approval_status?: string
+          assigned_day?: string | null
+          assigned_time?: string | null
+          assigned_timezone?: string | null
+          class_feedback_sent_at?: string | null
+          class_link_sent_at?: string | null
           classes_included?: number
           created_at?: string
           currency?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           due_at?: string | null
           duration?: number
           enrollment_status?: string
+          first_class_date?: string | null
+          forming_email_sent_at?: string | null
+          forming_escalation_sent_at?: string | null
           id?: string
           last_reminder_at?: string | null
           level?: string | null
@@ -642,21 +1048,27 @@ export type Database = {
           negative_since?: string | null
           package_id?: string | null
           payment_date?: string | null
+          payment_email_sent_at?: string | null
           payment_method?: string | null
           payment_provider?: string | null
           payment_status?: string
           plan_type?: string
+          pre_class_reminder_sent_at?: string | null
           preferred_day?: string | null
           preferred_days?: string[] | null
           preferred_start?: string | null
           preferred_time?: string | null
+          receipt_nudge_sent_at?: string | null
           receipt_url?: string
+          rejection_followup_sent_at?: string | null
           reminder_count?: number
           reviewed_at?: string | null
           reviewed_by?: string | null
           sessions_remaining?: number
           sessions_total?: number
           slot_id?: string | null
+          slot_rejection_at?: string | null
+          slot_rejection_reason?: string | null
           status?: string
           stripe_payment_intent_id?: string | null
           timezone?: string | null
@@ -665,6 +1077,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "enrollments_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "enrollments_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
           {
             foreignKeyName: "fk_enrollments_matched_batch"
             columns: ["matched_batch_id"]
@@ -741,54 +1167,51 @@ export type Database = {
           },
         ]
       }
-      leads: {
+      interview_training_sessions: {
         Row: {
-          country: string | null
           created_at: string
-          duration: string | null
-          email: string
-          goal: string | null
+          free_used: number
           id: string
-          level: string | null
-          name: string
-          plan_type: string | null
-          schedule: string | null
-          source: string | null
-          status: string
-          timezone: string | null
-          user_id: string | null
+          industry: string | null
+          job_title: string
+          languages_spoken: string[] | null
+          paid_purchased: number
+          payment_status: string | null
+          questions: Json | null
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string
+          years_experience: number
         }
         Insert: {
-          country?: string | null
           created_at?: string
-          duration?: string | null
-          email: string
-          goal?: string | null
+          free_used?: number
           id?: string
-          level?: string | null
-          name: string
-          plan_type?: string | null
-          schedule?: string | null
-          source?: string | null
-          status?: string
-          timezone?: string | null
-          user_id?: string | null
+          industry?: string | null
+          job_title: string
+          languages_spoken?: string[] | null
+          paid_purchased?: number
+          payment_status?: string | null
+          questions?: Json | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id: string
+          years_experience?: number
         }
         Update: {
-          country?: string | null
           created_at?: string
-          duration?: string | null
-          email?: string
-          goal?: string | null
+          free_used?: number
           id?: string
-          level?: string | null
-          name?: string
-          plan_type?: string | null
-          schedule?: string | null
-          source?: string | null
-          status?: string
-          timezone?: string | null
-          user_id?: string | null
+          industry?: string | null
+          job_title?: string
+          languages_spoken?: string[] | null
+          paid_purchased?: number
+          payment_status?: string | null
+          questions?: Json | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string
+          years_experience?: number
         }
         Relationships: []
       }
@@ -839,6 +1262,72 @@ export type Database = {
           utm_source?: string | null
         }
         Relationships: []
+      }
+      leads: {
+        Row: {
+          country: string | null
+          created_at: string
+          duration: string | null
+          email: string
+          goal: string | null
+          id: string
+          level: string | null
+          name: string
+          plan_type: string | null
+          schedule: string | null
+          source: string | null
+          status: string
+          timezone: string | null
+          user_id: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          duration?: string | null
+          email: string
+          goal?: string | null
+          id?: string
+          level?: string | null
+          name: string
+          plan_type?: string | null
+          schedule?: string | null
+          source?: string | null
+          status?: string
+          timezone?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          duration?: string | null
+          email?: string
+          goal?: string | null
+          id?: string
+          level?: string | null
+          name?: string
+          plan_type?: string | null
+          schedule?: string | null
+          source?: string | null
+          status?: string
+          timezone?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "leads_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       lesson_dialogues: {
         Row: {
@@ -989,25 +1478,31 @@ export type Database = {
       lesson_vocabulary: {
         Row: {
           id: string
+          image_url: string | null
           korean: string
           lesson_id: number
           meaning: string
+          meaning_ar: string | null
           romanization: string
           sort_order: number
         }
         Insert: {
           id?: string
+          image_url?: string | null
           korean: string
           lesson_id: number
           meaning: string
+          meaning_ar?: string | null
           romanization?: string
           sort_order?: number
         }
         Update: {
           id?: string
+          image_url?: string | null
           korean?: string
           lesson_id?: number
           meaning?: string
+          meaning_ar?: string | null
           romanization?: string
           sort_order?: number
         }
@@ -1051,6 +1546,20 @@ export type Database = {
             referencedRelation: "student_groups"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "level_group_config_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "level_group_config_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
         ]
       }
       level_slot_config: {
@@ -1077,6 +1586,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "level_slot_config_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "level_slot_config_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+          {
             foreignKeyName: "level_slot_config_slot_id_fkey"
             columns: ["slot_id"]
             isOneToOne: false
@@ -1088,6 +1611,7 @@ export type Database = {
       marketing_posts: {
         Row: {
           ad_primary_text: string
+          campaign_name: string | null
           caption_text: string
           created_at: string
           description: string
@@ -1097,11 +1621,14 @@ export type Database = {
           image_url_1x1: string | null
           image_url_4x5: string | null
           image_url_story: string | null
+          post_order: number | null
+          scheduled_date: string | null
           status: string
           video_url: string | null
         }
         Insert: {
           ad_primary_text?: string
+          campaign_name?: string | null
           caption_text?: string
           created_at?: string
           description?: string
@@ -1111,11 +1638,14 @@ export type Database = {
           image_url_1x1?: string | null
           image_url_4x5?: string | null
           image_url_story?: string | null
+          post_order?: number | null
+          scheduled_date?: string | null
           status?: string
           video_url?: string | null
         }
         Update: {
           ad_primary_text?: string
+          campaign_name?: string | null
           caption_text?: string
           created_at?: string
           description?: string
@@ -1125,6 +1655,8 @@ export type Database = {
           image_url_1x1?: string | null
           image_url_4x5?: string | null
           image_url_story?: string | null
+          post_order?: number | null
+          scheduled_date?: string | null
           status?: string
           video_url?: string | null
         }
@@ -1179,6 +1711,20 @@ export type Database = {
           timezone?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "matching_slots_course_level_fkey_course_levels"
+            columns: ["course_level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "matching_slots_course_level_fkey_course_levels"
+            columns: ["course_level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
           {
             foreignKeyName: "matching_slots_package_id_fkey"
             columns: ["package_id"]
@@ -1367,47 +1913,196 @@ export type Database = {
           score?: number
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "placement_tests_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "placement_tests_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       profiles: {
         Row: {
           avatar_url: string | null
           country: string
+          course_level_key: string | null
           created_at: string
           credits: number
           email: string
+          email_unsubscribed: boolean
           id: string
-          level: string
+          language: string | null
+          level: string | null
           name: string
+          name_reminder_sent_at: string | null
           reset_version: string | null
           status: string
+          timezone: string | null
+          unsubscribe_token: string | null
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
           country?: string
+          course_level_key?: string | null
           created_at?: string
           credits?: number
           email: string
+          email_unsubscribed?: boolean
           id?: string
-          level?: string
+          language?: string | null
+          level?: string | null
           name: string
+          name_reminder_sent_at?: string | null
           reset_version?: string | null
           status?: string
+          timezone?: string | null
+          unsubscribe_token?: string | null
           user_id: string
         }
         Update: {
           avatar_url?: string | null
           country?: string
+          course_level_key?: string | null
           created_at?: string
           credits?: number
           email?: string
+          email_unsubscribed?: boolean
           id?: string
-          level?: string
+          language?: string | null
+          level?: string | null
           name?: string
+          name_reminder_sent_at?: string | null
           reset_version?: string | null
           status?: string
+          timezone?: string | null
+          unsubscribe_token?: string | null
           user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_course_level_key_fkey_course_levels"
+            columns: ["course_level_key"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "profiles_course_level_key_fkey_course_levels"
+            columns: ["course_level_key"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "profiles_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "profiles_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      promo_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          discount_flat: number | null
+          discount_pct: number | null
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          uses_count: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          discount_flat?: number | null
+          discount_pct?: number | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          uses_count?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          discount_flat?: number | null
+          discount_pct?: number | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          uses_count?: number
+        }
+        Relationships: []
+      }
+      referral_clicks: {
+        Row: {
+          clicked_at: string
+          id: string
+          referrer_user_id: string
+          visitor_fingerprint: string
+        }
+        Insert: {
+          clicked_at?: string
+          id?: string
+          referrer_user_id: string
+          visitor_fingerprint: string
+        }
+        Update: {
+          clicked_at?: string
+          id?: string
+          referrer_user_id?: string
+          visitor_fingerprint?: string
+        }
+        Relationships: []
+      }
+      referral_conversions: {
+        Row: {
+          converted_at: string
+          id: string
+          referred_email: string
+          referrer_user_id: string
+          xp_awarded: boolean
+        }
+        Insert: {
+          converted_at?: string
+          id?: string
+          referred_email: string
+          referrer_user_id: string
+          xp_awarded?: boolean
+        }
+        Update: {
+          converted_at?: string
+          id?: string
+          referred_email?: string
+          referrer_user_id?: string
+          xp_awarded?: boolean
         }
         Relationships: []
       }
@@ -1475,7 +2170,22 @@ export type Database = {
           start_time?: string
           timezone?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "schedule_packages_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "schedule_packages_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       schedule_resubmission_requests: {
         Row: {
@@ -1591,6 +2301,30 @@ export type Database = {
           },
         ]
       }
+      stock_video_cache: {
+        Row: {
+          fetched_at: string
+          id: string
+          post_type: string
+          query: string
+          results: Json
+        }
+        Insert: {
+          fetched_at?: string
+          id?: string
+          post_type: string
+          query: string
+          results: Json
+        }
+        Update: {
+          fetched_at?: string
+          id?: string
+          post_type?: string
+          query?: string
+          results?: Json
+        }
+        Relationships: []
+      }
       student_badges: {
         Row: {
           badge_key: string
@@ -1646,7 +2380,22 @@ export type Database = {
           schedule_time?: string | null
           schedule_timezone?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "student_groups_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "student_groups_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       student_lesson_progress: {
         Row: {
@@ -1695,10 +2444,39 @@ export type Database = {
           },
         ]
       }
+      student_nps: {
+        Row: {
+          created_at: string
+          feedback: string | null
+          id: string
+          score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          score: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       student_package_preferences: {
         Row: {
           level: string
           package_id: string | null
+          preferred_day_of_week: number | null
+          preferred_start_time: string | null
           requested_at: string
           updated_at: string
           user_id: string
@@ -1706,6 +2484,8 @@ export type Database = {
         Insert: {
           level?: string
           package_id?: string | null
+          preferred_day_of_week?: number | null
+          preferred_start_time?: string | null
           requested_at?: string
           updated_at?: string
           user_id: string
@@ -1713,11 +2493,27 @@ export type Database = {
         Update: {
           level?: string
           package_id?: string | null
+          preferred_day_of_week?: number | null
+          preferred_start_time?: string | null
           requested_at?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "student_package_preferences_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "student_package_preferences_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
           {
             foreignKeyName: "student_package_preferences_package_id_fkey"
             columns: ["package_id"]
@@ -1810,6 +2606,20 @@ export type Database = {
             referencedRelation: "student_groups"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "student_schedule_preferences_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "student_schedule_preferences_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
         ]
       }
       student_slot_preferences: {
@@ -1879,6 +2689,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "student_slot_preferences_selected_level_fkey_course_levels"
+            columns: ["selected_level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "student_slot_preferences_selected_level_fkey_course_levels"
+            columns: ["selected_level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+          {
             foreignKeyName: "student_slot_preferences_slot_1_id_fkey"
             columns: ["slot_1_id"]
             isOneToOne: false
@@ -1900,93 +2724,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      achievement_milestones: {
-        Row: {
-          id: number
-          user_id: string
-          milestone_type: string
-          milestone_tier: number
-          milestone_name: string
-          target_value: number
-          progress_value: number
-          is_achieved: boolean
-          achieved_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: number
-          user_id: string
-          milestone_type: string
-          milestone_tier: number
-          milestone_name: string
-          target_value: number
-          progress_value?: number
-          is_achieved?: boolean
-          achieved_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: number
-          user_id?: string
-          milestone_type?: string
-          milestone_tier?: number
-          milestone_name?: string
-          target_value?: number
-          progress_value?: number
-          is_achieved?: boolean
-          achieved_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      user_learning_goals: {
-        Row: {
-          id: string
-          user_id: string
-          goal_type: string
-          goal_name: string
-          target_value: number
-          time_period: string
-          current_progress: number
-          status: string
-          created_at: string
-          target_date: string | null
-          completed_at: string | null
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          goal_type: string
-          goal_name: string
-          target_value: number
-          time_period: string
-          current_progress?: number
-          status?: string
-          created_at?: string
-          target_date?: string | null
-          completed_at?: string | null
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          goal_type?: string
-          goal_name?: string
-          target_value?: number
-          time_period?: string
-          current_progress?: number
-          status?: string
-          created_at?: string
-          target_date?: string | null
-          completed_at?: string | null
-          updated_at?: string
-        }
-        Relationships: []
       }
       student_streaks: {
         Row: {
@@ -2143,6 +2880,36 @@ export type Database = {
         }
         Relationships: []
       }
+      teacher_availability: {
+        Row: {
+          created_at: string | null
+          day_of_week: number
+          id: string
+          is_available: boolean | null
+          start_time: string
+          teacher_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          day_of_week: number
+          id?: string
+          is_available?: boolean | null
+          start_time: string
+          teacher_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          day_of_week?: number
+          id?: string
+          is_available?: boolean | null
+          start_time?: string
+          teacher_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       textbook_lessons: {
         Row: {
           book: string
@@ -2157,6 +2924,7 @@ export type Database = {
           title_ar: string
           title_en: string
           title_ko: string
+          topik_level: number
         }
         Insert: {
           book?: string
@@ -2171,6 +2939,7 @@ export type Database = {
           title_ar?: string
           title_en: string
           title_ko: string
+          topik_level?: number
         }
         Update: {
           book?: string
@@ -2185,8 +2954,467 @@ export type Database = {
           title_ar?: string
           title_en?: string
           title_ko?: string
+          topik_level?: number
         }
         Relationships: []
+      }
+      training_starred: {
+        Row: {
+          collections: Json
+          id: string
+          starred: number[]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          collections?: Json
+          id?: string
+          starred?: number[]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          collections?: Json
+          id?: string
+          starred?: number[]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trial_bookings: {
+        Row: {
+          attendance_confirmed_at: string | null
+          attendance_responded_at: string | null
+          attendance_response: string | null
+          calendar_url: string | null
+          class_language: string
+          confirmation_email_failed_at: string | null
+          confirmation_token: string | null
+          confirmed_at: string | null
+          created_at: string | null
+          day_of_week: number
+          duration_min: number
+          email: string
+          email_opened_at: string | null
+          email_sent_at: string | null
+          followup_day1_sent_at: string | null
+          followup_day3_sent_at: string | null
+          followup_day7_sent_at: string | null
+          followup_prep_sent_at: string | null
+          goal: string | null
+          id: string
+          is_tba: boolean
+          level: string | null
+          name: string
+          next_trial_month: string | null
+          phone: string | null
+          rebook_email_sent_at: string | null
+          rollover_notified_at: string | null
+          rollover_status: string | null
+          slot_chosen_at: string | null
+          start_time: string | null
+          status: string | null
+          timezone: string | null
+          trial_date: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attendance_confirmed_at?: string | null
+          attendance_responded_at?: string | null
+          attendance_response?: string | null
+          calendar_url?: string | null
+          class_language?: string
+          confirmation_email_failed_at?: string | null
+          confirmation_token?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          day_of_week: number
+          duration_min?: number
+          email: string
+          email_opened_at?: string | null
+          email_sent_at?: string | null
+          followup_day1_sent_at?: string | null
+          followup_day3_sent_at?: string | null
+          followup_day7_sent_at?: string | null
+          followup_prep_sent_at?: string | null
+          goal?: string | null
+          id?: string
+          is_tba?: boolean
+          level?: string | null
+          name: string
+          next_trial_month?: string | null
+          phone?: string | null
+          rebook_email_sent_at?: string | null
+          rollover_notified_at?: string | null
+          rollover_status?: string | null
+          slot_chosen_at?: string | null
+          start_time?: string | null
+          status?: string | null
+          timezone?: string | null
+          trial_date?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attendance_confirmed_at?: string | null
+          attendance_responded_at?: string | null
+          attendance_response?: string | null
+          calendar_url?: string | null
+          class_language?: string
+          confirmation_email_failed_at?: string | null
+          confirmation_token?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          day_of_week?: number
+          duration_min?: number
+          email?: string
+          email_opened_at?: string | null
+          email_sent_at?: string | null
+          followup_day1_sent_at?: string | null
+          followup_day3_sent_at?: string | null
+          followup_day7_sent_at?: string | null
+          followup_prep_sent_at?: string | null
+          goal?: string | null
+          id?: string
+          is_tba?: boolean
+          level?: string | null
+          name?: string
+          next_trial_month?: string | null
+          phone?: string | null
+          rebook_email_sent_at?: string | null
+          rollover_notified_at?: string | null
+          rollover_status?: string | null
+          slot_chosen_at?: string | null
+          start_time?: string | null
+          status?: string | null
+          timezone?: string | null
+          trial_date?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trial_bookings_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "trial_bookings_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      trial_broadcasts: {
+        Row: {
+          broadcast_key: string
+          created_at: string
+          error_count: number
+          id: string
+          sent_count: number
+          triggered_by: string | null
+        }
+        Insert: {
+          broadcast_key: string
+          created_at?: string
+          error_count?: number
+          id?: string
+          sent_count?: number
+          triggered_by?: string | null
+        }
+        Update: {
+          broadcast_key?: string
+          created_at?: string
+          error_count?: number
+          id?: string
+          sent_count?: number
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
+      trial_invite_sends: {
+        Row: {
+          attendance_responded_at: string | null
+          attendance_response: string | null
+          campaign: string
+          email: string
+          email_opened_at: string | null
+          id: string
+          name: string | null
+          sent_at: string
+          source: string
+        }
+        Insert: {
+          attendance_responded_at?: string | null
+          attendance_response?: string | null
+          campaign?: string
+          email: string
+          email_opened_at?: string | null
+          id?: string
+          name?: string | null
+          sent_at?: string
+          source: string
+        }
+        Update: {
+          attendance_responded_at?: string | null
+          attendance_response?: string | null
+          campaign?: string
+          email?: string
+          email_opened_at?: string | null
+          id?: string
+          name?: string | null
+          sent_at?: string
+          source?: string
+        }
+        Relationships: []
+      }
+      trial_rate_limits: {
+        Row: {
+          action: string
+          attempt_count: number
+          id: string
+          identifier: string
+          last_attempt: string
+          window_start: string
+        }
+        Insert: {
+          action?: string
+          attempt_count?: number
+          id?: string
+          identifier: string
+          last_attempt?: string
+          window_start: string
+        }
+        Update: {
+          action?: string
+          attempt_count?: number
+          id?: string
+          identifier?: string
+          last_attempt?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      trial_settings: {
+        Row: {
+          default_duration_min: number
+          id: number
+          min_group_size: number
+          program_start_date: string | null
+          suggestion_weeks: number
+          trial_block_days: number
+          trial_block_start_dow: number
+          updated_at: string
+          window_end_day: number | null
+          window_start_day: number | null
+        }
+        Insert: {
+          default_duration_min?: number
+          id?: number
+          min_group_size?: number
+          program_start_date?: string | null
+          suggestion_weeks?: number
+          trial_block_days?: number
+          trial_block_start_dow?: number
+          updated_at?: string
+          window_end_day?: number | null
+          window_start_day?: number | null
+        }
+        Update: {
+          default_duration_min?: number
+          id?: number
+          min_group_size?: number
+          program_start_date?: string | null
+          suggestion_weeks?: number
+          trial_block_days?: number
+          trial_block_start_dow?: number
+          updated_at?: string
+          window_end_day?: number | null
+          window_start_day?: number | null
+        }
+        Relationships: []
+      }
+      trial_slot_skips: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          reason: string | null
+          skip_date: string
+          slot_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          reason?: string | null
+          skip_date: string
+          slot_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          reason?: string | null
+          skip_date?: string
+          slot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trial_slot_skips_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "trial_slots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trial_slot_skips_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "v_trial_bookings_admin"
+            referencedColumns: ["slot_id"]
+          },
+          {
+            foreignKeyName: "trial_slot_skips_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "v_trial_slots_admin"
+            referencedColumns: ["slot_id"]
+          },
+        ]
+      }
+      trial_slots: {
+        Row: {
+          archived_at: string | null
+          capacity: number
+          class_language: string | null
+          created_at: string
+          day_of_week: number
+          duration_min: number
+          enrollment_alert_sent_at: string | null
+          id: string
+          is_active: boolean
+          lifecycle: string
+          meeting_url: string | null
+          min_run_checked_at: string | null
+          min_to_run: number | null
+          notes: string | null
+          session_period: string | null
+          start_time: string
+          timezone: string
+          trial_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          capacity?: number
+          class_language?: string | null
+          created_at?: string
+          day_of_week: number
+          duration_min?: number
+          enrollment_alert_sent_at?: string | null
+          id?: string
+          is_active?: boolean
+          lifecycle?: string
+          meeting_url?: string | null
+          min_run_checked_at?: string | null
+          min_to_run?: number | null
+          notes?: string | null
+          session_period?: string | null
+          start_time: string
+          timezone?: string
+          trial_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          capacity?: number
+          class_language?: string | null
+          created_at?: string
+          day_of_week?: number
+          duration_min?: number
+          enrollment_alert_sent_at?: string | null
+          id?: string
+          is_active?: boolean
+          lifecycle?: string
+          meeting_url?: string | null
+          min_run_checked_at?: string | null
+          min_to_run?: number | null
+          notes?: string | null
+          session_period?: string | null
+          start_time?: string
+          timezone?: string
+          trial_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_learning_goals: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          current_progress: number | null
+          goal_name: string
+          goal_type: string
+          id: string
+          status: string | null
+          target_date: string | null
+          target_value: number
+          time_period: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          current_progress?: number | null
+          goal_name: string
+          goal_type: string
+          id?: string
+          status?: string | null
+          target_date?: string | null
+          target_value: number
+          time_period: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          current_progress?: number | null
+          goal_name?: string
+          goal_type?: string
+          id?: string
+          status?: string | null
+          target_date?: string | null
+          target_value?: number
+          time_period?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_learning_goals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_student_overview"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_learning_goals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_student_status_overview"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_learning_goals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -2206,44 +3434,94 @@ export type Database = {
         }
         Relationships: []
       }
-      training_starred: {
+      vocabulary_review_history: {
         Row: {
-          id: string
-          user_id: string
-          starred: number[]
-          collections: Json
+          created_at: string
+          difficulty_factor: number
+          id: number
+          interval_days: number
+          last_reviewed_at: string | null
+          lesson_vocabulary_id: string
+          next_review_date: string
+          quality_last_review: number | null
+          review_count: number
           updated_at: string
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          starred?: number[]
-          collections?: Json
+          created_at?: string
+          difficulty_factor?: number
+          id?: number
+          interval_days?: number
+          last_reviewed_at?: string | null
+          lesson_vocabulary_id: string
+          next_review_date?: string
+          quality_last_review?: number | null
+          review_count?: number
           updated_at?: string
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          starred?: number[]
-          collections?: Json
+          created_at?: string
+          difficulty_factor?: number
+          id?: number
+          interval_days?: number
+          last_reviewed_at?: string | null
+          lesson_vocabulary_id?: string
+          next_review_date?: string
+          quality_last_review?: number | null
+          review_count?: number
           updated_at?: string
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vocabulary_review_history_lesson_vocabulary_id_fkey"
+            columns: ["lesson_vocabulary_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_vocabulary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vocabulary_review_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_student_overview"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "vocabulary_review_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_student_status_overview"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "vocabulary_review_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
     }
     Views: {
-      lead_funnel: {
+      active_course_levels: {
         Row: {
-          clicked_free_trial: boolean | null
-          clicked_whatsapp: boolean | null
-          first_seen: string | null
-          last_seen: string | null
-          session_id: string | null
-          signup_completed: boolean | null
-          started_placement: boolean | null
-          touchpoints: string[] | null
-          user_id: string | null
-          viewed_pricing_cta: boolean | null
+          display_label: string | null
+          key: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          display_label?: string | null
+          key?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          display_label?: string | null
+          key?: string | null
+          sort_order?: number | null
         }
         Relationships: []
       }
@@ -2253,6 +3531,7 @@ export type Database = {
           amount_due: number | null
           approval_status: string | null
           country: string | null
+          created_at: string | null
           currency: string | null
           derived_status: string | null
           duration: number | null
@@ -2267,6 +3546,7 @@ export type Database = {
           payment_provider: string | null
           payment_status: string | null
           plan_type: string | null
+          remaining_balance: number | null
           sessions_remaining: number | null
           sessions_total: number | null
           source_label: string | null
@@ -2302,6 +3582,162 @@ export type Database = {
           unit_price: number | null
           user_id: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_level_fkey_course_levels"
+            columns: ["profile_level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "profiles_level_fkey_course_levels"
+            columns: ["profile_level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      checkout_recovery_kpi: {
+        Row: {
+          click_rate_pct: number | null
+          leads_clicked: number | null
+          leads_converted: number | null
+          leads_emailed: number | null
+          leads_opened: number | null
+          open_rate_pct: number | null
+          recovery_rate_pct: number | null
+          total_sent: number | null
+        }
+        Relationships: []
+      }
+      checkout_recovery_tracker: {
+        Row: {
+          converted_at: string | null
+          email: string | null
+          emails_sent: number | null
+          last_clicked_at: string | null
+          last_opened_at: string | null
+          last_sent_at: string | null
+          last_stage_sent: number | null
+          lead_created_at: string | null
+          lead_id: string | null
+          name: string | null
+          plan_type: string | null
+          unsubscribed: boolean | null
+        }
+        Relationships: []
+      }
+      lead_funnel: {
+        Row: {
+          booked_trial: boolean | null
+          clicked_free_trial: boolean | null
+          clicked_whatsapp: boolean | null
+          enrolled_paid: boolean | null
+          entry_page: string | null
+          event_count: number | null
+          first_referrer: string | null
+          first_seen: string | null
+          first_source: string | null
+          first_utm_campaign: string | null
+          first_utm_medium: string | null
+          first_utm_source: string | null
+          last_seen: string | null
+          last_source: string | null
+          session_id: string | null
+          signup_completed: boolean | null
+          started_placement: boolean | null
+          touchpoints: string[] | null
+          user_id: string | null
+          viewed_pricing_cta: boolean | null
+        }
+        Relationships: []
+      }
+      v_trial_bookings_admin: {
+        Row: {
+          attendance_responded_at: string | null
+          attendance_response: string | null
+          class_language: string | null
+          confirmed_at: string | null
+          created_at: string | null
+          day_name: string | null
+          day_of_week: number | null
+          email: string | null
+          email_opened_at: string | null
+          email_sent_at: string | null
+          goal: string | null
+          id: string | null
+          is_tba: boolean | null
+          level: string | null
+          name: string | null
+          next_trial_month: string | null
+          phone: string | null
+          program_phase: string | null
+          rollover_notified_at: string | null
+          rollover_status: string | null
+          slot_capacity: number | null
+          slot_duration_min: number | null
+          slot_exists: boolean | null
+          slot_id: string | null
+          slot_is_active: boolean | null
+          slot_lifecycle: string | null
+          start_time: string | null
+          status: string | null
+          time_bucket: string | null
+          timezone: string | null
+          trial_date: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trial_bookings_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "active_course_levels"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "trial_bookings_level_fkey_course_levels"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "course_levels"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      v_trial_slot_fill_rate: {
+        Row: {
+          booked_count: number | null
+          capacity: number | null
+          day_of_week: number | null
+          fill_pct: number | null
+          near_capacity: boolean | null
+          next_trial_date: string | null
+          start_time: string | null
+        }
+        Relationships: []
+      }
+      v_trial_slots_admin: {
+        Row: {
+          booked_count: number | null
+          capacity: number | null
+          class_language: string | null
+          day_name: string | null
+          day_of_week: number | null
+          duration_min: number | null
+          is_active: boolean | null
+          is_full: boolean | null
+          lifecycle: string | null
+          meeting_url: string | null
+          min_to_run: number | null
+          occurrence_date: string | null
+          seats_left: number | null
+          session_period: string | null
+          slot_id: string | null
+          start_time: string | null
+          timezone: string | null
+        }
         Relationships: []
       }
       xp_leaderboard: {
@@ -2315,10 +3751,7 @@ export type Database = {
       }
     }
     Functions: {
-      attach_session_to_user: {
-        Args: { p_session: string }
-        Returns: undefined
-      }
+      _trial_time_to_minutes: { Args: { t: string }; Returns: number }
       add_credits: {
         Args: { _amount: number; _user_id: string }
         Returns: number
@@ -2331,13 +3764,35 @@ export type Database = {
         }
         Returns: number
       }
+      admin_manual_enroll: {
+        Args: {
+          p_amount: number
+          p_classes_included: number
+          p_currency: string
+          p_duration: number
+          p_group_id?: string
+          p_level?: string
+          p_plan_type: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       admin_remove_attendance: {
         Args: { p_enrollment_id: string; p_session_date: string }
         Returns: number
       }
+      advance_trial_slots: { Args: never; Returns: undefined }
       approve_attendance_request: {
         Args: { _request_id: string }
         Returns: number
+      }
+      approve_enrollment: {
+        Args: {
+          _admin_id: string
+          _enrollment_id: string
+          _unit_price?: number
+        }
+        Returns: undefined
       }
       approve_group_attendance: {
         Args: { _attendance_id: string }
@@ -2355,8 +3810,55 @@ export type Database = {
         Args: { _enrollment_id: string; _user_id: string }
         Returns: string
       }
+      attach_session_to_user: {
+        Args: { p_session: string }
+        Returns: undefined
+      }
       auto_match_student: { Args: { _preference_id: string }; Returns: string }
+      auto_send_profile_reminders: { Args: never; Returns: undefined }
       backfill_missing_enrollments: { Args: never; Returns: Json }
+      book_trial_with_capacity_check: {
+        Args: {
+          p_day_of_week: number
+          p_email: string
+          p_goal: string
+          p_level: string
+          p_name: string
+          p_phone: string
+          p_start_time: string
+          p_timezone: string
+          p_trial_date: string
+          p_user_id?: string
+        }
+        Returns: string
+      }
+      cancel_enrollment: {
+        Args: { _enrollment_id: string }
+        Returns: undefined
+      }
+      check_trial_cron_health: { Args: never; Returns: undefined }
+      claim_trial_capacity_alert: {
+        Args: { p_start_time: string; p_trial_date: string }
+        Returns: {
+          capacity: number
+          class_language: string
+          confirmed_count: number
+          day_of_week: number
+          fourth_email: string
+          fourth_name: string
+          should_send: boolean
+          timezone: string
+        }[]
+      }
+      claim_trial_min_run_check: {
+        Args: { p_start_time: string; p_trial_date: string }
+        Returns: {
+          affected_bookings: number
+          confirmed_count: number
+          min_required: number
+          should_rollover: boolean
+        }[]
+      }
       cleanup_pkg_groups: { Args: never; Returns: Json }
       complete_schedule_resubmission: {
         Args: {
@@ -2376,7 +3878,291 @@ export type Database = {
       deduct_credit: { Args: { _user_id: string }; Returns: number }
       ensure_pkg_groups_for_packages: { Args: never; Returns: number }
       factory_reset_data: { Args: never; Returns: string }
+      fn_create_trial_slot: {
+        Args: {
+          p_capacity?: number
+          p_day_of_week: number
+          p_duration_min?: number
+          p_start_time: string
+          p_timezone?: string
+        }
+        Returns: {
+          archived_at: string | null
+          capacity: number
+          class_language: string | null
+          created_at: string
+          day_of_week: number
+          duration_min: number
+          enrollment_alert_sent_at: string | null
+          id: string
+          is_active: boolean
+          lifecycle: string
+          meeting_url: string | null
+          min_run_checked_at: string | null
+          min_to_run: number | null
+          notes: string | null
+          session_period: string | null
+          start_time: string
+          timezone: string
+          trial_date: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "trial_slots"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      fn_first_trial_block_date: { Args: { p_month: string }; Returns: string }
+      fn_retire_trial_slot: {
+        Args: { p_new_lifecycle?: string; p_slot_id: string }
+        Returns: {
+          archived_at: string | null
+          capacity: number
+          class_language: string | null
+          created_at: string
+          day_of_week: number
+          duration_min: number
+          enrollment_alert_sent_at: string | null
+          id: string
+          is_active: boolean
+          lifecycle: string
+          meeting_url: string | null
+          min_run_checked_at: string | null
+          min_to_run: number | null
+          notes: string | null
+          session_period: string | null
+          start_time: string
+          timezone: string
+          trial_date: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "trial_slots"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      fn_set_trial_program_start_date: {
+        Args: { p_date: string }
+        Returns: {
+          default_duration_min: number
+          id: number
+          min_group_size: number
+          program_start_date: string | null
+          suggestion_weeks: number
+          trial_block_days: number
+          trial_block_start_dow: number
+          updated_at: string
+          window_end_day: number | null
+          window_start_day: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "trial_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      fn_suggest_trial_slots: {
+        Args: never
+        Returns: {
+          day_name: string
+          day_of_week: number
+          duration_min: number
+          has_historical_demand: boolean
+          is_reasonable_hour: boolean
+          reasons: string[]
+          score: number
+          source: string
+          start_time: string
+          timezone: string
+          would_replace_full_slot: boolean
+        }[]
+      }
+      fn_trial_slot_conflicts: {
+        Args: {
+          p_day_of_week: number
+          p_duration_min?: number
+          p_start_text: string
+        }
+        Returns: {
+          detail: string
+          source: string
+        }[]
+      }
+      fn_update_trial_slot: {
+        Args: {
+          p_capacity?: number
+          p_class_language?: string
+          p_clear_meeting_url?: boolean
+          p_clear_min_to_run?: boolean
+          p_duration_min?: number
+          p_lifecycle?: string
+          p_meeting_url?: string
+          p_min_to_run?: number
+          p_session_period?: string
+          p_slot_id: string
+          p_start_time?: string
+          p_timezone?: string
+          p_trial_date?: string
+        }
+        Returns: {
+          archived_at: string | null
+          capacity: number
+          class_language: string | null
+          created_at: string
+          day_of_week: number
+          duration_min: number
+          enrollment_alert_sent_at: string | null
+          id: string
+          is_active: boolean
+          lifecycle: string
+          meeting_url: string | null
+          min_run_checked_at: string | null
+          min_to_run: number | null
+          notes: string | null
+          session_period: string | null
+          start_time: string
+          timezone: string
+          trial_date: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "trial_slots"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      generate_group_sessions: {
+        Args: { p_group_id: string; p_start_date?: string; p_weeks?: number }
+        Returns: {
+          created: boolean
+          session_date: string
+        }[]
+      }
+      generate_sessions_for_group: {
+        Args: { p_group_id: string; p_start_date?: string; p_weeks?: number }
+        Returns: number
+      }
       get_auth_email: { Args: never; Returns: string }
+      get_enrollment_for_payment: {
+        Args: { p_enrollment_id: string }
+        Returns: {
+          amount: number
+          approval_status: string
+          classes_included: number
+          currency: string
+          due_at: string
+          duration: number
+          id: string
+          payment_date: string
+          payment_method: string
+          plan_type: string
+          receipt_url: string
+          user_id: string
+        }[]
+      }
+      get_group_sessions: {
+        Args: { p_from?: string; p_group_id: string; p_to?: string }
+        Returns: {
+          marked_count: number
+          present_count: number
+          session_date: string
+          session_id: string
+          total_members: number
+        }[]
+      }
+      get_near_capacity_trial_slots: {
+        Args: never
+        Returns: {
+          booked_count: number
+          capacity: number
+          day_of_week: number
+          fill_pct: number
+          next_trial_date: string
+          start_time: string
+        }[]
+      }
+      get_session_roster: {
+        Args: { p_session_id: string }
+        Returns: {
+          admin_approved: boolean
+          attendance_status: string
+          email: string
+          full_name: string
+          user_id: string
+        }[]
+      }
+      get_sessions_for_reminder_1h: {
+        Args: never
+        Returns: {
+          duration_min: number
+          email: string
+          group_name: string
+          level: string
+          name: string
+          session_date: string
+          session_id: string
+          start_time: string
+          user_id: string
+        }[]
+      }
+      get_sessions_for_reminder_24h: {
+        Args: never
+        Returns: {
+          duration_min: number
+          email: string
+          group_name: string
+          level: string
+          name: string
+          session_date: string
+          session_id: string
+          start_time: string
+          user_id: string
+        }[]
+      }
+      get_student_preference_trends: {
+        Args: { days_back?: number }
+        Returns: {
+          day_of_week: number
+          level: string
+          preferred_start_time: string
+          request_count: number
+        }[]
+      }
+      get_student_upcoming_sessions: {
+        Args: { p_user_id: string }
+        Returns: {
+          attendance_status: string
+          day_of_week: number
+          duration_min: number
+          group_id: string
+          group_name: string
+          level: string
+          session_date: string
+          session_id: string
+          start_time: string
+          timezone: string
+        }[]
+      }
+      get_trial_availability: {
+        Args: { p_language?: string }
+        Returns: {
+          booked_count: number
+          capacity: number
+          class_language: string
+          day_of_week: number
+          duration_min: number
+          next_trial_date: string
+          session_period: string
+          start_time: string
+          timezone: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2384,6 +4170,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_blog_view: { Args: { post_slug: string }; Returns: undefined }
+      log_pgnet_email_failures: { Args: never; Returns: undefined }
       mark_student_attendance: {
         Args: { _notes?: string; _student_id: string }
         Returns: number
@@ -2392,6 +4180,7 @@ export type Database = {
         Args: { _enrollment_id: string }
         Returns: string
       }
+      normalize_level: { Args: { raw: string }; Returns: string }
       reassign_student_slot: {
         Args: { _enrollment_id: string; _new_slot_id: string }
         Returns: undefined
@@ -2404,6 +4193,10 @@ export type Database = {
         Args: { _reset_password: string }
         Returns: string
       }
+      resolve_user_language: {
+        Args: { p_country?: string; p_email: string }
+        Returns: string
+      }
       revert_attendance_request: {
         Args: { _request_id: string }
         Returns: undefined
@@ -2412,6 +4205,26 @@ export type Database = {
         Args: { _enrollment_id: string }
         Returns: undefined
       }
+      run_trial_min_group_checks: { Args: never; Returns: undefined }
+      save_session_attendance: {
+        Args: { p_records: Json; p_session_id: string }
+        Returns: number
+      }
+      save_student_preference: {
+        Args: {
+          p_level?: string
+          p_preferred_day_of_week: number
+          p_preferred_start_time: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      send_class_feedback_emails: { Args: never; Returns: undefined }
+      send_forming_escalation_emails: { Args: never; Returns: undefined }
+      send_forming_group_emails: { Args: never; Returns: undefined }
+      send_pre_class_reminders: { Args: never; Returns: undefined }
+      send_receipt_nudge_emails: { Args: never; Returns: undefined }
+      send_rejection_followup_emails: { Args: never; Returns: undefined }
       submit_egypt_payment: {
         Args: {
           _enrollment_id: string
@@ -2421,6 +4234,22 @@ export type Database = {
           _tx_ref?: string
         }
         Returns: undefined
+      }
+      submit_enrollment_with_preference: {
+        Args: {
+          p_amount: number
+          p_classes_included: number
+          p_duration: number
+          p_level: string
+          p_payment_provider: string
+          p_plan_type: string
+          p_preferred_day_of_week?: number
+          p_preferred_start_time?: string
+          p_stripe_payment_intent_id?: string
+          p_unit_price: number
+          p_user_id: string
+        }
+        Returns: Json
       }
       submit_manual_enrollment:
         | {
@@ -2444,6 +4273,11 @@ export type Database = {
             }
             Returns: string
           }
+      trigger_abandoned_checkout_recovery: { Args: never; Returns: undefined }
+      trigger_class_reminder_1h: { Args: never; Returns: undefined }
+      trigger_class_reminder_24h: { Args: never; Returns: undefined }
+      trigger_funnel_digest: { Args: never; Returns: undefined }
+      trigger_trial_followups: { Args: never; Returns: undefined }
       unmatch_student_slot: {
         Args: { _enrollment_id: string }
         Returns: undefined
@@ -2455,6 +4289,33 @@ export type Database = {
           _timezone: string
         }
         Returns: undefined
+      }
+      upsert_trial_booking: {
+        Args: {
+          p_day_of_week: number
+          p_delete_id: string
+          p_email: string
+          p_goal: string
+          p_language: string
+          p_level: string
+          p_name: string
+          p_phone: string
+          p_start_time: string
+          p_status: string
+          p_timezone: string
+          p_trial_date: string
+          p_user_id: string
+        }
+        Returns: string
+      }
+      upsert_trial_rate_limit: {
+        Args: {
+          p_action: string
+          p_identifier: string
+          p_max_attempts?: number
+          p_window_start: string
+        }
+        Returns: boolean
       }
       validate_resubmission_token: {
         Args: { _token: string }
