@@ -20,6 +20,10 @@ import { CheckCircle, Mail, RefreshCw, Users, XCircle } from "lucide-react";
 import { formatTime, convertDateTimeToTimezone } from "@/lib/admin-utils";
 import { getAdminTimezone } from "@/lib/viewerTimezone";
 import { getLevelShortLabel } from "@/constants/levels";
+import { useAllTrialSlots } from "@/hooks/useTrialAdmin";
+import AddTrialClassDialog from "@/components/admin/trial/AddTrialClassDialog";
+import { TrialSlotRow } from "@/types/trial-admin";
+import { Pencil, ChevronDown, ChevronUp, CalendarCog } from "lucide-react";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -135,6 +139,9 @@ const TrialClassesManager = () => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [trialSlotMap, setTrialSlotMap] = useState<Record<string, string>>({});
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [editingSlot, setEditingSlot] = useState<TrialSlotRow | null>(null);
+  const allSlotsQ = useAllTrialSlots();
 
   const { data: bookings = [], isLoading: loadingBookings } = useQuery<TrialBooking[]>({
     queryKey: ["admin", "trial-bookings"],
@@ -613,8 +620,85 @@ const TrialClassesManager = () => {
 
   const isPastSession = (date: string | null) => !!date && new Date(`${date}T00:00:00`) < startOfToday;
 
+  const activeScheduleSlots = (allSlotsQ.data ?? [])
+    .filter((s) => s.lifecycle === "active")
+    .sort((a, b) => (a.trial_date ?? "").localeCompare(b.trial_date ?? "") || a.start_time.localeCompare(b.start_time));
+
   return (
     <div className="space-y-4">
+      {/* Trial schedule — edit dates/times/language/capacity for your own availability */}
+      <Card>
+        <CardHeader
+          className="py-3 cursor-pointer select-none"
+          onClick={() => setScheduleOpen((o) => !o)}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <CalendarCog className="h-4 w-4" />
+              Trial Schedule ({activeScheduleSlots.length} active {activeScheduleSlots.length === 1 ? "slot" : "slots"})
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                <AddTrialClassDialog />
+              </div>
+              {scheduleOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Edit any session's date, time, language, or capacity based on your own availability. Changes apply to the public booking page immediately.
+          </p>
+        </CardHeader>
+        {scheduleOpen && (
+          <CardContent className="pt-0">
+            {allSlotsQ.isLoading ? (
+              <p className="text-xs text-muted-foreground py-4">Loading schedule...</p>
+            ) : activeScheduleSlots.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-4">No active trial slots configured.</p>
+            ) : (
+              <div className="rounded-md border overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Day</TableHead>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Language</TableHead>
+                      <TableHead className="text-right">Capacity</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {activeScheduleSlots.map((s) => (
+                      <TableRow key={s.id}>
+                        <TableCell className="text-xs font-mono">{s.trial_date ?? "—"}</TableCell>
+                        <TableCell className="text-xs">{DAY_NAMES[s.day_of_week]}</TableCell>
+                        <TableCell className="text-xs font-mono">{s.start_time} ({s.timezone})</TableCell>
+                        <TableCell className="text-xs capitalize">{s.class_language ?? "—"}</TableCell>
+                        <TableCell className="text-xs text-right">{s.capacity}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 w-7 p-0"
+                            onClick={() => setEditingSlot(s)}
+                            title="Edit this trial slot"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        )}
+      </Card>
+      {editingSlot && (
+        <AddTrialClassDialog editingSlot={editingSlot} onDoneEditing={() => setEditingSlot(null)} />
+      )}
+
       {/* Header controls */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
