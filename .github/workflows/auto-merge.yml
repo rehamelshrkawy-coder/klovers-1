@@ -55,16 +55,18 @@ jobs:
             exit 0
           fi
 
-          if [ "$draft" = "true" ]; then
-            echo "PR #$number is a draft - leaving it alone."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
           if [ "$mergeable" = "CONFLICTING" ]; then
             echo "::warning::PR #$number has merge conflicts with main and needs a manual rebase."
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
+          fi
+
+          # Claude Code opens its PRs in draft state, so "draft" carries no
+          # signal here - it is just the default. Mark it ready so it can be
+          # merged. This is exactly why PR #40 and #41 sat unmerged.
+          if [ "$draft" = "true" ]; then
+            echo "PR #$number is a draft - marking it ready for review."
+            gh pr ready "$number"
           fi
 
           echo "number=$number" >> "$GITHUB_OUTPUT"
