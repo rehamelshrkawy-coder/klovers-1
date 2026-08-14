@@ -101,7 +101,7 @@ export default {
   		},
   		fontFamily: {
   			sans: [
-  				'Inter',
+  				'Plus Jakarta Sans',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',
@@ -110,23 +110,23 @@ export default {
   				'Roboto',
   				'Helvetica Neue',
   				'Arial',
-  				'Tajawal',
+  				'Cairo',
   				'Noto Sans',
   				'sans-serif'
   			],
   			display: [
+  				'Poppins',
   				'Plus Jakarta Sans',
-  				'Inter',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',
   				'Segoe UI',
-  				'Tajawal',
+  				'Cairo',
   				'sans-serif'
   			],
   			arabic: [
-  				'Tajawal',
-  				'Inter',
+  				'Cairo',
+  				'Plus Jakarta Sans',
   				'ui-sans-serif',
   				'system-ui',
   				'sans-serif'
