@@ -545,16 +545,20 @@ const TrialClassesManager = () => {
     }
   };
 
-  // ── Repeat detection (same email appearing more than once)
+  // ── Repeat detection (same email with more than one ACTIVE booking).
+  // Cancelled history doesn't count — otherwise the badge never clears even
+  // after a genuine duplicate is resolved (e.g. via "Clear duplicates").
   const emailCounts = useMemo(() => {
     const m: Record<string, number> = {};
     bookings.forEach((b) => {
+      if (b.status === "cancelled") return;
       const k = (b.email || "").toLowerCase();
       if (k) m[k] = (m[k] || 0) + 1;
     });
     return m;
   }, [bookings]);
-  const isRepeat = (b: TrialBooking) => (emailCounts[(b.email || "").toLowerCase()] || 0) > 1;
+  const isRepeat = (b: TrialBooking) =>
+    b.status !== "cancelled" && (emailCounts[(b.email || "").toLowerCase()] || 0) > 1;
 
   // ── Filter
   const startOfToday = useMemo(() => {
