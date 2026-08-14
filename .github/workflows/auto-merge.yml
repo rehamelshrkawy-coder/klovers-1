@@ -1,0 +1,99 @@
+name: Auto-merge Claude PRs
+
+# Merges PRs from claude/* branches into main as soon as the CI workflow
+# goes green, so work done in a Claude session reaches production instead
+# of sitting in an open PR.
+#
+# Uses workflow_run (not pull_request) so the merge step runs with the
+# workflow definition from main and with write permissions, even though CI
+# itself runs in the PR's context.
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  merge:
+    name: Merge if CI passed
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      startsWith(github.event.workflow_run.head_branch, 'claude/')
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      BRANCH: ${{ github.event.workflow_run.head_branch }}
+      TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Find the open PR for this branch
+        id: pr
+        run: |
+          set -euo pipefail
+          pr=$(gh pr list --head "$BRANCH" --state open --json number,headRefOid,isDraft,mergeable --jq '.[0] // empty')
+          if [ -z "$pr" ]; then
+            echo "No open PR for $BRANCH - nothing to merge."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          number=$(echo "$pr" | jq -r .number)
+          head=$(echo "$pr" | jq -r .headRefOid)
+          draft=$(echo "$pr" | jq -r .isDraft)
+          mergeable=$(echo "$pr" | jq -r .mergeable)
+
+          if [ "$head" != "$TESTED_SHA" ]; then
+            echo "PR #$number moved on since CI ran - a newer CI run will handle it."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$draft" = "true" ]; then
+            echo "PR #$number is a draft - leaving it alone."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$mergeable" = "CONFLICTING" ]; then
+            echo "::warning::PR #$number has merge conflicts with main and needs a manual rebase."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      # Tries squash first; falls back to a merge commit if the repo does not
+      # have squash merging enabled (merge commits are known to be allowed -
+      # that is how PR #38 and #39 landed).
+      - name: Merge the PR
+        if: steps.pr.outputs.skip == 'false'
+        run: |
+          set -euo pipefail
+          n="${{ steps.pr.outputs.number }}"
+          if gh pr merge "$n" --squash --delete-branch; then
+            echo "Squash-merged PR #$n into main."
+          else
+            echo "Squash merge unavailable, falling back to a merge commit."
+            gh pr merge "$n" --merge --delete-branch
+            echo "Merged PR #$n into main."
+          fi
+
+      # A push made with GITHUB_TOKEN does NOT trigger other workflows, so the
+      # "Deploy Supabase" job that normally runs on push to main would be
+      # skipped. Dispatch it explicitly. (Vercel is unaffected - it deploys via
+      # its own GitHub App webhook, which does fire on this push.)
+      - name: Kick off Supabase migrations + edge functions
+        if: steps.pr.outputs.skip == 'false'
+        run: |
+          set -euo pipefail
+          sleep 10
+          gh workflow run deploy-functions.yml --ref main
+          echo "Dispatched Deploy Supabase on main."
