@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -193,7 +193,12 @@ const App = () => (
                 <Route path="/interview-training" element={<KoreanInterviewPage />} />
                 <Route path="/welcome-back" element={<ReturningStudentsLandingPage />} />
                 <Route path="/hangul-book" element={<AuthProtectedRoute><HangulBookPage /></AuthProtectedRoute>} />
-                <Route path="/trial-book" element={<AuthProtectedRoute><TrialBookPage /></AuthProtectedRoute>} />
+                {/* Renamed from /trial-book — that name sat one character
+                    from /trial-booking (an unrelated booking flow) despite
+                    this being a printable teacher's guide, not a booking
+                    page. Old links keep working via redirect. */}
+                <Route path="/teacher/trial-guide" element={<AuthProtectedRoute><TrialBookPage /></AuthProtectedRoute>} />
+                <Route path="/trial-book" element={<Navigate to="/teacher/trial-guide" replace />} />
                 <Route path="/trial-confirm" element={<TrialConfirmPage />} />
                 <Route path="/enrollment-status" element={<AuthProtectedRoute><EnrollmentStatusPage /></AuthProtectedRoute>} />
                 <Route path="/hangul-starter" element={<HangulStarterPage />} />

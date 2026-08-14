@@ -11,6 +11,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useSEO } from "@/hooks/useSEO";
@@ -133,6 +143,7 @@ const TrialBookingPage = () => {
   const [loading, setLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>(guessCountryFromTz);
   const [classLanguage, setClassLanguage] = useState<"arabic" | "english">(() =>
     defaultLanguageForCountry(guessCountryFromTz())
@@ -496,7 +507,7 @@ const TrialBookingPage = () => {
                   {t("trialBooking.changeDateBtn")}
                 </button>
                 <button
-                  onClick={handleCancelBooking}
+                  onClick={() => setCancelConfirmOpen(true)}
                   disabled={cancelling}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-destructive/50 hover:bg-destructive/5 text-sm font-semibold text-foreground transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -504,6 +515,24 @@ const TrialBookingPage = () => {
                   {cancelling ? t("trialBooking.cancelling") : t("trialBooking.cancelDateBtn")}
                 </button>
               </div>
+
+              <AlertDialog open={cancelConfirmOpen} onOpenChange={setCancelConfirmOpen}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("trialBooking.cancelConfirmTitle")}</AlertDialogTitle>
+                    <AlertDialogDescription>{t("trialBooking.cancelConfirmDesc")}</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("trialBooking.cancelConfirmKeep")}</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={() => { setCancelConfirmOpen(false); handleCancelBooking(); }}
+                    >
+                      {t("trialBooking.cancelConfirmAction")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
 
               {/* Inline country selector — updates pricing below in real time */}
               <div className="mt-5 flex items-center justify-center gap-2 flex-wrap">
