@@ -154,7 +154,7 @@ const ExitIntentModal = () => {
             </h3>
             <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
               {isAr
-                ? "هنبعتلك ورقة هانغول + ١٠٪ خصم على أول حصة مدفوعة."
+                ? "هنبعتلك ورقة هانغول + 10٪ خصم على أول حصة مدفوعة."
                 : "We'll send you the Hangul sheet + 10% off your first paid class."}
             </p>
             <Button asChild className="w-full gap-2 mb-3" onClick={() => setShow(false)}>

@@ -11,6 +11,7 @@ import ReturningStudentBanner from "@/components/ReturningStudentBanner";
 import InterviewBannerChip from "@/components/InterviewBannerChip";
 import HomeExitNudge from "@/components/HomeExitNudge";
 import { COMMUNITY_MEMBERS } from "@/lib/siteConfig";
+import { formatNumber } from "@/lib/formatNumber";
 
 // Lazy-load below-fold sections for faster initial paint
 const MeetTeacher = lazy(() => import("@/components/MeetTeacher"));
@@ -39,8 +40,8 @@ const CommunityBand = () => {
                   community members — a different quantity, now labelled so. */}
               <p className="font-extrabold text-foreground text-lg leading-tight">
                 {isAr
-                  ? `انضم لأكثر من ${COMMUNITY_MEMBERS.toLocaleString("ar-EG")} عضو`
-                  : `Join ${COMMUNITY_MEMBERS.toLocaleString("en-US")}+ members`}
+                  ? `انضم لأكثر من ${formatNumber(COMMUNITY_MEMBERS, "ar")} عضو`
+                  : `Join ${formatNumber(COMMUNITY_MEMBERS, "en")}+ members`}
               </p>
               <p className="text-muted-foreground text-sm">
                 {isAr ? "في مجتمعنا على تيليغرام وفيسبوك" : "in our Telegram & Facebook community"}

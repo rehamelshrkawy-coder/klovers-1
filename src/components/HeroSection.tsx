@@ -13,6 +13,7 @@ import {
   WHATSAPP_BASE,
 } from "@/lib/siteConfig";
 import { useTrialAvailability, formatSession } from "@/hooks/useTrialAvailability";
+import { formatNumber } from "@/lib/formatNumber";
 
 /** True when the visitor has asked their OS to reduce motion. */
 const prefersReducedMotion = () =>
@@ -296,7 +297,7 @@ const HeroSection = () => {
           <div className="w-full h-px bg-gradient-to-r from-transparent via-white/25 to-transparent mb-6" />
           <div className="grid grid-cols-3 gap-4 md:gap-8">
             {[
-              { icon: Users, ref: studentRef, display: `${studentCount.toLocaleString('en-US')}+`, label: isAr ? "طالب تعلّموا" : "Students Taught" },
+              { icon: Users, ref: studentRef, display: `${formatNumber(studentCount, isAr ? "ar" : "en")}+`, label: isAr ? "طالب تعلّموا" : "Students Taught" },
               { icon: Star,  ref: ratingRef,  display: `${(Math.max(0, ratingCount) / 10).toFixed(1)} ★`, label: isAr ? "متوسط التقييم" : "Average Rating" },
               // Was "6 Months → To Conversational". Six months is 24 sessions,
               // which is Level 1 / TOPIK 1 / A1 by the site's own roadmap — not

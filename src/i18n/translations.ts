@@ -1864,14 +1864,35 @@ export const translations = {
       langMalay: "Malay",
       langTurkish: "Turkish",
     },
+    // Describes the tour the modal actually renders. The previous version of
+    // this section described a different three-step tour (profile / placement /
+    // plan) that no component consumed, while the modal carried its own
+    // titleEn/titleAr literal pairs — 46 translated keys with no consumer, next
+    // to untranslatable copy on a bilingual site.
     welcomeModal: {
-      title: "Welcome to Klovers! 🎉",
-      subtitle: "Let's get you started on your Korean journey",
-      step1: "Complete your profile",
-      step2: "Take the placement test",
-      step3: "Choose your plan",
-      cta: "Let's Go!",
-      skip: "I'll do it later",
+      title: "Welcome to Klovers! 🇰🇷",
+      subtitle: "Here's how to kick off your Korean journey",
+      next: "Next",
+      done: "Done",
+      skip: "Skip welcome tour",
+      close: "Close",
+      steps: [
+        {
+          title: "Take your placement test",
+          description: "Find out your exact Korean level (A1–C2) with our free TOPIK-based assessment. It only takes 10 minutes.",
+          cta: "Take the free test",
+        },
+        {
+          title: "Explore your textbook",
+          description: "Browse 75+ structured Korean lessons organised by level. Study vocabulary, grammar and culture at your own pace.",
+          cta: "Open the textbook",
+        },
+        {
+          title: "Play and earn XP",
+          description: "13 interactive games to practise Korean — every game you play earns XP and unlocks badges.",
+          cta: "Play games",
+        },
+      ],
     },
     notFoundPage: {
       title: "Page Not Found",
@@ -1934,7 +1955,7 @@ export const translations = {
       bio4: "كل مدرس بيتقيّم على الطلاقة وأسلوب التدريس وقدرته على الشرح بالعربي قبل الانضمام. تعلّمك في أيدي أمينة.",
       highlights: [
         { label: "+500", description: "طالب تعلّموا" },
-        { label: "٤.٩ / ٥", description: "متوسط تقييم الطلاب" },
+        { label: "4.9 / 5", description: "متوسط تقييم الطلاب" },
         { label: "TOPIK", description: "مدرسون معتمدون" },
       ],
       cta: "احجز حصة مجانية",
@@ -1944,7 +1965,7 @@ export const translations = {
       subtitle: "مش حفظ. مش مشاهدة. كلام حقيقي — بالعربي عشان يوصل من الدقيقة الأولى.",
       steps: [
         { title: "شرح بالعربي", description: "معلمتك بتشرح الكورية بالعربي — عشان تفهم فعلاً مش بس تحفظ أصوات." },
-        { title: "أقصى ٦ طلاب", description: "المجموعة صغيرة بما يكفي إنك تتكلم في كل حصة. مفيش اختباء." },
+        { title: "أقصى 6 طلاب", description: "المجموعة صغيرة بما يكفي إنك تتكلم في كل حصة. مفيش اختباء." },
         { title: "تصحيح فوري", description: "المعلمة بتصحح نطقك على الهواء وبتبعتلك تمارين على مستواك بعد الحصة." },
         { title: "مسار TOPIK واضح", description: "من A1 لـ C2 — دايماً عارف وصلت فين والخطوة الجاية إيه." },
       ],
@@ -1969,14 +1990,14 @@ export const translations = {
       title: "ماذا يقول طلابنا",
       subtitle: "قصص حقيقية من محبي الكورية",
       items: [
-        { name: "حياة مصطفى", quote: "ميرسي جداً على تعليمنا اللغة الكورية 😍 متشكرة جداً على المستويات اللي وصلنالها من الصفر — تعليم الحروف والكتابة والقراءة والكلام.", location: "مصر", duration: "٦ أشهر", level: "A1 → B1" },
-        { name: "سامة آدم", quote: "بجد أحلى سونتسينيم في الدنيا 😍 الكورس خفيف وبستمتع بيه جداً. قربت أكمل سنة وبجد اتحسنت كتير في الكوري والجرامر بتسهله جداً علينا ❤️", location: "مصر", duration: "١١ شهر", level: "A1 → B2" },
-        { name: "يمنى دراهم", quote: "من الكورسات اللذيذة والممتعة جداً! طريقتها حلوة جداً وبتوضح الحاجة بصورة بسيطة وسهلة، دا غير شخصيتها العسولة وأنها هتساعدك في أي وقت 💕", location: "مصر", duration: "٤ أشهر", level: "A1 → A2" },
+        { name: "حياة مصطفى", quote: "ميرسي جداً على تعليمنا اللغة الكورية 😍 متشكرة جداً على المستويات اللي وصلنالها من الصفر — تعليم الحروف والكتابة والقراءة والكلام.", location: "مصر", duration: "6 أشهر", level: "A1 → B1" },
+        { name: "سامة آدم", quote: "بجد أحلى سونتسينيم في الدنيا 😍 الكورس خفيف وبستمتع بيه جداً. قربت أكمل سنة وبجد اتحسنت كتير في الكوري والجرامر بتسهله جداً علينا ❤️", location: "مصر", duration: "11 شهر", level: "A1 → B2" },
+        { name: "يمنى دراهم", quote: "من الكورسات اللذيذة والممتعة جداً! طريقتها حلوة جداً وبتوضح الحاجة بصورة بسيطة وسهلة، دا غير شخصيتها العسولة وأنها هتساعدك في أي وقت 💕", location: "مصر", duration: "4 أشهر", level: "A1 → A2" },
       ],
     },
     finalCta: {
       title: "حصة واحدة مجانية — هذا كل ما نطلبه",
-      subtitle: "٣٠ دقيقة مع معلمة حقيقية — الشرح بالعربي. لا بطاقة ائتمان، لا التزام. جرّب وشوف إذا الكورية مناسبة لك.",
+      subtitle: "30 دقيقة مع معلمة حقيقية — الشرح بالعربي. لا بطاقة ائتمان، لا التزام. جرّب وشوف إذا الكورية مناسبة لك.",
       button: "احجز حصة مجانية",
     },
     returningStudents: {
@@ -2974,7 +2995,7 @@ export const translations = {
       bookingFailed: "فشل الحجز. يرجى المحاولة مرة أخرى.",
       noSlotsAvailable: "لا توجد مواعيد متاحة في هذا اليوم.",
       whatToExpect: "ماذا تتوقع",
-      expectItem1: "في ٣٠ دقيقة — قراءة أول كلمة كورية حقيقية بصوت عالي.",
+      expectItem1: "في 30 دقيقة — قراءة أول كلمة كورية حقيقية بصوت عالي.",
       expectItem2: "تحديد مستواك بالظبط من بين الستة مستويات.",
       expectItem3: "خطة مكتوبة لأول أربع أسابيع بعد الحصة.",
       fillAllFields: "يرجى ملء جميع الحقول المطلوبة",
@@ -3762,13 +3783,29 @@ export const translations = {
       error: "حدث خطأ. يرجى المحاولة مرة أخرى.",
     },
     welcomeModal: {
-      title: "أهلاً بك في Klovers! 🎉",
-      subtitle: "لنبدأ رحلتك الكورية",
-      step1: "أكمل ملفك الشخصي",
-      step2: "خذ اختبار تحديد المستوى",
-      step3: "اختر خطتك",
-      cta: "لننطلق!",
-      skip: "سأفعل ذلك لاحقاً",
+      title: "أهلاً بيك في Klovers! 🇰🇷",
+      subtitle: "إزاي تبدأ رحلتك مع الكورية",
+      next: "التالي",
+      done: "تم",
+      skip: "تخطي جولة الترحيب",
+      close: "إغلاق",
+      steps: [
+        {
+          title: "اختبار تحديد المستوى",
+          description: "اعرف مستواك بالظبط من A1 لـ C2 باختبار مجاني مبني على TOPIK. 10 دقايق بس.",
+          cta: "ابدأ الاختبار المجاني",
+        },
+        {
+          title: "استكشف كتابك",
+          description: "أكتر من 75 درس كوري منظّم حسب المستوى — مفردات وقواعد وثقافة على راحتك.",
+          cta: "افتح الكتاب",
+        },
+        {
+          title: "العب واكسب نقاط",
+          description: "13 لعبة تفاعلية لتدريب الكورية — كل لعبة بتكسبك نقاط وبتفتح شارات.",
+          cta: "العب دلوقتي",
+        },
+      ],
     },
     notFoundPage: {
       title: "الصفحة غير موجودة",
