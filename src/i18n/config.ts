@@ -111,16 +111,43 @@ const adminAr = {
   },
 };
 
+/**
+ * The admin namespace carries a complete Arabic translation set — and until
+ * now nothing could ever reach it. `lng` was hardcoded to "en" and
+ * `changeLanguage` was never called anywhere, so `adminAr` above was written,
+ * reviewed and shipped as dead weight.
+ *
+ * The initial language is resolved the same way the rest of the site resolves
+ * it (URL first, then the saved preference), and LanguageProvider keeps the
+ * two in step from then on — see syncAdminLanguage below.
+ */
+function initialAdminLanguage(): "en" | "ar" {
+  try {
+    const fromUrl = new URLSearchParams(window.location.search).get("lang");
+    if (fromUrl === "ar" || fromUrl === "en") return fromUrl;
+    const stored = localStorage.getItem("k-lovers-lang");
+    if (stored === "ar" || stored === "en") return stored;
+  } catch {
+    /* Private mode, or no window during prerender. */
+  }
+  return "en";
+}
+
 i18n.use(initReactI18next).init({
   resources: {
     en: { admin: adminEn },
     ar: { admin: adminAr },
   },
-  lng: "en",
+  lng: initialAdminLanguage(),
   fallbackLng: "en",
   ns: ["admin"],
   defaultNS: "admin",
   interpolation: { escapeValue: false },
 });
+
+/** Points i18next at the language the rest of the app is using. */
+export function syncAdminLanguage(language: "en" | "ar"): void {
+  if (i18n.language !== language) void i18n.changeLanguage(language);
+}
 
 export default i18n;

@@ -23,7 +23,7 @@ import { CheckCircle2, CalendarPlus, CalendarClock, CalendarX, ArrowRight, Gradu
 import { useLanguage } from "@/contexts/LanguageContext";
 import { friendlyError } from "@/lib/friendlyError";
 import { convertDateTimeToTimezone } from "@/lib/admin-utils";
-import { viewerToday, NO_END_DATE_SENTINEL } from "@/hooks/useTrialAvailability";
+import { viewerToday, NO_END_DATE_SENTINEL } from "@/lib/trialTime";
 import { readPendingTrialSlot, clearPendingTrialSlot } from "@/lib/pendingTrialSlot";
 
 // ── Country / pricing helpers ─────────────────────────────────────────────────

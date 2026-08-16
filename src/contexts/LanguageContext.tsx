@@ -82,6 +82,7 @@ export function resolveInitialLanguage(
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 import { translations } from "@/i18n/translations";
+import { syncAdminLanguage } from "@/i18n/config";
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<Language>(() => {
@@ -94,6 +95,10 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
     document.documentElement.lang = language;
     try { localStorage.setItem(LANG_STORAGE_KEY, language); } catch { /* private mode */ }
+
+    // The admin panel runs on i18next rather than this context. Keep the two
+    // in step so its Arabic strings are actually reachable.
+    syncAdminLanguage(language);
 
     // Write the choice back into the URL so the page is linkable and
     // shareable in the language the reader is actually looking at.
