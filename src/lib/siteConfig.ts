@@ -1,7 +1,7 @@
 // ─── Site-wide configuration constants ───────────────────────────────────────
 // Change these in ONE place and they propagate everywhere.
 
-export const WHATSAPP_NUMBER = "601121777560"; // Update this if your number changes
+export const WHATSAPP_NUMBER = "201010003084"; // Update this if your number changes
 export const WHATSAPP_BASE = `https://wa.me/${WHATSAPP_NUMBER}`;
 
 export const CONTACT_EMAIL = "koreanlovers.net@gmail.com";

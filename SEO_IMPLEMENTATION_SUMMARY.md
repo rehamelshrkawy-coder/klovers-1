@@ -138,7 +138,7 @@ In GSC, use **Inspect URL** tool to request indexing for:
 2. Search for "Klovers" or create new listing
 3. Fill in complete business info:
    - Name: Klovers — Korean Lovers Academy
-   - Phone: +201121777560
+   - Phone: +201010003084
    - Address: Service area in Egypt + Middle East
    - Website: https://kloversegy.com
    - Hours: Mo-Su 09:00-21:00

@@ -45,8 +45,8 @@ const Footer = () => {
               <a href="mailto:koreanlovers.net@gmail.com" className="flex items-center gap-2 hover:text-primary transition-colors">
                 <Mail className="h-3.5 w-3.5 shrink-0" /> koreanlovers.net@gmail.com
               </a>
-              <a href="tel:+601121777560" className="flex items-center gap-2 hover:text-primary transition-colors">
-                <Phone className="h-3.5 w-3.5 shrink-0" /> +601121777560
+              <a href="tel:+201010003084" className="flex items-center gap-2 hover:text-primary transition-colors">
+                <Phone className="h-3.5 w-3.5 shrink-0" /> +201010003084
               </a>
             </div>
           </div>

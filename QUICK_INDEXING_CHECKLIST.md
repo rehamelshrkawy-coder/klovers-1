@@ -37,7 +37,7 @@
 - [ ] Search for "Klovers" or create new listing
 - [ ] Fill in complete business information:
   - [ ] Name: Klovers — Korean Lovers Academy
-  - [ ] Phone: +201121777560
+  - [ ] Phone: +201010003084
   - [ ] Website: https://kloversegy.com
   - [ ] Address: Service area - Egypt / Middle East
   - [ ] Hours: Mo-Su 09:00-21:00
