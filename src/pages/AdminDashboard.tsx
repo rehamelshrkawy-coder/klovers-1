@@ -358,7 +358,14 @@ const AdminDashboard = () => {
 
   /** Targeted refetch — replaces the old monolithic invalidateAll(). */
   const invalidateAll = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ["admin"] });
+    return Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["admin"] }),
+      queryClient.invalidateQueries({ queryKey: ["trial-admin"] }),
+      queryClient.invalidateQueries({ queryKey: ["lead_events"] }),
+      queryClient.invalidateQueries({ queryKey: ["lead_funnel"] }),
+      queryClient.invalidateQueries({ queryKey: ["lead_funnel_prev"] }),
+      queryClient.invalidateQueries({ queryKey: ["enrollments_sources"] }),
+    ]);
   }, [queryClient]);
 
   // ── Local UI state ────────────────────────────────────────────────────────
