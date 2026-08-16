@@ -19,6 +19,14 @@ permissions:
   pull-requests: write
   actions: write
 
+# Serialise merges. Without this, two PRs that go green at the same time can
+# both merge, and the COMBINATION of the two would never have been built by
+# CI - each was only tested against the main that existed when its own run
+# started.
+concurrency:
+  group: auto-merge-main
+  cancel-in-progress: false
+
 jobs:
   merge:
     name: Merge if CI passed
@@ -72,11 +80,31 @@ jobs:
           echo "number=$number" >> "$GITHUB_OUTPUT"
           echo "skip=false" >> "$GITHUB_OUTPUT"
 
+      # Guard against merging a stale-but-green PR. CI built this PR against
+      # whatever main was at the time; if main has moved since, that build no
+      # longer describes the tree we are about to create. Re-run CI instead of
+      # merging blind.
+      - name: Confirm main has not moved since CI ran
+        id: freshness
+        if: steps.pr.outputs.skip == 'false'
+        run: |
+          set -euo pipefail
+          ci_started="${{ github.event.workflow_run.created_at }}"
+          main_pushed=$(gh api "repos/$GH_REPO/commits/main" --jq '.commit.committer.date')
+          echo "CI started: $ci_started / main last commit: $main_pushed"
+          if [[ "$main_pushed" > "$ci_started" ]]; then
+            echo "::warning::main advanced after CI ran for PR #${{ steps.pr.outputs.number }}. Re-running CI rather than merging an untested combination."
+            gh workflow run ci.yml --ref "$BRANCH" || true
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "stale=false" >> "$GITHUB_OUTPUT"
+          fi
+
       # Tries squash first; falls back to a merge commit if the repo does not
       # have squash merging enabled (merge commits are known to be allowed -
       # that is how PR #38 and #39 landed).
       - name: Merge the PR
-        if: steps.pr.outputs.skip == 'false'
+        if: steps.pr.outputs.skip == 'false' && steps.freshness.outputs.stale == 'false'
         run: |
           set -euo pipefail
           n="${{ steps.pr.outputs.number }}"
@@ -93,7 +121,7 @@ jobs:
       # skipped. Dispatch it explicitly. (Vercel is unaffected - it deploys via
       # its own GitHub App webhook, which does fire on this push.)
       - name: Kick off Supabase migrations + edge functions
-        if: steps.pr.outputs.skip == 'false'
+        if: steps.pr.outputs.skip == 'false' && steps.freshness.outputs.stale == 'false'
         run: |
           set -euo pipefail
           sleep 10
