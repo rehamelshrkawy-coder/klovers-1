@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Users, Star, Zap, MessageCircle } from "lucide-react";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
@@ -18,18 +19,12 @@ const KR_CHARS = ["안녕", "한국어", "공부", "화이팅", "수업", "최�
 const FinalCTA = () => {
   const { t, language } = useLanguage();
   const isAr = language === "ar";
-  const sectionRef = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
+  /* Shared reveal: falls back to visible when IntersectionObserver
+     is missing, and reveals after 2s regardless — a section that
+     never appears is worse than one that appears early. */
+  const { ref: sectionRef, visible } = useScrollReveal<HTMLElement>({ threshold: 0.2 });
   const [count, setCount] = useState(0);
 
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.2 }
-    );
-    if (sectionRef.current) obs.observe(sectionRef.current);
-    return () => obs.disconnect();
-  }, []);
 
   // Animate student count 0 → 1000
   useEffect(() => {

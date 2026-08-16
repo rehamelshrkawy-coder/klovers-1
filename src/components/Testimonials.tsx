@@ -26,6 +26,18 @@ const Testimonials = () => {
   const refs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
+    const revealAll = () => setVisible(new Set(items.map((_, i) => i)));
+
+    // No observer, or reduced motion: reveal everything immediately rather
+    // than leaving every item stuck at opacity-0 forever.
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (typeof IntersectionObserver === "undefined" || reduceMotion) {
+      revealAll();
+      return;
+    }
+
     const observers: IntersectionObserver[] = [];
     refs.current.forEach((el, i) => {
       if (!el) return;
@@ -36,7 +48,13 @@ const Testimonials = () => {
       obs.observe(el);
       observers.push(obs);
     });
-    return () => observers.forEach(o => o.disconnect());
+    // Failsafe: whatever the observers did, the content becomes visible.
+    const timer = window.setTimeout(revealAll, 2000);
+
+    return () => {
+      observers.forEach(o => o.disconnect());
+      window.clearTimeout(timer);
+    };
   }, [items.length]);
 
   return (

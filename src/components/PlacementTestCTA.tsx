@@ -2,13 +2,16 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ClipboardCheck, Brain, Target, Sparkles, Clock, CheckCircle2, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const PlacementTestCTA = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const sectionRef = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
+  /* Shared reveal: falls back to visible when IntersectionObserver
+     is missing, and reveals after 2s regardless — a section that
+     never appears is worse than one that appears early. */
+  const { ref: sectionRef, visible } = useScrollReveal<HTMLElement>({ threshold: 0.15 });
   const [activeLevel, setActiveLevel] = useState(0);
 
   const LEVELS = [
@@ -28,14 +31,6 @@ const PlacementTestCTA = () => {
   ];
 
   // Scroll-triggered entrance
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.15 }
-    );
-    if (sectionRef.current) obs.observe(sectionRef.current);
-    return () => obs.disconnect();
-  }, []);
 
   // Animate through levels once visible
   useEffect(() => {

@@ -4,8 +4,31 @@ import { AlertCircle } from "lucide-react";
 const SRCSET_WIDTHS_FULL = [320, 480, 640, 828, 1080, 1200, 1920];
 const SRCSET_WIDTHS_CARD = [320, 480, 640, 828];
 
+/**
+ * Vercel's built-in image optimizer. The `images` block in vercel.json
+ * configures this endpoint — but nothing ever requested a `/_vercel/image`
+ * URL, so that whole configuration block was inert and every local image was
+ * served at full size in its original format.
+ *
+ * Only used in the browser on the deployed origin: in dev, and during the
+ * prerender pass, the endpoint does not exist.
+ */
+function vercelImageUrl(src: string, width: number, quality: number): string {
+  return `/_vercel/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality}`;
+}
+
+const canUseVercelOptimizer =
+  typeof window !== "undefined" && !/^(localhost|127\.|0\.0\.0\.0)/.test(window.location.hostname);
+
 function optimizedUrl(src: string, width: number, quality = 75): string {
-  if (!src.startsWith("http://") && !src.startsWith("https://")) return src;
+  if (!src.startsWith("http://") && !src.startsWith("https://")) {
+    // Local asset (/hero-korean.jpg, /assets/...). Hand it to Vercel's
+    // optimizer so it gets resized and served as AVIF/WebP.
+    if (src.startsWith("/") && canUseVercelOptimizer) {
+      return vercelImageUrl(src, width, quality);
+    }
+    return src;
+  }
   // Unsplash supports native resizing via URL params
   if (src.includes("images.unsplash.com")) {
     const url = new URL(src);
@@ -33,6 +56,20 @@ function buildSrcSet(src: string, quality = 75, isCard = false): string {
   const widths = isCard ? SRCSET_WIDTHS_CARD : SRCSET_WIDTHS_FULL;
   return widths.map((w) => `${optimizedUrl(src, w, quality)} ${w}w`).join(", ");
 }
+
+/**
+ * Intrinsic dimensions for the `width`/`height` attributes.
+ *
+ * These do not size the image — CSS does that — but without them the browser
+ * cannot reserve space before the bytes arrive, so every image on the site
+ * pushed the layout down as it loaded. The numbers only need the right
+ * aspect ratio, which is fixed here by the variant's own CSS class
+ * (`aspect-[16/9]` for heroes, `aspect-video` for cards).
+ */
+const INTRINSIC = {
+  hero: { width: 1200, height: 675 },  // 16:9
+  card: { width: 640, height: 360 },   // 16:9
+} as const;
 
 interface OptimizedImageProps {
   src?: string;
@@ -123,6 +160,9 @@ const OptimizedImage = ({
         srcSet={buildSrcSet(src!, quality, isCard)}
         sizes={effectiveSizes}
         alt={alt}
+        /* Reserve the space before the bytes land — see INTRINSIC above. */
+        width={effectiveIsHero ? INTRINSIC.hero.width : INTRINSIC.card.width}
+        height={effectiveIsHero ? INTRINSIC.hero.height : INTRINSIC.card.height}
         loading={priority ? "eager" : "lazy"}
         decoding={priority ? "sync" : "async"}
         referrerPolicy="no-referrer"
