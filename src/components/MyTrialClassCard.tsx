@@ -18,7 +18,10 @@ interface TrialBookingRow {
   rollover_status: "pending_notification" | "notified" | null;
 }
 
-const TRIAL_DURATION_MIN = 45;
+// Matches trial_slots.duration_min for the currently active schedule — used
+// only as a fallback for legacy bookings made before a slot's duration was
+// resolvable (e.g. its trial_slots row has since been retired).
+const DEFAULT_TRIAL_DURATION_MIN = 30;
 
 function formatDate(d: string) {
   const date = new Date(d + "T12:00:00");
@@ -36,6 +39,7 @@ function daysUntil(d: string) {
 
 const MyTrialClassCard = () => {
   const [booking, setBooking] = useState<TrialBookingRow | null>(null);
+  const [durationMin, setDurationMin] = useState(DEFAULT_TRIAL_DURATION_MIN);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,7 +56,21 @@ const MyTrialClassCard = () => {
         .limit(1)
         .maybeSingle();
 
-      if (data) setBooking(data as TrialBookingRow);
+      if (data) {
+        setBooking(data as TrialBookingRow);
+        // The booking row itself doesn't carry duration — read it from the
+        // matching trial_slots row so this always matches what's actually
+        // scheduled, instead of a number hardcoded here going stale.
+        if (data.trial_date && data.start_time) {
+          const { data: slot } = await supabase
+            .from("trial_slots")
+            .select("duration_min")
+            .eq("trial_date", data.trial_date)
+            .eq("start_time", data.start_time)
+            .maybeSingle();
+          if (slot?.duration_min) setDurationMin(slot.duration_min);
+        }
+      }
       setLoading(false);
     };
     load();
@@ -143,7 +161,7 @@ const MyTrialClassCard = () => {
     title: "Free Korean Trial Class — Klovers Academy",
     date: booking.trial_date,
     time: booking.start_time,
-    durationMin: TRIAL_DURATION_MIN,
+    durationMin,
     description: `Trial class with Klovers Academy.\nLevel: ${booking.level || "Beginner"}\nhttps://kloversegy.com`,
     timezone,
   });
@@ -163,7 +181,7 @@ const MyTrialClassCard = () => {
               <p className="font-bold text-foreground text-lg">{formatDate(local.dateStr)}</p>
               <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                 <Clock className="h-3.5 w-3.5" />
-                {local.timeFormatted} · {TRIAL_DURATION_MIN} min · {userTz.replace(/_/g, " ")}
+                {local.timeFormatted} · {durationMin} min · {userTz.replace(/_/g, " ")}
               </p>
               <p className="text-[11px] text-muted-foreground/70">({formatDate(booking.trial_date)} {formatTime12h(booking.start_time)} {timezone.replace(/_/g, " ")})</p>
 

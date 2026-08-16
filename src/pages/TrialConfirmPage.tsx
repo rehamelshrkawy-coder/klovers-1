@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type PageState = "loading" | "success" | "already" | "error";
 
 const TrialConfirmPage = () => {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id") ?? "";
   const token = searchParams.get("token") ?? "";
@@ -79,48 +81,44 @@ const TrialConfirmPage = () => {
   }, [id, token]);
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="bg-card border border-border rounded-2xl shadow-xl max-w-md w-full p-8 text-center">
         {/* Logo / brand */}
         <div className="mb-6">
-          <span className="text-4xl font-black tracking-tight text-black">
-            K<span className="text-yellow-400">lovers</span>
+          <span className="text-4xl font-black tracking-tight text-foreground">
+            K<span className="text-primary">lovers</span>
           </span>
-          <p className="text-gray-500 text-sm mt-1">Korean Language Academy</p>
+          <p className="text-muted-foreground text-sm mt-1">{t("trialConfirm.tagline")}</p>
         </div>
 
         {state === "loading" && (
           <div className="py-8">
-            <div className="w-10 h-10 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Confirming your attendance…</p>
+            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">{t("trialConfirm.loading")}</p>
           </div>
         )}
 
         {(state === "success" || state === "already") && (
           <div className="py-4">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-950/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">✅</span>
             </div>
-            <h1 className="text-2xl font-bold text-black mb-2">Attendance Confirmed!</h1>
-            <p className="text-gray-600 mb-6">
-              {state === "already"
-                ? "You've already confirmed your attendance. See you in class!"
-                : "You're all set. See you in class!"}
+            <h1 className="text-2xl font-bold text-foreground mb-2">{t("trialConfirm.successTitle")}</h1>
+            <p className="text-muted-foreground mb-6">
+              {state === "already" ? t("trialConfirm.alreadyDesc") : t("trialConfirm.successDesc")}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a
                 href="/placement-test"
-                style={{ backgroundColor: "#000", color: "#FACC15" }}
-                className="inline-block font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
+                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-bold px-6 py-3 rounded-xl text-base hover:opacity-90 transition-opacity"
               >
-                📝 Take Placement Test
+                📝 {t("trialConfirm.placementTestBtn")}
               </a>
               <a
                 href="/pricing"
-                style={{ backgroundColor: "#000", color: "#FACC15" }}
-                className="inline-block font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
+                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-bold px-6 py-3 rounded-xl text-base hover:opacity-90 transition-opacity"
               >
-                💰 View Prices
+                💰 {t("trialConfirm.viewPricesBtn")}
               </a>
             </div>
             {classLink && (
@@ -128,9 +126,9 @@ const TrialConfirmPage = () => {
                 href={classLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block mt-3 text-sm text-gray-500 underline hover:text-gray-700"
+                className="inline-block mt-3 text-sm text-muted-foreground underline hover:text-foreground"
               >
-                Join via Google Meet
+                {t("trialConfirm.joinMeetLink")}
               </a>
             )}
           </div>
@@ -138,25 +136,25 @@ const TrialConfirmPage = () => {
 
         {state === "error" && (
           <div className="py-4">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-950/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">❌</span>
             </div>
-            <h1 className="text-2xl font-bold text-black mb-2">Link Invalid</h1>
-            <p className="text-gray-600 mb-6">
-              This link is invalid or has already been used. Please contact us if you need help.
+            <h1 className="text-2xl font-bold text-foreground mb-2">{t("trialConfirm.errorTitle")}</h1>
+            <p className="text-muted-foreground mb-6">
+              {t("trialConfirm.errorDesc")}
             </p>
             <a
               href="https://wa.me/201010003084"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-black text-yellow-400 font-bold px-6 py-3 rounded-xl text-base hover:opacity-90 transition-opacity"
+              className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-bold px-6 py-3 rounded-xl text-base hover:opacity-90 transition-opacity"
             >
-              Contact us on WhatsApp
+              {t("trialConfirm.contactWhatsapp")}
             </a>
           </div>
         )}
 
-        <p className="text-gray-400 text-xs mt-8">
+        <p className="text-muted-foreground/70 text-xs mt-8">
           <a href="https://kloversegy.com" className="hover:underline">kloversegy.com</a>
         </p>
       </div>
