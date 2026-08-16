@@ -3,7 +3,7 @@ import { ArrowRight, Sparkles, Users, Star, Zap, MessageCircle } from "lucide-re
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { trackAndOpenWhatsApp, logLeadEvent } from "@/lib/leadTracking";
 
@@ -24,7 +24,6 @@ const FinalCTA = () => {
      never appears is worse than one that appears early. */
   const { ref: sectionRef, visible } = useScrollReveal<HTMLElement>({ threshold: 0.2 });
   const [count, setCount] = useState(0);
-
 
   // Animate student count 0 → 1000
   useEffect(() => {

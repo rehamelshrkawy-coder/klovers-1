@@ -143,7 +143,7 @@ const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
               {isAr ? current.ctaAr : current.ctaEn}
               <ChevronRight className="h-4 w-4 rtl-flip" />
             </Button>
-            <Button variant="outline" onClick={handleNext} className="h-10 px-4 text-sm">
+            <Button variant="outline" onClick={handleNext} className="min-h-[44px] px-4 text-sm">
               {step < STEPS.length - 1
                 ? (isAr ? "التالي" : "Next")
                 : (isAr ? "تم" : "Done")}

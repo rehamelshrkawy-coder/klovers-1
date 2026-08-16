@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -20,9 +19,9 @@ import TrialSlotPicker from "@/components/TrialSlotPicker";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { track } from "@/lib/tracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
-import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
 import { CheckCircle2, CalendarPlus, CalendarClock, CalendarX, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2, Globe, Link2, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { friendlyError } from "@/lib/friendlyError";
 import { convertDateTimeToTimezone } from "@/lib/admin-utils";
 import { viewerToday, NO_END_DATE_SENTINEL } from "@/hooks/useTrialAvailability";
 import { readPendingTrialSlot, clearPendingTrialSlot } from "@/lib/pendingTrialSlot";
@@ -249,12 +248,6 @@ const TrialBookingPage = () => {
     if (pending) setClassLanguage(pending.class_language);
   }, []);
 
-  // Kept for the read-only level line on the success screen.
-  const needsLevel =
-    profileLoaded &&
-    !(profile?.level?.trim()) &&
-    !((user?.user_metadata?.level as string | undefined)?.trim());
-
   const handleSlotPicked = async (dayOfWeek: number, startTime: string, trialDate: string) => {
     if (!user) {
       navigate(`/signup?redirect=${encodeURIComponent("/trial-booking")}`);
@@ -404,7 +397,7 @@ const TrialBookingPage = () => {
       logLeadEvent({ source_type: "free_trial", cta_label: "booking_failed", metadata: { reason: err?.message || "unknown" } });
       toast({
         title: t("trialBooking.somethingWrong"),
-        description: err.message || t("trialBooking.tryAgain"),
+        description: friendlyError(t, err).message,
         variant: "destructive",
       });
     } finally {
@@ -506,7 +499,7 @@ const TrialBookingPage = () => {
     } catch (err: any) {
       toast({
         title: t("trialBooking.somethingWrong"),
-        description: err.message || t("trialBooking.tryAgain"),
+        description: friendlyError(t, err).message,
         variant: "destructive",
       });
     } finally {

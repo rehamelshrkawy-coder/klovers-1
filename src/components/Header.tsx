@@ -118,7 +118,7 @@ const Header = () => {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8" aria-label="Toggle dark mode">
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-11 w-11" aria-label="Toggle dark mode">
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
             <Button variant="ghost" size="sm" onClick={toggleLanguage} className="gap-1.5 text-xs">
@@ -145,9 +145,9 @@ const Header = () => {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none">
                     {profile?.avatar_url ? (
-                      <img src={profile.avatar_url} alt={profile.name} className="h-8 w-8 rounded-full object-cover border border-border" />
+                      <img src={profile.avatar_url} alt={profile.name} className="h-11 w-11 rounded-full object-cover border border-border" />
                     ) : (
-                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center border border-border">
+                      <div className="h-11 w-11 rounded-full bg-muted flex items-center justify-center border border-border">
                         <UserCircle className="h-5 w-5 text-muted-foreground" />
                       </div>
                     )}

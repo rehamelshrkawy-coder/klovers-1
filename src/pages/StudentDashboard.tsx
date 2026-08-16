@@ -176,17 +176,17 @@ const ProfileCard = ({
                   onChange={(e) => setNameValue(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
                 />
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSaveName} disabled={saving}>
+                <Button size="icon" variant="ghost" className="h-11 w-11" onClick={handleSaveName} disabled={saving}>
                   <Check className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setEditingName(false); setNameValue(displayName); }}>
+                <Button size="icon" variant="ghost" className="h-11 w-11" onClick={() => { setEditingName(false); setNameValue(displayName); }}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <p className="font-semibold text-foreground text-lg">{displayName}</p>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setNameValue(displayName); setEditingName(true); }}>
+                <Button size="icon" variant="ghost" className="h-11 w-11" onClick={() => { setNameValue(displayName); setEditingName(true); }}>
                   <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>
               </div>
@@ -595,7 +595,7 @@ const StudentDashboard = () => {
                 <div key="streak" className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-800/60 rounded-xl px-3 py-2 text-sm">
                   <span className="animate-bounce text-base">🔥</span>
                   <span className="flex-1 font-medium text-orange-800 dark:text-orange-300">Keep your <strong>{streak}-day streak</strong> alive!</span>
-                  <Button size="sm" variant="ghost" className="h-7 text-xs text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 shrink-0 px-2" onClick={() => navigate("/games")}>Play →</Button>
+                  <Button size="sm" variant="ghost" className="min-h-[44px] px-3 text-xs text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 shrink-0 px-2" onClick={() => navigate("/games")}>Play →</Button>
                 </div>
               );
             }
@@ -606,7 +606,7 @@ const StudentDashboard = () => {
                   <div key="sessions" className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-800/60 rounded-xl px-3 py-2 text-sm">
                     <span className="text-base">📦</span>
                     <span className="flex-1 font-medium text-blue-900 dark:text-blue-300">{remaining <= 0 ? "Package finished" : `Only ${remaining} session${remaining === 1 ? "" : "s"} left`}</span>
-                    <Button size="sm" className="h-7 text-xs bg-blue-600 hover:bg-blue-700 text-white shrink-0 px-2" onClick={() => navigate("/enroll-now")}>Renew →</Button>
+                    <Button size="sm" className="min-h-[44px] px-3 text-xs bg-blue-600 hover:bg-blue-700 text-white shrink-0 px-2" onClick={() => navigate("/enroll-now")}>Renew →</Button>
                   </div>
                 );
               }
@@ -628,7 +628,7 @@ const StudentDashboard = () => {
                   <div key="profile" className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 rounded-xl px-3 py-2 text-sm">
                     <span className="text-base">⚠️</span>
                     <span className="flex-1 font-medium text-amber-800 dark:text-amber-300">Profile {Math.round((done / total) * 100)}% complete</span>
-                    <Button size="sm" variant="ghost" className="h-7 text-xs text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 shrink-0 px-2" onClick={() => navigate("/dashboard?complete=name")}>Fix →</Button>
+                    <Button size="sm" variant="ghost" className="min-h-[44px] px-3 text-xs text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 shrink-0 px-2" onClick={() => navigate("/dashboard?complete=name")}>Fix →</Button>
                   </div>
                 );
               }

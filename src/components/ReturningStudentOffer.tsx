@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   GraduationCap,
@@ -31,7 +31,6 @@ const ReturningStudentOffer = () => {
   const { ref: sectionRef, visible } = useScrollReveal<HTMLElement>({ threshold: 0.1 });
   const [copied, setCopied] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-
 
   const handleCopy = async () => {
     try {

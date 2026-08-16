@@ -13,6 +13,7 @@ import Footer from "@/components/Footer";
 
 import { LEVEL_SELECT_OPTIONS, normalizeLevel, getLevelShortLabel } from "@/constants/levels";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { friendlyError } from "@/lib/friendlyError";
 // Keep the canonical short keys (hangul, l1 … l6) as values so the RPC
 // receives exactly what schedule_packages.level contains. Labels stay friendly.
 const LEVELS = LEVEL_SELECT_OPTIONS;
@@ -138,7 +139,7 @@ const ResubmitSchedulePage = () => {
       setSubmitted(true);
       toast({ title: t("resubmitSchedule.savedTitle"), description: t("resubmitSchedule.savedDesc") });
     } catch (err: any) {
-      toast({ title: t("common.error"), description: err.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: friendlyError(t, err).message, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }

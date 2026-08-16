@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Gamepad2, ArrowRight, Zap, Trophy, Star } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 
 const GAMES = [
   { emoji: "🃏", title: "Memory Match",     desc: "Match Korean words to meanings",   color: "from-[#FFE5CC]/40 to-[#FFE5CC]/10", border: "hover:border-[#FFE5CC]",  hot: true  },
@@ -38,7 +37,6 @@ const HomeGamesSection = () => {
      is missing, and reveals after 2s regardless — a section that
      never appears is worse than one that appears early. */
   const { ref: sectionRef, visible } = useScrollReveal<HTMLElement>({ threshold: 0.1 });
-
 
   return (
     <section ref={sectionRef} className="py-20 md:py-28 px-4 relative overflow-hidden bg-muted/20">
