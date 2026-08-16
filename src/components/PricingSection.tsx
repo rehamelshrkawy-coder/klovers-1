@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, MapPin, Star, Crown, Globe, Sparkles, Users, MessageCircle } from "lucide-react";
+import { Check, MapPin, Star, Crown, Globe, Sparkles, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "@/hooks/use-toast";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
@@ -167,7 +167,7 @@ const PricingSection = () => {
   };
 
   return (
-    <section id="pricing" className="py-20 bg-card">
+    <section id="pricing" className="py-20 md:py-28 bg-card">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <Badge variant="secondary" className="mb-4">

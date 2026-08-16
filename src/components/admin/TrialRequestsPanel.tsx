@@ -198,10 +198,10 @@ const TrialRequestsPanel = () => {
                     <TableRow key={b.id} className={b.status === "pending" ? "bg-yellow-50/50" : ""}>
                       <TableCell className="font-medium">{b.name}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{b.email}</TableCell>
-                      <TableCell className="text-sm">{b.phone || "â"}</TableCell>
+                      <TableCell className="text-sm">{b.phone || "—"}</TableCell>
                       <TableCell className="font-medium">{dayTime}</TableCell>
                       <TableCell>{trialDate}</TableCell>
-                      <TableCell className="text-sm">{b.level || "â"}</TableCell>
+                      <TableCell className="text-sm">{b.level || "—"}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${statusColor[b.status] || "bg-gray-100 text-gray-700"}`}>
                           {b.status}

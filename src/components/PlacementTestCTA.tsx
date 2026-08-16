@@ -15,7 +15,7 @@ const PlacementTestCTA = () => {
     { label: t("placementCta.levelA1"),  color: "bg-blue-500",   width: "w-[15%]" },
     { label: t("placementCta.levelA2"),  color: "bg-cyan-500",    width: "w-[30%]" },
     { label: t("placementCta.levelB1"),  color: "bg-green-500",   width: "w-[50%]" },
-    { label: t("placementCta.levelB2"),  color: "bg-amber-500",   width: "w-[65%]" },
+    { label: t("placementCta.levelB2"),  color: "bg-primary",   width: "w-[65%]" },
     { label: t("placementCta.levelC1"),  color: "bg-orange-500",  width: "w-[80%]" },
     { label: t("placementCta.levelC2"),  color: "bg-rose-500",    width: "w-[100%]" },
   ];
@@ -55,15 +55,15 @@ const PlacementTestCTA = () => {
       className="py-20 px-4 relative overflow-hidden bg-gradient-to-b from-background to-muted/40"
     >
       {/* Background blobs */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-amber-200/15 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-80 h-80 bg-amber-200/15 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl pointer-events-none" />
+      <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-80 h-80 bg-primary/10 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl pointer-events-none" />
 
       {/* Floating Korean characters */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden>
         {["한", "국", "어", "급", "수"].map((char, i) => (
           <span
             key={char}
-            className="absolute text-5xl font-bold text-amber-300/10 dark:text-amber-400/8"
+            className="absolute text-5xl font-bold text-primary/15 dark:text-primary/10"
             style={{ top: `${15 + i * 18}%`, left: `${3 + i * 19}%`, transform: `rotate(${-15 + i * 8}deg)` }}
           >
             {char}
@@ -80,7 +80,7 @@ const PlacementTestCTA = () => {
               visible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
             }`}
           >
-            <div className="inline-flex items-center gap-2 bg-amber-100 border border-black/10 px-4 py-2 rounded-full text-sm font-semibold text-amber-700">
+            <div className="inline-flex items-center gap-2 bg-primary/15 border border-black/10 px-4 py-2 rounded-full text-sm font-semibold text-primary-text">
               <Sparkles className="h-4 w-4" />
               {t("placementCta.badge")}
             </div>
@@ -89,7 +89,7 @@ const PlacementTestCTA = () => {
               {t("placementCta.titleLine1")}<br />
               <span className="relative inline-block">
                 <span className="relative z-10">{t("placementCta.titleMiddle")}</span>
-                <span className="absolute bottom-1 left-0 w-full h-3 bg-amber-200/40 rounded-full -z-0" />
+                <span className="absolute bottom-1 left-0 w-full h-3 bg-primary/20 rounded-full -z-0" />
               </span>{" "}
               {t("placementCta.titleEnd")}
             </h2>
@@ -102,7 +102,7 @@ const PlacementTestCTA = () => {
             <div className="grid grid-cols-2 gap-3">
               {FEATURES.map(({ icon: Icon, label }) => (
                 <div key={label} className="flex items-center gap-2.5 bg-muted/60 rounded-xl px-3 py-2.5 text-sm text-foreground font-medium">
-                  <Icon className="h-4 w-4 text-amber-600 shrink-0" />
+                  <Icon className="h-4 w-4 text-primary-text shrink-0" />
                   {label}
                 </div>
               ))}
@@ -151,7 +151,7 @@ const PlacementTestCTA = () => {
                           {lvl.label}
                         </span>
                         {idx === activeLevel && (
-                          <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium animate-pulse border border-black/10">
+                          <span className="text-[10px] bg-primary/15 text-primary-text px-2 py-0.5 rounded-full font-medium animate-pulse border border-black/10">
                             {t("placementCta.detecting")}
                           </span>
                         )}
@@ -173,7 +173,7 @@ const PlacementTestCTA = () => {
                 {/* Card footer */}
                 <div className="px-5 py-3 bg-muted/50 border-t border-border flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">{t("placementCta.cardFooter")}</span>
-                  <span className="text-xs font-bold text-amber-700">{t("placementCta.free")}</span>
+                  <span className="text-xs font-bold text-primary-text">{t("placementCta.free")}</span>
                 </div>
               </div>
 

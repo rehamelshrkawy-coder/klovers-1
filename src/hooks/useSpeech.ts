@@ -7,7 +7,7 @@ interface UseSpeechOptions {
   gender?: "male" | "female";
 }
 
-/* âââ Voice picker: best-effort male / female for a given language âââ */
+/* ─── Voice picker: best-effort male / female for a given language ─── */
 
 function pickVoice(
   voices: SpeechSynthesisVoice[],
@@ -16,7 +16,7 @@ function pickVoice(
 ): SpeechSynthesisVoice | undefined {
   if (!voices.length) return undefined;
 
-  // Normalise e.g. "ko-KR" â "ko"
+  // Normalise e.g. "ko-KR" → "ko"
   const shortLang = lang.split("-")[0].toLowerCase();
 
   // Filter voices that match the language
@@ -156,7 +156,7 @@ export function useSpeech(options: UseSpeechOptions = {}) {
     setIsPaused(false);
   }, []);
 
-  /* âââ Convenience: language helpers âââ */
+  /* ─── Convenience: language helpers ─── */
   const speakKorean = useCallback(
     (text: string, opts?: Omit<UseSpeechOptions, "language">) => {
       speak(text, { ...opts, language: "ko-KR" });
@@ -171,7 +171,7 @@ export function useSpeech(options: UseSpeechOptions = {}) {
     [speak],
   );
 
-  /* âââ Convenience: gendered helpers âââ */
+  /* ─── Convenience: gendered helpers ─── */
   const speakAsMale = useCallback(
     (text: string, opts?: Omit<UseSpeechOptions, "gender">) => {
       speak(text, { ...opts, gender: "male" });

@@ -1023,12 +1023,24 @@ export default function TrialBookPage() {
       <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
         <Lock className="h-8 w-8 text-amber-600" />
       </div>
-      <h1 className="text-2xl font-black">Trial Book — Admin Only</h1>
-      <p className="text-muted-foreground max-w-sm">This resource is available to teachers and admins only.</p>
-      <button onClick={() => navigate("/dashboard")}
-        className="px-6 py-2 bg-amber-500 text-black font-bold rounded-lg hover:bg-amber-400 transition-colors">
-        Back to Dashboard
-      </button>
+      <h1 className="text-2xl font-black">Trial Book — teachers and admins only</h1>
+      <p className="text-muted-foreground max-w-sm">
+        This is the teacher's handbook. Looking to book a free trial class? That's on the
+        next page along.
+      </p>
+      {/* This screen used to be a dead end. Anyone who lands here after
+          mistyping /trial-booking is almost certainly a student trying to book,
+          so the booking page is the primary action. */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <button onClick={() => navigate("/free-trial")}
+          className="min-h-[44px] px-6 py-2 bg-primary text-primary-foreground font-bold rounded-lg hover:opacity-90 transition-opacity">
+          Book a free class
+        </button>
+        <button onClick={() => navigate("/dashboard")}
+          className="min-h-[44px] px-6 py-2 border border-border font-semibold rounded-lg hover:bg-muted transition-colors">
+          Back to dashboard
+        </button>
+      </div>
     </div>
   );
 
