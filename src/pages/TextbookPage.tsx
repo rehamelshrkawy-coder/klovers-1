@@ -121,7 +121,7 @@ const TextbookPage = () => {
               ? `${GRAMMAR_MASTERY_WORLDS.length} ${isAr ? "عوالم" : "worlds"} · ${lessons.length} ${isAr ? "درسًا · جميع المستويات الست" : "lessons · All 6 Levels"}`
               : isPictureVocab
               ? `${PICTURE_VOCAB_WORLDS.length} ${isAr ? "عوالم" : "worlds"} · ${lessons.length} ${isAr ? "درس" : "lessons"}`
-              : `${WORLDS.filter(w => w.topikLevel === 1).length} ${isAr ? "عوالم توبيك ١" : "TOPIK 1 worlds"} · ${WORLDS.filter(w => w.topikLevel === 2).length} ${isAr ? "عوالم توبيك ٢" : "TOPIK 2 worlds"} · ${lessons.length} ${t("textbook.heroSubtitle")}`
+              : `${WORLDS.filter(w => w.topikLevel === 1).length} ${isAr ? "عوالم توبيك 1" : "TOPIK 1 worlds"} · ${WORLDS.filter(w => w.topikLevel === 2).length} ${isAr ? "عوالم توبيك 2" : "TOPIK 2 worlds"} · ${lessons.length} ${t("textbook.heroSubtitle")}`
             }
           </p>
         </section>

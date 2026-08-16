@@ -101,9 +101,9 @@ const MeetTeacher = () => {
               </p>
               <div className="flex gap-0 items-stretch">
                 {(isAr ? [
-                  { m: "شهر ١", desc: "هانغل + تحيات" },
-                  { m: "شهر ٣", desc: "محادثات A2" },
-                  { m: "شهر ٦", desc: "B1 واثق" },
+                  { m: "شهر 1", desc: "هانغل + تحيات" },
+                  { m: "شهر 3", desc: "محادثات A2" },
+                  { m: "شهر 6", desc: "B1 واثق" },
                 ] : [
                   { m: "Month 1", desc: "Hangul + greetings" },
                   { m: "Month 3", desc: "A2 conversations" },

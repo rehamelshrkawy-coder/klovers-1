@@ -290,10 +290,10 @@ export function getReferralPostTemplateAR(): PostTemplate {
 }
 
 const TESTIMONIALS_AR = [
-  { quote: "نجحت في TOPIK 2!", student: "منى، المستوى ٤" },
-  { quote: "بقيت أقرأ المنيو!", student: "سارة، المستوى ٢" },
-  { quote: "أحسن كلاس كوري!", student: "أحمد، المستوى ١" },
-  { quote: "تستاهل كل قرش!", student: "رنا، المستوى ٣" },
+  { quote: "نجحت في TOPIK 2!", student: "منى، المستوى 4" },
+  { quote: "بقيت أقرأ المنيو!", student: "سارة، المستوى 2" },
+  { quote: "أحسن كلاس كوري!", student: "أحمد، المستوى 1" },
+  { quote: "تستاهل كل قرش!", student: "رنا، المستوى 3" },
   { quote: "بتكلم كوري في سنة!", student: "نور، متقدم" },
 ];
 
@@ -309,7 +309,7 @@ export function getTestimonialPostTemplateAR(index = 0): PostTemplate {
 
 const FAQ_ITEMS_AR = [
   { q: "ممكن أتعلم كوري أونلاين؟", a: "أيوه! مجموعات صغيرة\nوحصص منظمة" },
-  { q: "هتقدم بسرعة قد إيه؟", a: "هتقرأ كوري في ٤ أسابيع\nمع المنهج بتاعنا" },
+  { q: "هتقدم بسرعة قد إيه؟", a: "هتقرأ كوري في 4 أسابيع\nمع المنهج بتاعنا" },
   { q: "يستاهل أتعلم كوري؟", a: "دراما، كيبوب، سفر —\nافتح عوالم جديدة" },
 ];
 

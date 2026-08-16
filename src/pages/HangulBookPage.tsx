@@ -894,12 +894,12 @@ function VowCard({ v, lang }: { v: typeof VOWELS[0]; lang: Lang }) {
 ══════════════════════════════════════════════════ */
 
 const BOOKS_AR = [
-  { n:"١", icon:"🔤", title:"الهانغول — الأبجدية الكورية", sub:"هذا الكتاب", current:true },
-  { n:"٢", icon:"👋", title:"أهلاً وسهلاً — التحيات والمحادثة الأولى", sub:"الكتاب الثاني", current:false },
-  { n:"٣", icon:"🔢", title:"الأرقام والوقت والحياة اليومية", sub:"الكتاب الثالث", current:false },
-  { n:"٤", icon:"📖", title:"قواعد اللغة — الأساسيات", sub:"الكتاب الرابع", current:false },
-  { n:"٥", icon:"🎬", title:"المحادثة ولغة المسلسلات", sub:"الكتاب الخامس", current:false },
-  { n:"٦", icon:"🏆", title:"القراءة والكتابة والطلاقة", sub:"الكتاب السادس", current:false },
+  { n:"1", icon:"🔤", title:"الهانغول — الأبجدية الكورية", sub:"هذا الكتاب", current:true },
+  { n:"2", icon:"👋", title:"أهلاً وسهلاً — التحيات والمحادثة الأولى", sub:"الكتاب الثاني", current:false },
+  { n:"3", icon:"🔢", title:"الأرقام والوقت والحياة اليومية", sub:"الكتاب الثالث", current:false },
+  { n:"4", icon:"📖", title:"قواعد اللغة — الأساسيات", sub:"الكتاب الرابع", current:false },
+  { n:"5", icon:"🎬", title:"المحادثة ولغة المسلسلات", sub:"الكتاب الخامس", current:false },
+  { n:"6", icon:"🏆", title:"القراءة والكتابة والطلاقة", sub:"الكتاب السادس", current:false },
 ];
 const BOOKS_EN = [
   { n:"1", icon:"🔤", title:"Hangul — The Korean Alphabet", sub:"This Book", current:true },
@@ -917,20 +917,20 @@ const BOOKS_EN = [
 /* ── 7-Day Study Plan AR ── */
 function StudyPlanAr() {
   const days = [
-    { d:"اليوم ١", icon:"🔤", task:"الحروف الساكنة — الجزء الأول (ㄱ–ㅅ)", tip:"كرر كل حرف ١٠ مرات بصوت عالٍ", color:"#fef9ec" },
-    { d:"اليوم ٢", icon:"🔤", task:"الحروف الساكنة — الجزء الثاني (ㅇ–ㅎ)", tip:"اكتب كل حرف ٥ مرات في كراسة", color:"#fef9ec" },
-    { d:"اليوم ٣", icon:"🗣️", task:"حروف المد (ㅏ–ㅕ) + الحروف المُشدَّدة", tip:"استمع للنطق من QR ثم كرره", color:"#f0fff4" },
-    { d:"اليوم ٤", icon:"🏗️", task:"بناء الكتل المقطعية + الباتشيم", tip:"جرب تكتب اسمك بالكوري!", color:"#f0fff4" },
-    { d:"اليوم ٥", icon:"✏️", task:"التمارين التطبيقية (المستويات ١–٣)", tip:"خصص ٣٠ دقيقة بدون هاتف", color:"#fffef0" },
-    { d:"اليوم ٦", icon:"🎬", task:"مفردات المسلسلات الكورية (٢٠ كلمة)", tip:"اربط كل كلمة بمشهد من مسلسل تحبه", color:"#fffef0" },
-    { d:"اليوم ٧", icon:"🏆", task:"مراجعة شاملة + اختبار المفردات", tip:"اقرأ خمس كلمات كورية عشوائية بصوت عالٍ!", color:"#f0f4ff" },
+    { d:"اليوم 1", icon:"🔤", task:"الحروف الساكنة — الجزء الأول (ㄱ–ㅅ)", tip:"كرر كل حرف 10 مرات بصوت عالٍ", color:"#fef9ec" },
+    { d:"اليوم 2", icon:"🔤", task:"الحروف الساكنة — الجزء الثاني (ㅇ–ㅎ)", tip:"اكتب كل حرف 5 مرات في كراسة", color:"#fef9ec" },
+    { d:"اليوم 3", icon:"🗣️", task:"حروف المد (ㅏ–ㅕ) + الحروف المُشدَّدة", tip:"استمع للنطق من QR ثم كرره", color:"#f0fff4" },
+    { d:"اليوم 4", icon:"🏗️", task:"بناء الكتل المقطعية + الباتشيم", tip:"جرب تكتب اسمك بالكوري!", color:"#f0fff4" },
+    { d:"اليوم 5", icon:"✏️", task:"التمارين التطبيقية (المستويات 1–3)", tip:"خصص 30 دقيقة بدون هاتف", color:"#fffef0" },
+    { d:"اليوم 6", icon:"🎬", task:"مفردات المسلسلات الكورية (20 كلمة)", tip:"اربط كل كلمة بمشهد من مسلسل تحبه", color:"#fffef0" },
+    { d:"اليوم 7", icon:"🏆", task:"مراجعة شاملة + اختبار المفردات", tip:"اقرأ خمس كلمات كورية عشوائية بصوت عالٍ!", color:"#f0f4ff" },
   ];
   return (
     <Page dir="rtl">
-      <SHead title="خطة الدراسة — ٧ أيام" subtitle="اتبع هذه الخطة وستقرأ الكورية في أسبوع واحد!" />
+      <SHead title="خطة الدراسة — 7 أيام" subtitle="اتبع هذه الخطة وستقرأ الكورية في أسبوع واحد!" />
       <div style={{ borderLeft:`3px solid ${Y}`, paddingLeft:"10px", marginBottom:"8mm", background:SBG, padding:"8px 10px" }}>
-        <div style={{ fontSize:"12px", fontWeight:800, color:T1, marginBottom:"2px" }}>🎯 الهدف: قراءة الهانغول في ٧ أيام</div>
-        <div style={{ fontSize:"11px", color:T3, lineHeight:1.6 }}>٣٠–٤٥ دقيقة يومياً تكفي. الاستمرارية أهم من الكم!</div>
+        <div style={{ fontSize:"12px", fontWeight:800, color:T1, marginBottom:"2px" }}>🎯 الهدف: قراءة الهانغول في 7 أيام</div>
+        <div style={{ fontSize:"11px", color:T3, lineHeight:1.6 }}>30–45 دقيقة يومياً تكفي. الاستمرارية أهم من الكم!</div>
       </div>
       <div style={{ display:"flex", flexDirection:"column", marginBottom:"8mm" }}>
         {days.map((day, i) => (
@@ -977,9 +977,9 @@ const ASPIRATED = [
 function AspiratedAr() {
   return (
     <Page dir="rtl">
-      <SHead title="الحروف الساكنة المُشدَّدة (된소리) 💥" subtitle="٥ حروف تُنطق بضغط إضافي — بدون هواء!" />
+      <SHead title="الحروف الساكنة المُشدَّدة (된소리) 💥" subtitle="5 حروف تُنطق بضغط إضافي — بدون هواء!" />
       <p style={{ fontSize:"11px", color:T2, lineHeight:1.6, marginBottom:"4mm", borderLeft:`3px solid ${Y}`, paddingLeft:"8px" }}>
-        ⚠️ <strong>للمبتدئين:</strong> هذه حروف متقدمة — ركز أولاً على الـ١٤ حرفاً الأساسية. ارجع لهذه الصفحة في الأسبوع الثاني!
+        ⚠️ <strong>للمبتدئين:</strong> هذه حروف متقدمة — ركز أولاً على الـ14 حرفاً الأساسية. ارجع لهذه الصفحة في الأسبوع الثاني!
       </p>
       <p style={{ fontSize:"11px", color:T2, lineHeight:1.6, marginBottom:"5mm" }}>
         الفرق الأساسي: الحروف العادية مع نفخة هواء خفيفة. الحروف المُشدَّدة <strong>بدون</strong> أي هواء — الحلق والفم مضغوطان.
@@ -1038,7 +1038,7 @@ const COMPOUND_VOWELS = [
 function CompoundVowelsAr() {
   return (
     <Page dir="rtl">
-      <SHead title="حروف المد المُركَّبة (이중모음) 🔗" subtitle="١١ حرف مد مُركَّب — تُبنى من حرفين بسيطين!" />
+      <SHead title="حروف المد المُركَّبة (이중모음) 🔗" subtitle="11 حرف مد مُركَّب — تُبنى من حرفين بسيطين!" />
       <p style={{ fontSize:"11px", color:T2, lineHeight:1.6, marginBottom:"5mm" }}>
         لا تحفظها كلها الآن! الأكثر استخداماً: <strong>ㅘ ㅝ ㅐ ㅔ ㅢ</strong> — ستقابلهم كثيراً في المسلسلات والأغاني.
       </p>
@@ -1071,7 +1071,7 @@ function CompoundVowelsAr() {
 function HistoryAr() {
   return (
     <Page dir="rtl">
-      <SHead title="تاريخ اللغة الكورية" subtitle="رحلة ٢٠٠٠ عام من الكلمات والحكايات" />
+      <SHead title="تاريخ اللغة الكورية" subtitle="رحلة 2000 عام من الكلمات والحكايات" />
 
       {/* Photo header */}
       <div style={{ marginBottom:"10px", borderRadius:"10px", overflow:"hidden" }}>
@@ -1082,10 +1082,10 @@ function HistoryAr() {
       {/* Timeline */}
       <div style={{ display:"flex", flexDirection:"column", gap:"0", marginBottom:"8mm" }}>
         {[
-          { era:"قبل ١٠٠٠ م", icon:"🏔️", title:"بدايات اللغة الكورية", body:"تطورت اللغة الكورية على مدى آلاف السنين في شبه الجزيرة الكورية. تُصنَّف اليوم كـ«لغة معزولة» — لا تنتمي لأي مجموعة لغوية أخرى في العالم. ليست صينية، وليست يابانية، وليست عربية — إنها فريدة من نوعها!" },
-          { era:"١٠٠٠–١٤٤٢ م", icon:"📜", title:"عصر الهانجا — حروف المستعارة", body:"قبل اختراع الهانغول، كان الكوريون يستخدمون الحروف الصينية (한자 هانجا). كانت صعبة التعلم جداً — فقط النخبة والعلماء كانوا يقرؤون ويكتبون. أكثر من ٩٥٪ من الشعب الكوري كان أمياً بالكامل." },
-          { era:"١٤٤٣ م ★", icon:"👑", title:"ثورة الملك سيجونغ", body:"أدرك الملك سيجونغ أن هذا ظلم بيّن. فأسس مجمعاً من ثمانية علماء نوابغ في «قاعة الحكماء» (집현전) وعملوا سنوات في سرية تامة لاختراع أبجدية جديدة تناسب الأصوات الكورية تماماً." },
-          { era:"١٤٤٦ م", icon:"📚", title:"إعلان هونمينجونغأوم", body:"أُعلن عن الأبجدية الجديدة تحت اسم «훈민정음» (هونمينجونغأوم) بمعنى «الأصوات الصحيحة لتعليم الشعب». واجه الملك معارضة شديدة من الطبقة الحاكمة — لكنه أصرّ. واليوم يُحتفل بيوم الهانغول كل عام في التاسع من أكتوبر." },
+          { era:"قبل 1000 م", icon:"🏔️", title:"بدايات اللغة الكورية", body:"تطورت اللغة الكورية على مدى آلاف السنين في شبه الجزيرة الكورية. تُصنَّف اليوم كـ«لغة معزولة» — لا تنتمي لأي مجموعة لغوية أخرى في العالم. ليست صينية، وليست يابانية، وليست عربية — إنها فريدة من نوعها!" },
+          { era:"1000–1442 م", icon:"📜", title:"عصر الهانجا — حروف المستعارة", body:"قبل اختراع الهانغول، كان الكوريون يستخدمون الحروف الصينية (한자 هانجا). كانت صعبة التعلم جداً — فقط النخبة والعلماء كانوا يقرؤون ويكتبون. أكثر من 95٪ من الشعب الكوري كان أمياً بالكامل." },
+          { era:"1443 م ★", icon:"👑", title:"ثورة الملك سيجونغ", body:"أدرك الملك سيجونغ أن هذا ظلم بيّن. فأسس مجمعاً من ثمانية علماء نوابغ في «قاعة الحكماء» (집현전) وعملوا سنوات في سرية تامة لاختراع أبجدية جديدة تناسب الأصوات الكورية تماماً." },
+          { era:"1446 م", icon:"📚", title:"إعلان هونمينجونغأوم", body:"أُعلن عن الأبجدية الجديدة تحت اسم «훈민정음» (هونمينجونغأوم) بمعنى «الأصوات الصحيحة لتعليم الشعب». واجه الملك معارضة شديدة من الطبقة الحاكمة — لكنه أصرّ. واليوم يُحتفل بيوم الهانغول كل عام في التاسع من أكتوبر." },
         ].map((item, i) => (
           <div key={i} style={{ display:"flex", gap:"12px", marginBottom:"6px", paddingBottom:"6px", borderBottom:`1px solid ${BD}`, alignItems:"flex-start" }}>
             <div style={{ fontSize:"18px", flexShrink:0, marginTop:"2px" }}>{item.icon}</div>
@@ -1101,7 +1101,7 @@ function HistoryAr() {
       <div style={{ borderTop:`3px solid ${Y}`, paddingTop:"4mm" }}>
         <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"3px" }}>حقيقة مذهلة!</div>
         <p style={{ fontSize:"11px", color:T2, lineHeight:1.7, margin:0 }}>
-          يتحدث الكورية أكثر من <strong>٨٠ مليون شخص</strong> حول العالم. وقد صنّفت منظمة اليونسكو الهانغول كواحد من أكثر أنظمة الكتابة علمية ومنطقية في التاريخ البشري!
+          يتحدث الكورية أكثر من <strong>80 مليون شخص</strong> حول العالم. وقد صنّفت منظمة اليونسكو الهانغول كواحد من أكثر أنظمة الكتابة علمية ومنطقية في التاريخ البشري!
         </p>
       </div>
     </Page>
@@ -1127,10 +1127,10 @@ function SejongAr() {
           <div style={{ fontSize:"15px", fontWeight:900, color:T1, marginBottom:"8px" }}>سيجونغ الكبير</div>
           <div style={{ display:"flex", flexDirection:"column", gap:"4px" }}>
             {[
-              { icon:"🎂", label:"الميلاد", val:"١٥ مايو ١٣٩٧م" },
-              { icon:"👑", label:"الحكم", val:"١٤١٨ – ١٤٥٠م" },
+              { icon:"🎂", label:"الميلاد", val:"15 مايو 1397م" },
+              { icon:"👑", label:"الحكم", val:"1418 – 1450م" },
               { icon:"🏛️", label:"الأسرة", val:"أسرة جوسون الملكية" },
-              { icon:"📚", label:"إنجازه الأعظم", val:"اختراع الهانغول ١٤٤٣م" },
+              { icon:"📚", label:"إنجازه الأعظم", val:"اختراع الهانغول 1443م" },
               { icon:"🌟", label:"لقبه", val:"«أعظم ملوك كوريا»" },
             ].map(r=>(
               <div key={r.label} style={{ display:"flex", gap:"8px", alignItems:"center" }}>
@@ -1166,7 +1166,7 @@ function SejongAr() {
         <div style={{ fontSize:"12px", color:T2, lineHeight:2, fontStyle:"italic" }}>
           كل إنسان لديه ما يريد أن يقوله، لكن كثيرين لا يجدون طريقة للتعبير. أريد أن يكون كل شخص في مملكتي قادراً على القراءة والكتابة.
         </div>
-        <div style={{ fontSize:"11px", color:T3, fontWeight:700, marginTop:"5px" }}>— الملك سيجونغ الكبير، ١٤٤٦م</div>
+        <div style={{ fontSize:"11px", color:T3, fontWeight:700, marginTop:"5px" }}>— الملك سيجونغ الكبير، 1446م</div>
       </div>
     </Page>
   );
@@ -1252,7 +1252,7 @@ function CultureAr() {
 function CourseAr() {
   return (
     <Page dir="rtl">
-      <SHead title="سلسلة كتب Klovers — ٦ كتب إلى الإتقان 📚" subtitle="خارطة رحلتك من الصفر إلى الطلاقة" />
+      <SHead title="سلسلة كتب Klovers — 6 كتب إلى الإتقان 📚" subtitle="خارطة رحلتك من الصفر إلى الطلاقة" />
 
       <p style={{ fontSize:"11px", color:T2, lineHeight:1.8, marginBottom:"6mm" }}>
         صُمِّمت سلسلة Klovers لتأخذك من <strong>لا تعرف حرفاً واحداً</strong> إلى <strong>التحدث والكتابة بطلاقة</strong> — بطريقة ممتعة تعتمد على مسلسلاتك المفضلة وموسيقاك الكورية المحبوبة. كل كتاب يبني على السابق.
@@ -1291,8 +1291,8 @@ function CourseAr() {
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"8px" }}>
         {[
-          { icon:"⏱️", title:"١٥–٢٠ دقيقة", sub:"يومياً تكفي" },
-          { icon:"🎯", title:"٦ كتب", sub:"من الصفر للطلاقة" },
+          { icon:"⏱️", title:"15–20 دقيقة", sub:"يومياً تكفي" },
+          { icon:"🎯", title:"6 كتب", sub:"من الصفر للطلاقة" },
           { icon:"🎬", title:"لغة حقيقية", sub:"من المسلسلات والحياة" },
         ].map(s=>(
           <div key={s.title} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"10px", textAlign:"center", background:SBG }}>
@@ -1308,9 +1308,9 @@ function CourseAr() {
 
 function EdCover({ lang }: { lang: "ar" | "en" }) {
   const isAr = lang === "ar";
-  const badge    = isAr ? "كتاب مبتدئين · كتاب ٠١" : "BEGINNER WORKBOOK · BOOK 01";
+  const badge    = isAr ? "كتاب مبتدئين · كتاب 01" : "BEGINNER WORKBOOK · BOOK 01";
   const subtitle = isAr ? "اقرأ وأكتب الكورية — خطوة بخطوة" : "Read and Write Korean — Step by Step";
-  const headline = isAr ? "اقرأ الكورية في ٦ ساعات فقط" : "READ KOREAN IN JUST 6 HOURS";
+  const headline = isAr ? "اقرأ الكورية في 6 ساعات فقط" : "READ KOREAN IN JUST 6 HOURS";
   const body1    = isAr ? "كتاب الأبجدية الكورية للمبتدئين تماماً." : "The Korean Alphabet Workbook for Complete Beginners.";
   const body2    = isAr ? "مستوحى من المسلسلات الكورية والكيبوب." : "Inspired by K-drama and K-pop.";
   const author   = isAr ? "رهام الشرقاوي" : "REHAM ELSHRKAWY";
@@ -1448,10 +1448,10 @@ function CoverAr() { return <EdCover lang="ar" />; }
 
 function WelcomeAr() {
   const plan = [
-    { d:"يوم ١", t:"حروف المد ㅏ–ㅜ" }, { d:"يوم ٢", t:"حروف المد ㅡ–ㅕ" },
-    { d:"يوم ٣", t:"ساكنة ㄱ–ㄷ" }, { d:"يوم ٤", t:"ساكنة ㄹ–ㅅ" },
-    { d:"يوم ٥", t:"ساكنة ㅇ–ㅊ" }, { d:"يوم ٦", t:"ساكنة ㅋ–ㅎ" },
-    { d:"يوم ٧", t:"مقاطع + مراجعة 🏆" },
+    { d:"يوم 1", t:"حروف المد ㅏ–ㅜ" }, { d:"يوم 2", t:"حروف المد ㅡ–ㅕ" },
+    { d:"يوم 3", t:"ساكنة ㄱ–ㄷ" }, { d:"يوم 4", t:"ساكنة ㄹ–ㅅ" },
+    { d:"يوم 5", t:"ساكنة ㅇ–ㅊ" }, { d:"يوم 6", t:"ساكنة ㅋ–ㅎ" },
+    { d:"يوم 7", t:"مقاطع + مراجعة 🏆" },
   ];
   return (
     <Page dir="rtl">
@@ -1461,12 +1461,12 @@ function WelcomeAr() {
         <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", background:SBG }}>
           <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"5px" }}>لماذا الهانغول رائع؟</div>
           <p style={{ fontSize:"10px", lineHeight:1.8, color:T2, margin:0 }}>
-            اخترع الملك سيجونغ الهانغول عام ١٤٤٣م. إنها <strong>أبجدية صوتية</strong> — كل حرف يمثل صوتاً واحداً فقط. معظم المتعلمين يستطيعون القراءة في <strong>٢ إلى ٣ أيام</strong> فقط!
+            اخترع الملك سيجونغ الهانغول عام 1443م. إنها <strong>أبجدية صوتية</strong> — كل حرف يمثل صوتاً واحداً فقط. معظم المتعلمين يستطيعون القراءة في <strong>2 إلى 3 أيام</strong> فقط!
           </p>
         </div>
         <div style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"12px", background:SBG }}>
           <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"7px" }}>الأرقام السحرية</div>
-          {[{n:"١٤", l:"حرفاً ساكناً أساسياً"},{n:"١٠", l:"حروف مد أساسية"},{n:"∞", l:"مقطع ممكن التكوين"}].map(({n,l})=>(
+          {[{n:"14", l:"حرفاً ساكناً أساسياً"},{n:"10", l:"حروف مد أساسية"},{n:"∞", l:"مقطع ممكن التكوين"}].map(({n,l})=>(
             <div key={n} style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px" }}>
               <div style={{ border:`2px solid ${Y}`, color:T1, fontWeight:900, fontSize:"16px", width:"34px", height:"34px", borderRadius:"6px", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>{n}</div>
               <div style={{ fontSize:"10px", color:T2, fontWeight:600 }}>{l}</div>
@@ -1500,7 +1500,7 @@ function WelcomeAr() {
       </div>
 
       {/* 7-day plan */}
-      <div style={{ fontSize:"10px", fontWeight:700, color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"5px" }}>خطة الدراسة في ٧ أيام</div>
+      <div style={{ fontSize:"10px", fontWeight:700, color:T3, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"5px" }}>خطة الدراسة في 7 أيام</div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:"4px", marginBottom:"6mm" }}>
         {plan.map((p,i)=>(
           <div key={i} style={{ border:`1px solid ${i===6?Y:BD}`, borderRadius:"4px", padding:"5px 3px", textAlign:"center", background:i===6?YL:SBG }}>
@@ -1541,25 +1541,25 @@ function WelcomeAr() {
 /* ── Table of Contents AR ── */
 function TocAr() {
   const chapters = [
-    { n:"١",  title:"خطة الكورس داخل الفصل — ٤ أسابيع",          icon:"🗓️", page:3,  new:true },
-    { n:"٢",  title:"كيفية استخدام هذا الكتاب",                    icon:"📖", page:4,  new:true },
-    { n:"٣",  title:"تاريخ اللغة الكورية",                         icon:"📜", page:5 },
-    { n:"٤",  title:"الملك سيجونغ العظيم",                         icon:"👑", page:6 },
-    { n:"٥",  title:"الثقافة الكورية",                             icon:"🌸", page:7 },
-    { n:"٦",  title:"مرحباً بعالم الهانغول",                       icon:"🎉", page:8 },
-    { n:"٧",  title:"الدرس ١ — ㄱ ㄴ ㄷ + ㅏ ㅓ",                  icon:"🔤", page:9 },
-    { n:"٨",  title:"الدرس ٢ — ㄹ ㅁ ㅂ + ㅗ ㅜ",                  icon:"🔤", page:12 },
-    { n:"٩",  title:"الدرس ٣ — ㅅ ㅇ ㅈ + ㅡ ㅣ",                  icon:"🔤", page:15 },
-    { n:"١٠", title:"الدرس ٤ — ㅊ ㅋ ㅌ",                          icon:"🔤", page:18 },
-    { n:"١١", title:"الدرس ٥ — ㅍ ㅎ",                             icon:"🔤", page:21 },
-    { n:"١٢", title:"الدرس ٦ — مراجعة شاملة + قراءة + إملاء",    icon:"✅", page:24 },
-    { n:"١٣", title:"الدرس ٧ — حروف المد المُركَّبة",              icon:"🔗", page:26, new:true },
-    { n:"١٤", title:"الدرس ٨ — الباتشيم (الحرف النهائي)",         icon:"⬇️", page:28 },
-    { n:"١٥", title:"أساسيات المسلسلات الكورية",                   icon:"🎬", page:30 },
-    { n:"١٦", title:"الاختبار النهائي",                            icon:"🏆", page:32 },
-    { n:"١٧", title:"شهادة الإتمام",                               icon:"🎓", page:33 },
-    { n:"١٨", title:"تمارين تطبيقية ومفتاح الإجابات",             icon:"✏️", page:34 },
-    { n:"١٩", title:"ملحق المفردات — أكثر ٥٠ كلمة",              icon:"📚", page:36 },
+    { n:"1",  title:"خطة الكورس داخل الفصل — 4 أسابيع",          icon:"🗓️", page:3,  new:true },
+    { n:"2",  title:"كيفية استخدام هذا الكتاب",                    icon:"📖", page:4,  new:true },
+    { n:"3",  title:"تاريخ اللغة الكورية",                         icon:"📜", page:5 },
+    { n:"4",  title:"الملك سيجونغ العظيم",                         icon:"👑", page:6 },
+    { n:"5",  title:"الثقافة الكورية",                             icon:"🌸", page:7 },
+    { n:"6",  title:"مرحباً بعالم الهانغول",                       icon:"🎉", page:8 },
+    { n:"7",  title:"الدرس 1 — ㄱ ㄴ ㄷ + ㅏ ㅓ",                  icon:"🔤", page:9 },
+    { n:"8",  title:"الدرس 2 — ㄹ ㅁ ㅂ + ㅗ ㅜ",                  icon:"🔤", page:12 },
+    { n:"9",  title:"الدرس 3 — ㅅ ㅇ ㅈ + ㅡ ㅣ",                  icon:"🔤", page:15 },
+    { n:"10", title:"الدرس 4 — ㅊ ㅋ ㅌ",                          icon:"🔤", page:18 },
+    { n:"11", title:"الدرس 5 — ㅍ ㅎ",                             icon:"🔤", page:21 },
+    { n:"12", title:"الدرس 6 — مراجعة شاملة + قراءة + إملاء",    icon:"✅", page:24 },
+    { n:"13", title:"الدرس 7 — حروف المد المُركَّبة",              icon:"🔗", page:26, new:true },
+    { n:"14", title:"الدرس 8 — الباتشيم (الحرف النهائي)",         icon:"⬇️", page:28 },
+    { n:"15", title:"أساسيات المسلسلات الكورية",                   icon:"🎬", page:30 },
+    { n:"16", title:"الاختبار النهائي",                            icon:"🏆", page:32 },
+    { n:"17", title:"شهادة الإتمام",                               icon:"🎓", page:33 },
+    { n:"18", title:"تمارين تطبيقية ومفتاح الإجابات",             icon:"✏️", page:34 },
+    { n:"19", title:"ملحق المفردات — أكثر 50 كلمة",              icon:"📚", page:36 },
   ];
   return (
     <Page dir="rtl">
@@ -1590,7 +1590,7 @@ function TocAr() {
       </div>
 
       <p style={{ fontSize:"11px", color:T2, lineHeight:1.7, borderTop:`1px solid ${BD}`, paddingTop:"4mm", margin:0 }}>
-        اقرأ كل درس بالترتيب — كل درس يبني على السابق. في ٤ أسابيع ستقرأ الكورية بثقة كاملة!
+        اقرأ كل درس بالترتيب — كل درس يبني على السابق. في 4 أسابيع ستقرأ الكورية بثقة كاملة!
       </p>
     </Page>
   );
@@ -1645,7 +1645,7 @@ function VowelsAr() {
     <Page dir="rtl" chapter="حروف المد">
       <SHead title="حروف المد (모음)" subtitle="حروف المد لا تقف وحدها — تحتاج دائماً حرفاً ساكناً" />
       <p style={{ fontSize:"11px", color:T2, marginBottom:"4mm", lineHeight:1.6 }}>
-        بنهاية هذه الصفحة ستتمكن من قراءة ونطق ١٠ حروف مد كورية وتكوين مقاطع كاملة.
+        بنهاية هذه الصفحة ستتمكن من قراءة ونطق 10 حروف مد كورية وتكوين مقاطع كاملة.
         إذا بدأت الكلمة بصوت مدّي، استخدم الحرف الصامت ㅇ أمامه: أ = 아 (ㅇ + ㅏ).
       </p>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px 16px" }}>
@@ -1859,7 +1859,7 @@ function BatchimAr() {
       </div>
       <p style={{ fontSize:"12px", color:"#222", textAlign:"center", marginBottom:"5mm", fontWeight:700 }}>
         رغم وجود حروف كثيرة، إلا أن نطق الباتشيم يُختصر إلى{" "}
-        <span style={{ color:KIDS_RED, fontWeight:900, textDecoration:"underline" }}>٧ أصوات أساسية فقط.</span>
+        <span style={{ color:KIDS_RED, fontWeight:900, textDecoration:"underline" }}>7 أصوات أساسية فقط.</span>
       </p>
 
       {/* The 7 sounds */}
@@ -1910,7 +1910,7 @@ function DoubleBatchimAr() {
       {/* Larsen-Freeman: don't memorize warning */}
       <div style={{ background:"#fff8e1", border:"2px solid #fbbf24", borderRadius:"8px", padding:"7px 12px", fontSize:"11px", color:"#92400e", marginBottom:"8px" }}>
         <strong>⚠️ تنبيه مهم للمبتدئين:</strong> لا تحاول حفظ هذه الجداول كلها الآن! هذا محتوى متقدم — فهم المبدأ يكفي تماماً.
-        الباتشيم المزدوج سيصبح طبيعياً جداً بعد قراءة ١٠٠ كلمة فقط. <strong>سيُشرح بالتفصيل في الكتاب الثاني.</strong>
+        الباتشيم المزدوج سيصبح طبيعياً جداً بعد قراءة 100 كلمة فقط. <strong>سيُشرح بالتفصيل في الكتاب الثاني.</strong>
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" }}>
@@ -1997,7 +1997,7 @@ function DoubleBatchimAr() {
 function KdramaPageAr({ slice, page }: { slice:[number,number]; page:number }) {
   return (
     <Page dir="rtl">
-      <SHead title={`أساسيات المسلسلات الكورية 🎬 — الجزء ${page===1?"١":"٢"} من ٢`} subtitle="كلمات سمعتها مئة مرة — اقرأها الآن بالهانغول!" />
+      <SHead title={`أساسيات المسلسلات الكورية 🎬 — الجزء ${page===1?"1":"2"} من 2`} subtitle="كلمات سمعتها مئة مرة — اقرأها الآن بالهانغول!" />
       <div style={{ borderLeft:`3px solid ${Y}`, paddingLeft:"10px", marginBottom:"8px", fontSize:"11px", color:T2, fontWeight:700, background:SBG, padding:"7px 10px" }}>
         🎬 {page===1 ? "الكلمات الأساسية — تُسمع في كل حلقة تقريباً!" : "الكلمات المتقدمة — ستبدو كالمحترف!"}
       </div>
@@ -2027,7 +2027,7 @@ function PracticeAr() {
         <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"7px" }}>✅ قائمة التحقق الذاتي — هل أنت مستعد للتمارين؟</div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4px" }}>
           {[
-            "أستطيع نطق الـ١٤ حرفاً الساكناً",
+            "أستطيع نطق الـ14 حرفاً الساكناً",
             "أستطيع نطق الحروف المدية العشرة",
             "أستطيع بناء مقطع بسيط مثل 가، 나",
             "أعرف ما هو الباتشيم",
@@ -2043,7 +2043,7 @@ function PracticeAr() {
       </div>
 
       <div style={{ display:"flex", gap:"8px", marginBottom:"8px" }}>
-        {["المستوى ١ — /٥","المستوى ٢ — /٥","المستوى ٣ — /٥"].map((l,i)=>(
+        {["المستوى 1 — /5","المستوى 2 — /5","المستوى 3 — /5"].map((l,i)=>(
           <div key={i} style={{ flex:1, border:`1px solid ${BD}`, borderRadius:"6px", padding:"6px", textAlign:"center", background:SBG }}>
             <div style={{ fontSize:"16px" }}>{"⭐".repeat(i+1)}</div>
             <div style={{ fontSize:"10px", color:T3, marginTop:"2px" }}>{l}</div>
@@ -2052,7 +2052,7 @@ function PracticeAr() {
       </div>
 
       <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", marginBottom:"8px", background:SBG }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>⭐ تحدي المستوى ١ — الصوت الصحيح</div>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>⭐ تحدي المستوى 1 — الصوت الصحيح</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"6px" }}>
           {[{q:"ㄱ",c:["ن","م","ك","هـ"]},{q:"ㄴ",c:["ك","ن","س","م"]},{q:"ㅁ",c:["هـ","ب","م","ر"]},{q:"ㅅ",c:["س","ك","ج","ب"]},{q:"ㅎ",c:["م","هـ","ن","ك"]}].map((e,i)=>(
             <div key={i} style={{ textAlign:"center" }}>
@@ -2066,7 +2066,7 @@ function PracticeAr() {
       </div>
 
       <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", marginBottom:"8px", background:SBG }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>⭐⭐ تحدي المستوى ٢ — اكتب النطق</div>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>⭐⭐ تحدي المستوى 2 — اكتب النطق</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"6px" }}>
           {[{k:"가방",a:"ga-bang"},{k:"사랑",a:"sa-rang"},{k:"한국",a:"han-guk"},{k:"친구",a:"chin-gu"},{k:"고마워",a:"go-ma-wo"}].map((e,i)=>(
             <div key={i} style={{ textAlign:"center" }}>
@@ -2078,7 +2078,7 @@ function PracticeAr() {
       </div>
 
       <div style={{ border:`1px solid ${BD}`, borderRadius:"8px", padding:"10px", marginBottom:"8px", background:SBG }}>
-        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>⭐⭐⭐ تحدي المستوى ٣ — ابنِ المقطع</div>
+        <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"6px" }}>⭐⭐⭐ تحدي المستوى 3 — ابنِ المقطع</div>
         <div style={{ display:"flex", gap:"8px", flexWrap:"wrap", direction:"ltr" }}>
           {[{eq:"ㅂ+ㅏ=?",a:"바"},{eq:"ㄴ+ㅗ=?",a:"노"},{eq:"ㅅ+ㅣ=?",a:"시"},{eq:"ㅎ+ㅏ=?",a:"하"},{eq:"ㄱ+ㅜ=?",a:"구"}].map((e,i)=>(
             <div key={i} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"8px 10px", textAlign:"center", background:"#fff" }}>
@@ -2106,9 +2106,9 @@ function AnswerAr() {
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"8px", marginBottom:"10px" }}>
         {[
-          { t:"تمرين ١", items:[["ㄱ","ك"],["ㄴ","ن"],["ㅁ","م"],["ㅅ","س"],["ㅎ","هـ"]] },
-          { t:"تمرين ٢", items:[["가방","ga-bang"],["사랑","sa-rang"],["한국","han-guk"],["친구","chin-gu"],["고마워","go-ma-wo"]] },
-          { t:"تمرين ٣", items:[["ㅂ+ㅏ","바"],["ㄴ+ㅗ","노"],["ㅅ+ㅣ","시"],["ㅎ+ㅏ","하"],["ㄱ+ㅜ","구"]] },
+          { t:"تمرين 1", items:[["ㄱ","ك"],["ㄴ","ن"],["ㅁ","م"],["ㅅ","س"],["ㅎ","هـ"]] },
+          { t:"تمرين 2", items:[["가방","ga-bang"],["사랑","sa-rang"],["한국","han-guk"],["친구","chin-gu"],["고마워","go-ma-wo"]] },
+          { t:"تمرين 3", items:[["ㅂ+ㅏ","바"],["ㄴ+ㅗ","노"],["ㅅ+ㅣ","시"],["ㅎ+ㅏ","하"],["ㄱ+ㅜ","구"]] },
         ].map(ex=>(
           <div key={ex.t} style={{ background:"#f8f8f8", borderRadius:"8px", padding:"8px" }}>
             <div style={{ fontSize:"11px", fontWeight:800, color:BK, marginBottom:"5px" }}>{ex.t}</div>
@@ -2662,7 +2662,7 @@ type LessonProps = { lesson: number; slice: [number, number]; lang: Lang };
 
 function LessonHeader({ lesson, kind, lang }: { lesson: number; kind: "teach"|"practice"|"review"; lang: Lang }) {
   const isAr = lang === "ar";
-  const num = isAr ? ["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1] : String(lesson);
+  const num = isAr ? ["1","2","3","4","5","6","7","8"][lesson-1] : String(lesson);
   const kindLabel = isAr
     ? { teach:"تعلّم", practice:"تدريب", review:"مراجعة" }[kind]
     : { teach:"Learn", practice:"Practice", review:"Review" }[kind];
@@ -2781,7 +2781,7 @@ function PracticeLetters({ lesson, slice, lang }: LessonProps) {
 
       <div style={{ fontSize:"12px", color:T2, marginBottom:"6mm", lineHeight:1.7 }}>
         {isAr
-          ? "تتبّع كل حرف ٤ مرات (الصف الأول)، ثم اكتبه من ذاكرتك ٤ مرات (الصف الثاني)."
+          ? "تتبّع كل حرف 4 مرات (الصف الأول)، ثم اكتبه من ذاكرتك 4 مرات (الصف الثاني)."
           : "Trace each letter 4 times (top row), then write it from memory 4 times (bottom row)."}
       </div>
 
@@ -2889,7 +2889,7 @@ function ReviewLetters({ lesson, slice, lang }: LessonProps) {
       <div style={{ marginTop:"auto", paddingTop:"6mm", borderTop:`1px solid ${BD}`, display:"flex", alignItems:"center", gap:"10px" }}>
         <div style={{ width:"18px", height:"18px", border:`2px solid ${T1}`, borderRadius:"3px", flexShrink:0 }} />
         <span style={{ fontSize:"12px", color:T1, fontWeight:700 }}>
-          {isAr ? `أتممتُ الدرس ${["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1]}` : `I completed Lesson ${lesson}`}
+          {isAr ? `أتممتُ الدرس ${["1","2","3","4","5","6","7","8"][lesson-1]}` : `I completed Lesson ${lesson}`}
         </span>
       </div>
     </Page>
@@ -3363,7 +3363,7 @@ function BackCoverAr() {
       }}>
         <div style={{ width:"30px", height:"4px", background:Y, marginBottom:"6mm" }} />
         <div style={{ fontSize:"19px", fontWeight:900, color:Y, letterSpacing:"2px", marginBottom:"4mm" }}>
-          اقرأ الكورية في ٦ ساعات فقط
+          اقرأ الكورية في 6 ساعات فقط
         </div>
         <div style={{ width:"100%", height:"1px", background:"#333", marginBottom:"5mm" }} />
         <div style={{ fontSize:"13px", color:"#fff", lineHeight:1.6, marginBottom:"2mm" }}>
@@ -3518,9 +3518,9 @@ function VocabAppendixAr() {
   ];
   return (
     <Page dir="rtl">
-      <SHead title="ملحق المفردات — أكثر ٥٠ كلمة شيوعاً 📖" subtitle="مرتبة حسب التكرار في اللغة الكورية اليومية" />
+      <SHead title="ملحق المفردات — أكثر 50 كلمة شيوعاً 📖" subtitle="مرتبة حسب التكرار في اللغة الكورية اليومية" />
       <div style={{ borderLeft:`3px solid ${Y}`, paddingLeft:"10px", marginBottom:"8px", fontSize:"11px", color:T2, background:SBG, padding:"7px 10px" }}>
-        💡 هذه الكلمات تُشكّل أكثر من <strong>٧٠٪</strong> من اللغة الكورية اليومية. احفظ أول ٢٠ كلمة وستفهم نصف ما يُقال حولك!
+        💡 هذه الكلمات تُشكّل أكثر من <strong>70٪</strong> من اللغة الكورية اليومية. احفظ أول 20 كلمة وستفهم نصف ما يُقال حولك!
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"5px" }}>
         {words.map(w => (
@@ -3621,9 +3621,9 @@ function VocabAppendixEn() {
 ═════════════════════════════════════════════════════════════════ */
 
 const VOWEL_PARTS: Record<1|2|3, { chars:string[]; en:string; ar:string }> = {
-  1: { chars:["ㅏ","ㅓ","ㅗ","ㅜ"], en:"Vowels Part 1 — ㅏ ㅓ ㅗ ㅜ", ar:"حروف المد — الجزء ١" },
-  2: { chars:["ㅡ","ㅣ","ㅐ","ㅔ"], en:"Vowels Part 2 — ㅡ ㅣ ㅐ ㅔ", ar:"حروف المد — الجزء ٢" },
-  3: { chars:["ㅑ","ㅕ","ㅛ","ㅠ"], en:"Vowels Part 3 — ㅑ ㅕ + review", ar:"حروف المد — الجزء ٣ + مراجعة" },
+  1: { chars:["ㅏ","ㅓ","ㅗ","ㅜ"], en:"Vowels Part 1 — ㅏ ㅓ ㅗ ㅜ", ar:"حروف المد — الجزء 1" },
+  2: { chars:["ㅡ","ㅣ","ㅐ","ㅔ"], en:"Vowels Part 2 — ㅡ ㅣ ㅐ ㅔ", ar:"حروف المد — الجزء 2" },
+  3: { chars:["ㅑ","ㅕ","ㅛ","ㅠ"], en:"Vowels Part 3 — ㅑ ㅕ + review", ar:"حروف المد — الجزء 3 + مراجعة" },
 };
 const VOWEL_ROMAN: Record<string,string> = { "ㅏ":"a","ㅓ":"eo","ㅗ":"o","ㅜ":"u","ㅡ":"eu","ㅣ":"i","ㅐ":"ae","ㅔ":"e","ㅑ":"ya","ㅕ":"yeo","ㅛ":"yo","ㅠ":"yu" };
 
@@ -3631,45 +3631,45 @@ function CoursePlan({ lang }: { lang: Lang }) {
   const isAr = lang === "ar";
   const weeks = [
     {
-      n: isAr ? "الأسبوع ١" : "Week 1",
-      title: isAr ? "الدرس ١ + الدرس ٢" : "Lesson 1 + Lesson 2",
+      n: isAr ? "الأسبوع 1" : "Week 1",
+      title: isAr ? "الدرس 1 + الدرس 2" : "Lesson 1 + Lesson 2",
       letters: "ㄱ ㄴ ㄷ + ㅏ ㅓ  /  ㄹ ㅁ ㅂ + ㅗ ㅜ",
       goal: isAr
-        ? "يتعرّف الطالب على ٦ حروف ساكنة و٤ حروف مد. يجمع مقاطع بسيطة ويقرأ كلمات: 가방، 나비، 밥، 물."
+        ? "يتعرّف الطالب على 6 حروف ساكنة و4 حروف مد. يجمع مقاطع بسيطة ويقرأ كلمات: 가방، 나비، 밥، 물."
         : "6 consonants + 4 vowels. Students combine syllables and read simple words: 가방 (bag), 나비 (butterfly), 밥 (rice), 물 (water).",
-      lessons: isAr ? ["الدرس ١: ㄱ ㄴ ㄷ + ㅏ ㅓ","الدرس ٢: ㄹ ㅁ ㅂ + ㅗ ㅜ"] : ["Lesson 1: ㄱ ㄴ ㄷ + ㅏ ㅓ","Lesson 2: ㄹ ㅁ ㅂ + ㅗ ㅜ"],
+      lessons: isAr ? ["الدرس 1: ㄱ ㄴ ㄷ + ㅏ ㅓ","الدرس 2: ㄹ ㅁ ㅂ + ㅗ ㅜ"] : ["Lesson 1: ㄱ ㄴ ㄷ + ㅏ ㅓ","Lesson 2: ㄹ ㅁ ㅂ + ㅗ ㅜ"],
     },
     {
-      n: isAr ? "الأسبوع ٢" : "Week 2",
-      title: isAr ? "الدرس ٣ + الدرس ٤" : "Lesson 3 + Lesson 4",
+      n: isAr ? "الأسبوع 2" : "Week 2",
+      title: isAr ? "الدرس 3 + الدرس 4" : "Lesson 3 + Lesson 4",
       letters: "ㅅ ㅇ ㅈ + ㅡ ㅣ  /  ㅊ ㅋ ㅌ",
       goal: isAr
-        ? "يكمل الطالب ١١ حرفاً ساكناً. يتعلّم المد المحايد والطويل. يقرأ: 사과، 지도، 카메라."
+        ? "يكمل الطالب 11 حرفاً ساكناً. يتعلّم المد المحايد والطويل. يقرأ: 사과، 지도، 카메라."
         : "11 consonants learned. Students read: 사과 (apple), 지도 (map), 카메라 (camera). Pair reading drill every class.",
-      lessons: isAr ? ["الدرس ٣: ㅅ ㅇ ㅈ + ㅡ ㅣ","الدرس ٤: ㅊ ㅋ ㅌ"] : ["Lesson 3: ㅅ ㅇ ㅈ + ㅡ ㅣ","Lesson 4: ㅊ ㅋ ㅌ"],
+      lessons: isAr ? ["الدرس 3: ㅅ ㅇ ㅈ + ㅡ ㅣ","الدرس 4: ㅊ ㅋ ㅌ"] : ["Lesson 3: ㅅ ㅇ ㅈ + ㅡ ㅣ","Lesson 4: ㅊ ㅋ ㅌ"],
     },
     {
-      n: isAr ? "الأسبوع ٣" : "Week 3",
-      title: isAr ? "الدرس ٥ + الدرس ٦" : "Lesson 5 + Lesson 6",
+      n: isAr ? "الأسبوع 3" : "Week 3",
+      title: isAr ? "الدرس 5 + الدرس 6" : "Lesson 5 + Lesson 6",
       letters: "ㅍ ㅎ  /  مراجعة شاملة",
       goal: isAr
-        ? "يكمل الطالب الـ١٤ حرفاً الساكنة كلها. الدرس ٦ مراجعة شاملة + قراءة + إملاء كبير."
+        ? "يكمل الطالب الـ14 حرفاً الساكنة كلها. الدرس 6 مراجعة شاملة + قراءة + إملاء كبير."
         : "All 14 consonants complete. Lesson 6 is a full review + reading practice + dictation test.",
-      lessons: isAr ? ["الدرس ٥: ㅍ ㅎ","الدرس ٦: مراجعة + قراءة + إملاء"] : ["Lesson 5: ㅍ ㅎ","Lesson 6: Full Review + Reading + Dictation"],
+      lessons: isAr ? ["الدرس 5: ㅍ ㅎ","الدرس 6: مراجعة + قراءة + إملاء"] : ["Lesson 5: ㅍ ㅎ","Lesson 6: Full Review + Reading + Dictation"],
     },
     {
-      n: isAr ? "الأسبوع ٤" : "Week 4",
-      title: isAr ? "الدرس ٧ + الدرس ٨" : "Lesson 7 + Lesson 8",
+      n: isAr ? "الأسبوع 4" : "Week 4",
+      title: isAr ? "الدرس 7 + الدرس 8" : "Lesson 7 + Lesson 8",
       letters: "حروف المد المركبة  /  الباتشيم",
       goal: isAr
         ? "يتعلّم الطالب حروف المد المركبة (ㅐ ㅔ ㅑ ㅕ ㅘ ㅝ...) والباتشيم (الحرف النهائي). يقرأ كلمات كاملة: 한국، 밥، 물."
         : "Compound vowels (ㅐ ㅔ ㅑ ㅕ ㅘ ㅝ...) and Batchim (final consonants). Students read complete Korean words: 한국, 밥, 물.",
-      lessons: isAr ? ["الدرس ٧: حروف المد المركبة","الدرس ٨: الباتشيم — الحرف النهائي"] : ["Lesson 7: Compound Vowels","Lesson 8: Batchim — Final Consonants"],
+      lessons: isAr ? ["الدرس 7: حروف المد المركبة","الدرس 8: الباتشيم — الحرف النهائي"] : ["Lesson 7: Compound Vowels","Lesson 8: Batchim — Final Consonants"],
     },
   ];
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "خطة الكورس" : "Course Plan"}>
-      <SHead title={isAr ? "خطة كورس الهانغول داخل الفصل — ٤ أسابيع" : "4-Week Classroom Hangul Course Plan"} subtitle={isAr ? "حصتان في الأسبوع · ٩٠ دقيقة لكل حصة · إملاء في كل حصة · واجب بعد كل درس" : "2 lessons per week · 90 minutes each · dictation every class · homework after every lesson"} />
+      <SHead title={isAr ? "خطة كورس الهانغول داخل الفصل — 4 أسابيع" : "4-Week Classroom Hangul Course Plan"} subtitle={isAr ? "حصتان في الأسبوع · 90 دقيقة لكل حصة · إملاء في كل حصة · واجب بعد كل درس" : "2 lessons per week · 90 minutes each · dictation every class · homework after every lesson"} />
       <div style={{ display:"flex", flexDirection:"column", gap:"5mm", marginBottom:"7mm" }}>
         {weeks.map((w,i) => (
           <div key={i} style={{ border:`1px solid ${BD}`, borderRadius:"6px", padding:"5mm", background:i===0?"#fffdf3":SBG }}>
@@ -3689,7 +3689,7 @@ function CoursePlan({ lang }: { lang: Lang }) {
         ))}
       </div>
       <div style={{ borderLeft:`3px solid ${Y}`, padding:"4mm 5mm", background:"#fffdf3", fontSize:"11px", color:T2, lineHeight:1.7 }}>
-        {isAr ? "هذا الكورس يعطي أفضل نتائج عندما يلتزم الطالب بحلّ الواجب وتطبيق الإملاء والتدريب اليومي (٥–١٠ دقائق) بين الحصص. الإملاء واجب في كل حصة — لا تتخطّه أبداً." : "This course works best when students complete the homework, dictation drills, and 5–10 minute daily practice between classes. Dictation is required every class — never skip it."}
+        {isAr ? "هذا الكورس يعطي أفضل نتائج عندما يلتزم الطالب بحلّ الواجب وتطبيق الإملاء والتدريب اليومي (5–10 دقائق) بين الحصص. الإملاء واجب في كل حصة — لا تتخطّه أبداً." : "This course works best when students complete the homework, dictation drills, and 5–10 minute daily practice between classes. Dictation is required every class — never skip it."}
       </div>
     </Page>
   );
@@ -3721,7 +3721,7 @@ function HowToUse({ lang }: { lang: Lang }) {
         { icon:"✍️", title:"تعلّم بالكتابة التطبيقية", body:"اكتب، انطق، اقرأ — التطبيق أهم من الشرح. لا تتجاوز تمارين التتبع والكتابة من الذاكرة." },
         { icon:"🗣️", title:"الإملاء واجب كل حصة", body:"ينطق المعلم حروفاً ومقاطع وكلمات، والطالب يكتب ما يسمع. هذا أهم تدريب على الإطلاق — لا تتخطّه." },
         { icon:"🎤", title:"النطق والتكرار مع زميل", body:"كرّر بصوت عالٍ بعد المعلم، اقرأ مع زميلك، سجّل صوتك واستمع له. النطق الصحيح يجي من التكرار." },
-        { icon:"📖", title:"اقرأ كلمات حقيقية من الدرس ١", body:"لا تنتظر حتى تنتهي من الكتاب. من الدرس الأول ستقرأ كلمات حقيقية: 가방، 나비، 밥، 물. كل درس يضيف كلمات جديدة." },
+        { icon:"📖", title:"اقرأ كلمات حقيقية من الدرس 1", body:"لا تنتظر حتى تنتهي من الكتاب. من الدرس الأول ستقرأ كلمات حقيقية: 가방، 나비، 밥، 물. كل درس يضيف كلمات جديدة." },
       ]
     : [
         { icon:"🔊", title:"Sound + Shape first", body:"Learn every letter through its sound and its shape together. Don't memorize in order — understand the shape from the sound." },
@@ -3762,10 +3762,10 @@ function SpeakingDrill({ lesson, slice, lang }: LessonProps) {
   const syllables = letters.flatMap(c => drillVowels.slice(0,3).map(v => buildSyllable(c.char, v)));
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "تدريب النطق" : "Speaking Drill"}>
-      <SHead title={isAr ? `تدريب النطق — الدرس ${["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1]}` : `Speaking Drill — Lesson ${lesson}`} subtitle={isAr ? "كرّر بصوت عالٍ، ثم اقرأ مع زميلك" : "Say each one aloud, then read with a partner"} />
+      <SHead title={isAr ? `تدريب النطق — الدرس ${["1","2","3","4","5","6","7","8"][lesson-1]}` : `Speaking Drill — Lesson ${lesson}`} subtitle={isAr ? "كرّر بصوت عالٍ، ثم اقرأ مع زميلك" : "Say each one aloud, then read with a partner"} />
       <div style={{ marginBottom:"5mm" }}>
         <div style={{ fontSize:"11px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
-          {isAr ? "١. كرّر بعد المعلم" : "1. Repeat after the teacher"}
+          {isAr ? "1. كرّر بعد المعلم" : "1. Repeat after the teacher"}
         </div>
         <div style={{ display:"flex", gap:"6mm", justifyContent:"center", flexWrap:"wrap", border:`1px solid ${BD}`, borderRadius:"6px", padding:"6mm", background:"#fff" }}>
           {letters.map(c => (
@@ -3778,7 +3778,7 @@ function SpeakingDrill({ lesson, slice, lang }: LessonProps) {
       </div>
       <div style={{ marginBottom:"5mm" }}>
         <div style={{ fontSize:"11px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
-          {isAr ? "٢. قراءة المقاطع بصوت عالٍ" : "2. Read syllables aloud"}
+          {isAr ? "2. قراءة المقاطع بصوت عالٍ" : "2. Read syllables aloud"}
         </div>
         <div style={{ display:"flex", gap:"4mm", flexWrap:"wrap", border:`1px solid ${BD}`, borderRadius:"6px", padding:"5mm", background:"#fff", direction:"ltr" }}>
           {syllables.map((s,i) => (
@@ -3788,11 +3788,11 @@ function SpeakingDrill({ lesson, slice, lang }: LessonProps) {
       </div>
       <div>
         <div style={{ fontSize:"11px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
-          {isAr ? "٣. قراءة جماعية مع زميل" : "3. Pair reading with a partner"}
+          {isAr ? "3. قراءة جماعية مع زميل" : "3. Pair reading with a partner"}
         </div>
         <ul style={{ margin:0, paddingInlineStart:"18px", fontSize:"11px", color:T2, lineHeight:1.8 }}>
           {(isAr
-            ? ["الطالب أ يقرأ الحرف، الطالب ب يكرّر بصوت أعلى.","تبادلوا الأدوار كل ٣٠ ثانية.","ركّز على المخارج: المعلم يصحّح النطق."]
+            ? ["الطالب أ يقرأ الحرف، الطالب ب يكرّر بصوت أعلى.","تبادلوا الأدوار كل 30 ثانية.","ركّز على المخارج: المعلم يصحّح النطق."]
             : ["Student A reads the letter, Student B repeats louder.","Switch roles every 30 seconds.","Focus on pronunciation — teacher corrects mouth shape."]
           ).map((t,i) => <li key={i}>{t}</li>)}
         </ul>
@@ -3816,7 +3816,7 @@ function Dictation({ lesson, slice, lang }: LessonProps) {
   const dictWords = DICTATION_WORDS[lesson] || letters.flatMap(c => (c[isAr?"ar":"en"].ex || []).slice(0,1).map(w => w.k));
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "إملاء" : "Dictation"}>
-      <SHead title={isAr ? `إملاء — الدرس ${["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1]}` : `Dictation — Lesson ${lesson}`} subtitle={isAr ? "ينطق المعلم بصوت واضح، والطالب يكتب في المربعات" : "The teacher reads aloud; the student writes in the boxes"} />
+      <SHead title={isAr ? `إملاء — الدرس ${["1","2","3","4","5","6","7","8"][lesson-1]}` : `Dictation — Lesson ${lesson}`} subtitle={isAr ? "ينطق المعلم بصوت واضح، والطالب يكتب في المربعات" : "The teacher reads aloud; the student writes in the boxes"} />
       <div style={{ borderLeft:`3px solid ${Y}`, padding:"3mm 5mm", background:"#fffdf3", fontSize:"11px", color:T2, lineHeight:1.7, marginBottom:"5mm" }}>
         <strong>{isAr ? "للمعلم: " : "Teacher: "}</strong>
         {isAr
@@ -3897,7 +3897,7 @@ function MiniReading({ lesson, lang }: LessonProps) {
   const words = LESSON_WORDS[lesson] || [];
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "قراءة قصيرة" : "Mini Reading"}>
-      <SHead title={isAr ? `قراءة قصيرة — الدرس ${["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1]}` : `Mini Reading — Lesson ${lesson}`} subtitle={isAr ? `${words.length} كلمة — كلها مكوّنة من حروف ومدّ سبق دراستها` : `${words.length} words — all built from letters and vowels you've already learned`} />
+      <SHead title={isAr ? `قراءة قصيرة — الدرس ${["1","2","3","4","5","6","7","8"][lesson-1]}` : `Mini Reading — Lesson ${lesson}`} subtitle={isAr ? `${words.length} كلمة — كلها مكوّنة من حروف ومدّ سبق دراستها` : `${words.length} words — all built from letters and vowels you've already learned`} />
       <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:"3mm", marginBottom:"5mm" }}>
         {words.map((w,i) => (
           <div key={i} style={{ border:`1px solid ${BD}`, borderRadius:"5px", padding:"3mm", background:"#fff", textAlign:"center", direction:"ltr" }}>
@@ -4076,7 +4076,7 @@ function LessonVowels({ lesson, lang }: { lesson: number; lang: Lang }) {
   const range = LESSON_VOWEL_INDICES[lesson];
   if (!range) return null;
   const vowels = VOWELS.slice(range[0], range[1]);
-  const num = isAr ? ["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1] : String(lesson);
+  const num = isAr ? ["1","2","3","4","5","6","7","8"][lesson-1] : String(lesson);
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "حروف المد" : "Vowels"}>
       <SHead
@@ -4130,8 +4130,8 @@ function LessonReviewAll({ lang }: { lang: Lang }) {
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "مراجعة شاملة" : "Full Review"}>
       <SHead
-        title={isAr ? "الدرس ٦ — مراجعة شاملة + قراءة + إملاء" : "Lesson 6 — Full Review + Reading + Dictation"}
-        subtitle={isAr ? "ثبّت كل ما تعلمته في الدروس ١–٥" : "Consolidate everything from Lessons 1–5"}
+        title={isAr ? "الدرس 6 — مراجعة شاملة + قراءة + إملاء" : "Lesson 6 — Full Review + Reading + Dictation"}
+        subtitle={isAr ? "ثبّت كل ما تعلمته في الدروس 1–5" : "Consolidate everything from Lessons 1–5"}
       />
       <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"3mm" }}>
         1. {isAr ? "اقرأ كل الحروف الساكنة بصوت عالٍ" : "Read every consonant out loud"}
@@ -4163,7 +4163,7 @@ function PictureWords({ lesson, lang }: LessonProps) {
   const words = LESSON_WORDS[lesson] || [];
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "كلمات بالصور" : "Picture Words"}>
-      <SHead title={isAr ? `كلمات بالصور — الدرس ${["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1]}` : `Picture Words — Lesson ${lesson}`} subtitle={isAr ? "كل كلمة هنا مكوّنة فقط من الحروف ومدّ الصوت التي درستَها حتى الآن" : "Every word below uses only consonants and vowels you have already learned"} />
+      <SHead title={isAr ? `كلمات بالصور — الدرس ${["1","2","3","4","5","6","7","8"][lesson-1]}` : `Picture Words — Lesson ${lesson}`} subtitle={isAr ? "كل كلمة هنا مكوّنة فقط من الحروف ومدّ الصوت التي درستَها حتى الآن" : "Every word below uses only consonants and vowels you have already learned"} />
       <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:"3mm", marginBottom:"5mm" }}>
         {words.map((w, i) => (
           <div key={`${w.k}-${i}`} style={{ border:`1px solid ${BD}`, borderRadius:"5px", padding:"2.5mm", background:"#fff", direction:isAr?"rtl":"ltr", textAlign:"center" }}>
@@ -4289,14 +4289,14 @@ function Homework({ lesson, slice, lang }: LessonProps) {
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "الواجب" : "Homework"}>
       <div style={{ marginBottom:"6mm", paddingBottom:"4mm", borderBottom:`1px solid ${BD}` }}>
         <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"2px", marginBottom:"3px" }}>
-          {isAr ? `واجب الدرس ${["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1]}` : `Lesson ${lesson} Homework`}
+          {isAr ? `واجب الدرس ${["1","2","3","4","5","6","7","8"][lesson-1]}` : `Lesson ${lesson} Homework`}
         </div>
         <div style={{ fontSize:"22px", fontWeight:900, color:T1 }}>
           {isAr ? "واجب البيت" : "Homework"}
         </div>
       </div>
 
-      <HwSection letter="A" title={isAr ? "تدريب الكتابة" : "Writing Practice"} body={isAr ? "اكتب كل حرف ١٠ مرات في كرّاسك." : "Write each letter 10 times in your notebook."} />
+      <HwSection letter="A" title={isAr ? "تدريب الكتابة" : "Writing Practice"} body={isAr ? "اكتب كل حرف 10 مرات في كرّاسك." : "Write each letter 10 times in your notebook."} />
       <div style={{ display:"flex", gap:"8px", marginBottom:"6mm", flexWrap:"wrap" }}>
         {letters.map(c => (
           <div key={c.char} style={{ border:`1px solid ${BD}`, borderRadius:"4px", padding:"3mm 5mm", fontSize:"30px", fontWeight:900, color:T1, background:"#fff" }}>{c.char}</div>
@@ -4335,23 +4335,23 @@ function Homework({ lesson, slice, lang }: LessonProps) {
 function DailyPractice({ lesson, lang }: { lesson:number; lang: Lang }) {
   const isAr = lang === "ar";
   const days = isAr
-    ? ["اكتب حروف اليوم ٥ مرات.","سجّل صوتك وأنت تقرأ الحروف.","اقرأ المقاطع بصوت عالٍ.","امزج بين الحروف القديمة والجديدة.","اختبار سريع: غطِّ الإجابات واختبر نفسك.","اقرأ ٣ كلمات كورية بسيطة.","راجع كل شيء قبل الحصة القادمة."]
+    ? ["اكتب حروف اليوم 5 مرات.","سجّل صوتك وأنت تقرأ الحروف.","اقرأ المقاطع بصوت عالٍ.","امزج بين الحروف القديمة والجديدة.","اختبار سريع: غطِّ الإجابات واختبر نفسك.","اقرأ 3 كلمات كورية بسيطة.","راجع كل شيء قبل الحصة القادمة."]
     : ["Write today's letters 5 times.","Record your voice reading the letters.","Read the syllables aloud.","Mix old + new letters.","Mini quiz: cover the answers and test yourself.","Read 3 simple Korean words.","Review everything before the next class."];
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "تدريب يومي" : "Daily Practice"}>
       <div style={{ marginBottom:"6mm", paddingBottom:"4mm", borderBottom:`1px solid ${BD}` }}>
         <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"2px", marginBottom:"3px" }}>
-          {isAr ? `بعد الدرس ${["١","٢","٣","٤","٥","٦","٧","٨"][lesson-1]}` : `After Lesson ${lesson}`}
+          {isAr ? `بعد الدرس ${["1","2","3","4","5","6","7","8"][lesson-1]}` : `After Lesson ${lesson}`}
         </div>
         <div style={{ fontSize:"22px", fontWeight:900, color:T1 }}>
-          {isAr ? "تدريب يومي — من ٥ إلى ١٠ دقائق" : "Daily Practice — 5 to 10 Minutes"}
+          {isAr ? "تدريب يومي — من 5 إلى 10 دقائق" : "Daily Practice — 5 to 10 Minutes"}
         </div>
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(7, 1fr)", gap:"3mm", marginBottom:"6mm" }}>
         {days.map((task,i) => (
           <div key={i} style={{ border:`1px solid ${BD}`, borderRadius:"4px", padding:"3mm", background:SBG }}>
             <div style={{ fontSize:"9px", color:T3, fontWeight:800, letterSpacing:"1px", marginBottom:"3mm" }}>
-              {isAr ? `يوم ${["١","٢","٣","٤","٥","٦","٧"][i]}` : `DAY ${i+1}`}
+              {isAr ? `يوم ${["1","2","3","4","5","6","7"][i]}` : `DAY ${i+1}`}
             </div>
             <div style={{ fontSize:"11px", color:T1, lineHeight:1.5, fontWeight:600 }}>{task}</div>
             <div style={{ marginTop:"3mm", width:"14px", height:"14px", border:`1.5px solid ${T2}`, borderRadius:"3px" }} />
@@ -4369,16 +4369,16 @@ function WeeklyCheckpoint({ week, lang }: { week:1|2|3|4; lang: Lang }) {
   const isAr = lang === "ar";
   const data = {
     1: { ar: ["تقرأ ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ","تكتب كل حرف من الذاكرة","تقرأ 가 나 다 라 마 바","ترسل voice note واحدة"], en: ["Read ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ","Write each letter from memory","Read 가 나 다 라 마 바","Send one voice note"] },
-    2: { ar: ["تقرأ جميع الـ١٤ حرفاً ساكناً","تميّز بين الحروف المتشابهة","تقرأ مقاطع بسيطة","تكمل تدريب الإملاء"], en: ["Read all 14 consonants","Identify similar letters","Read simple syllables","Complete dictation practice"] },
+    2: { ar: ["تقرأ جميع الـ14 حرفاً ساكناً","تميّز بين الحروف المتشابهة","تقرأ مقاطع بسيطة","تكمل تدريب الإملاء"], en: ["Read all 14 consonants","Identify similar letters","Read simple syllables","Complete dictation practice"] },
     3: { ar: ["تقرأ جميع حروف المد الأساسية","تركّب كتل المقاطع","تقرأ كلمات مثل 나، 바나나، 고기","تفهم ㅇ الصامتة"], en: ["Read all basic vowels","Build syllable blocks","Read words like 나, 바나나, 고기","Understand silent ㅇ"] },
-    4: { ar: ["تفهم الباتشيم","تقرأ كلمات مثل 한국، 밥، 물، 사랑","تكمل اختبار القراءة النهائي","جاهز للانتقال إلى المستوى ١"], en: ["Understand batchim","Read words like 한국, 밥, 물, 사랑","Complete the final reading test","Ready to move to Level 1"] },
+    4: { ar: ["تفهم الباتشيم","تقرأ كلمات مثل 한국، 밥، 물، 사랑","تكمل اختبار القراءة النهائي","جاهز للانتقال إلى المستوى 1"], en: ["Understand batchim","Read words like 한국, 밥, 물, 사랑","Complete the final reading test","Ready to move to Level 1"] },
   } as const;
   const items = data[week][isAr ? "ar" : "en"];
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "نقطة مراجعة" : "Checkpoint"}>
       <div style={{ marginBottom:"7mm", paddingBottom:"5mm", borderBottom:`2px solid ${T1}` }}>
         <div style={{ fontSize:"10px", color:T3, textTransform:"uppercase", letterSpacing:"3px", marginBottom:"3px" }}>
-          {isAr ? `الأسبوع ${["١","٢","٣","٤"][week-1]}` : `Week ${week}`}
+          {isAr ? `الأسبوع ${["1","2","3","4"][week-1]}` : `Week ${week}`}
         </div>
         <div style={{ fontSize:"28px", fontWeight:900, color:T1 }}>
           {isAr ? "نقطة مراجعة" : "Checkpoint"}
@@ -4414,7 +4414,7 @@ function VowelsLesson({ part, lang }: { part: 1|2|3; lang: Lang }) {
         ))}
       </div>
       <div style={{ fontSize:"10px", fontWeight:800, color:T3, letterSpacing:"2px", textTransform:"uppercase", marginBottom:"3mm" }}>
-        {isAr ? "اكتب كل حرف ٤ مرات" : "Write each vowel 4 times"}
+        {isAr ? "اكتب كل حرف 4 مرات" : "Write each vowel 4 times"}
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap:"3mm", marginBottom:"6mm" }}>
         {Array(8).fill(null).map((_,i) => (
@@ -4429,9 +4429,9 @@ function VowelsLesson({ part, lang }: { part: 1|2|3; lang: Lang }) {
 function BatchimLesson({ part, lang }: { part: 1|2|3; lang: Lang }) {
   const isAr = lang === "ar";
   const titles = {
-    1: { en:"Batchim Part 1 — What is Batchim?", ar:"الباتشيم — الجزء ١: ما هو الباتشيم؟" },
-    2: { en:"Batchim Part 2 — The 7 Final Sounds", ar:"الباتشيم — الجزء ٢: الأصوات السبعة النهائية" },
-    3: { en:"Batchim Part 3 — Linking Rule", ar:"الباتشيم — الجزء ٣: قاعدة الوصل" },
+    1: { en:"Batchim Part 1 — What is Batchim?", ar:"الباتشيم — الجزء 1: ما هو الباتشيم؟" },
+    2: { en:"Batchim Part 2 — The 7 Final Sounds", ar:"الباتشيم — الجزء 2: الأصوات السبعة النهائية" },
+    3: { en:"Batchim Part 3 — Linking Rule", ar:"الباتشيم — الجزء 3: قاعدة الوصل" },
   };
   return (
     <Page dir={isAr ? "rtl" : "ltr"} chapter={isAr ? "الباتشيم" : "Batchim"}>
@@ -4560,7 +4560,7 @@ function FinalTest({ lang }: { lang: Lang }) {
         ))}
       </div>
 
-      <HwSection letter="D" title={isAr ? "إملاء من المعلم" : "Teacher Dictation"} body={isAr ? "ينطق المعلم ٥ أصوات أو مقاطع، ويكتبها الطالب." : "Teacher says 5 sounds/syllables, student writes them."} />
+      <HwSection letter="D" title={isAr ? "إملاء من المعلم" : "Teacher Dictation"} body={isAr ? "ينطق المعلم 5 أصوات أو مقاطع، ويكتبها الطالب." : "Teacher says 5 sounds/syllables, student writes them."} />
       <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"3mm", marginBottom:"6mm" }}>
         {[1,2,3,4,5].map(n => (
           <div key={n} style={{ border:`1px solid ${BD}`, height:"16mm", borderRadius:"4px", background:"#fff", position:"relative" }}>
@@ -4574,7 +4574,7 @@ function FinalTest({ lang }: { lang: Lang }) {
           {isAr ? "النتيجة النهائية" : "Final Result"}
         </div>
         {(isAr
-          ? ["ممتاز — جاهز للمستوى ١","جيد — يحتاج مراجعة بسيطة","يحتاج إلى تدريب إضافي على الهانغول"]
+          ? ["ممتاز — جاهز للمستوى 1","جيد — يحتاج مراجعة بسيطة","يحتاج إلى تدريب إضافي على الهانغول"]
           : ["Excellent — ready for Level 1","Good — needs light review","Needs more Hangul practice"]
         ).map((t,i) => (
           <div key={i} style={{ display:"flex", alignItems:"center", gap:"8px", fontSize:"12px", color:T2, marginBottom:"3px" }}>
@@ -4603,7 +4603,7 @@ function Certificate({ lang }: { lang: Lang }) {
         <div style={{ width:"60px", height:"2px", background:GOLD, margin:"0 auto 8mm" }} />
         <div style={{ fontSize:"13px", color:T2, lineHeight:1.8, maxWidth:"140mm", margin:"0 auto" }}>
           {isAr
-            ? "أصبحت قادراً على قراءة الحروف الكورية الأساسية والمقاطع والكلمات المبدئية. أنت الآن جاهز للبدء في كورس الكورية المستوى ١ مع كلوفرز."
+            ? "أصبحت قادراً على قراءة الحروف الكورية الأساسية والمقاطع والكلمات المبدئية. أنت الآن جاهز للبدء في كورس الكورية المستوى 1 مع كلوفرز."
             : "You can now read basic Korean letters, syllables, and beginner words. You are ready to start Korean Level 1 with Klovers."}
         </div>
         <div style={{ marginTop:"15mm", display:"flex", justifyContent:"space-between", gap:"10mm" }}>

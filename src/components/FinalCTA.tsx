@@ -11,14 +11,16 @@ import {
   TRIAL_GROUP_SIZE_MAX,
   WHATSAPP_BASE,
 } from "@/lib/siteConfig";
+import { formatNumber } from "@/lib/formatNumber";
 import { trackAndOpenWhatsApp, logLeadEvent } from "@/lib/leadTracking";
 
 // Values come from siteConfig so the homepage hero, this block and the About
 // page cannot drift apart — they previously disagreed by 4x across locales.
-const SOCIAL_PROOF = [
-  { icon: Users, value: `${STUDENTS_TAUGHT}+`, label: "Students Taught" },
-  { icon: Star,  value: `${AVERAGE_RATING}★`,  label: "Average Rating" },
-  { icon: Zap,   value: "98%",                 label: "Would Recommend" },
+// The labels were hardcoded English on a bilingual site.
+const socialProof = (isAr: boolean) => [
+  { icon: Users, value: `${STUDENTS_TAUGHT}+`, label: isAr ? "طالب تعلّموا" : "Students Taught" },
+  { icon: Star,  value: `${AVERAGE_RATING}★`,  label: isAr ? "متوسط التقييم" : "Average Rating" },
+  { icon: Zap,   value: "98%",                 label: isAr ? "ينصحون بنا" : "Would Recommend" },
 ];
 
 // Floating Korean characters for visual texture
@@ -122,12 +124,12 @@ const FinalCTA = () => {
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          {SOCIAL_PROOF.map(({ icon: Icon, value, label }, i) => (
+          {socialProof(isAr).map(({ icon: Icon, value, label }, i) => (
             <div key={label} className="flex items-center gap-2 bg-primary-foreground/10 border border-primary-foreground/15 rounded-xl px-4 py-2.5">
               <Icon className="h-5 w-5 text-primary-foreground/70" />
               <div className="text-start">
                 <p className="font-bold text-primary-foreground text-sm leading-none">
-                  {i === 0 ? `${count.toLocaleString()}+` : value}
+                  {i === 0 ? `${formatNumber(count, isAr ? "ar" : "en")}+` : value}
                 </p>
                 <p className="text-[11px] text-primary-foreground/60">{label}</p>
               </div>
@@ -189,8 +191,8 @@ const FinalCTA = () => {
           {isAr
             // Community members, not students. These are different quantities
             // and are now labelled as such in both locales.
-            ? `🌍 انضم لأكثر من ${COMMUNITY_MEMBERS.toLocaleString("ar-EG")} عضو في مجتمعنا على تيليجرام وفيسبوك`
-            : `🌍 Join ${COMMUNITY_MEMBERS.toLocaleString("en-US")}+ members in our Telegram & Facebook community`}
+            ? `🌍 انضم لأكثر من ${formatNumber(COMMUNITY_MEMBERS, "ar")} عضو في مجتمعنا على تيليجرام وفيسبوك`
+            : `🌍 Join ${formatNumber(COMMUNITY_MEMBERS, "en")}+ members in our Telegram & Facebook community`}
         </p>
 
         {/* Guarantee badge */}

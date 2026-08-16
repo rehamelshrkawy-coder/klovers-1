@@ -153,28 +153,28 @@ const HangulStarterPage = () => {
 
             <LetterGrid
               items={CONSONANTS}
-              label={isAr ? "الحروف الساكنة الأساسية (١٤)" : "Basic Consonants (14)"}
+              label={isAr ? "الحروف الساكنة الأساسية (14)" : "Basic Consonants (14)"}
             />
             <LetterGrid
               items={DOUBLE_CONSONANTS}
-              label={isAr ? "الحروف الساكنة المضاعفة (٥)" : "Double Consonants (5)"}
+              label={isAr ? "الحروف الساكنة المضاعفة (5)" : "Double Consonants (5)"}
             />
             <LetterGrid
               items={VOWELS}
-              label={isAr ? "حروف المد الأساسية (١٠)" : "Basic Vowels (10)"}
+              label={isAr ? "حروف المد الأساسية (10)" : "Basic Vowels (10)"}
             />
             <LetterGrid
               items={COMPOUND_VOWELS}
-              label={isAr ? "حروف المد المركبة (١١)" : "Compound Vowels (11)"}
+              label={isAr ? "حروف المد المركبة (11)" : "Compound Vowels (11)"}
             />
 
             {/* Quick tips */}
             <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 print:hidden">
               <h2 className="font-black text-foreground mb-3">
-                {isAr ? "٣ حقائق تسهّل عليك" : "3 facts that make Hangul easy"}
+                {isAr ? "3 حقائق تسهّل عليك" : "3 facts that make Hangul easy"}
               </h2>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>✅ {isAr ? "هانغول اتصمم في ١٤٤٣ م — بيُتعلم في ساعات مش سنين." : "Hangul was designed in 1443 — it can be learned in hours, not years."}</li>
+                <li>✅ {isAr ? "هانغول اتصمم في 1443 م — بيُتعلم في ساعات مش سنين." : "Hangul was designed in 1443 — it can be learned in hours, not years."}</li>
                 <li>✅ {isAr ? "كل حرف شكله بيشبح طريقة لفظه." : "Each letter's shape reflects how your mouth moves to say it."}</li>
                 <li>✅ {isAr ? "مش لازم تحفظ كل حاجة قبل ما تبدأ — مدرستك هتشرحلك كل حاجة." : "You don't need to memorize everything before starting — your teacher will guide you through it."}</li>
               </ul>
