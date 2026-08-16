@@ -113,7 +113,7 @@ const AttendanceHistoryCard = ({ dates }: { dates: AttendanceDate[] }) => {
               {dates.map((d, i) => (
                 <div key={`${d.date}-${i}`} className="flex items-center justify-between p-2 rounded-lg border border-border">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground w-5 text-right">{i + 1}.</span>
+                    <span className="text-xs text-muted-foreground w-5 text-end">{i + 1}.</span>
                     <CalendarCheck className="h-4 w-4 text-amber-600" />
                     <span className="text-sm font-medium text-foreground">
                       {new Date(d.date + "T00:00:00").toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })}
@@ -692,7 +692,7 @@ const StudentDashboard = () => {
               >
                 <span className="text-base">📅</span>
                 <span>Book a Class</span>
-                <span className="text-xs opacity-60 ml-auto">WhatsApp →</span>
+                <span className="text-xs opacity-60 ms-auto">WhatsApp →</span>
               </a>
             </div>
           </div>
@@ -753,7 +753,7 @@ const StudentDashboard = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {quickActions.map(({ label, desc, emoji, path, bg }) => (
                 <button key={label} onClick={() => navigate(path)} aria-label={`${label}: ${desc}`}
-                  className={`group rounded-xl p-3 text-left shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 ${bg}`}>
+                  className={`group rounded-xl p-3 text-start shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 ${bg}`}>
                   <div className="text-xl mb-1">{emoji}</div>
                   <p className="font-semibold text-white text-sm">{label}</p>
                   <p className="text-white/75 text-[11px]">{desc}</p>
@@ -784,7 +784,7 @@ const StudentDashboard = () => {
                     <div key={ko} className="relative flex-none w-36 h-44 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:scale-[1.03] transition-all duration-300">
                       <img src={img} alt={en} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                      <div className="absolute bottom-0 start-0 end-0 p-2.5">
                         <p className="text-white font-bold text-base leading-tight">{ko}</p>
                         <p className="text-white/75 text-[10px] leading-tight">{en}</p>
                         <p className="text-white/50 text-[9px] mt-0.5">{caption}</p>
@@ -820,7 +820,7 @@ const StudentDashboard = () => {
               <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-transparent ring-1 ring-black/10">
                 <CardContent className="pt-6 pb-6 space-y-4">
                   <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0 border border-black/10">
+                    <div className="h-12 w-12 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0 border border-black/10 dark:bg-amber-900/40">
                       <GraduationCap className="h-6 w-6 text-amber-600" />
                     </div>
                     <div>
@@ -872,14 +872,14 @@ const StudentDashboard = () => {
                         )}
                       </div>
                       <Button variant="outline" size="sm" onClick={() => navigate("/placement-test")}>
-                        <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Retake
+                        <RotateCcw className="h-3.5 w-3.5 me-1.5" /> Retake
                       </Button>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">Find your Korean level</p>
                       <Button size="sm" onClick={() => navigate("/placement-test")}>
-                        <GraduationCap className="h-3.5 w-3.5 mr-1.5" /> Take Test
+                        <GraduationCap className="h-3.5 w-3.5 me-1.5" /> Take Test
                       </Button>
                     </div>
                   )}
@@ -969,14 +969,14 @@ const StudentDashboard = () => {
                           )}
                         </div>
                         <Button variant="outline" size="sm" onClick={() => navigate("/placement-test")}>
-                          <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Retake
+                          <RotateCcw className="h-3.5 w-3.5 me-1.5" /> Retake
                         </Button>
                       </div>
                     ) : (
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">Take the placement test to find your level</p>
                         <Button size="sm" onClick={() => navigate("/placement-test")}>
-                          <GraduationCap className="h-3.5 w-3.5 mr-1.5" /> Take Test
+                          <GraduationCap className="h-3.5 w-3.5 me-1.5" /> Take Test
                         </Button>
                       </div>
                     )}
@@ -1086,7 +1086,7 @@ const StudentDashboard = () => {
                         <CardTitle className="text-base flex items-center gap-2">
                           <Package className="h-4 w-4" />
                           <span className="capitalize">{enrollment.plan_type}</span> — {enrollment.duration}mo
-                          <Badge variant="outline" className="ml-1 text-xs">Older</Badge>
+                          <Badge variant="outline" className="ms-1 text-xs">Older</Badge>
                         </CardTitle>
                         <Badge variant={remaining >= 0 ? "secondary" : "destructive"}>
                           {remaining >= 0 ? `${remaining} left` : `${extra} extra`}
@@ -1121,9 +1121,9 @@ const StudentDashboard = () => {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => window.open(`/progress-report?uid=${userId}`, '_blank', 'noopener,noreferrer')}
-                  className="flex flex-col items-center gap-2 bg-card border border-border rounded-2xl p-4 hover:border-amber-300 hover:bg-amber-50 transition-all text-center"
+                  className="flex flex-col items-center gap-2 bg-card border border-border rounded-2xl p-4 hover:border-amber-300 hover:bg-amber-50 transition-all text-center dark:bg-amber-950/40 dark:border-amber-700"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center border border-black/10">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center border border-black/10 dark:bg-amber-900/40">
                     <FileText className="h-5 w-5 text-amber-600" />
                   </div>
                   <span className="text-sm font-semibold text-foreground">Progress Report</span>
@@ -1131,9 +1131,9 @@ const StudentDashboard = () => {
                 </button>
                 <button
                   onClick={() => window.open(`/certificate?uid=${userId}&level=${encodeURIComponent(profileLevel || 'A0')}`, '_blank', 'noopener,noreferrer')}
-                  className="flex flex-col items-center gap-2 bg-card border border-border rounded-2xl p-4 hover:border-amber-300 hover:bg-amber-50 transition-all text-center"
+                  className="flex flex-col items-center gap-2 bg-card border border-border rounded-2xl p-4 hover:border-amber-300 hover:bg-amber-50 transition-all text-center dark:bg-amber-950/40 dark:border-amber-700"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center border border-black/10">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center border border-black/10 dark:bg-amber-900/40">
                     <Award className="h-5 w-5 text-amber-600" />
                   </div>
                   <span className="text-sm font-semibold text-foreground">Certificate</span>

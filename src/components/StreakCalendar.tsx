@@ -136,7 +136,7 @@ export function StreakCalendar() {
         <div className="overflow-x-auto">
           <div className="min-w-[400px]">
             {/* Month labels */}
-            <div className="flex mb-1 pl-8">
+            <div className="flex mb-1 ps-8">
               {weeks.map((week, wi) => {
                 const label = monthLabels.find(m => m.colIdx === wi);
                 return (
@@ -152,7 +152,7 @@ export function StreakCalendar() {
             {/* Calendar grid */}
             <div className="flex gap-1">
               {/* Day labels */}
-              <div className="flex flex-col gap-1 mr-1">
+              <div className="flex flex-col gap-1 me-1">
                 {DAYS.map((d, di) => (
                   <div key={d} className="h-3.5 flex items-center">
                     {di % 2 === 1 && (

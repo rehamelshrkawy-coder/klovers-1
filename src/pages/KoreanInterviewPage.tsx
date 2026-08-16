@@ -255,8 +255,8 @@ export default function KoreanInterviewPage() {
         {/* ── Hero Section ── */}
         <section className="relative overflow-hidden bg-secondary text-white">
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-10 left-10 text-8xl font-bold rotate-12">면접</div>
-            <div className="absolute bottom-10 right-10 text-8xl font-bold -rotate-12">준비</div>
+            <div className="absolute top-10 start-10 text-8xl font-bold rotate-12">면접</div>
+            <div className="absolute bottom-10 end-10 text-8xl font-bold -rotate-12">준비</div>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-9xl font-bold opacity-50">합격</div>
           </div>
           <div className="relative max-w-5xl mx-auto px-4 py-16 md:py-24 text-center">
@@ -494,7 +494,7 @@ export default function KoreanInterviewPage() {
             </p>
             <Link to="/practice-interview">
               <Button variant="outline" className="gap-2">
-                <GraduationCap className="h-4 w-4" /> {t("koreanInterviewPage.demoBtn")} <ArrowRight className="h-4 w-4" />
+                <GraduationCap className="h-4 w-4" /> {t("koreanInterviewPage.demoBtn")} <ArrowRight className="h-4 w-4 rtl-flip" />
               </Button>
             </Link>
           </div>
@@ -532,7 +532,7 @@ export default function KoreanInterviewPage() {
           <div className="flex flex-col gap-3 mt-2">
             <Link to="/login?redirect=/interview-training">
               <Button className="w-full gap-2">
-                <ChevronRight className="h-4 w-4" /> {t("koreanInterviewPage.loginDialogSignIn")}
+                <ChevronRight className="h-4 w-4 rtl-flip" /> {t("koreanInterviewPage.loginDialogSignIn")}
               </Button>
             </Link>
             <Link to="/signup?redirect=/interview-training">

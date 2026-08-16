@@ -69,7 +69,7 @@ export function StreakCelebration({
           <p className="text-sm text-foreground">
             Keep it up! You're building an amazing habit! 🎉
           </p>
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-b border-r border-border rotate-45" />
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-b border-e border-border rotate-45" />
         </div>
 
         {/* Mascot with flame shield */}

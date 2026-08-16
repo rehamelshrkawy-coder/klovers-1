@@ -140,7 +140,7 @@ const ExitIntentModal = () => {
       <div ref={modalRef} className="relative bg-background border border-border rounded-3xl shadow-2xl max-w-md w-full p-7 animate-in zoom-in-95 duration-200">
         <button
           onClick={() => setShow(false)}
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-4 end-4 text-muted-foreground hover:text-foreground transition-colors"
           aria-label={isAr ? "إغلاق" : "Close"}
         >
           <X className="h-5 w-5" />
@@ -160,7 +160,7 @@ const ExitIntentModal = () => {
             <Button asChild className="w-full gap-2 mb-3" onClick={() => setShow(false)}>
               <Link to="/hangul-starter">
                 {isAr ? "اعرض ورقة هانغول الآن" : "View Hangul Sheet Now"}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 rtl-flip" />
               </Link>
             </Button>
             <Button variant="ghost" onClick={() => setShow(false)} className="w-full text-muted-foreground">

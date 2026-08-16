@@ -145,7 +145,7 @@ export default function EnrollmentStatusPage() {
                       <div>
                         <p className={`font-semibold text-sm ${step.done ? "text-green-700 dark:text-green-400" : step.active ? "text-foreground" : "text-muted-foreground"}`}>
                           {isAr ? step.labelAr : step.label}
-                          {step.active && <span className="ml-2 text-yellow-600 text-xs font-normal">{isAr ? "← أنت هنا" : "← you're here"}</span>}
+                          {step.active && <span className="ms-2 text-yellow-600 text-xs font-normal">{isAr ? "← أنت هنا" : "← you're here"}</span>}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">{isAr ? step.detailAr : step.detail}</p>
                       </div>

@@ -99,7 +99,7 @@ const HomeExitNudge = () => {
           className="group flex items-center gap-4 p-4 hover:bg-primary/5 transition-colors"
         >
           <div className="text-3xl flex-shrink-0">🎯</div>
-          <div className="flex-1 min-w-0 pr-6">
+          <div className="flex-1 min-w-0 pe-6">
             <p className="font-bold text-foreground text-sm leading-tight">
               {isAr ? "قبل ما تمشي — اعرف مستواك في الكورية" : "Before you go — find your Korean level"}
             </p>
@@ -108,7 +108,7 @@ const HomeExitNudge = () => {
             </p>
           </div>
           <div className="flex-shrink-0 inline-flex items-center gap-1 bg-primary text-primary-foreground font-bold text-sm px-5 py-3 rounded-xl shadow-lg group-hover:shadow-xl group-hover:scale-[1.03] transition-all">
-            {isAr ? "ابدأ" : "Start"} <ArrowRight className="h-3.5 w-3.5" />
+            {isAr ? "ابدأ" : "Start"} <ArrowRight className="h-3.5 w-3.5 rtl-flip" />
           </div>
         </Link>
       </div>

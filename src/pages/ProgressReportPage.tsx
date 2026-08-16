@@ -71,7 +71,7 @@ const ProgressReportPage = () => {
   if (!data) return <div className="flex items-center justify-center min-h-screen text-muted-foreground">{isAr ? "سجّل الدخول لعرض تقريرك." : "Sign in to view your report."}</div>;
 
   return (
-    <div className="min-h-screen bg-gray-100 print:bg-white">
+    <div className="min-h-screen bg-gray-100 print:bg-white dark:bg-gray-900/40">
       {/* Print controls — hidden when printing */}
       <div className="print:hidden flex justify-center gap-3 py-6">
         <Button onClick={handlePrint} className="gap-2">

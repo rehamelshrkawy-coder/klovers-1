@@ -619,10 +619,10 @@ const PlacementTestPage = () => {
 
           <div className="flex justify-between gap-3">
             <Button variant="outline" onClick={() => setPhase("test")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> {isAr ? "العودة للاختبار" : "Back to Test"}
+              <ArrowLeft className="me-2 h-4 w-4 rtl-flip" /> {isAr ? "العودة للاختبار" : "Back to Test"}
             </Button>
             <Button onClick={handleSubmit} disabled={submitting || totalAnswered === 0}>
-              {submitting ? (isAr ? "جارٍ الإرسال..." : "Submitting…") : (isAr ? "إرسال الاختبار" : "Submit Test")} <ArrowRight className="ml-2 h-4 w-4" />
+              {submitting ? (isAr ? "جارٍ الإرسال..." : "Submitting…") : (isAr ? "إرسال الاختبار" : "Submit Test")} <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
             </Button>
           </div>
         </main>
@@ -705,7 +705,7 @@ const PlacementTestPage = () => {
                   disabled={listeningSelected === null}
                   onClick={() => listeningSelected !== null && advanceListening(listeningSelected)}
                 >
-                  {isLast ? (isAr ? "إنهاء اختبار الاستماع" : "Finish Listening Exam") : (isAr ? "تأكيد الإجابة" : "Confirm Answer")} <ArrowRight className="ml-2 h-4 w-4" />
+                  {isLast ? (isAr ? "إنهاء اختبار الاستماع" : "Finish Listening Exam") : (isAr ? "تأكيد الإجابة" : "Confirm Answer")} <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               ) : (
                 <p className="text-center text-xs text-muted-foreground">
@@ -745,7 +745,7 @@ const PlacementTestPage = () => {
           <Card>
             <CardContent className="pt-6 pb-6 space-y-5">
               {/* Passage */}
-              <div className="bg-muted/50 border-l-4 border-primary/40 rounded-r-lg px-4 py-3 text-sm leading-relaxed text-foreground font-medium">
+              <div className="bg-muted/50 border-s-4 border-primary/40 rounded-e-lg px-4 py-3 text-sm leading-relaxed text-foreground font-medium">
                 {q.passage}
               </div>
 
@@ -792,7 +792,7 @@ const PlacementTestPage = () => {
                   disabled={readingSelected === null}
                   onClick={() => readingSelected !== null && advanceReading(readingSelected)}
                 >
-                  {isLast ? (isAr ? "إنهاء اختبار القراءة" : "Finish Reading Exam") : (isAr ? "تأكيد الإجابة" : "Confirm Answer")} <ArrowRight className="ml-2 h-4 w-4" />
+                  {isLast ? (isAr ? "إنهاء اختبار القراءة" : "Finish Reading Exam") : (isAr ? "تأكيد الإجابة" : "Confirm Answer")} <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
               ) : (
                 <p className="text-center text-xs text-muted-foreground">
@@ -1015,7 +1015,7 @@ const PlacementTestPage = () => {
                         navigate("/free-trial");
                       }}
                     >
-                      {isAr ? "احجز تجربتي المجانية" : "Book My Free Trial"} <ArrowRight className="ml-2 h-4 w-4" />
+                      {isAr ? "احجز تجربتي المجانية" : "Book My Free Trial"} <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                     </Button>
                     <button
                       onClick={() => {
@@ -1100,7 +1100,7 @@ const PlacementTestPage = () => {
                       onClick={() => navigate(link)}
                       className="text-xs text-primary font-medium hover:underline flex items-center gap-1"
                     >
-                      {label} <ArrowRight className="h-3 w-3" />
+                      {label} <ArrowRight className="h-3 w-3 rtl-flip" />
                     </button>
                   </div>
                 );
@@ -1120,7 +1120,7 @@ const PlacementTestPage = () => {
                         />
                       ))}
                     </div>
-                    <span className="text-muted-foreground w-8 text-right">{correct}/{total}</span>
+                    <span className="text-muted-foreground w-8 text-end">{correct}/{total}</span>
                   </div>
                 ))}
               </div>
@@ -1176,7 +1176,7 @@ const PlacementTestPage = () => {
               <p className="text-sm font-semibold text-foreground text-center">{isAr ? "مستعد لبدء التعلّم؟" : "Ready to start learning?"}</p>
               <div className="flex gap-2">
                 <Button size="lg" className="flex-1" onClick={() => navigate("/enroll")}>
-                  {isAr ? "📚 احجز حصة" : "📚 Book a Class"} <ArrowRight className="ml-2 h-4 w-4" />
+                  {isAr ? "📚 احجز حصة" : "📚 Book a Class"} <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
                 </Button>
                 <Button size="lg" variant="outline" className="flex-1 gap-2" onClick={() => handleWhatsAppEnroll(result)}>
                   <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current shrink-0" xmlns="http://www.w3.org/2000/svg">
@@ -1335,7 +1335,7 @@ const PlacementTestPage = () => {
 
                       {/* Listening passage revealed in review */}
                       {q.section === "Listening" && q.passage && (
-                        <div className="ml-7 mb-2 rounded-lg bg-primary/5 border border-primary/15 px-3 py-2 text-xs space-y-1.5">
+                        <div className="ms-7 mb-2 rounded-lg bg-primary/5 border border-primary/15 px-3 py-2 text-xs space-y-1.5">
                           <p className="font-medium text-foreground leading-relaxed">{q.passage}</p>
                           <button
                             className="flex items-center gap-1 text-primary hover:underline text-[11px]"
@@ -1347,7 +1347,7 @@ const PlacementTestPage = () => {
                       )}
 
                       {!wasSkipped && (
-                        <div className="ml-7 text-xs space-y-1 mb-2">
+                        <div className="ms-7 text-xs space-y-1 mb-2">
                           {!isCorrect && (
                             <p className="text-red-700 dark:text-red-300">
                               {isAr ? "إجابتك:" : "Your answer:"} {q.options[userAnswer] ?? "—"}
@@ -1359,9 +1359,9 @@ const PlacementTestPage = () => {
                         </div>
                       )}
 
-                      <p className="ml-7 text-xs text-muted-foreground leading-relaxed">{q.explanation}</p>
+                      <p className="ms-7 text-xs text-muted-foreground leading-relaxed">{q.explanation}</p>
                       {q.arabicTip && (
-                        <p className="mt-1.5 ml-7 text-xs text-muted-foreground border-r-2 border-primary/40 pr-2 text-right leading-relaxed" dir="rtl">
+                        <p className="mt-1.5 ms-7 text-xs text-muted-foreground border-e-2 border-primary/40 pe-2 text-end leading-relaxed" dir="rtl">
                           💡 {q.arabicTip}
                         </p>
                       )}
@@ -1449,7 +1449,7 @@ const PlacementTestPage = () => {
                 navigate("/free-trial?level=hangul");
               }}
             >
-              {isAr ? "احجز التجربة" : "Book trial"} <ArrowRight className="h-3 w-3 ml-1" />
+              {isAr ? "احجز التجربة" : "Book trial"} <ArrowRight className="h-3 w-3 ms-1 rtl-flip" />
             </Button>
           </div>
         )}
@@ -1469,7 +1469,7 @@ const PlacementTestPage = () => {
               <span className="text-green-800 dark:text-green-300 font-medium">{isAr ? `${totalAnswered} تمت الإجابة` : `${totalAnswered} answered`}</span>
               {totalSkipped > 0 && <span className="text-amber-800 dark:text-amber-300 font-medium">{isAr ? `${totalSkipped} تم التخطي` : `${totalSkipped} skipped`}</span>}
               {totalRemaining > 0 && <span>{isAr ? `${totalRemaining} متبقي` : `${totalRemaining} left`}</span>}
-              <span className="flex items-center gap-1 ml-1 text-muted-foreground" title="Auto-advance to next question after answering">
+              <span className="flex items-center gap-1 ms-1 text-muted-foreground" title="Auto-advance to next question after answering">
                 <Switch id="auto-advance" checked={autoAdvance} onCheckedChange={toggleAutoAdvance} className="scale-75 origin-right" />
                 <label htmlFor="auto-advance" className="cursor-pointer select-none hidden sm:inline">{isAr ? "تلقائي" : "Auto"}</label>
               </span>
@@ -1541,7 +1541,7 @@ const PlacementTestPage = () => {
                       </span>
                     </div>
                     <p className="font-medium text-sm leading-snug">
-                      <span className="text-muted-foreground mr-1.5">Q{q.id}.</span>
+                      <span className="text-muted-foreground me-1.5">Q{q.id}.</span>
                       {q.question}
                     </p>
                   </div>
@@ -1561,13 +1561,13 @@ const PlacementTestPage = () => {
                       </Button>
                     </div>
                   ) : q.passage ? (
-                    <div className="bg-muted/50 border-l-4 border-primary/40 rounded-r-lg px-4 py-3 mb-4 text-sm leading-relaxed text-foreground font-medium">
+                    <div className="bg-muted/50 border-s-4 border-primary/40 rounded-e-lg px-4 py-3 mb-4 text-sm leading-relaxed text-foreground font-medium">
                       {q.passage}
                     </div>
                   ) : null}
 
                   {isSkipped ? (
-                    <div className="flex items-center justify-between ml-1">
+                    <div className="flex items-center justify-between ms-1">
                       <span className="text-sm text-muted-foreground italic">{isAr ? "تم التخطي — يحتسب كـ 0" : "Skipped — counts as 0"}</span>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleUnskip(q.id); }}
@@ -1598,18 +1598,18 @@ const PlacementTestPage = () => {
                             }, 350);
                           }
                         }}
-                        className="space-y-2 ml-1"
+                        className="space-y-2 ms-1"
                       >
                         {q.options.map((opt, oi) => (
                           <div key={oi} className="flex items-center space-x-3">
                             <RadioGroupItem value={oi.toString()} id={`q${q.id}-o${oi}`} />
                             <Label htmlFor={`q${q.id}-o${oi}`} className="cursor-pointer text-sm">
-                              <span className="text-muted-foreground mr-1 text-xs">{oi + 1}.</span> {opt}
+                              <span className="text-muted-foreground me-1 text-xs">{oi + 1}.</span> {opt}
                             </Label>
                           </div>
                         ))}
                       </RadioGroup>
-                      <div className="mt-3 ml-1">
+                      <div className="mt-3 ms-1">
                         <button
                           onClick={(e) => { e.stopPropagation(); handleSkip(q.id); }}
                           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -1628,16 +1628,16 @@ const PlacementTestPage = () => {
         {/* Navigation */}
         <div className="flex justify-between mt-8 pb-8 gap-3">
           <Button variant="outline" onClick={() => setPage((p) => p - 1)} disabled={page === 0}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> {isAr ? "السابق" : "Previous"}
+            <ArrowLeft className="me-2 h-4 w-4 rtl-flip" /> {isAr ? "السابق" : "Previous"}
           </Button>
 
           {page < TOTAL_PAGES - 1 ? (
             <Button onClick={() => setPage((p) => p + 1)}>
-              {isAr ? "التالي" : "Next"} <ArrowRight className="ml-2 h-4 w-4" />
+              {isAr ? "التالي" : "Next"} <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
             </Button>
           ) : (
             <Button onClick={() => setPhase("review")} disabled={totalAnswered === 0}>
-              <ClipboardList className="mr-2 h-4 w-4" /> {isAr ? "مراجعة وإرسال" : "Review & Submit"}
+              <ClipboardList className="me-2 h-4 w-4" /> {isAr ? "مراجعة وإرسال" : "Review & Submit"}
             </Button>
           )}
         </div>

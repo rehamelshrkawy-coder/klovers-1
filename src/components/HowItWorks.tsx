@@ -86,7 +86,7 @@ const HowItWorks = () => {
           >
             <Link to="/free-trial">
               {t("howItWorks", "cta")}
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-5 w-5 rtl-flip" />
             </Link>
           </Button>
         </div>

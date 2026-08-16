@@ -163,7 +163,7 @@ const TextbookProgressPage = () => {
                           {isAr ? world.descriptionAr : world.description}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-end">
                         <p className="font-bold text-foreground">{wp.completed}/{wp.total}</p>
                         {isComplete && <span className="text-sm text-primary">✓</span>}
                       </div>

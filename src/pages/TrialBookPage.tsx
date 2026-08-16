@@ -1018,7 +1018,7 @@ export default function TrialBookPage() {
 
   if (access === "denied") return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-6 text-center">
-      <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
+      <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center dark:bg-amber-900/40">
         <Lock className="h-8 w-8 text-amber-600" />
       </div>
       <h1 className="text-2xl font-black">Trial Book — Admin Only</h1>
@@ -1062,7 +1062,7 @@ export default function TrialBookPage() {
             ← Back
           </button>
           <span className="text-sm font-bold">Trial Class Book — دليل الحصة التجريبية</span>
-          <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">30 min</span>
+          <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium dark:bg-amber-900/40 dark:text-amber-400">30 min</span>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex border rounded-lg overflow-hidden text-xs">

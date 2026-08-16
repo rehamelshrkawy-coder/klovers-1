@@ -109,7 +109,7 @@ const TrialConfirmPage = () => {
 
         {(state === "success" || state === "already") && (
           <div className="py-4">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4" aria-hidden="true">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-green-900/40" aria-hidden="true">
               <span className="text-3xl">✅</span>
             </div>
             <h1 className="text-2xl font-bold text-black mb-2">{t("trialConfirm.title")}</h1>
@@ -146,7 +146,7 @@ const TrialConfirmPage = () => {
 
         {state === "error" && (
           <div className="py-4">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4" aria-hidden="true">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-red-900/40" aria-hidden="true">
               <span className="text-3xl">❌</span>
             </div>
             <h1 className="text-2xl font-bold text-black mb-2">{t("trialConfirm.errorTitle")}</h1>

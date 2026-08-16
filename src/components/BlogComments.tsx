@@ -190,9 +190,10 @@ const BlogComments = ({ postId, isAr }: BlogCommentsProps) => {
           aria-hidden="true"
           style={{ position: "absolute", left: "-9999px", opacity: 0, height: 0, width: 0 }}
         />
-        <div className={isAr ? "text-left" : "text-right"}>
+        {/* text-end resolves to the trailing edge in both directions. */}
+        <div className="text-end">
           <Button type="submit" disabled={submitting}>
-            <Send className={`h-4 w-4 ${isAr ? "ml-2" : "mr-2"}`} />
+            <Send className="h-4 w-4 me-2" />
             {submitting ? t.submitting : t.submit}
           </Button>
         </div>

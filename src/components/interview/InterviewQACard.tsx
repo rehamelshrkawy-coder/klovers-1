@@ -54,12 +54,12 @@ export default function InterviewQACard({ qa, index, locked }: {
           </div>
           <div className="space-y-3 blur-sm select-none pointer-events-none">
             <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30">
-              <div className="h-4 bg-blue-200 rounded w-3/4 mb-2" />
-              <div className="h-3 bg-blue-100 rounded w-1/2" />
+              <div className="h-4 bg-blue-200 rounded w-3/4 mb-2 dark:bg-blue-900/60" />
+              <div className="h-3 bg-blue-100 rounded w-1/2 dark:bg-blue-900/40" />
             </div>
             <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/30">
-              <div className="h-4 bg-green-200 rounded w-full mb-2" />
-              <div className="h-3 bg-green-100 rounded w-2/3" />
+              <div className="h-4 bg-green-200 rounded w-full mb-2 dark:bg-green-900/60" />
+              <div className="h-3 bg-green-100 rounded w-2/3 dark:bg-green-900/40" />
             </div>
           </div>
           <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-gray-900/60">

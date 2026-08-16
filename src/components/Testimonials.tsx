@@ -43,14 +43,14 @@ const Testimonials = () => {
     <section className="py-20 md:py-28 relative overflow-hidden bg-background">
       {/* Decorative background blobs */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-amber-200/15 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-200/15 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl" />
+        <div className="absolute top-0 start-0 w-96 h-96 bg-amber-200/15 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl dark:bg-amber-900/60" />
+        <div className="absolute bottom-0 end-0 w-96 h-96 bg-amber-200/15 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl dark:bg-amber-900/60" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
         <div className="text-center mb-14">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold uppercase tracking-widest mb-4 border border-black/15 shadow-sm">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold uppercase tracking-widest mb-4 border border-black/15 shadow-sm dark:bg-amber-900/40 dark:text-amber-300">
             Student Stories
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -83,7 +83,7 @@ const Testimonials = () => {
               }`}
             >
               {/* Large decorative quote */}
-              <div className="absolute top-4 right-5 text-6xl font-serif text-amber-400/15 leading-none select-none group-hover:text-amber-400/25 transition-colors">
+              <div className="absolute top-4 end-5 text-6xl font-serif text-amber-400/15 leading-none select-none group-hover:text-amber-400/25 transition-colors">
                 "
               </div>
 

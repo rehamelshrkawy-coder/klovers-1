@@ -60,7 +60,7 @@ export default function InstallPrompt() {
       role="dialog"
       aria-label="Install Klovers app"
       aria-modal="false"
-      className="fixed bottom-20 left-4 right-4 md:left-auto md:right-6 md:w-80 z-[200] bg-card border border-border rounded-xl shadow-xl p-4 flex items-start gap-3 animate-in slide-in-from-bottom-4 duration-300"
+      className="fixed bottom-20 start-4 end-4 md:start-auto md:end-6 md:w-80 z-[200] bg-card border border-border rounded-xl shadow-xl p-4 flex items-start gap-3 animate-in slide-in-from-bottom-4 duration-300"
     >
       <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden">
         <img src="/klovers-logo.jpg" alt="Klovers" className="w-full h-full object-cover" />

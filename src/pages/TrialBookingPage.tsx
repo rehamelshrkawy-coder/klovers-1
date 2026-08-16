@@ -570,7 +570,7 @@ const TrialBookingPage = () => {
               <p className="sr-only" role="status" aria-live="polite">
                 {t("trialBooking.successTitle")} — {localFormattedDate}, {localized.timeFormatted}
               </p>
-              <div className="inline-flex items-center gap-3 bg-card border border-border rounded-2xl px-5 py-3 text-left">
+              <div className="inline-flex items-center gap-3 bg-card border border-border rounded-2xl px-5 py-3 text-start">
                 <CalendarPlus className="h-5 w-5 text-primary shrink-0" />
                 <div>
                   <p className="font-bold text-foreground">{localFormattedDate}</p>
@@ -679,7 +679,7 @@ const TrialBookingPage = () => {
                     const url = `${WHATSAPP_BASE}?text=${encodeURIComponent(t("trialBooking.whatsappSuccessMsg"))}`;
                     trackAndOpenWhatsApp(url, { cta_label: "post_booking_whatsapp" });
                   }}
-                  className="w-full flex items-center gap-4 bg-green-50 dark:bg-green-950/30 border-2 border-green-400 rounded-xl p-4 text-left hover:bg-green-100 dark:hover:bg-green-950/50 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-green-50 dark:bg-green-950/30 border-2 border-green-400 rounded-xl p-4 text-start hover:bg-green-100 dark:hover:bg-green-950/50 hover:shadow-md transition-all group"
                 >
                   <div className="h-10 w-10 rounded-full bg-[#25D366] flex items-center justify-center shrink-0">
                     <MessageCircle className="h-5 w-5 text-white" />
@@ -688,7 +688,7 @@ const TrialBookingPage = () => {
                     <p className="font-bold text-sm text-foreground">{t("trialBooking.whatsappPromptTitle")}</p>
                     <p className="text-xs text-muted-foreground">{t("trialBooking.whatsappPromptDesc")}</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-green-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-green-600 group-hover:translate-x-0.5 transition-all shrink-0 rtl-flip" />
                 </button>
 
                 {/* Placement test */}
@@ -698,7 +698,7 @@ const TrialBookingPage = () => {
                     logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_placement_test" });
                     navigate("/placement-test");
                   }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-blue-400 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-start hover:border-blue-400 hover:shadow-md transition-all group"
                 >
                   <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
                     <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -707,7 +707,7 @@ const TrialBookingPage = () => {
                     <p className="font-semibold text-sm text-foreground">{t("trialBooking.findLevelTitle")}</p>
                     <p className="text-xs text-muted-foreground">{t("trialBooking.findLevelDesc")}</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all shrink-0 rtl-flip" />
                 </button>
 
                 {/* Pricing teaser */}
@@ -717,7 +717,7 @@ const TrialBookingPage = () => {
                     logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_pricing" });
                     navigate("/pricing");
                   }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-purple-400 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-start hover:border-purple-400 hover:shadow-md transition-all group"
                 >
                   <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
                     <Tag className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -730,7 +730,7 @@ const TrialBookingPage = () => {
                         : `Group classes from ${getStartingPrice(selectedCountry)} · small groups`}
                     </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all shrink-0 rtl-flip" />
                 </button>
 
                 {/* Referral / share */}
@@ -747,7 +747,7 @@ const TrialBookingPage = () => {
                       window.open(`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`, "_blank", "noopener,noreferrer");
                     }
                   }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-orange-400 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-start hover:border-orange-400 hover:shadow-md transition-all group"
                 >
                   <div className="h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center shrink-0">
                     <Share2 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
@@ -760,7 +760,7 @@ const TrialBookingPage = () => {
                       {language === "ar" ? "خليهم يجربوا معاك — الحصة المجانية متاحة للكل" : "Invite a friend to join your free class"}
                     </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-orange-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-orange-600 group-hover:translate-x-0.5 transition-all shrink-0 rtl-flip" />
                 </button>
               </div>
             </div>
@@ -950,7 +950,7 @@ const TrialBookingPage = () => {
 
               <p className="text-xs text-muted-foreground text-center mt-6">
                 {t("trialBooking.manageFromDashboard")}
-                <ArrowRight className="inline h-3 w-3 ml-1" />
+                <ArrowRight className="inline h-3 w-3 ms-1 rtl-flip" />
               </p>
             </div>
           </div>

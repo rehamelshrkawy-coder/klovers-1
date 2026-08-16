@@ -358,7 +358,7 @@ const BlogPostPage = () => {
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Button onClick={() => window.location.reload()} variant="outline">{isAr ? "حاول مرة أخرى" : "Try again"}</Button>
               <Button asChild variant="ghost">
-                <Link to="/blog"><ArrowLeft className="h-4 w-4 mr-2" />{isAr ? "العودة للمدونة" : "Back to Blog"}</Link>
+                <Link to="/blog"><ArrowLeft className="h-4 w-4 me-2 rtl-flip" />{isAr ? "العودة للمدونة" : "Back to Blog"}</Link>
               </Button>
             </div>
           </div>
@@ -400,7 +400,7 @@ const BlogPostPage = () => {
           <h1 className="text-2xl font-bold text-foreground mb-4">{isAr ? "المقال غير موجود" : "Article not found"}</h1>
           <Button asChild variant="outline">
             <Link to="/blog">
-              <ArrowLeft className="h-4 w-4 mr-2" />{isAr ? "العودة للمدونة" : "Back to Blog"}
+              <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />{isAr ? "العودة للمدونة" : "Back to Blog"}
             </Link>
           </Button>
         </main>
@@ -424,11 +424,11 @@ const BlogPostPage = () => {
               <li>
                 <Link to="/" className="hover:text-foreground transition-colors">{isAr ? "الرئيسية" : "Home"}</Link>
               </li>
-              <li><ChevronRight className="h-3.5 w-3.5" /></li>
+              <li><ChevronRight className="h-3.5 w-3.5 rtl-flip" /></li>
               <li>
                 <Link to="/blog" className="hover:text-foreground transition-colors">{isAr ? "المدونة" : "Blog"}</Link>
               </li>
-              <li><ChevronRight className="h-3.5 w-3.5" /></li>
+              <li><ChevronRight className="h-3.5 w-3.5 rtl-flip" /></li>
               <li className="text-foreground font-medium truncate max-w-[260px]" aria-current="page">
                 {post.title}
               </li>
@@ -502,7 +502,7 @@ const BlogPostPage = () => {
             prose-a:text-blue-700 dark:prose-a:text-blue-400 prose-a:font-medium prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-blue-900 dark:hover:prose-a:text-blue-300
             prose-strong:text-foreground prose-strong:font-bold
             prose-em:text-foreground/80
-            prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:px-5 prose-blockquote:py-3 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-foreground/80
+            prose-blockquote:border-s-4 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:px-5 prose-blockquote:py-3 prose-blockquote:rounded-e-lg prose-blockquote:not-italic prose-blockquote:text-foreground/80
             prose-li:text-foreground/90 prose-li:text-[1.05rem] prose-li:leading-relaxed prose-li:my-1.5
             prose-ul:my-5 prose-ol:my-5
             prose-ul:list-disc prose-ol:list-decimal
@@ -511,7 +511,7 @@ const BlogPostPage = () => {
             prose-img:rounded-xl prose-img:shadow-md prose-img:my-8 prose-img:mx-auto
             prose-hr:border-border prose-hr:my-10
             prose-table:w-full prose-th:bg-muted/60 prose-th:text-foreground prose-th:font-semibold prose-td:text-foreground/80 prose-td:border-border prose-th:border-border
-            ${isRtl ? "text-right" : ""}
+            ${isRtl ? "text-end" : ""}
           `}>
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {post.content}
@@ -529,7 +529,7 @@ const BlogPostPage = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
               <Button asChild size="lg" className="gap-2">
                 <Link to={post.cta_url || "/placement-test"}>
-                  {post.cta_url ? (isAr ? "ابدأ الآن" : "Get Started") : (isAr ? "🎯 خذ اختبار تحديد المستوى المجاني" : "🎯 Take the Free Placement Test")} <ArrowRight className="h-4 w-4" />
+                  {post.cta_url ? (isAr ? "ابدأ الآن" : "Get Started") : (isAr ? "🎯 خذ اختبار تحديد المستوى المجاني" : "🎯 Take the Free Placement Test")} <ArrowRight className="h-4 w-4 rtl-flip" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="gap-2">
@@ -555,7 +555,7 @@ const BlogPostPage = () => {
               onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(`https://wa.me/?text=${encodeURIComponent(post.title + " — " + window.location.href)}`, { cta_label: "blog_share", metadata: { slug: post.slug } }); }}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-green-200 bg-green-50 hover:bg-green-100 transition-colors text-green-700"
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-green-200 bg-green-50 hover:bg-green-100 transition-colors text-green-700 dark:bg-green-950/40 dark:bg-green-900/40 dark:text-green-400 dark:border-green-800"
             >
               💬 WhatsApp
             </a>
@@ -588,7 +588,7 @@ const BlogPostPage = () => {
             <Button asChild className="gap-2 shrink-0">
               <Link to="/free-trial">
                 {isAr ? "احجز مجانًا" : "Book Free Class"}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 rtl-flip" />
               </Link>
             </Button>
           </div>
@@ -637,7 +637,7 @@ const BlogPostPage = () => {
           <div className="mt-8">
             <Button asChild variant="outline" size="sm">
               <Link to="/blog">
-                <ArrowLeft className="h-4 w-4 mr-2" />{isAr ? "جميع المقالات" : "All Articles"}
+                <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />{isAr ? "جميع المقالات" : "All Articles"}
               </Link>
             </Button>
           </div>

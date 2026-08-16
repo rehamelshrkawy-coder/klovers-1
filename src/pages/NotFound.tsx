@@ -63,7 +63,7 @@ const NotFound = () => {
                 className="group flex flex-col items-center gap-2 p-4 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-md transition-all duration-200 text-center relative"
               >
                 {badge && (
-                  <span className="absolute top-2 right-2 text-[9px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800 px-1.5 py-0.5 rounded-full font-semibold leading-none">
+                  <span className="absolute top-2 end-2 text-[9px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800 px-1.5 py-0.5 rounded-full font-semibold leading-none">
                     {badge}
                   </span>
                 )}

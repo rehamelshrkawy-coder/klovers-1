@@ -320,7 +320,7 @@ const KoreanWritingTest = ({ vocab, dialogue, lessonTitle, onComplete }: KoreanW
               disabled={freeWriteInput.trim().length < 2}
               className="gap-2"
             >
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 rtl-flip" />
               {isAr ? "إرسال" : "Submit"}
             </Button>
           </div>
@@ -348,7 +348,7 @@ const KoreanWritingTest = ({ vocab, dialogue, lessonTitle, onComplete }: KoreanW
               disabled={!userInput.trim()}
               className="w-full gap-2"
             >
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 rtl-flip" />
               {isAr ? "تحقق" : "Check"}
             </Button>
           </div>

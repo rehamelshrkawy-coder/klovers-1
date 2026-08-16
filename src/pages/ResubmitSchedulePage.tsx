@@ -244,7 +244,7 @@ const ResubmitSchedulePage = () => {
                         key={pkg.id}
                         type="button"
                         onClick={() => setSelectedPackageId(pkg.id)}
-                        className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                        className={`w-full text-start p-4 rounded-lg border-2 transition-all ${
                           selectedPackageId === pkg.id
                             ? "border-primary bg-accent"
                             : "border-border hover:border-primary/50"
@@ -284,7 +284,7 @@ const ResubmitSchedulePage = () => {
               onClick={handleSubmit}
             >
               {submitting ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("resubmitSchedule.saving")}</>
+                <><Loader2 className="h-4 w-4 me-2 animate-spin" /> {t("resubmitSchedule.saving")}</>
               ) : (
                 t("resubmitSchedule.submitScheduleBtn")
               )}

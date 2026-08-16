@@ -41,10 +41,11 @@ const WhatsAppButton = () => {
       style={{ bottom: "calc(6rem + env(safe-area-inset-bottom, 0px))" }}
     >
       {/* Tooltip label — desktop only */}
+      {/* `end-[…]` puts the tooltip on the inner side of the button in both
+          directions on its own — the old `isAr ? left : right` conditional is
+          exactly what a logical property replaces. */}
       <span
-        className={`pointer-events-none absolute top-1/2 -translate-y-1/2 bg-foreground text-background text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg hidden sm:block ${
-          isAr ? "left-[calc(100%+0.75rem)]" : "right-[calc(100%+0.75rem)]"
-        }`}
+        className="pointer-events-none absolute top-1/2 -translate-y-1/2 end-[calc(100%+0.75rem)] bg-foreground text-background text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg hidden sm:block"
         aria-hidden="true"
       >
         {isAr ? "تواصل معنا" : "Chat with us"}

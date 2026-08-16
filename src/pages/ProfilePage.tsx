@@ -193,7 +193,7 @@ const ProfilePage = () => {
 
               <div>
                 <p className="text-xs text-muted-foreground mb-1.5">
-                  <Globe className="h-3 w-3 inline mr-1" />
+                  <Globe className="h-3 w-3 inline me-1" />
                   {isAr ? "الدولة" : "Country"}
                 </p>
                 <Select value={country} onValueChange={setCountry}>
@@ -231,7 +231,7 @@ const ProfilePage = () => {
                   <button
                     key={href}
                     onClick={() => navigate(href)}
-                    className="flex items-center gap-2 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors text-sm font-medium text-foreground text-left"
+                    className="flex items-center gap-2 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors text-sm font-medium text-foreground text-start"
                   >
                     <Icon className="h-4 w-4 text-primary shrink-0" />
                     {label}

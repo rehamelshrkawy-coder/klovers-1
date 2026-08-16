@@ -309,17 +309,17 @@ const ReturningStudentsLandingPage = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" asChild className="gap-2 h-13 px-8 text-base font-bold shadow-lg">
+              <Button size="lg" asChild className="gap-2 h-14 px-8 text-base font-bold shadow-lg">
                 <Link to="/enroll-now">
                   {t("welcomeBack.hero.ctaPrimary")}
-                  <ArrowRight className="h-5 w-5" />
+                  <ArrowRight className="h-5 w-5 rtl-flip" />
                 </Link>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 asChild
-                className="gap-2 h-13 px-8 text-base font-medium border-border text-foreground hover:bg-muted"
+                className="gap-2 h-14 px-8 text-base font-medium border-border text-foreground hover:bg-muted"
               >
                 <Link to="/placement-test">
                   {t("welcomeBack.hero.ctaSecondary")}
@@ -448,7 +448,7 @@ const ReturningStudentsLandingPage = () => {
               >
                 <Link to="/placement-test">
                   {t("welcomeBack.steps.placementLink")}
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <ArrowRight className="h-3.5 w-3.5 rtl-flip" />
                 </Link>
               </Button>
             </div>
@@ -543,18 +543,18 @@ const ReturningStudentsLandingPage = () => {
               <Button
                 size="lg"
                 asChild
-                className="gap-2 h-13 px-8 text-base font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg"
+                className="gap-2 h-14 px-8 text-base font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg"
               >
                 <Link to="/enroll-now">
                   {t("welcomeBack.finalCta.button")}
-                  <ArrowRight className="h-5 w-5" />
+                  <ArrowRight className="h-5 w-5 rtl-flip" />
                 </Link>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 asChild
-                className="gap-2 h-13 px-8 text-base font-medium border-white/40 text-white hover:bg-white/10"
+                className="gap-2 h-14 px-8 text-base font-medium border-white/40 text-white hover:bg-white/10"
               >
                 <a
                   href={WHATSAPP_BASE}

@@ -243,7 +243,7 @@ const StoryGapGame = ({ onGameComplete }: { onGameComplete?: (score: number, tot
           <p className="text-sm text-muted-foreground">{storyScore}/{story.gaps.length} gaps correct</p>
         </div>
         <Button onClick={nextStory} className="w-full gap-2">
-          {storyIdx + 1 >= stories.length ? <><Trophy className="h-4 w-4" /> Finish!</> : <><ArrowRight className="h-4 w-4" /> Next Story</>}
+          {storyIdx + 1 >= stories.length ? <><Trophy className="h-4 w-4" /> Finish!</> : <><ArrowRight className="h-4 w-4 rtl-flip" /> Next Story</>}
         </Button>
       </div>
     );
@@ -278,7 +278,7 @@ const StoryGapGame = ({ onGameComplete }: { onGameComplete?: (score: number, tot
       </div>
 
       {selected && (
-        <Card className={`p-3 border-l-4 text-sm ${selected === gap.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
+        <Card className={`p-3 border-s-4 text-sm ${selected === gap.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
           <p className="font-semibold">{selected === gap.correct ? `✅ Correct! "${gap.correct}"` : `❌ Answer: "${gap.correct}"`}</p>
         </Card>
       )}
@@ -301,7 +301,7 @@ const StoryGapGame = ({ onGameComplete }: { onGameComplete?: (score: number, tot
 
       {selected && (
         <Button onClick={next} className="w-full gap-2">
-          {gapIdx + 1 >= story.gaps.length ? <><BookOpen className="h-4 w-4" /> Review Story</> : <><ArrowRight className="h-4 w-4" /> Next Gap</>}
+          {gapIdx + 1 >= story.gaps.length ? <><BookOpen className="h-4 w-4" /> Review Story</> : <><ArrowRight className="h-4 w-4 rtl-flip" /> Next Gap</>}
         </Button>
       )}
     </div>

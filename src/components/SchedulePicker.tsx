@@ -349,7 +349,7 @@ const SchedulePicker = ({
                 const label = `${oLocal.weekday} · ${oLocal.timeFormatted} · ${userTimezone}`;
                 onSelect(`private-${opt.dayIndex}-${opt.time}`, label);
               }}
-              className="w-full text-left p-4 rounded-lg border-2 border-border hover:border-primary hover:bg-accent transition-all"
+              className="w-full text-start p-4 rounded-lg border-2 border-border hover:border-primary hover:bg-accent transition-all"
             >
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
@@ -388,7 +388,7 @@ const SchedulePicker = ({
             type="button"
             aria-label={`Select ${local.weekday} at ${local.timeFormatted}; ${pkg.seats_left > 0 ? `${pkg.seats_left} seats available` : "full"}`}
             onClick={() => handleClick(pkg)}
-            className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+            className={`w-full text-start p-4 rounded-lg border-2 transition-all ${
               pkg.seats_left === 0
                 ? "border-border opacity-60 hover:border-destructive/50"
                 : "border-border hover:border-primary hover:bg-accent"
@@ -420,7 +420,7 @@ const SchedulePicker = ({
                   : "destructive"
                 }
               >
-                <Users className="h-3 w-3 mr-1" />
+                <Users className="h-3 w-3 me-1" />
                 {pkg.seats_left > 0 ? `${pkg.seats_left} seats` : "Full"}
               </Badge>
             </div>
@@ -459,7 +459,7 @@ const SchedulePicker = ({
                   type="button"
                   aria-label={`Select alternative ${altLocal.weekday} at ${altLocal.timeFormatted}`}
                   onClick={() => selectPackage(alt, true)}
-                  className="w-full text-left p-3 rounded-lg border-2 border-border hover:border-primary hover:bg-accent transition-all"
+                  className="w-full text-start p-3 rounded-lg border-2 border-border hover:border-primary hover:bg-accent transition-all"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -471,7 +471,7 @@ const SchedulePicker = ({
                       </p>
                     </div>
                     <Badge variant="secondary" className="text-xs">
-                      <Users className="h-3 w-3 mr-1" /> {alt.seats_left} seats
+                      <Users className="h-3 w-3 me-1" /> {alt.seats_left} seats
                     </Badge>
                   </div>
                 </button>

@@ -264,10 +264,10 @@ const ReturningStudentOffer = () => {
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <Button size="lg" asChild className="gap-2 h-13 px-8 text-base font-bold shadow-lg">
+          <Button size="lg" asChild className="gap-2 h-14 px-8 text-base font-bold shadow-lg">
             <Link to="/placement-test">
               {t("returningStudents.section.cta")}
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-5 w-5 rtl-flip" />
             </Link>
           </Button>
         </div>

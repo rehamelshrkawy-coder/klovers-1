@@ -194,7 +194,7 @@ const HonorificGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
       </Card>
 
       {selected && (
-        <Card className={`p-3 border-l-4 text-sm ${selected === q.honorific ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
+        <Card className={`p-3 border-s-4 text-sm ${selected === q.honorific ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
           <p className="font-semibold mb-1">{selected === q.honorific ? "✅ Correct!" : `❌ Answer: ${q.honorific}`}</p>
           <p className="text-xs text-muted-foreground">{q.explanation}</p>
         </Card>
@@ -218,7 +218,7 @@ const HonorificGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
 
       {selected && (
         <Button onClick={next} className="w-full gap-2">
-          {round + 1 >= totalRounds ? <><Trophy className="h-4 w-4" /> See Results</> : <><ArrowRight className="h-4 w-4" /> Next</>}
+          {round + 1 >= totalRounds ? <><Trophy className="h-4 w-4" /> See Results</> : <><ArrowRight className="h-4 w-4 rtl-flip" /> Next</>}
         </Button>
       )}
     </div>

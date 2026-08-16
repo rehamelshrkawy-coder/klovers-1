@@ -19,10 +19,10 @@ const InterviewBannerChip = () => {
 
   return (
     <div
-      className={`fixed bottom-32 z-40 animate-in slide-in-from-bottom-4 duration-500 ${isAr ? "left-4" : "left-4"}`}
+      className="fixed bottom-32 start-4 z-40 animate-in slide-in-from-bottom-4 duration-500"
       dir={isAr ? "rtl" : "ltr"}
     >
-      <div className="flex items-center gap-2 bg-foreground text-background pl-3 pr-2 py-2 rounded-full shadow-xl border border-primary/30 max-w-[260px]">
+      <div className="flex items-center gap-2 bg-foreground text-background ps-3 pe-2 py-2 rounded-full shadow-xl border border-primary/30 max-w-[260px]">
         <span className="bg-primary text-primary-foreground text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide flex-shrink-0">
           {t("homeBanner.badge")}
         </span>
@@ -34,11 +34,11 @@ const InterviewBannerChip = () => {
           className="flex-shrink-0 text-primary hover:text-primary/80 transition-colors"
           aria-label={t("homeBanner.cta")}
         >
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight className="h-4 w-4 rtl-flip" />
         </Link>
         <button
           onClick={dismiss}
-          className="flex-shrink-0 text-background/50 hover:text-background transition-colors ml-0.5"
+          className="flex-shrink-0 text-background/50 hover:text-background transition-colors ms-0.5"
           aria-label="Dismiss"
         >
           <X className="h-3.5 w-3.5" />

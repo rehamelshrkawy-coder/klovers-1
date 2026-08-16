@@ -98,7 +98,7 @@ const CompleteProfilePage = () => {
         <Header />
         <main className="pt-28 pb-20 px-4 flex flex-col items-center text-center">
           <div className="max-w-md mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto dark:bg-green-900/40">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">{t("completeProfile.doneTitle")}</h1>
@@ -108,7 +108,7 @@ const CompleteProfilePage = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
               <Button asChild>
                 <Link to="/enroll">
-                  {t("completeProfile.browseCourses")} <ArrowRight className="h-4 w-4 ml-2" />
+                  {t("completeProfile.browseCourses")} <ArrowRight className="h-4 w-4 ms-2 rtl-flip" />
                 </Link>
               </Button>
               <Button asChild variant="outline">
@@ -215,7 +215,7 @@ const CompleteProfilePage = () => {
 
               <Button type="submit" className="w-full" size="lg" disabled={submitting}>
                 {submitting ? t("completeProfile.savingButton") : t("completeProfile.saveButton")}
-                {!submitting && <ArrowRight className="h-4 w-4 ml-2" />}
+                {!submitting && <ArrowRight className="h-4 w-4 ms-2 rtl-flip" />}
               </Button>
             </form>
 

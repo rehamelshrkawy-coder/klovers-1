@@ -50,7 +50,7 @@ const EnrollSection = () => {
                 key={index}
                 className="relative group hover:shadow-xl transition-all duration-300 border-border hover:border-primary/50 overflow-hidden"
               >
-                <div className="absolute -top-2 -left-2 w-12 h-12 bg-primary rounded-br-2xl flex items-center justify-center border-b border-r border-black/25">
+                <div className="absolute -top-2 -left-2 w-12 h-12 bg-primary rounded-br-2xl flex items-center justify-center border-b border-e border-black/25">
                   <span className="text-primary-foreground font-bold text-xl">
                     {index + 1}
                   </span>

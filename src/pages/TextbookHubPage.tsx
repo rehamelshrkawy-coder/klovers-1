@@ -101,7 +101,7 @@ const TextbookHubPage = () => {
       <Header />
       <main id="main-content" className="pt-24 pb-16">
         <section className="text-center mb-12 px-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-700 text-sm font-medium mb-6 border border-black/10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-700 text-sm font-medium mb-6 border border-black/10 dark:bg-amber-900/40 dark:text-amber-400">
             <Sparkles className="h-4 w-4" />
             {isAr ? "مكتبة الكتب" : "Book Library"}
           </div>
@@ -131,7 +131,7 @@ const TextbookHubPage = () => {
                   )}
                 >
                   {hasBadge && (
-                    <span className="absolute top-3 right-3 text-xs font-bold px-2 py-0.5 rounded-full bg-violet-500 text-white">
+                    <span className="absolute top-3 end-3 text-xs font-bold px-2 py-0.5 rounded-full bg-violet-500 text-white">
                       {(book as { badge?: string }).badge}
                     </span>
                   )}

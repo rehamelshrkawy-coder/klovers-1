@@ -98,7 +98,7 @@ const TextbookPage = () => {
         {/* Back to library */}
         <section className="container mx-auto px-4 max-w-4xl mb-4">
           <Link to="/textbook" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-amber-700 transition-colors">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 rtl-flip" />
             {isAr ? "العودة للمكتبة" : "Back to Library"}
           </Link>
         </section>

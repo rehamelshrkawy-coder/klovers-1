@@ -75,7 +75,7 @@ const ColorMatchGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
       <div className="max-w-lg mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <Badge variant="outline">{t("games.round")} {round + 1}/{totalRounds}</Badge>
-          <Badge variant="secondary"><Sparkles className="h-3 w-3 mr-1" />{score * 5} XP</Badge>
+          <Badge variant="secondary"><Sparkles className="h-3 w-3 me-1" />{score * 5} XP</Badge>
         </div>
         <Card className="p-6 text-center space-y-4">
           <p className="text-sm text-muted-foreground">{t("games.colorsPrompt")}</p>
@@ -95,7 +95,7 @@ const ColorMatchGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
             {feedback === "correct" ? t("games.correctFeedback") : t("games.colorsWrong").replace("{answer}", qData.question.english)}
           </p>}
         </Card>
-        {feedback && <Button onClick={nextRound} className="w-full gap-2">{t("games.next")} <ArrowRight className="h-4 w-4" /></Button>}
+        {feedback && <Button onClick={nextRound} className="w-full gap-2">{t("games.next")} <ArrowRight className="h-4 w-4 rtl-flip" /></Button>}
         <Button variant="ghost" size="sm" onClick={restart} className="w-full gap-1"><RotateCcw className="h-3 w-3" /> {t("games.restart")}</Button>
       </div>
     </section>

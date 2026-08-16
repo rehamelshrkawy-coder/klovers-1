@@ -163,7 +163,7 @@ const HeroSection = () => {
       {/* Cinematic gradient — just enough for text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-black/55" />
       {/* Bottom scrim for stats readability */}
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/50 to-transparent" />
+      <div className="absolute bottom-0 start-0 end-0 h-40 bg-gradient-to-t from-black/50 to-transparent" />
 
       {/* Primary colour glow behind headline */}
       <div
@@ -342,7 +342,7 @@ const HeroSection = () => {
       </div>
 
       {/* ── Stats strip — absolutely pinned to bottom ─────────── */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 pb-8 sm:pb-10 px-4">
+      <div className="absolute bottom-0 start-0 end-0 z-10 pb-8 sm:pb-10 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="w-full h-px bg-gradient-to-r from-transparent via-white/25 to-transparent mb-6" />
           <div className="grid grid-cols-3 gap-4 md:gap-8">

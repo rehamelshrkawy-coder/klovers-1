@@ -362,22 +362,37 @@ export const translations = {
       availableIn: "Available in",
       getStartedNow: "Get Started Now",
       getStarted: "Get Started",
+      /*
+        These tiers are about geography, not proficiency.
+
+        They used to be labelled Starter / Explorer / Master — a proficiency
+        ladder bolted onto a pricing ladder, so an Egyptian student was told
+        she was on the "Starter" tier because of where she lives, and a
+        beginner in London was a "Master". Everyone gets the same course; only
+        the price is regional, and the taglines now say exactly that.
+      */
+      sameCurriculum: "Same curriculum, same teachers.",
       tiers: {
         local: {
-          name: "Local Klovers", tagline: "Starter",
-          description: "Perfect for beginners! Start your Korean journey at a special discounted price.",
-          discountLabel: "Discounted for Egyptian Students 🇪🇬",
+          name: "Egypt pricing", tagline: "Priced for Egypt",
+          description: "Our full Korean course at the Egyptian price. Same curriculum, same teachers.",
+          discountLabel: "Egyptian student pricing 🇪🇬",
         },
         regional: {
-          name: "Regional Klovers", tagline: "Explorer",
-          description: "For learners ready to explore Korean language and culture. Special discount for Malaysia students!",
-          discountLabel: "Discounted for Malaysian Students 🇲🇾",
+          name: "Regional pricing", tagline: "Priced for your region",
+          description: "Our full Korean course at the regional price. Same curriculum, same teachers.",
+          discountLabel: "Malaysian student pricing 🇲🇾",
         },
         global: {
-          name: "Global Klovers", tagline: "Master",
-          description: "Full premium experience for advanced learners and serious Korean enthusiasts.",
+          name: "International pricing", tagline: "International rate",
+          description: "Our full Korean course at the international rate. Same curriculum, same teachers.",
         },
       },
+      mostPopularBadge: "⭐ Most popular",
+      flexiblePayment: "Need to pay in instalments? Message us.",
+      discountBadge: "Discounted",
+      taughtInArabic: "Taught in Arabic",
+      smallGroupsNote: "Classes are small by design, so each session has a fixed number of seats.",
       durations: {
         "1 Month": "1 Month",
         "3 Months": "3 Months",
@@ -2318,22 +2333,28 @@ export const translations = {
       availableIn: "متاح في",
       getStartedNow: "ابدأ الآن",
       getStarted: "ابدأ",
+      sameCurriculum: "نفس المنهج، ونفس المعلمين.",
       tiers: {
         local: {
-          name: "Klovers المحلي", tagline: "مبتدئ",
-          description: "مثالي للمبتدئين! ابدأ رحلتك في تعلّم الكورية بسعر مخفض خاص.",
-          discountLabel: "خصم للطلاب المصريين 🇪🇬",
+          name: "سعر مصر", tagline: "بسعر مصر",
+          description: "نفس الكورس الكامل بسعر مصر. نفس المنهج، ونفس المعلمين.",
+          discountLabel: "سعر الطلاب المصريين 🇪🇬",
         },
         regional: {
-          name: "Klovers الإقليمي", tagline: "مستكشف",
-          description: "للمتعلمين المستعدين لاستكشاف اللغة والثقافة الكورية. خصم خاص لطلاب ماليزيا!",
-          discountLabel: "خصم للطلاب الماليزيين 🇲🇾",
+          name: "السعر الإقليمي", tagline: "بسعر منطقتك",
+          description: "نفس الكورس الكامل بالسعر الإقليمي. نفس المنهج، ونفس المعلمين.",
+          discountLabel: "سعر الطلاب الماليزيين 🇲🇾",
         },
         global: {
-          name: "Klovers العالمي", tagline: "محترف",
-          description: "تجربة متميزة كاملة للمتعلمين المتقدمين وعشاق الكورية الجادين.",
+          name: "السعر الدولي", tagline: "السعر الدولي",
+          description: "نفس الكورس الكامل بالسعر الدولي. نفس المنهج، ونفس المعلمين.",
         },
       },
+      mostPopularBadge: "⭐ الأكثر اختياراً",
+      flexiblePayment: "محتاج تقسّط؟ كلّمنا.",
+      discountBadge: "مخفّض",
+      taughtInArabic: "الشرح بالعربي",
+      smallGroupsNote: "الحصص صغيرة بطبيعتها، فكل جلسة ليها عدد مقاعد ثابت.",
       durations: {
         "1 Month": "شهر واحد",
         "3 Months": "3 أشهر",

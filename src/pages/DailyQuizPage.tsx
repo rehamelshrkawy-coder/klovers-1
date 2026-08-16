@@ -259,7 +259,7 @@ const DailyQuizPage = () => {
         <main id="main-content" className="flex-1 flex items-center justify-center px-4 py-16">
           <Card className="w-full max-w-md text-center">
             <CardHeader>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40">
                 <CheckCircle className="h-8 w-8 text-blue-600" />
               </div>
               <CardTitle className="text-2xl">{t("dailyQuiz.alreadyDoneTitle")}</CardTitle>
@@ -305,7 +305,7 @@ const DailyQuizPage = () => {
         <main id="main-content" className="flex-1 flex items-center justify-center px-4 py-16">
           <Card className="w-full max-w-md text-center">
             <CardHeader>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 border border-black/10">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 border border-black/10 dark:bg-yellow-900/40">
                 <Zap className="h-8 w-8 text-yellow-600" />
               </div>
               <CardTitle className="text-2xl">{t("dailyQuiz.startLearningTitle")}</CardTitle>
@@ -332,7 +332,7 @@ const DailyQuizPage = () => {
         <main id="main-content" className="flex-1 flex items-center justify-center px-4 py-16">
           <Card className="w-full max-w-md text-center">
             <CardHeader>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 border border-black/10">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 border border-black/10 dark:bg-yellow-900/40">
                 <Zap className="h-8 w-8 text-yellow-600" />
               </div>
               <CardTitle className="text-2xl">{t("dailyQuiz.dailyChallengeTitle")}</CardTitle>
@@ -352,7 +352,7 @@ const DailyQuizPage = () => {
                 {t("dailyQuiz.passNote")}
               </p>
               <Button onClick={() => setQuizStarted(true)} size="lg" className="w-full">
-                {t("dailyQuiz.startQuizBtn")} <ArrowRight className="ml-2 h-4 w-4" />
+                {t("dailyQuiz.startQuizBtn")} <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
               </Button>
             </CardContent>
           </Card>
@@ -519,7 +519,7 @@ const DailyQuizPage = () => {
               onClick={handlePrevious}
               disabled={currentIndex === 0}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 me-2 rtl-flip" />
               {t("dailyQuiz.previous")}
             </Button>
 
@@ -532,7 +532,7 @@ const DailyQuizPage = () => {
                 onClick={handleNext}
                 disabled={!showResults[currentExercise.id]}
               >
-                {t("dailyQuiz.nextBtn")} <ArrowRight className="h-4 w-4 ml-2" />
+                {t("dailyQuiz.nextBtn")} <ArrowRight className="h-4 w-4 ms-2 rtl-flip" />
               </Button>
             )}
           </div>

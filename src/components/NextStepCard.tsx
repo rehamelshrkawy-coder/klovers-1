@@ -89,7 +89,7 @@ export function NextStepCard({ completedType, lessonSection }: NextStepCardProps
     <Card className="border border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
       <CardContent className="pt-4 pb-4">
         <div className="flex items-center gap-2 mb-3">
-          <ChevronRight className="h-4 w-4 text-primary" />
+          <ChevronRight className="h-4 w-4 text-primary rtl-flip" />
           <p className="text-sm font-semibold text-foreground">What's next?</p>
         </div>
         <div className="flex flex-wrap gap-2">

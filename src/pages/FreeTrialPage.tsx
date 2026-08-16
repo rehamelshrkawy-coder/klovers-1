@@ -319,7 +319,7 @@ const FreeTrialPage = () => {
                       aria-label="Book your free Korean trial class"
                     >
                       {t("freeTrial.cta")}
-                      <ArrowRight className="h-5 w-5" />
+                      <ArrowRight className="h-5 w-5 rtl-flip" />
                     </Button>
 
                     {/* Inline social proof */}

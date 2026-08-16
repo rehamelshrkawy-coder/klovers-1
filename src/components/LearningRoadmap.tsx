@@ -140,7 +140,7 @@ const LearningRoadmap = () => {
                       isActive ? "max-h-40 mt-4 opacity-100" : "max-h-0 opacity-0"
                     }`}
                   >
-                    <p className="text-sm text-muted-foreground leading-relaxed pl-[72px]">
+                    <p className="text-sm text-muted-foreground leading-relaxed ps-[72px]">
                       {stage.description}
                     </p>
                   </div>
@@ -164,7 +164,7 @@ const LearningRoadmap = () => {
           <Button size="lg" asChild className="gap-2 text-base font-bold h-12 px-8">
             <Link to="/placement-test">
               {t("roadmap", "cta")}
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-5 w-5 rtl-flip" />
             </Link>
           </Button>
           <p className="text-sm text-muted-foreground mt-3">{t("roadmap", "ctaSub")}</p>

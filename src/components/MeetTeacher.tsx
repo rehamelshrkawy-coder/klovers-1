@@ -18,7 +18,7 @@ const MeetTeacher = () => {
 
         {/* Section header */}
         <div className="text-center mb-16">
-          <span className="inline-block bg-amber-100 text-amber-800 text-xs font-bold tracking-[0.2em] uppercase px-5 py-2 rounded-full mb-5 border border-black/15 shadow-sm">
+          <span className="inline-block bg-amber-100 text-amber-800 text-xs font-bold tracking-[0.2em] uppercase px-5 py-2 rounded-full mb-5 border border-black/15 shadow-sm dark:bg-amber-900/40 dark:text-amber-300">
             Our Educators
           </span>
           <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-foreground tracking-tight">
@@ -33,7 +33,7 @@ const MeetTeacher = () => {
           <div className="flex justify-center lg:justify-end">
             <div className="relative">
               {/* Subtle warm glow backdrop */}
-              <div className="absolute -inset-6 rounded-3xl bg-amber-200/20 blur-3xl" />
+              <div className="absolute -inset-6 rounded-3xl bg-amber-200/20 blur-3xl dark:bg-amber-900/60" />
               {/* Decorative border offset */}
               <div className="absolute -bottom-4 -right-4 w-full h-full rounded-3xl border-2 border-amber-300/50" />
               {/* Photo card */}
@@ -73,9 +73,9 @@ const MeetTeacher = () => {
                 return (
                   <div
                     key={index}
-                    className="group flex flex-col items-center text-center bg-muted/50 hover:bg-amber-50 border border-border hover:border-amber-300 rounded-2xl p-4 md:p-5 transition-all duration-300 ring-1 ring-black/5"
+                    className="group flex flex-col items-center text-center bg-muted/50 hover:bg-amber-50 border border-border hover:border-amber-300 rounded-2xl p-4 md:p-5 transition-all duration-300 ring-1 ring-black/5 dark:bg-amber-950/40 dark:border-amber-700"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-amber-100 group-hover:bg-amber-200 flex items-center justify-center mb-3 transition-colors border border-black/10">
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 group-hover:bg-amber-200 flex items-center justify-center mb-3 transition-colors border border-black/10 dark:bg-amber-900/40 dark:bg-amber-900/60">
                       <Icon className="h-5 w-5 text-amber-700" />
                     </div>
                     <span className="text-foreground font-extrabold text-lg md:text-xl leading-none">
@@ -90,7 +90,7 @@ const MeetTeacher = () => {
             </div>
 
             {/* Team note */}
-            <p className="text-muted-foreground text-sm md:text-base leading-relaxed border-l-2 border-amber-400 pl-4 italic">
+            <p className="text-muted-foreground text-sm md:text-base leading-relaxed border-s-2 border-amber-400 ps-4 italic">
               {t("teacher", "bio4")}
             </p>
 
@@ -132,7 +132,7 @@ const MeetTeacher = () => {
               >
                 <Link to="/free-trial">
                   {t("teacher", "cta")}
-                  <ArrowRight className="h-5 w-5" />
+                  <ArrowRight className="h-5 w-5 rtl-flip" />
                 </Link>
               </Button>
             </div>

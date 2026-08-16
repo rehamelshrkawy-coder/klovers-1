@@ -720,7 +720,7 @@ const EnrollNowPage = () => {
           {/* Progress track */}
           <div className="relative h-1.5 bg-muted rounded-full mx-4 sm:mx-12">
             <div
-              className="absolute inset-y-0 left-0 bg-primary rounded-full transition-all duration-500"
+              className="absolute inset-y-0 start-0 bg-primary rounded-full transition-all duration-500"
               style={{ width: `${(Math.min(step - 1, 2) / 2) * 100}%` }}
             />
           </div>
@@ -816,7 +816,7 @@ const EnrollNowPage = () => {
               )}
 
               <Button type="button" className="w-full" size="lg" disabled={!canProceedStep1} onClick={() => setStep(2)}>
-                {t("enrollNow.next")} <ArrowRight className="ml-2 h-4 w-4" />
+                {t("enrollNow.next")} <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
               </Button>
               {!canProceedStep1 && (
                 <p className="text-xs text-destructive text-center">
@@ -833,7 +833,7 @@ const EnrollNowPage = () => {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Button type="button" variant="ghost" size="sm" onClick={() => setStep(1)}>
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-4 w-4 rtl-flip" />
                 </Button>
                 <div>
                   <CardTitle className="text-2xl flex items-center gap-2">
@@ -962,7 +962,7 @@ const EnrollNowPage = () => {
               </p>
 
               <Button type="button" className="w-full" size="lg" disabled={!canProceedStep2} onClick={handleGoToStep3}>
-                {t("enrollNow.next")} <ArrowRight className="ml-2 h-4 w-4" />
+                {t("enrollNow.next")} <ArrowRight className="ms-2 h-4 w-4 rtl-flip" />
               </Button>
               {!canProceedStep2 && (
                 <p className="text-xs text-destructive text-center">
@@ -983,7 +983,7 @@ const EnrollNowPage = () => {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Button type="button" variant="ghost" size="sm" onClick={() => setStep(2)}>
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-4 w-4 rtl-flip" />
                 </Button>
                 <div>
                   <CardTitle className="text-2xl">{t("enrollNow.reviewPay")}</CardTitle>
@@ -1014,7 +1014,7 @@ const EnrollNowPage = () => {
                       nav(`/signup?redirect=${encodeURIComponent(returnUrl)}`);
                     }}
                   >
-                    <LogIn className="mr-2 h-4 w-4" />
+                    <LogIn className="me-2 h-4 w-4" />
                     {t("auth.signInToContinue")}
                   </Button>
                 </div>
@@ -1038,7 +1038,7 @@ const EnrollNowPage = () => {
                   <span className="absolute -bottom-0.5 -right-0.5 text-sm leading-none">🇰🇷</span>
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-sm text-foreground">Reham 선생님 <span className="text-xs font-normal text-primary bg-primary/10 px-1.5 py-0.5 rounded-full ml-1">Certified</span></p>
+                  <p className="font-semibold text-sm text-foreground">Reham 선생님 <span className="text-xs font-normal text-primary bg-primary/10 px-1.5 py-0.5 rounded-full ms-1">Certified</span></p>
                   <p className="text-xs text-muted-foreground">5+ years · 300+ students · all levels</p>
                   <div className="flex gap-0.5 mt-0.5">{"⭐⭐⭐⭐⭐".split("").map((s,i)=><span key={i} className="text-xs">{s}</span>)}</div>
                 </div>
@@ -1087,13 +1087,13 @@ const EnrollNowPage = () => {
                 {!promoApplied ? (
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Tag className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         placeholder="Promo code"
                         value={promoInput}
                         onChange={e => { setPromoInput(e.target.value.toUpperCase()); setPromoError(""); }}
                         onKeyDown={e => e.key === "Enter" && applyPromo()}
-                        className="pl-9 uppercase placeholder:normal-case text-sm h-9"
+                        className="ps-9 uppercase placeholder:normal-case text-sm h-9"
                       />
                     </div>
                     <Button
@@ -1175,12 +1175,12 @@ const EnrollNowPage = () => {
               >
                 {loading ? (isEgypt ? t("enrollNow.creatingOrder") : t("enrollNow.redirectingPayment")) : isEgypt ? (
                   <>
-                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    <ShieldCheck className="me-2 h-4 w-4" />
                     {t("enrollNow.confirmOrder")} ({finalPrice?.toLocaleString() ?? "—"} EGP)
                   </>
                 ) : (
                   <>
-                    <CreditCard className="mr-2 h-4 w-4" />
+                    <CreditCard className="me-2 h-4 w-4" />
                     {t("enrollNow.payNow")} ${finalPrice?.toFixed(2) ?? "—"} {t("enrollNow.now")}
                   </>
                 )}
@@ -1251,7 +1251,7 @@ const EnrollNowPage = () => {
         onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(`${WHATSAPP_BASE}?text=${encodeURIComponent("Hi! I have a question before enrolling in Klovers.")}`, { cta_label: "enroll_questions_pill" }); }}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 left-6 z-50 flex items-center gap-2 bg-[#25D366] text-white text-sm font-semibold px-4 py-2.5 rounded-full shadow-lg hover:bg-[#1ebe5d] transition-colors"
+        className="fixed bottom-6 start-6 z-50 flex items-center gap-2 bg-[#25D366] text-white text-sm font-semibold px-4 py-2.5 rounded-full shadow-lg hover:bg-[#1ebe5d] transition-colors"
         aria-label="Chat on WhatsApp"
       >
         💬 Questions?
