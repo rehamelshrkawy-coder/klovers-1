@@ -118,10 +118,12 @@ const reviews = [
 const row1 = reviews.slice(0, 6);
 const row2 = reviews.slice(6);
 
+// Brand gold rather than yellow-400 (#FACC15), which is 1.53:1 on white — the
+// stars were all but invisible, and a rating is meaningful content, not decor.
 const StarRow = () => (
-  <div className="flex gap-0.5">
+  <div className="flex gap-0.5" role="img" aria-label="Rated 5 out of 5">
     {Array.from({ length: 5 }).map((_, i) => (
-      <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+      <Star key={i} className="h-3.5 w-3.5 fill-primary-text text-primary-text" aria-hidden="true" />
     ))}
   </div>
 );
@@ -141,7 +143,7 @@ const ReviewCard = ({ review }: { review: (typeof reviews)[0] }) => {
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-sm flex-shrink-0 border border-black/10">
+          <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary-text font-bold text-sm flex-shrink-0 border border-black/10">
             {initials}
           </div>
           <div className="min-w-0">
@@ -246,7 +248,7 @@ const TestimonialsSection = () => {
         <div className="flex items-center justify-center gap-2 mt-4">
           <div className="flex gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+              <Star key={i} className="h-5 w-5 fill-primary-text text-primary-text" aria-hidden="true" />
             ))}
           </div>
           <span className="text-lg font-bold text-foreground">{AVERAGE_RATING.toFixed(1)}</span>

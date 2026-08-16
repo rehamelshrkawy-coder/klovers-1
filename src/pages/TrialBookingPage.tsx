@@ -26,6 +26,7 @@ import {
   WHATSAPP_BASE,
 } from "@/lib/siteConfig";
 import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
+import { ALL_COUNTRIES, resolveCountry } from "@/lib/countries";
 import { CheckCircle2, CalendarPlus, CalendarClock, CalendarX, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2, Globe, Link2, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { convertDateTimeToTimezone, todayInTimezone } from "@/lib/admin-utils";
@@ -91,17 +92,12 @@ const COUNTRY_PRICE: Record<string, string> = {
   Australia: "$60/mo", Japan: "$60/mo", "South Korea": "$60/mo", China: "$60/mo",
 };
 
-const ALL_COUNTRIES = [
-  "Algeria","Argentina","Australia","Bahrain","Brazil","Canada","China",
-  "Colombia","Egypt","France","Germany","India","Indonesia","Iraq","Japan",
-  "Jordan","Kuwait","Lebanon","Libya","Malaysia","Mexico","Morocco","Oman",
-  "Pakistan","Philippines","Qatar","Saudi Arabia","South Korea","Sudan",
-  "Syria","Thailand","Tunisia","Turkey","UAE","United Kingdom","United States",
-  "Vietnam","Yemen",
-];
-
 function getStartingPrice(country: string): string {
-  return COUNTRY_PRICE[country] ?? "$25/mo";
+  // Resolve first: an unrecognised spelling used to fall straight through to
+  // the cheapest bracket, so a student in Germany who had typed their country
+  // into the free-text registration field was quoted the Egypt price.
+  const resolved = resolveCountry(country);
+  return (resolved && COUNTRY_PRICE[resolved]) ?? "$25/mo";
 }
 
 function guessCountryFromTz(): string {
@@ -189,8 +185,8 @@ const TrialBookingPage = () => {
           setSelectedLevel(metaLevel);
         }
         // Pre-fill country from profile if available — avoids asking the user again
-        const profileCountry = (data as any)?.country?.trim();
-        if (profileCountry && ALL_COUNTRIES.includes(profileCountry)) {
+        const profileCountry = resolveCountry((data as any)?.country);
+        if (profileCountry) {
           setSelectedCountry(profileCountry);
           setClassLanguage(defaultLanguageForCountry(profileCountry));
         }
@@ -528,8 +524,16 @@ const TrialBookingPage = () => {
                 <CalendarPlus className="h-5 w-5 text-primary-text shrink-0" />
                 <div>
                   <p className="font-bold text-foreground">{localFormattedDate}</p>
+                  {/* States the format on the confirmation as well as before
+                      the booking. A student expecting one-to-one who joins a
+                      call with five strangers is a refund conversation. */}
                   <p className="text-sm text-muted-foreground">
-                    {localized.timeFormatted} · {bookingResult.duration_min} {t("mySchedule.minutes")} · {tzCity}
+                    {localized.timeFormatted} · {bookingResult.duration_min || TRIAL_DURATION_MIN} {t("mySchedule.minutes")} · {tzCity}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === "ar"
+                      ? `حصة جماعية · حتى ${TRIAL_GROUP_SIZE_MAX} طلاب`
+                      : `Group class · up to ${TRIAL_GROUP_SIZE_MAX} students`}
                   </p>
                   {!isInSlotTz && (
                     <p className="text-[11px] text-muted-foreground/60">
@@ -854,7 +858,7 @@ const TrialBookingPage = () => {
               )}
 
               {/* Country selector — hidden when profile already has a country */}
-              {!(profile?.country?.trim() && ALL_COUNTRIES.includes(profile.country.trim())) && (
+              {!resolveCountry(profile?.country) && (
                 <div className="mb-4 space-y-1.5">
                   <Label htmlFor="trial-country" className="text-sm font-medium flex items-center gap-1.5">
                     <Globe className="h-3.5 w-3.5 text-muted-foreground" />

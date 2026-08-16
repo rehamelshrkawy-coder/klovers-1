@@ -1,32 +1,15 @@
 import { describe, it, expect } from "vitest";
+import { getPluralCategory, interpolate as tInterpolate } from "@/contexts/LanguageContext";
 
 /**
- * Tests for the Arabic + English plural category logic extracted from LanguageContext.
- * These run without React so they stay fast and dependency-free.
+ * Arabic + English plural categories and placeholder interpolation.
+ *
+ * These import the shipped implementations rather than re-declaring copies of
+ * them. The copies were the reason the interpolation bug survived: the test
+ * asserted against its own `{{name}}`-only regex and passed happily while the
+ * whole translation corpus used single braces, so the real function was a no-op
+ * on 100% of it.
  */
-
-type Language = "en" | "ar";
-type PluralCategory = "zero" | "one" | "two" | "few" | "many" | "other";
-
-// Copy of getPluralCategory from LanguageContext (pure function, safe to duplicate for test)
-function getPluralCategory(count: number, lang: Language): PluralCategory {
-  if (lang === "ar") {
-    if (count === 0) return "zero";
-    if (count === 1) return "one";
-    if (count === 2) return "two";
-    if (count >= 3 && count <= 10) return "few";
-    if (count >= 11 && count <= 99) return "many";
-    return "other";
-  }
-  return count === 1 ? "one" : "other";
-}
-
-// Copy of tInterpolate (pure function)
-function tInterpolate(template: string, vars: Record<string, string | number>): string {
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key) =>
-    vars[key] !== undefined ? String(vars[key]) : `{{${key}}}`
-  );
-}
 
 // ─── Arabic plural categories ──────────────────────────────────────────────
 describe("getPluralCategory — Arabic (6 forms)", () => {
@@ -76,5 +59,22 @@ describe("tInterpolate", () => {
     const tmpl = "{{a}} + {{b}}";
     tInterpolate(tmpl, { a: 1, b: 2 });
     expect(tmpl).toBe("{{a}} + {{b}}");
+  });
+
+  // Every interpolated string in both locales is written with SINGLE braces.
+  // The regex matched double braces only, so the function was a no-op on the
+  // entire corpus — it did not break production only because nothing called it.
+  it("replaces single-brace {count}, which is what the corpus actually uses", () => {
+    expect(tInterpolate("{count} درس", { count: 5 })).toBe("5 درس");
+    expect(tInterpolate("Question {current} of {total}", { current: 2, total: 20 }))
+      .toBe("Question 2 of 20");
+  });
+
+  it("handles both brace styles in one template", () => {
+    expect(tInterpolate("{a} and {{b}}", { a: "x", b: "y" })).toBe("x and y");
+  });
+
+  it("leaves unknown single-brace placeholders intact", () => {
+    expect(tInterpolate("Hello {name}", {})).toBe("Hello {name}");
   });
 });

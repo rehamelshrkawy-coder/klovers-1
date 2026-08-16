@@ -48,8 +48,8 @@ const HomeGamesSection = () => {
   return (
     <section ref={sectionRef} className="py-20 md:py-28 px-4 relative overflow-hidden bg-muted/20">
       {/* Background blobs */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-amber-200/15 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-72 h-72 bg-amber-200/15 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl pointer-events-none" />
+      <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-72 h-72 bg-primary/10 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative z-10">
 
@@ -59,7 +59,7 @@ const HomeGamesSection = () => {
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           }`}
         >
-          <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-black/15 shadow-sm">
+          <div className="inline-flex items-center gap-2 bg-primary/15 text-primary-text px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-black/15 shadow-sm">
             <Gamepad2 className="h-4 w-4" />
             {t("games.learnPlay")}
           </div>
@@ -74,7 +74,7 @@ const HomeGamesSection = () => {
           <div className="flex items-center justify-center gap-4 flex-wrap">
             {STATS.map(({ icon: Icon, value, label }) => (
               <div key={label} className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-2.5 shadow-sm">
-                <div className="h-7 w-7 rounded-lg bg-amber-100 border border-black/10 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-lg bg-primary/15 border border-black/10 flex items-center justify-center">
                   <Icon className="h-3.5 w-3.5 text-foreground" />
                 </div>
                 <div className="text-start">
@@ -106,7 +106,7 @@ const HomeGamesSection = () => {
               <div className="text-3xl mb-2">{game.emoji}</div>
               <h3 className="font-bold text-foreground text-sm leading-tight mb-1">{game.title}</h3>
               <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{game.desc}</p>
-              <div className="mt-2 flex items-center gap-1 text-[11px] text-amber-700 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="mt-2 flex items-center gap-1 text-[11px] text-primary-text font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                 Play now <ArrowRight className="h-3 w-3" />
               </div>
             </button>
@@ -132,7 +132,7 @@ const HomeGamesSection = () => {
 
         {/* XP banner */}
         <div
-          className={`bg-gradient-to-r from-amber-500/10 via-primary/10 to-green-500/10 border border-border rounded-2xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 transition-all duration-700 delay-300 ${
+          className={`bg-gradient-to-r from-primary/15 via-primary/10 to-green-500/10 border border-border rounded-2xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 transition-all duration-700 delay-300 ${
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >

@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import {
+  AVERAGE_RATING,
   RATINGS_COUNT,
   TRIAL_DURATION_MIN,
   TRIAL_GROUP_SIZE_MAX,
@@ -27,7 +28,7 @@ const Stars = ({ count = 5 }: { count?: number }) => (
 );
 
 const FreeTrialPage = () => {
-  const { t, language } = useLanguage();
+  const { t, tInterpolate, language } = useLanguage();
   const isAr = language === "ar";
 
   const PERKS = [
@@ -235,7 +236,9 @@ const FreeTrialPage = () => {
                 {/* Star rating */}
                 <div className="flex items-center gap-2 justify-center md:justify-start mb-8">
                   <Stars />
-                  <span className="text-sm font-semibold text-foreground">{t("freeTrial.ratingText")}</span>
+                  <span className="text-sm font-semibold text-foreground">
+                    {tInterpolate(t("freeTrial.ratingText"), { rating: AVERAGE_RATING.toFixed(1), count: RATINGS_COUNT })}
+                  </span>
                 </div>
 
                 {/* CTA */}

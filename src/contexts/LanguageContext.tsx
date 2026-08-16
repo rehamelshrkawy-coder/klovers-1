@@ -12,7 +12,7 @@ type PluralCategory = "zero" | "one" | "two" | "few" | "many" | "other";
  * Arabic:  zero → 0, one → 1, two → 2, few → 3-10, many → 11-99, other → 100+
  * (Arabic has 6 plural forms — the richest plural system of any major language.)
  */
-function getPluralCategory(count: number, lang: Language): PluralCategory {
+export function getPluralCategory(count: number, lang: Language): PluralCategory {
   if (lang === "ar") {
     if (count === 0) return "zero";
     if (count === 1) return "one";
@@ -23,6 +23,21 @@ function getPluralCategory(count: number, lang: Language): PluralCategory {
   }
   // English (and fallback for other languages)
   return count === 1 ? "one" : "other";
+}
+
+/**
+ * Interpolate `{name}` / `{{name}}` placeholders in a translated string.
+ *
+ * Exported as a plain function so tests exercise the code that actually ships.
+ * The regex used to match `{{name}}` only, while all 29 interpolated strings in
+ * both locales are written with single braces — zero overlap, so this was a
+ * no-op on 100% of the corpus, and the one caller that did interpolate had to
+ * hand-roll `.replace()`.
+ */
+export function interpolate(template: string, vars: Record<string, string | number>): string {
+  return template.replace(/\{\{?(\w+)\}?\}/g, (match, key: string) =>
+    vars[key] !== undefined ? String(vars[key]) : match
+  );
 }
 
 interface LanguageContextType {
@@ -140,18 +155,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     return Array.isArray(result) ? result : [];
   }, [resolve]);
 
-  /**
-   * Accepts both `{{name}}` and `{name}` placeholders.
-   *
-   * The regex used to match `{{name}}` only, while all 29 interpolated strings
-   * in both locales are written with single braces — zero overlap, so this was
-   * a no-op on 100% of the corpus and every caller had to hand-roll `.replace()`.
-   */
-  const tInterpolate = useCallback((template: string, vars: Record<string, string | number>): string => {
-    return template.replace(/\{\{?(\w+)\}?\}/g, (match, key: string) =>
-      vars[key] !== undefined ? String(vars[key]) : match
-    );
-  }, []);
+  const tInterpolate = useCallback(interpolate, []);
 
   const tPlural = useCallback((
     sectionOrPath: string,

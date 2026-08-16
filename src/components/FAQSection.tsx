@@ -12,7 +12,7 @@ const FAQSection = () => {
   const faqs = tArray("faq", "items") as { question: string; answer: string }[];
 
   return (
-    <section id="faq" className="py-20 bg-card">
+    <section id="faq" className="py-20 md:py-28 bg-card">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <Badge variant="secondary" className="mb-4">

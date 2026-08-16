@@ -1096,7 +1096,7 @@ export const translations = {
       perkDuration: "30-minute session",
       perkAssessment: "Personalised level assessment",
       heroSubtitleEmotional: "Watch your favourite K-dramas without subtitles — it starts with one free class.",
-      ratingText: "4.9 · Rated by 200+ students",
+      ratingText: "{rating} · Rated by {count}+ students",
       socialCount: "500+",
       socialCountText: "students already learning",
       testimonial1Quote: "Very effective. Reham is soo awesome and I learnt a lot from her. I give her 10/10. Thank you for making things easier!",
@@ -2167,6 +2167,7 @@ export const translations = {
       experience: {
         title: "الخبرة والمؤهلات",
         items: [
+          "أكثر من 12 سنة خبرة في تدريس اللغة الكورية (من 2012 لحد دلوقتي)",
           "أكثر من 500 طالب في أكثر من 15 دولة",
           "متخصصة في تعليم الناطقين بالعربية",
           "خبيرة تحضير TOPIK بنسب نجاح عالية",
@@ -2992,7 +2993,7 @@ export const translations = {
       perkDuration: "جلسة مدتها 30 دقيقة",
       perkAssessment: "تقييم مستوى مخصص",
       heroSubtitleEmotional: "مسلسلاتك الكورية من غير ترجمة — والبداية حصة واحدة مجانية.",
-      ratingText: "4.9 · تقييم أكثر من 200 طالب",
+      ratingText: "{rating} · تقييم أكثر من {count} طالب",
       socialCount: "+500",
       socialCountText: "طالب يتعلمون الآن",
       testimonial1Quote: "Very effective. Reham is soo awesome and I learnt a lot from her. I give her 10/10. Thank you for making things easier!",

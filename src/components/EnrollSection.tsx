@@ -20,7 +20,7 @@ const EnrollSection = () => {
   }[];
 
   return (
-    <section id="enroll" className="py-20 bg-background">
+    <section id="enroll" className="py-20 md:py-28 bg-background">
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto mb-8">
           <div className="flex items-center justify-center gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-6 py-3 text-sm font-medium text-foreground animate-pulse">
