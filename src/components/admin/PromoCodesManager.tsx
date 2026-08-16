@@ -134,7 +134,7 @@ const PromoCodesManager = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Tag className="h-5 w-5 text-primary" />
+          <Tag className="h-5 w-5 text-primary-text" />
           <div>
             <h3 className="font-semibold text-foreground">Promo Codes</h3>
             <p className="text-xs text-muted-foreground">{codes.filter(c => c.active && !isExpired(c)).length} active codes</p>
@@ -278,17 +278,17 @@ const PromoCodesManager = () => {
                       </div>
                       {c.description && <p className="text-xs text-muted-foreground">{c.description}</p>}
                     </TableCell>
-                    <TableCell className="font-semibold text-primary">{formatDiscount(c)}</TableCell>
+                    <TableCell className="font-semibold text-primary-text">{formatDiscount(c)}</TableCell>
                     <TableCell className="text-xs">{c.currency ?? "Any"}</TableCell>
                     <TableCell className="text-xs">
                       {c.uses_count}{c.max_uses ? ` / ${c.max_uses}` : ""}
-                      {exhausted && <Badge className="ml-1 text-[10px] bg-destructive/10 text-destructive border-destructive/20">Exhausted</Badge>}
+                      {exhausted && <Badge className="ms-1 text-[10px] bg-destructive/10 text-destructive border-destructive/20">Exhausted</Badge>}
                     </TableCell>
                     <TableCell className="text-xs">
                       {c.expires_at
                         ? <>
                             {new Date(c.expires_at).toLocaleDateString()}
-                            {expired && <Badge className="ml-1 text-[10px] bg-muted text-muted-foreground">Expired</Badge>}
+                            {expired && <Badge className="ms-1 text-[10px] bg-muted text-muted-foreground">Expired</Badge>}
                           </>
                         : "Never"}
                     </TableCell>

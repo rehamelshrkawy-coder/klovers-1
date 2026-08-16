@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBottomSurface } from "@/hooks/useBottomSurface";
 
 const STORAGE_KEY = "cookie_consent";
 
@@ -19,7 +20,9 @@ const CookieBanner = () => {
     setShow(false);
   };
 
-  if (!show) return null;
+  // Highest priority in the bottom strip: a legal notice outranks marketing.
+  const granted = useBottomSurface("cookieBanner", show);
+  if (!granted) return null;
 
   return (
     <div

@@ -31,7 +31,7 @@ const STATE_CONFIG: Record<OverallState, { label: string; icon: React.ReactNode;
 
 const statusIcon = (status: ChecklistItem["status"]) => {
   switch (status) {
-    case "PASS": return <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />;
+    case "PASS": return <CheckCircle2 className="h-4 w-4 text-primary-text shrink-0" />;
     case "WARN": return <AlertTriangle className="h-4 w-4 text-yellow-500 shrink-0" />;
     case "BLOCKER": return <XCircle className="h-4 w-4 text-destructive shrink-0" />;
     case "INFO": return <Info className="h-4 w-4 text-muted-foreground shrink-0" />;
@@ -116,7 +116,7 @@ function PreferredDaysEditor({ enrollmentId, currentDays, currentTimezone, stude
         )}
       </div>
       <Button size="sm" onClick={save} disabled={saving || days.length === 0} className="h-7 text-xs">
-        {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />} Save Days
+        {saving ? <Loader2 className="h-3 w-3 animate-spin me-1" /> : <Save className="h-3 w-3 me-1" />} Save Days
       </Button>
     </div>
   );
@@ -150,7 +150,7 @@ function TimezoneEditor({ enrollmentId, currentDays, currentTimezone, onSaved }:
         </SelectContent>
       </Select>
       <Button size="sm" onClick={save} disabled={saving} className="h-7 text-xs">
-        {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />} Save Timezone
+        {saving ? <Loader2 className="h-3 w-3 animate-spin me-1" /> : <Save className="h-3 w-3 me-1" />} Save Timezone
       </Button>
     </div>
   );
@@ -223,7 +223,7 @@ function PaymentApprover({ enrollmentId, planType, onSaved }: { enrollmentId: st
     <div className="mt-2 p-3 bg-muted/50 rounded-md space-y-2">
       <p className="text-xs text-muted-foreground">This will mark the enrollment as PAID + APPROVED.</p>
       <Button size="sm" onClick={approve} disabled={saving} className="h-7 text-xs">
-        {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle2 className="h-3 w-3 mr-1" />} Approve Payment
+        {saving ? <Loader2 className="h-3 w-3 animate-spin me-1" /> : <CheckCircle2 className="h-3 w-3 me-1" />} Approve Payment
       </Button>
     </div>
   );
@@ -249,7 +249,7 @@ function PaymentDateEditor({ enrollmentId, currentDate, onSaved }: { enrollmentI
       <p className="text-xs font-medium text-foreground">Set payment date:</p>
       <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="h-8 text-xs w-44" />
       <Button size="sm" onClick={save} disabled={saving} className="h-7 text-xs">
-        {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />} Save Date
+        {saving ? <Loader2 className="h-3 w-3 animate-spin me-1" /> : <Save className="h-3 w-3 me-1" />} Save Date
       </Button>
     </div>
   );
@@ -288,7 +288,7 @@ function SlotAssigner({ enrollmentId, slots, onSaved }: { enrollmentId: string; 
         </SelectContent>
       </Select>
       <Button size="sm" onClick={assign} disabled={saving || !selectedSlot} className="h-7 text-xs">
-        {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />} Assign Slot
+        {saving ? <Loader2 className="h-3 w-3 animate-spin me-1" /> : <Save className="h-3 w-3 me-1" />} Assign Slot
       </Button>
     </div>
   );
@@ -320,7 +320,7 @@ function PaymentMethodEditor({ enrollmentId, currentMethod, onSaved }: { enrollm
         </SelectContent>
       </Select>
       <Button size="sm" onClick={save} disabled={saving || !method} className="h-7 text-xs">
-        {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />} Save Method
+        {saving ? <Loader2 className="h-3 w-3 animate-spin me-1" /> : <Save className="h-3 w-3 me-1" />} Save Method
       </Button>
     </div>
   );
@@ -352,7 +352,7 @@ function AdminNotesEditor({ enrollmentId, initialNotes }: { enrollmentId: string
         onChange={(e) => setNotes(e.target.value)}
       />
       <Button size="sm" variant="outline" onClick={save} disabled={saving} className="h-7 text-xs">
-        {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />} Save Notes
+        {saving ? <Loader2 className="h-3 w-3 animate-spin me-1" /> : <Save className="h-3 w-3 me-1" />} Save Notes
       </Button>
     </div>
   );
@@ -554,7 +554,7 @@ function ChecklistPanel({ data, open, onClose, onRefresh, slots, setAdminTab }: 
           )}
           {grouped.passed.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold text-primary uppercase mb-2 flex items-center gap-1">
+              <h4 className="text-xs font-semibold text-primary-text uppercase mb-2 flex items-center gap-1">
                 <CheckCircle2 className="h-3.5 w-3.5" /> Passed ({grouped.passed.length})
               </h4>
               {renderItems(grouped.passed)}
@@ -672,7 +672,7 @@ function EnrollmentChecklistManager({ onAction, setAdminTab }: {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12 text-muted-foreground">
-        <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading checklists…
+        <Loader2 className="h-5 w-5 animate-spin me-2" /> Loading checklists…
       </div>
     );
   }
@@ -685,7 +685,7 @@ function EnrollmentChecklistManager({ onAction, setAdminTab }: {
           { label: "Total", count: counts.total, color: "text-foreground" },
           { label: "Blocked", count: counts.blocked, color: "text-destructive" },
           { label: "Review", count: counts.review, color: "text-yellow-600" },
-          { label: "Success", count: counts.success, color: "text-primary" },
+          { label: "Success", count: counts.success, color: "text-primary-text" },
         ].map(s => (
           <Card key={s.label}>
             <CardContent className="py-3 px-4 flex items-center justify-between">
@@ -699,13 +699,13 @@ function EnrollmentChecklistManager({ onAction, setAdminTab }: {
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
         <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Search className="absolute start-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input placeholder="Search…" value={search} onChange={e => setSearch(e.target.value)}
-            className="h-8 text-xs pl-7 w-44" />
+            className="h-8 text-xs ps-7 w-44" />
         </div>
         <Select value={stateFilter} onValueChange={v => setStateFilter(v as any)}>
           <SelectTrigger className="h-8 text-xs w-32">
-            <Filter className="h-3 w-3 mr-1" /> <SelectValue />
+            <Filter className="h-3 w-3 me-1" /> <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">All States</SelectItem>
@@ -730,10 +730,10 @@ function EnrollmentChecklistManager({ onAction, setAdminTab }: {
           </SelectContent>
         </Select>
         <Button variant="outline" size="sm" onClick={load}>
-          <RefreshCw className="h-3.5 w-3.5 mr-1" /> Refresh
+          <RefreshCw className="h-3.5 w-3.5 me-1" /> Refresh
         </Button>
         <Button variant="outline" size="sm" onClick={exportCSV} disabled={filtered.length === 0}>
-          <Download className="h-3.5 w-3.5 mr-1" /> Export CSV
+          <Download className="h-3.5 w-3.5 me-1" /> Export CSV
         </Button>
       </div>
 

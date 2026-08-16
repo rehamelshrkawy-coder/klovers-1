@@ -59,7 +59,7 @@ const VisualVocabScene = ({
     <div className="rounded-xl border border-border bg-card overflow-hidden mb-6">
       {/* Header */}
       <div className="bg-primary/10 px-5 py-3 text-center">
-        <p className="text-xs font-bold text-primary text-outlined uppercase tracking-wider">Visual Vocabulary</p>
+        <p className="text-xs font-bold text-primary-text text-outlined uppercase tracking-wider">Visual Vocabulary</p>
         <h3 className="text-lg font-bold text-foreground">{title}</h3>
         <p className="text-sm text-muted-foreground">{titleKo}</p>
       </div>
@@ -76,7 +76,7 @@ const VisualVocabScene = ({
         </div>
       ) : generating ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary-text" />
           <p className="text-sm text-muted-foreground">Generating scene illustration...</p>
         </div>
       ) : (

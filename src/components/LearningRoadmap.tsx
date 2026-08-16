@@ -15,7 +15,7 @@ const LEVEL_META: Record<string, { color: string; bg: string; border: string; gr
 };
 
 const getMeta = (level: string) =>
-  LEVEL_META[level] ?? { color: "text-primary", bg: "bg-primary/10", border: "border-primary/30", gradient: "from-primary/20 to-primary/5", icon: Star, emoji: "⭐" };
+  LEVEL_META[level] ?? { color: "text-primary-text", bg: "bg-primary/10", border: "border-primary/30", gradient: "from-primary/20 to-primary/5", icon: Star, emoji: "⭐" };
 
 const LearningRoadmap = () => {
   const { t, tArray } = useLanguage();
@@ -140,7 +140,7 @@ const LearningRoadmap = () => {
                       isActive ? "max-h-40 mt-4 opacity-100" : "max-h-0 opacity-0"
                     }`}
                   >
-                    <p className="text-sm text-muted-foreground leading-relaxed pl-[72px]">
+                    <p className="text-sm text-muted-foreground leading-relaxed ps-[72px]">
                       {stage.description}
                     </p>
                   </div>

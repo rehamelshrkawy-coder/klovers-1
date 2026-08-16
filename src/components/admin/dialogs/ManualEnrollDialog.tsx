@@ -169,7 +169,7 @@ export function ManualEnrollDialog({
             onClick={onEnroll}
             disabled={enrollSaving || (enrollForm.plan_type === "group" && !enrollForm.group_id) || !enrollForm.amount}
           >
-            {enrollSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <UserPlus className="h-4 w-4 mr-2" />}
+            {enrollSaving ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : <UserPlus className="h-4 w-4 me-2" />}
             Enroll
           </Button>
         </DialogFooter>

@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, MapPin, Star, Crown, Globe, Sparkles, Users, MessageCircle } from "lucide-react";
+import { Check, MapPin, Star, Crown, Globe, Sparkles, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "@/hooks/use-toast";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
@@ -167,7 +167,7 @@ const PricingSection = () => {
   };
 
   return (
-    <section id="pricing" className="py-20 bg-card">
+    <section id="pricing" className="py-20 md:py-28 bg-card">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <Badge variant="secondary" className="mb-4">
@@ -259,7 +259,7 @@ const PricingSection = () => {
                   )}
                   {isDiscountedCountry && (
                     <Badge className="bg-green-500 text-white">
-                      <Sparkles className="h-3 w-3 mr-1" /> Discount!
+                      <Sparkles className="h-3 w-3 me-1" /> Discount!
                     </Badge>
                   )}
                   {tierKey === "regional" && !isDiscountedCountry && isActive && (
@@ -315,14 +315,14 @@ const PricingSection = () => {
                                 {t("pricing", `durations.${price.duration}`) !== `durations.${price.duration}` ? t("pricing", `durations.${price.duration}`) : price.duration}
                               </p>
                               {isActive && isBestValue && (
-                                <span className="text-[10px] font-bold text-primary bg-primary/10 border border-primary/30 px-1.5 py-0.5 rounded-full leading-none">Best Value</span>
+                                <span className="text-[10px] font-bold text-primary-text bg-primary/10 border border-primary/30 px-1.5 py-0.5 rounded-full leading-none">Best Value</span>
                               )}
                             </div>
                             <p className="text-xs text-muted-foreground">
                               {t("pricing", `classes.${price.classes}`) !== `classes.${price.classes}` ? t("pricing", `classes.${price.classes}`) : price.classes}
                             </p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-end">
                             <p className="font-bold text-lg text-foreground">
                               {price.local ? `${price.local.toLocaleString()} ${price.currency}` : `$${price.usd}`}
                             </p>
@@ -353,14 +353,14 @@ const PricingSection = () => {
                                 {t("pricing", `durations.${price.duration}`) !== `durations.${price.duration}` ? t("pricing", `durations.${price.duration}`) : price.duration}
                               </p>
                               {isActive && isBestValue && (
-                                <span className="text-[10px] font-bold text-primary bg-primary/10 border border-primary/30 px-1.5 py-0.5 rounded-full leading-none">Best Value</span>
+                                <span className="text-[10px] font-bold text-primary-text bg-primary/10 border border-primary/30 px-1.5 py-0.5 rounded-full leading-none">Best Value</span>
                               )}
                             </div>
                             <p className="text-xs text-muted-foreground">
                               {t("pricing", `classes.${price.classes}`) !== `classes.${price.classes}` ? t("pricing", `classes.${price.classes}`) : price.classes}
                             </p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-end">
                             <p className="font-bold text-lg text-foreground">
                               {price.local ? `${price.local.toLocaleString()} ${price.currency}` : `$${price.usd}`}
                             </p>
@@ -433,12 +433,11 @@ const PricingSection = () => {
                   </div>
 
                   <div className="space-y-2">
-                    {isActive && (
-                      <div className="flex items-center justify-center gap-1.5 text-xs text-orange-600 dark:text-orange-400 font-medium bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-lg py-2">
-                        <Users className="h-3.5 w-3.5" />
-                        <span>Limited spots this intake — enroll to reserve yours</span>
-                      </div>
-                    )}
+                    {/* "Limited spots this intake" used to render here: hardcoded,
+                        backed by no capacity query, and referring to an "intake"
+                        that does not exist anywhere in the codebase. The honest
+                        urgency on this site is the live seat count on
+                        /free-trial, which carries a real number. */}
                     <Button
                       className="w-full"
                       variant={isActive ? "default" : "outline"}

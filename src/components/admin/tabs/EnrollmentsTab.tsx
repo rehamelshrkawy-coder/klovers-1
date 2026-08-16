@@ -151,12 +151,12 @@ export const EnrollmentsTab = memo(function EnrollmentsTab({
             <Tabs defaultValue="under_review" onValueChange={() => setEnrollmentPage(() => 0)}>
               <div className="flex gap-2 mb-3">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder={t("enrollments.searchPlaceholder")}
                     value={enrollmentSearch}
                     onChange={(e) => setEnrollmentSearch(e.target.value)}
-                    className="pl-9"
+                    className="ps-9"
                     aria-label="Search enrollments by name, email or plan"
                     type="search"
                   />
@@ -321,10 +321,10 @@ export const EnrollmentsTab = memo(function EnrollmentsTab({
             {selectedEnrollmentIds.size} enrollment{selectedEnrollmentIds.size > 1 ? "s" : ""} selected
           </p>
           <Button size="sm" onClick={handleBulkApprove} disabled={bulkApproving}>
-            {bulkApproving ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> {t("enrollments.approving")}</> : <><Check className="h-4 w-4 mr-1.5" /> {t("enrollments.bulkApprove")}</>}
+            {bulkApproving ? <><Loader2 className="h-4 w-4 me-1.5 animate-spin" /> {t("enrollments.approving")}</> : <><Check className="h-4 w-4 me-1.5" /> {t("enrollments.bulkApprove")}</>}
           </Button>
           <Button size="sm" variant="outline" onClick={() => setSelectedEnrollmentIds(() => new Set())}>
-            <X className="h-4 w-4 mr-1.5" /> {t("enrollments.clear")}
+            <X className="h-4 w-4 me-1.5" /> {t("enrollments.clear")}
           </Button>
         </div>
       )}

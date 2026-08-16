@@ -131,7 +131,7 @@ const LevelGroupConfig = () => {
                         {cfg.group ? cfg.group.name : cfg.group_id.slice(0, 8) + "…"}
                       </span>
                       {cfg.group?.schedule_day && (
-                        <span className="text-muted-foreground ml-1.5">
+                        <span className="text-muted-foreground ms-1.5">
                           {cfg.group.schedule_day}{cfg.group.schedule_time ? ` · ${cfg.group.schedule_time}` : ""}
                         </span>
                       )}
@@ -154,7 +154,7 @@ const LevelGroupConfig = () => {
                     className="w-full h-7 text-xs"
                     onClick={() => { setAddingFor(level); setSelectedGroupId(""); }}
                   >
-                    <Plus className="h-3 w-3 mr-1" /> Add Group
+                    <Plus className="h-3 w-3 me-1" /> Add Group
                   </Button>
                 )}
 

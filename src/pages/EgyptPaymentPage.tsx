@@ -112,7 +112,7 @@ const UnderReviewBlock = ({
       <CardContent className="pt-6 space-y-5">
         {/* Status badge */}
         <div className="text-center space-y-2">
-          <CheckCircle className="h-12 w-12 mx-auto text-primary" />
+          <CheckCircle className="h-12 w-12 mx-auto text-primary-text" />
           <h2 className="text-xl font-semibold text-foreground">{t("payment.paymentUnderReview")}</h2>
         </div>
 
@@ -140,7 +140,7 @@ const UnderReviewBlock = ({
 
         {/* View receipt */}
         <Button variant="outline" className="w-full" onClick={onViewReceipt} disabled={viewingReceipt}>
-          <Eye className="h-4 w-4 mr-2" />
+          <Eye className="h-4 w-4 me-2" />
           {viewingReceipt ? t("payment.opening") : t("payment.viewReceipt")}
         </Button>
 
@@ -185,7 +185,7 @@ const UnderReviewBlock = ({
                 onClick={handleReplace}
                 className="flex-1"
               >
-                <RefreshCw className="h-4 w-4 mr-1" />
+                <RefreshCw className="h-4 w-4 me-1" />
                 {replacing ? t("payment.replacing") : t("payment.replaceReceipt")}
               </Button>
               <Button type="button" variant="outline" size="sm" onClick={() => { setShowReplace(false); setNewFile(null); }}>
@@ -277,7 +277,7 @@ const PaymentForm = ({
               onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(WHATSAPP_BASE, { cta_label: "egypt_payment_bank_transfer" }); }}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#25D366] hover:bg-[#1ebe5d] px-4 py-2 rounded-lg transition-colors w-full justify-center"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-whatsapp-foreground bg-whatsapp hover:bg-whatsapp/90 px-4 py-2 rounded-lg transition-colors w-full justify-center"
             >
               {t("payment.contactWhatsApp")}
             </a>
@@ -560,7 +560,7 @@ const EgyptPaymentPage = () => {
                   {t("payment.approvedMsg")}
                 </p>
                 <Button className="w-full sm:w-auto" onClick={() => navigate("/dashboard")}>
-                  {t("payment.goToDashboard")} <ArrowRight className="h-4 w-4 ml-1" />
+                  {t("payment.goToDashboard")} <ArrowRight className="h-4 w-4 ms-1" />
                 </Button>
               </CardContent>
             </Card>
@@ -571,10 +571,10 @@ const EgyptPaymentPage = () => {
                 <CardContent className="pt-5 pb-5">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
-                      <Sparkles className="h-5 w-5 text-primary" />
+                      <Sparkles className="h-5 w-5 text-primary-text" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-1">{t("payment.upgradeAvailable")}</p>
+                      <p className="text-xs font-semibold text-primary-text uppercase tracking-widest mb-1">{t("payment.upgradeAvailable")}</p>
                       <h3 className="font-bold text-foreground mb-1">{t("payment.upgradeTitle")}</h3>
                       <p className="text-sm text-muted-foreground mb-3">
                         {t("payment.upgradeDesc")}
@@ -611,7 +611,7 @@ const EgyptPaymentPage = () => {
                 onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(WHATSAPP_BASE, { cta_label: "egypt_payment_rejected" }); }}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#25D366] hover:bg-[#1ebe5d] px-4 py-2 rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-whatsapp-foreground bg-whatsapp hover:bg-whatsapp/90 px-4 py-2 rounded-lg transition-colors"
               >
                 {t("payment.contactWhatsApp")}
               </a>

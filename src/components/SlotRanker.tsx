@@ -186,7 +186,7 @@ const SlotRanker = ({ selectedLevel, onComplete }: SlotRankerProps) => {
     return (
       <div className="bg-accent rounded-lg p-5 space-y-2">
         <div className="flex items-start gap-3">
-          <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+          <CheckCircle2 className="h-5 w-5 text-primary-text mt-0.5 shrink-0" />
           <div>
             {result.assigned ? (
               <>
@@ -221,9 +221,9 @@ const SlotRanker = ({ selectedLevel, onComplete }: SlotRankerProps) => {
             const slot = slots.find((s) => s.id === id);
             if (!slot) return null;
             return (
-              <Badge key={id} variant="secondary" className="gap-1 pr-1">
+              <Badge key={id} variant="secondary" className="gap-1 pe-1">
                 #{idx + 1}: {slot.day} {slot.time}
-                <button type="button" onClick={() => toggleSlot(id)} className="ml-1 hover:text-destructive" aria-label="Remove selected slot">
+                <button type="button" onClick={() => toggleSlot(id)} className="ms-1 hover:text-destructive" aria-label="Remove selected slot">
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
@@ -242,7 +242,7 @@ const SlotRanker = ({ selectedLevel, onComplete }: SlotRankerProps) => {
               type="button"
               aria-label={`Rank ${slot.day} at ${slot.time}`}
               onClick={() => toggleSlot(slot.id)}
-              className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+              className={`w-full text-start p-4 rounded-lg border-2 transition-all ${
                 rank
                   ? "border-primary bg-accent"
                   : "border-border hover:border-primary/50"
@@ -267,7 +267,7 @@ const SlotRanker = ({ selectedLevel, onComplete }: SlotRankerProps) => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={seatsLeft > 3 ? "secondary" : seatsLeft > 0 ? "default" : "destructive"}>
-                    <Users className="h-3 w-3 mr-1" />
+                    <Users className="h-3 w-3 me-1" />
                     {seatsLeft} left
                   </Badge>
                   {slot.status === "confirmed" && (

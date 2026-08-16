@@ -275,7 +275,7 @@ const SalesAnalytics = () => {
         <Card className="rounded-2xl">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="rounded-xl p-2 bg-primary/10"><Users className="h-4 w-4 text-primary" /></div>
+              <div className="rounded-xl p-2 bg-primary/10"><Users className="h-4 w-4 text-primary-text" /></div>
               <span className="text-xs text-muted-foreground">Paid Students</span>
             </div>
             <p className="text-2xl font-bold text-foreground">{paidEnrollments.length}</p>
@@ -315,7 +315,7 @@ const SalesAnalytics = () => {
                     <TableHead className="py-2 px-4">Student</TableHead>
                     <TableHead className="py-2 px-4">Amount</TableHead>
                     <TableHead className="py-2 px-4 hidden sm:table-cell">Days Overdue</TableHead>
-                    <TableHead className="py-2 px-4 text-right">Contact</TableHead>
+                    <TableHead className="py-2 px-4 text-end">Contact</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -341,7 +341,7 @@ const SalesAnalytics = () => {
                             {daysSince}d
                           </Badge>
                         </TableCell>
-                        <TableCell className="py-2 px-4 text-right">
+                        <TableCell className="py-2 px-4 text-end">
                           {email && (
                             <a
                               href={`${WHATSAPP_BASE}?text=${encodeURIComponent(`Hi ${name}! This is a reminder about your pending payment for the Korean course. Please let us know if you need any help completing it.`)}`}
@@ -465,7 +465,7 @@ const SalesAnalytics = () => {
             const a = document.createElement("a"); a.href = url; a.download = `plan-breakdown-${new Date().toISOString().slice(0,10)}.csv`; a.click();
             URL.revokeObjectURL(url);
           }}>
-            <Download className="h-4 w-4 mr-1" /> CSV
+            <Download className="h-4 w-4 me-1" /> CSV
           </Button>
         </CardHeader>
         <CardContent>
@@ -473,10 +473,10 @@ const SalesAnalytics = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Plan</TableHead>
-                <TableHead className="text-right">Enrollments</TableHead>
-                <TableHead className="text-right">Revenue</TableHead>
-                <TableHead className="text-right">Avg</TableHead>
-                <TableHead className="text-right">MoM %</TableHead>
+                <TableHead className="text-end">Enrollments</TableHead>
+                <TableHead className="text-end">Revenue</TableHead>
+                <TableHead className="text-end">Avg</TableHead>
+                <TableHead className="text-end">MoM %</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -487,10 +487,10 @@ const SalesAnalytics = () => {
                 return (
                   <TableRow key={p.name}>
                     <TableCell className="font-medium">{p.name}</TableCell>
-                    <TableCell className="text-right">{p.count}</TableCell>
-                    <TableCell className="text-right">${p.revenue.toLocaleString()}</TableCell>
-                    <TableCell className="text-right">${(p.revenue / p.count).toFixed(0)}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">{p.count}</TableCell>
+                    <TableCell className="text-end">${p.revenue.toLocaleString()}</TableCell>
+                    <TableCell className="text-end">${(p.revenue / p.count).toFixed(0)}</TableCell>
+                    <TableCell className="text-end">
                       <span className={momColor}>{momLabel}</span>
                     </TableCell>
                   </TableRow>

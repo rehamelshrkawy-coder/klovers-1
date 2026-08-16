@@ -423,10 +423,10 @@ const PackagesManager = ({ onSwitchToGroups }: { onSwitchToGroups?: () => void }
             onClick={handleLoadSuggestions}
             disabled={suggestionsLoading}
           >
-            <Lightbulb className="h-4 w-4 mr-1" />
+            <Lightbulb className="h-4 w-4 me-1" />
             {suggestionsLoading ? "Loading..." : "View Suggestions"}
           </Button>
-          <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4 mr-1" /> New Slot</Button>
+          <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4 me-1" /> New Slot</Button>
         </div>
       </div>
 
@@ -466,7 +466,7 @@ const PackagesManager = ({ onSwitchToGroups }: { onSwitchToGroups?: () => void }
                 <TableHead>Seats Left</TableHead>
                 <TableHead>Waitlist</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-end">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -525,15 +525,15 @@ const PackagesManager = ({ onSwitchToGroups }: { onSwitchToGroups?: () => void }
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right space-x-1">
+                  <TableCell className="text-end space-x-1 rtl:space-x-reverse">
                     <Button variant="ghost" size="sm" onClick={() => openEdit(p)}><Pencil className="h-4 w-4" /></Button>
                     {pkgHasGroup[p.id] ? (
                       <Button variant="ghost" size="sm" onClick={() => onSwitchToGroups?.()} title="View group in Groups tab">
-                        <Users className="h-4 w-4 mr-1" /> View Group
+                        <Users className="h-4 w-4 me-1" /> View Group
                       </Button>
                     ) : (
                       <Button variant="ghost" size="sm" onClick={() => handleAddGroup(p)} title="Create a group for this package">
-                        <Plus className="h-4 w-4 mr-1" /> Add Group
+                        <Plus className="h-4 w-4 me-1" /> Add Group
                       </Button>
                     )}
                     <Button variant="ghost" size="sm" onClick={() => handleToggleActive(p)}>
@@ -1015,7 +1015,7 @@ const GroupsManager = () => {
         <p className="text-sm text-muted-foreground">
           {groups.length} active group(s)
           {groups.length > 0 && (
-            <span className="ml-2">
+            <span className="ms-2">
               · <span className="text-green-600 font-medium">{groups.filter(g => g.active_count >= g.capacity).length} full</span>
               · <span className="text-amber-600 font-medium">{groups.filter(g => g.active_count < g.capacity).length} have open spots</span>
             </span>
@@ -1023,11 +1023,11 @@ const GroupsManager = () => {
         </p>
         <div className="flex-1" />
         <Button variant="outline" size="sm" onClick={handleSyncAndClean} disabled={syncing}>
-          <RefreshCw className={`h-4 w-4 mr-1 ${syncing ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-4 w-4 me-1 ${syncing ? "animate-spin" : ""}`} />
           Sync + Clean
         </Button>
         <Button size="sm" onClick={openAddGroup}>
-          <Plus className="h-4 w-4 mr-1" /> Add Group
+          <Plus className="h-4 w-4 me-1" /> Add Group
         </Button>
       </div>
 
@@ -1116,8 +1116,8 @@ const GroupsManager = () => {
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => toggleExpand(g.id)}>
                     {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                    <Users className="h-4 w-4 ml-1" />
-                    <span className="text-xs ml-1">{g.members.length}</span>
+                    <Users className="h-4 w-4 ms-1" />
+                    <span className="text-xs ms-1">{g.members.length}</span>
                   </Button>
                 </div>
               </div>
@@ -1195,12 +1195,12 @@ const GroupsManager = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search name or email..."
                 value={studentSearch}
                 onChange={(e) => handleSearchStudents(e.target.value)}
-                className="pl-9"
+                className="ps-9"
               />
             </div>
 
@@ -1223,14 +1223,14 @@ const GroupsManager = () => {
                       </div>
                       <p className="text-xs text-muted-foreground truncate">{r.email}</p>
                     </div>
-                    <div className="shrink-0 ml-2">
+                    <div className="shrink-0 ms-2">
                       {r.already_in_group ? (
                         <Badge variant="secondary" className="text-xs">Already in group</Badge>
                       ) : r.source === "lead" ? (
                         <Badge variant="outline" className="text-xs text-muted-foreground">Not registered</Badge>
                       ) : (
                         <Button size="sm" variant="outline" onClick={() => handleAddStudentToGroup(r)}>
-                          <Plus className="h-3.5 w-3.5 mr-1" /> Add
+                          <Plus className="h-3.5 w-3.5 me-1" /> Add
                         </Button>
                       )}
                     </div>
@@ -1378,7 +1378,7 @@ const WaitlistManager = () => {
                   <div key={alt.id} className="flex items-center justify-between p-2 rounded border bg-muted/30">
                     <span className="text-xs text-foreground">
                       {getLevelShortLabel(alt.level)} · {DAY_NAMES[alt.day_of_week]} {formatTime(alt.start_time)}
-                      <span className="text-muted-foreground ml-1">({alt.capacity - (alt.member_count || 0)} seats)</span>
+                      <span className="text-muted-foreground ms-1">({alt.capacity - (alt.member_count || 0)} seats)</span>
                     </span>
                     <Button
                       size="sm"
@@ -1387,7 +1387,7 @@ const WaitlistManager = () => {
                       disabled={assigning === r.user_id}
                       onClick={() => handleAssign(r.user_id, alt.id)}
                     >
-                      <ArrowRight className="h-3 w-3 mr-1" /> Assign
+                      <ArrowRight className="h-3 w-3 me-1" /> Assign
                     </Button>
                   </div>
                 ))}
@@ -1399,7 +1399,7 @@ const WaitlistManager = () => {
           </CardContent>
         </Card>
       ))}
-      <Button variant="outline" size="sm" onClick={fetchWaitlist}><RefreshCw className="h-4 w-4 mr-1" /> Refresh</Button>
+      <Button variant="outline" size="sm" onClick={fetchWaitlist}><RefreshCw className="h-4 w-4 me-1" /> Refresh</Button>
     </div>
   );
 };
@@ -1575,7 +1575,7 @@ const PrivateTimeConfig = () => {
                 {formatTime(t)}
                 <button
                   onClick={() => removeTime(t)}
-                  className="ml-1 text-muted-foreground hover:text-destructive"
+                  className="ms-1 text-muted-foreground hover:text-destructive"
                   disabled={saving}
                 >
                   <X className="h-3 w-3" />
@@ -1591,7 +1591,7 @@ const PrivateTimeConfig = () => {
               className="w-32"
             />
             <Button size="sm" onClick={addTime} disabled={saving || !newTime}>
-              <Plus className="h-4 w-4 mr-1" /> Add Time
+              <Plus className="h-4 w-4 me-1" /> Add Time
             </Button>
           </div>
         </CardContent>
@@ -1859,7 +1859,7 @@ const TrialBookingsManager = () => {
                   <TableHead>Status</TableHead>
                   <TableHead>Booked</TableHead>
                   <TableHead>Notes</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-end">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1887,7 +1887,7 @@ const TrialBookingsManager = () => {
                     <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate" title={b.goal || ""}>
                       {b.goal || "—"}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       {b.status === "pending" ? (
                         <div className="flex gap-1 justify-end flex-wrap">
                           <div className="flex items-center gap-1 flex-wrap">
@@ -1913,11 +1913,11 @@ const TrialBookingsManager = () => {
                               disabled={actioningId === b.id || !upcomingSlots.length}
                               onClick={() => handleConfirm(b, trialSlotMap[b.id] ?? upcomingSlots[0]?.value ?? "")}
                             >
-                              <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
+                              <CheckCircle className="h-3.5 w-3.5 me-1 text-green-600" /> Confirm
                             </Button>
                           </div>
                           <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleReject(b)}>
-                            <XCircle className="h-3.5 w-3.5 mr-1 text-red-600" /> Reject
+                            <XCircle className="h-3.5 w-3.5 me-1 text-red-600" /> Reject
                           </Button>
                         </div>
                       ) : (
@@ -1996,7 +1996,7 @@ const TrialBookingsManager = () => {
               </Select>
             )}
             <Button variant="outline" size="sm" onClick={fetchData}>
-              <RefreshCw className="h-4 w-4 mr-1" /> Refresh
+              <RefreshCw className="h-4 w-4 me-1" /> Refresh
             </Button>
           </div>
         </div>
@@ -2033,7 +2033,7 @@ const SchedulingManager = () => {
         <TabsTrigger value="config">Private Config</TabsTrigger>
         <TabsTrigger value="trials">Trial Bookings</TabsTrigger>
         <TabsTrigger value="trial-classes">Trial Classes</TabsTrigger>
-        <TabsTrigger value="notifications"><Bell className="h-4 w-4 mr-1" /> Notifications</TabsTrigger>
+        <TabsTrigger value="notifications"><Bell className="h-4 w-4 me-1" /> Notifications</TabsTrigger>
       </TabsList>
       <TabsContent value="config"><PrivateTimeConfig /></TabsContent>
       <TabsContent value="trials"><TrialBookingsManager /></TabsContent>

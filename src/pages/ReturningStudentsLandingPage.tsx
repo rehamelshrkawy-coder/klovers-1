@@ -267,7 +267,7 @@ const ReturningStudentsLandingPage = () => {
 
                   <Button
                     onClick={handleWhatsAppShare}
-                    className="w-full gap-2 bg-[#25D366] hover:bg-[#20BD5A] text-white"
+                    className="w-full gap-2 bg-whatsapp hover:bg-whatsapp/90 text-whatsapp-foreground"
                   >
                     <MessageCircle className="h-4 w-4" />
                     {t("welcomeBack.share.whatsapp")}

@@ -36,7 +36,7 @@ interface StudentAttendanceRequestProps {
 
 const statusConfig: Record<string, { label: string; icon: React.ElementType; variant: "default" | "secondary" | "destructive" | "outline"; color: string }> = {
   PENDING: { label: "Pending", icon: Clock, variant: "secondary", color: "text-muted-foreground" },
-  APPROVED: { label: "Approved", icon: CheckCircle2, variant: "default", color: "text-primary" },
+  APPROVED: { label: "Approved", icon: CheckCircle2, variant: "default", color: "text-primary-text" },
   REJECTED: { label: "Rejected", icon: XCircle, variant: "destructive", color: "text-destructive" },
 };
 
@@ -310,7 +310,7 @@ const StudentAttendanceRequest = ({ userId }: StudentAttendanceRequestProps) => 
               {adminDates.map((a) => (
                 <div key={a.id} className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/30 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center bg-muted text-primary">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center bg-muted text-primary-text">
                       <CheckCircle2 className="h-4 w-4" />
                     </div>
                     <div>

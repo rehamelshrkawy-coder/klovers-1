@@ -78,7 +78,7 @@ export default function InterviewQACard({ qa, index, locked }: {
       <CardContent className="p-5 space-y-4">
         <Badge variant="outline" className="text-xs">Q{index + 1}</Badge>
 
-        {/* Interviewer Question â male voice */}
+        {/* Interviewer Question — male voice */}
         <div className="space-y-2">
           <span className="text-xs font-semibold uppercase tracking-wide text-blue-600">Interviewer</span>
           <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 space-y-1">
@@ -94,7 +94,7 @@ export default function InterviewQACard({ qa, index, locked }: {
 
         <div className="w-full h-px bg-border" />
 
-        {/* Model Answer (Reham) â female voice */}
+        {/* Model Answer (Reham) — female voice */}
         <div className="space-y-2">
           <span className="text-xs font-semibold uppercase tracking-wide text-green-600">Model Answer</span>
           <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/30 space-y-1">

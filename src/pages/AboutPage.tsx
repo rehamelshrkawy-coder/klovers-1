@@ -104,7 +104,7 @@ const AboutPage = () => {
                   <ul className="space-y-3">
                     {experienceItems.map((item, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <Check className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                        <Check className="h-5 w-5 text-primary-text mt-0.5 shrink-0" />
                         <span className="text-muted-foreground">{item}</span>
                       </li>
                     ))}
@@ -118,7 +118,7 @@ const AboutPage = () => {
         {/* Mid-page CTA */}
         <section className="py-16 bg-card border-y border-border">
           <div className="container mx-auto px-4 text-center max-w-xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Ready to start?</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary-text mb-3">Ready to start?</p>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
               Join thousands of students learning Korean
             </h2>

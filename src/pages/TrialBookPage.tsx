@@ -151,7 +151,7 @@ function TrialCoverAr() {
 
       {/* Badge */}
       <div style={{ background:Y, borderRadius:"50px", padding:"6px 22px", fontSize:"11px", fontWeight:900, color:BK, marginBottom:"22px", letterSpacing:"1px" }}>
-        مجاناً · ٣٠ دقيقة · تجربة حقيقية
+        مجاناً · 30 دقيقة · تجربة حقيقية
       </div>
 
       <TaegeukIcon size={72} />
@@ -161,7 +161,7 @@ function TrialCoverAr() {
         حصتك التجريبية<br />المجانية
       </div>
       <div style={{ fontSize:"14px", color:"#ccc", marginBottom:"26px" }}>
-        اكتشف الكورية في ٣٠ دقيقة
+        اكتشف الكورية في 30 دقيقة
       </div>
 
       <DancheongBorder />
@@ -169,7 +169,7 @@ function TrialCoverAr() {
       <div style={{ marginTop:"16px", display:"flex", gap:"18px", justifyContent:"center" }}>
         {[
           { icon:"🎬", label:"K-Drama & K-Pop" },
-          { icon:"📚", label:"٦ مستويات" },
+          { icon:"📚", label:"6 مستويات" },
           { icon:"👨‍🏫", label:"معلم متخصص" },
         ].map(b => (
           <div key={b.label} style={{ textAlign:"center" }}>
@@ -189,16 +189,16 @@ function TrialCoverAr() {
 /* Agenda */
 function TrialAgendaAr() {
   const steps = [
-    { time:"٠–٥ دقائق",  icon:"👋", color:"#0047AB", title:"تعارف ودفء",         body:"نتعرف على بعض، أسمعكم أسماءكم، نشاط تحفيزي: 'ليه بدأت تتعلم كوري؟'" },
-    { time:"٥–١٢ دقيقة", icon:"🌏", color:"#C8102E", title:"ليه الكورية؟",        body:"K-Drama، K-Pop، السفر، السلسلة الكورية — سبع دقائق تغير نظرتك للغة." },
-    { time:"١٢–٢٢ دقيقة",icon:"✍️", color:"#166534", title:"نتعلم الهانغول!",      body:"نتعلم ٥ حروف ساكنة + ٣ حروف مد، ونقرأ ٢ كلمة كورية حقيقية سوياً." },
-    { time:"٢٢–٢٧ دقيقة",icon:"🎬", color:"#7B2D8B", title:"جمل من المسلسلات",   body:"نقرأ ٣ جمل من K-Drama بالهانغول، مع الترجمة والنطق الصحيح." },
-    { time:"٢٧–٣٠ دقيقة",icon:"🚀", color:BK,        title:"الخطوات التالية",      body:"نعرض المستويات الستة ونشرح الطريق للطلاقة — وإزاي تبدأ معنا!" },
+    { time:"0–5 دقائق",  icon:"👋", color:"#0047AB", title:"تعارف ودفء",         body:"نتعرف على بعض، أسمعكم أسماءكم، نشاط تحفيزي: 'ليه بدأت تتعلم كوري؟'" },
+    { time:"5–12 دقيقة", icon:"🌏", color:"#C8102E", title:"ليه الكورية؟",        body:"K-Drama، K-Pop، السفر، السلسلة الكورية — سبع دقائق تغير نظرتك للغة." },
+    { time:"12–22 دقيقة",icon:"✍️", color:"#166534", title:"نتعلم الهانغول!",      body:"نتعلم 5 حروف ساكنة + 3 حروف مد، ونقرأ 2 كلمة كورية حقيقية سوياً." },
+    { time:"22–27 دقيقة",icon:"🎬", color:"#7B2D8B", title:"جمل من المسلسلات",   body:"نقرأ 3 جمل من K-Drama بالهانغول، مع الترجمة والنطق الصحيح." },
+    { time:"27–30 دقيقة",icon:"🚀", color:BK,        title:"الخطوات التالية",      body:"نعرض المستويات الستة ونشرح الطريق للطلاقة — وإزاي تبدأ معنا!" },
   ];
 
   return (
     <Page dir="rtl">
-      <SHead title="برنامج الـ٣٠ دقيقة" subtitle="ما ستتعلمه اليوم — خطوة بخطوة" />
+      <SHead title="برنامج الـ30 دقيقة" subtitle="ما ستتعلمه اليوم — خطوة بخطوة" />
       <Photo src={PHOTOS.seoulNight} alt="Seoul" h={100} radius={10} overlay />
       <DancheongBorder />
 
@@ -228,7 +228,7 @@ function TrialAgendaAr() {
       <div style={{ background:Y, borderRadius:"10px", padding:"10px 14px", display:"flex", alignItems:"center", gap:"10px", marginTop:"4px" }}>
         <MugunghwaIcon size={32} color={BK} />
         <div style={{ fontSize:"11px", color:BK, fontWeight:700 }}>
-          في ٣٠ دقيقة فقط ستكون قادراً على قراءة كلمات كورية حقيقية!
+          في 30 دقيقة فقط ستكون قادراً على قراءة كلمات كورية حقيقية!
         </div>
       </div>
     </Page>
@@ -238,17 +238,17 @@ function TrialAgendaAr() {
 /* Why Korean */
 function TrialWhyAr() {
   const reasons = [
-    { icon:"🎬", title:"K-Drama و K-Pop",    body:"اكثر من ٢ مليار مشاهدة يومياً. تخيل إنك تفهم كل كلمة بدون ترجمة!" },
+    { icon:"🎬", title:"K-Drama و K-Pop",    body:"اكثر من 2 مليار مشاهدة يومياً. تخيل إنك تفهم كل كلمة بدون ترجمة!" },
     { icon:"✈️", title:"السفر لكوريا",        body:"كوريا الجنوبية وجهة أحلام الكثيرين. لغتهم تفتح لك أبواباً مختلفة تماماً." },
     { icon:"💼", title:"فرص العمل",           body:"شركات كورية ضخمة (Samsung، Hyundai، LG) تبحث دائماً عن متحدثي اللغة." },
     { icon:"🧠", title:"سهلة جداً للعرب",    body:"الهانغول أبجدية علمية منطقية — ممكن تتعلمها في يومين فقط!" },
     { icon:"🌟", title:"مجتمع نشيط",          body:"مجتمع Klovers دافئ ومتحمس — أصدقاء جدد يتعلمون معك." },
-    { icon:"🎯", title:"منهج واضح",           body:"٦ كتب منظمة من الصفر للطلاقة — تعرف دايماً إيه اللي جاي." },
+    { icon:"🎯", title:"منهج واضح",           body:"6 كتب منظمة من الصفر للطلاقة — تعرف دايماً إيه اللي جاي." },
   ];
 
   return (
     <Page dir="rtl">
-      <SHead title="ليه تتعلم الكورية؟" subtitle="٦ أسباب تخليك تبدأ النهارده" />
+      <SHead title="ليه تتعلم الكورية؟" subtitle="6 أسباب تخليك تبدأ النهارده" />
       <Photo src={PHOTOS.kpopCrowd} alt="K-Pop concert" h={90} radius={10} overlay />
       <DancheongBorder />
 
@@ -278,12 +278,12 @@ function TrialWhyAr() {
 /* Levels */
 function TrialLevelsAr() {
   const levels = [
-    { n:"١", color:"#C8102E", badge:"مبتدئ",      book:"الهانغول والأساسيات",        skills:["قراءة الهانغول", "مفردات أساسية", "أرقام وألوان", "تعارف بالكوري"] },
-    { n:"٢", color:"#0047AB", badge:"مبتدئ+",     book:"قواعد المحادثة",             skills:["جمل يومية", "أسئلة بسيطة", "التسوق والمطعم", "الطقس والوقت"] },
-    { n:"٣", color:"#166534", badge:"متوسط ١",    book:"القواعد الأساسية",           skills:["أفعال مهمة", "نفي وأسئلة", "ماضٍ ومستقبل", "مشاعر وآراء"] },
-    { n:"٤", color:"#7B2D8B", badge:"متوسط ٢",    book:"محادثات أعمق",              skills:["شرح وتفسير", "مواقف اجتماعية", "كتابة رسائل", "أخبار وأحداث"] },
-    { n:"٥", color:"#B45309", badge:"متقدم",       book:"الكورية الحقيقية",           skills:["لغة غير رسمية", "ثقافة وتقاليد", "فهم Drama حقيقية", "نقاش آراء"] },
-    { n:"٦", color:BK,        badge:"طلاقة",       book:"قراءة وكتابة وطلاقة",       skills:["قراءة مقالات", "كتابة إبداعية", "محادثة طبيعية", "اختبار TOPIK"] },
+    { n:"1", color:"#C8102E", badge:"مبتدئ",      book:"الهانغول والأساسيات",        skills:["قراءة الهانغول", "مفردات أساسية", "أرقام وألوان", "تعارف بالكوري"] },
+    { n:"2", color:"#0047AB", badge:"مبتدئ+",     book:"قواعد المحادثة",             skills:["جمل يومية", "أسئلة بسيطة", "التسوق والمطعم", "الطقس والوقت"] },
+    { n:"3", color:"#166534", badge:"متوسط 1",    book:"القواعد الأساسية",           skills:["أفعال مهمة", "نفي وأسئلة", "ماضٍ ومستقبل", "مشاعر وآراء"] },
+    { n:"4", color:"#7B2D8B", badge:"متوسط 2",    book:"محادثات أعمق",              skills:["شرح وتفسير", "مواقف اجتماعية", "كتابة رسائل", "أخبار وأحداث"] },
+    { n:"5", color:"#B45309", badge:"متقدم",       book:"الكورية الحقيقية",           skills:["لغة غير رسمية", "ثقافة وتقاليد", "فهم Drama حقيقية", "نقاش آراء"] },
+    { n:"6", color:BK,        badge:"طلاقة",       book:"قراءة وكتابة وطلاقة",       skills:["قراءة مقالات", "كتابة إبداعية", "محادثة طبيعية", "اختبار TOPIK"] },
   ];
 
   return (
@@ -329,7 +329,7 @@ function TrialLevelsAr() {
 
       <div style={{ background:Y, borderRadius:"8px", padding:"8px 14px", marginTop:"8px", textAlign:"center" }}>
         <div style={{ fontSize:"10px", color:BK, fontWeight:800 }}>
-          ⏱️ كل مستوى: ٢٤ حصة · ٩٠ دقيقة لكل حصة · مجموعات صغيرة (٤–٨ طلاب)
+          ⏱️ كل مستوى: 24 حصة · 90 دقيقة لكل حصة · مجموعات صغيرة (4–8 طلاب)
         </div>
       </div>
     </Page>
@@ -339,11 +339,11 @@ function TrialLevelsAr() {
 /* Hangul Taste */
 function TrialHangulAr() {
   const chars = [
-    { char:"ㄱ", sound:"ك/غ", word:"가방", read:"غا-بانغ", mean:"حقيبة" },
-    { char:"ㄴ", sound:"ن",   word:"나비", read:"نا-بي",   mean:"فراشة" },
-    { char:"ㅅ", sound:"س",   word:"사랑", read:"سا-رانغ", mean:"حب" },
-    { char:"ㅁ", sound:"م",   word:"물",   read:"مول",     mean:"ماء" },
-    { char:"ㅎ", sound:"هـ",  word:"한국", read:"هان-غوك", mean:"كوريا" },
+    { char:"ㄱ", sound:"گ/ك", word:"고기", read:"گو-گي", mean:"لحمة" },
+    { char:"ㄴ", sound:"ن",   word:"나",   read:"نا",     mean:"أنا" },
+    { char:"ㅅ", sound:"س",   word:"소",   read:"سو",     mean:"بقرة" },
+    { char:"ㅁ", sound:"م",   word:"이마", read:"إي-ما",  mean:"جبهة" },
+    { char:"ㅎ", sound:"هـ",  word:"하나", read:"ها-نا",  mean:"واحد" },
   ];
   const vowels = [
     { char:"ㅏ", sound:"آ",  ex:"아" },
@@ -353,7 +353,7 @@ function TrialHangulAr() {
 
   return (
     <Page dir="rtl">
-      <SHead title="جرّب الهانغول الآن! ✍️" subtitle="٥ حروف + ٣ حروف مد — تقرأ كلمات كورية في ١٠ دقائق" />
+      <SHead title="جرّب الهانغول الآن! ✍️" subtitle="5 حروف + 3 حروف مد — تقرأ كلمات كورية في 10 دقائق" />
       <DancheongBorder />
 
       {/* Consonants */}
@@ -411,9 +411,9 @@ function TrialHangulAr() {
         </div>
         <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
           {[
-            { k:"사랑", r:"سا-رانغ", m:"حب" },
-            { k:"한국", r:"هان-غوك", m:"كوريا" },
-            { k:"나비", r:"نا-بي", m:"فراشة" },
+            { k:"고기", r:"گو-گي", m:"لحمة" },
+            { k:"하나", r:"ها-نا", m:"واحد" },
+            { k:"오이", r:"أو-إي", m:"خيار" },
           ].map(w => (
             <div key={w.k} style={{
               background:"#fff", borderRadius:"8px", padding:"8px 12px",
@@ -480,10 +480,10 @@ function TrialDramaAr() {
 /* Testimonials */
 function TrialTestimonialsAr() {
   const testimonials = [
-    { name:"نور إبراهيم", city:"القاهرة", level:"مستوى ٢", quote:"كنت بحلم إني أفهم المسلسلات الكورية بدون ترجمة. بعد ٣ شهور مع Klovers بقيت أفهم ٥٠٪ من الكلام!", emoji:"🌸" },
-    { name:"ياسمين حسن",  city:"الإسكندرية", level:"مستوى ١", quote:"الهانغول بدت صعبة جداً من بره. بس بعد أول حصة مع الأستاذة قررت إني مكملة!", emoji:"💛" },
-    { name:"محمد علي",    city:"القاهرة", level:"مستوى ٣", quote:"مجموعة صغيرة + أسلوب المدرسة = تعلمت أكتر في شهرين من ٣ سنين بنفسي!", emoji:"🔥" },
-    { name:"سارة محمود",  city:"الجيزة",  level:"مستوى ٢", quote:"كل حصة بتبقى ممتعة ومليانة ضحك. مش بس بتتعلمي — بتحبي اللغة أكتر!", emoji:"😍" },
+    { name:"نور إبراهيم", city:"القاهرة", level:"مستوى 2", quote:"كنت بحلم إني أفهم المسلسلات الكورية بدون ترجمة. بعد 3 شهور مع Klovers بقيت أفهم 50٪ من الكلام!", emoji:"🌸" },
+    { name:"ياسمين حسن",  city:"الإسكندرية", level:"مستوى 1", quote:"الهانغول بدت صعبة جداً من بره. بس بعد أول حصة مع الأستاذة قررت إني مكملة!", emoji:"💛" },
+    { name:"محمد علي",    city:"القاهرة", level:"مستوى 3", quote:"مجموعة صغيرة + أسلوب المدرسة = تعلمت أكتر في شهرين من 3 سنين بنفسي!", emoji:"🔥" },
+    { name:"سارة محمود",  city:"الجيزة",  level:"مستوى 2", quote:"كل حصة بتبقى ممتعة ومليانة ضحك. مش بس بتتعلمي — بتحبي اللغة أكتر!", emoji:"😍" },
   ];
 
   return (
@@ -514,7 +514,7 @@ function TrialTestimonialsAr() {
       <div style={{ background:Y, borderRadius:"10px", padding:"10px 16px", display:"flex", alignItems:"center", gap:"12px" }}>
         <MugunghwaIcon size={36} color={BK} />
         <div>
-          <div style={{ fontSize:"12px", fontWeight:900, color:BK }}>+٥٠٠ طالب</div>
+          <div style={{ fontSize:"12px", fontWeight:900, color:BK }}>+500 طالب</div>
           <div style={{ fontSize:"10px", color:BK2 }}>انضموا لمجتمع Klovers من مصر والخليج والمغرب العربي</div>
         </div>
       </div>
@@ -525,10 +525,10 @@ function TrialTestimonialsAr() {
 /* Join CTA */
 function TrialJoinAr() {
   const steps = [
-    { n:"١", icon:"💬", title:"تواصل معنا",        body:"ابعت لنا على واتساب أو إنستجرام وإحنا هنرد عليك فوراً." },
-    { n:"٢", icon:"📅", title:"اختر موعدك",        body:"مواعيد مرنة — صباح أو مساء، أيام عطلة، حسب وقتك." },
-    { n:"٣", icon:"📚", title:"ابدأ المستوى الأول", body:"تحصل على كتاب Hangul Book 1 + الوصول للمجموعة + دعم الأستاذة." },
-    { n:"٤", icon:"🌟", title:"وصّل للطلاقة",      body:"٦ مستويات واضحة — ومجتمع يشجعك في كل خطوة." },
+    { n:"1", icon:"💬", title:"تواصل معنا",        body:"ابعت لنا على واتساب أو إنستجرام وإحنا هنرد عليك فوراً." },
+    { n:"2", icon:"📅", title:"اختر موعدك",        body:"مواعيد مرنة — صباح أو مساء، أيام عطلة، حسب وقتك." },
+    { n:"3", icon:"📚", title:"ابدأ المستوى الأول", body:"تحصل على كتاب Hangul Book 1 + الوصول للمجموعة + دعم الأستاذة." },
+    { n:"4", icon:"🌟", title:"وصّل للطلاقة",      body:"6 مستويات واضحة — ومجتمع يشجعك في كل خطوة." },
   ];
 
   return (
@@ -769,11 +769,11 @@ function TrialLevelsEn() {
 
 function TrialHangulEn() {
   const chars = [
-    { char:"ㄱ", sound:"g/k", word:"가방", read:"ga-bang", mean:"bag" },
-    { char:"ㄴ", sound:"n",   word:"나비", read:"na-bi",   mean:"butterfly" },
-    { char:"ㅅ", sound:"s",   word:"사랑", read:"sa-rang", mean:"love" },
-    { char:"ㅁ", sound:"m",   word:"물",   read:"mul",     mean:"water" },
-    { char:"ㅎ", sound:"h",   word:"한국", read:"han-guk", mean:"Korea" },
+    { char:"ㄱ", sound:"g/k", word:"고기", read:"go-gi",  mean:"meat" },
+    { char:"ㄴ", sound:"n",   word:"나",   read:"na",     mean:"I / me" },
+    { char:"ㅅ", sound:"s",   word:"소",   read:"so",     mean:"cow" },
+    { char:"ㅁ", sound:"m",   word:"이마", read:"i-ma",   mean:"forehead" },
+    { char:"ㅎ", sound:"h",   word:"하나", read:"ha-na",  mean:"one" },
   ];
   const vowels = [
     { char:"ㅏ", sound:"ah",  ex:"아" },
@@ -836,9 +836,9 @@ function TrialHangulEn() {
         <div style={{ fontSize:"11px", fontWeight:800, color:"#166534", marginBottom:"6px" }}>🎯 Try reading:</div>
         <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
           {[
-            { k:"사랑", r:"sa-rang", m:"love" },
-            { k:"한국", r:"han-guk", m:"Korea" },
-            { k:"나비", r:"na-bi",   m:"butterfly" },
+            { k:"고기", r:"go-gi", m:"meat" },
+            { k:"하나", r:"ha-na", m:"one" },
+            { k:"오이", r:"o-i",   m:"cucumber" },
           ].map(w => (
             <div key={w.k} style={{
               background:"#fff", borderRadius:"8px", padding:"8px 12px",
@@ -890,7 +890,9 @@ function TrialDramaEn() {
       <div style={{ background:"#0047AB", borderRadius:"10px", padding:"10px 14px", textAlign:"center" }}>
         <div style={{ fontSize:"12px", fontWeight:800, color:Y, marginBottom:"3px" }}>💡 Fun Fact</div>
         <div style={{ fontSize:"10px", color:"#ddd" }}>
-          After just Level 1, you'll understand what's being said in romantic and funny scenes of any K-Drama!
+          By the end of Level 1 you'll read Hangul on sight and catch the greetings, names and
+          set phrases you already half-recognise from K-dramas. Following unscripted dialogue
+          comes later — that's what Levels 2-4 are for.
         </div>
       </div>
     </Page>
@@ -1021,12 +1023,24 @@ export default function TrialBookPage() {
       <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
         <Lock className="h-8 w-8 text-amber-600" />
       </div>
-      <h1 className="text-2xl font-black">Trial Book — Admin Only</h1>
-      <p className="text-muted-foreground max-w-sm">This resource is available to teachers and admins only.</p>
-      <button onClick={() => navigate("/dashboard")}
-        className="px-6 py-2 bg-amber-500 text-black font-bold rounded-lg hover:bg-amber-400 transition-colors">
-        Back to Dashboard
-      </button>
+      <h1 className="text-2xl font-black">Trial Book — teachers and admins only</h1>
+      <p className="text-muted-foreground max-w-sm">
+        This is the teacher's handbook. Looking to book a free trial class? That's on the
+        next page along.
+      </p>
+      {/* This screen used to be a dead end. Anyone who lands here after
+          mistyping /trial-booking is almost certainly a student trying to book,
+          so the booking page is the primary action. */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <button onClick={() => navigate("/free-trial")}
+          className="min-h-[44px] px-6 py-2 bg-primary text-primary-foreground font-bold rounded-lg hover:opacity-90 transition-opacity">
+          Book a free class
+        </button>
+        <button onClick={() => navigate("/dashboard")}
+          className="min-h-[44px] px-6 py-2 border border-border font-semibold rounded-lg hover:bg-muted transition-colors">
+          Back to dashboard
+        </button>
+      </div>
     </div>
   );
 

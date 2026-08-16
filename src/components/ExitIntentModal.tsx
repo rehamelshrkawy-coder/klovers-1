@@ -140,7 +140,7 @@ const ExitIntentModal = () => {
       <div ref={modalRef} className="relative bg-background border border-border rounded-3xl shadow-2xl max-w-md w-full p-7 animate-in zoom-in-95 duration-200">
         <button
           onClick={() => setShow(false)}
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-4 end-4 text-muted-foreground hover:text-foreground transition-colors"
           aria-label={isAr ? "إغلاق" : "Close"}
         >
           <X className="h-5 w-5" />
@@ -154,7 +154,7 @@ const ExitIntentModal = () => {
             </h3>
             <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
               {isAr
-                ? "هنبعتلك ورقة هانغول + ١٠٪ خصم على أول حصة مدفوعة."
+                ? "هنبعتلك ورقة هانغول + 10٪ خصم على أول حصة مدفوعة."
                 : "We'll send you the Hangul sheet + 10% off your first paid class."}
             </p>
             <Button asChild className="w-full gap-2 mb-3" onClick={() => setShow(false)}>
@@ -174,7 +174,7 @@ const ExitIntentModal = () => {
                 <Gift className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-0.5">
+                <p className="text-xs font-bold text-primary-text uppercase tracking-widest mb-0.5">
                   {isAr ? "قبل ما تمشي" : "Before you go"}
                 </p>
                 <h3 className="text-lg font-black text-foreground leading-tight">

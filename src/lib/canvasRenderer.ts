@@ -963,7 +963,7 @@ function renderKloversAlert(ctx: CanvasRenderingContext2D, post: PostData, w: nu
   ctx.fillRect(w * 0.3, h * 0.13, w * 0.4, 3 * S);
 
   // ── LARGE seat number (focal point) ──
-  const numText = post.mainText.replace(/[^\d٠-٩]/g, "") || post.mainText;
+  const numText = post.mainText.replace(/[^\d0-9]/g, "") || post.mainText;
   const numSize = Math.min(180 * S, w * 0.30);
   ctx.font = fontStack("en", 900, numSize);
   ctx.fillStyle = "#FFFF00";

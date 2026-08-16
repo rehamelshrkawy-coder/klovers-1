@@ -358,7 +358,7 @@ const BlogPostPage = () => {
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Button onClick={() => window.location.reload()} variant="outline">{isAr ? "حاول مرة أخرى" : "Try again"}</Button>
               <Button asChild variant="ghost">
-                <Link to="/blog"><ArrowLeft className="h-4 w-4 mr-2" />{isAr ? "العودة للمدونة" : "Back to Blog"}</Link>
+                <Link to="/blog"><ArrowLeft className="h-4 w-4 me-2" />{isAr ? "العودة للمدونة" : "Back to Blog"}</Link>
               </Button>
             </div>
           </div>
@@ -400,7 +400,7 @@ const BlogPostPage = () => {
           <h1 className="text-2xl font-bold text-foreground mb-4">{isAr ? "المقال غير موجود" : "Article not found"}</h1>
           <Button asChild variant="outline">
             <Link to="/blog">
-              <ArrowLeft className="h-4 w-4 mr-2" />{isAr ? "العودة للمدونة" : "Back to Blog"}
+              <ArrowLeft className="h-4 w-4 me-2" />{isAr ? "العودة للمدونة" : "Back to Blog"}
             </Link>
           </Button>
         </main>
@@ -502,7 +502,7 @@ const BlogPostPage = () => {
             prose-a:text-blue-700 dark:prose-a:text-blue-400 prose-a:font-medium prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-blue-900 dark:hover:prose-a:text-blue-300
             prose-strong:text-foreground prose-strong:font-bold
             prose-em:text-foreground/80
-            prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:px-5 prose-blockquote:py-3 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-foreground/80
+            prose-blockquote:border-s-4 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:px-5 prose-blockquote:py-3 prose-blockquote:rounded-e-lg prose-blockquote:not-italic prose-blockquote:text-foreground/80
             prose-li:text-foreground/90 prose-li:text-[1.05rem] prose-li:leading-relaxed prose-li:my-1.5
             prose-ul:my-5 prose-ol:my-5
             prose-ul:list-disc prose-ol:list-decimal
@@ -511,7 +511,7 @@ const BlogPostPage = () => {
             prose-img:rounded-xl prose-img:shadow-md prose-img:my-8 prose-img:mx-auto
             prose-hr:border-border prose-hr:my-10
             prose-table:w-full prose-th:bg-muted/60 prose-th:text-foreground prose-th:font-semibold prose-td:text-foreground/80 prose-td:border-border prose-th:border-border
-            ${isRtl ? "text-right" : ""}
+            ${isRtl ? "text-end" : ""}
           `}>
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {post.content}
@@ -575,7 +575,7 @@ const BlogPostPage = () => {
           {/* Free trial CTA — conversion bridge mid-article journey */}
           <div className="my-10 bg-primary/5 border border-primary/20 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1">
+              <p className="text-xs font-bold text-primary-text uppercase tracking-wider mb-1">
                 {isAr ? "تعلم الكورية مع مدرس حقيقي" : "Learn Korean with a real teacher"}
               </p>
               <p className="font-bold text-foreground text-base leading-snug">
@@ -619,7 +619,7 @@ const BlogPostPage = () => {
                       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${TYPE_COLOR[rp.article_type] || "bg-muted text-muted-foreground border-border"}`}>
                         {(isAr ? TYPE_LABEL_AR : TYPE_LABEL)[rp.article_type] || rp.article_type}
                       </span>
-                      <h3 className="text-sm font-semibold text-foreground mt-2 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+                      <h3 className="text-sm font-semibold text-foreground mt-2 line-clamp-2 leading-snug group-hover:text-primary-text transition-colors">
                         {rp.title}
                       </h3>
                       <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
@@ -637,7 +637,7 @@ const BlogPostPage = () => {
           <div className="mt-8">
             <Button asChild variant="outline" size="sm">
               <Link to="/blog">
-                <ArrowLeft className="h-4 w-4 mr-2" />{isAr ? "جميع المقالات" : "All Articles"}
+                <ArrowLeft className="h-4 w-4 me-2" />{isAr ? "جميع المقالات" : "All Articles"}
               </Link>
             </Button>
           </div>

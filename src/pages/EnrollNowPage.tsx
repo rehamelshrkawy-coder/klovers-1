@@ -29,7 +29,7 @@ import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 import { track } from "@/lib/tracking";
 import { convertSlotToTimezone } from "@/lib/admin-utils";
-import { setUserTimezone } from "@/lib/viewerTimezone";
+import { setUserTimezone, supportedTimeZones } from "@/lib/viewerTimezone";
 import type { Database } from "@/integrations/supabase/types";
 
 type Step = 1 | 2 | 3 | 4;
@@ -810,13 +810,13 @@ const EnrollNowPage = () => {
 
               {isFirstTime && !isEgypt && (
                 <div className="bg-accent rounded-lg p-3 flex items-center gap-2 text-sm">
-                  <PartyPopper className="h-5 w-5 text-primary flex-shrink-0" />
+                  <PartyPopper className="h-5 w-5 text-primary-text flex-shrink-0" />
                   <span className="text-accent-foreground font-medium">{t("enrollNow.welcomeDiscount")}</span>
                 </div>
               )}
 
               <Button type="button" className="w-full" size="lg" disabled={!canProceedStep1} onClick={() => setStep(2)}>
-                {t("enrollNow.next")} <ArrowRight className="ml-2 h-4 w-4" />
+                {t("enrollNow.next")} <ArrowRight className="ms-2 h-4 w-4" />
               </Button>
               {!canProceedStep1 && (
                 <p className="text-xs text-destructive text-center">
@@ -861,7 +861,7 @@ const EnrollNowPage = () => {
                 <Select value={timezone} onValueChange={(tz) => { setTimezone(tz); setUserTimezone(tz); }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {Intl.supportedValuesOf("timeZone").map((tz) => (
+                    {supportedTimeZones().map((tz) => (
                       <SelectItem key={tz} value={tz}>{tz.replace(/_/g, " ")}</SelectItem>
                     ))}
                   </SelectContent>
@@ -889,7 +889,7 @@ const EnrollNowPage = () => {
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-md bg-[#25D366] hover:bg-[#1fb855] text-white px-4 py-2 text-sm font-semibold transition-colors"
+                      className="inline-flex items-center gap-2 rounded-md bg-whatsapp hover:bg-whatsapp/90 text-whatsapp-foreground px-4 py-2 text-sm font-semibold transition-colors"
                     >
                       Contact us on WhatsApp to arrange a private time
                     </a>
@@ -921,7 +921,7 @@ const EnrollNowPage = () => {
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-md bg-[#25D366] hover:bg-[#1fb855] text-white px-4 py-2 text-sm font-semibold transition-colors"
+                      className="inline-flex items-center gap-2 rounded-md bg-whatsapp hover:bg-whatsapp/90 text-whatsapp-foreground px-4 py-2 text-sm font-semibold transition-colors"
                     >
                       Or contact us on WhatsApp to find a suitable time
                     </a>
@@ -962,7 +962,7 @@ const EnrollNowPage = () => {
               </p>
 
               <Button type="button" className="w-full" size="lg" disabled={!canProceedStep2} onClick={handleGoToStep3}>
-                {t("enrollNow.next")} <ArrowRight className="ml-2 h-4 w-4" />
+                {t("enrollNow.next")} <ArrowRight className="ms-2 h-4 w-4" />
               </Button>
               {!canProceedStep2 && (
                 <p className="text-xs text-destructive text-center">
@@ -1014,7 +1014,7 @@ const EnrollNowPage = () => {
                       nav(`/signup?redirect=${encodeURIComponent(returnUrl)}`);
                     }}
                   >
-                    <LogIn className="mr-2 h-4 w-4" />
+                    <LogIn className="me-2 h-4 w-4" />
                     {t("auth.signInToContinue")}
                   </Button>
                 </div>
@@ -1035,10 +1035,10 @@ const EnrollNowPage = () => {
               <div className="flex items-center gap-3 bg-muted/60 border border-border rounded-xl px-4 py-3">
                 <div className="relative flex-shrink-0">
                   <img src={rehamPhoto} alt="Reham 선생님" className="w-11 h-11 rounded-full object-cover object-top" />
-                  <span className="absolute -bottom-0.5 -right-0.5 text-sm leading-none">🇰🇷</span>
+                  <span className="absolute -bottom-0.5 -end-0.5 text-sm leading-none">🇰🇷</span>
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-sm text-foreground">Reham 선생님 <span className="text-xs font-normal text-primary bg-primary/10 px-1.5 py-0.5 rounded-full ml-1">Certified</span></p>
+                  <p className="font-semibold text-sm text-foreground">Reham 선생님 <span className="text-xs font-normal text-primary-text bg-primary/10 px-1.5 py-0.5 rounded-full ms-1">Certified</span></p>
                   <p className="text-xs text-muted-foreground">5+ years · 300+ students · all levels</p>
                   <div className="flex gap-0.5 mt-0.5">{"⭐⭐⭐⭐⭐".split("").map((s,i)=><span key={i} className="text-xs">{s}</span>)}</div>
                 </div>
@@ -1057,7 +1057,7 @@ const EnrollNowPage = () => {
                   </div>
 
                   {isFirstTime && discountAmount > 0 && (
-                    <div className="flex justify-between text-sm text-primary">
+                    <div className="flex justify-between text-sm text-primary-text">
                       <span>{t("enrollNow.firstTimeDiscount")}</span>
                       <span className="font-bold">-${discountAmount.toFixed(2)}</span>
                     </div>
@@ -1087,13 +1087,13 @@ const EnrollNowPage = () => {
                 {!promoApplied ? (
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Tag className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         placeholder="Promo code"
                         value={promoInput}
                         onChange={e => { setPromoInput(e.target.value.toUpperCase()); setPromoError(""); }}
                         onKeyDown={e => e.key === "Enter" && applyPromo()}
-                        className="pl-9 uppercase placeholder:normal-case text-sm h-9"
+                        className="ps-9 uppercase placeholder:normal-case text-sm h-9"
                       />
                     </div>
                     <Button
@@ -1175,12 +1175,12 @@ const EnrollNowPage = () => {
               >
                 {loading ? (isEgypt ? t("enrollNow.creatingOrder") : t("enrollNow.redirectingPayment")) : isEgypt ? (
                   <>
-                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    <ShieldCheck className="me-2 h-4 w-4" />
                     {t("enrollNow.confirmOrder")} ({finalPrice?.toLocaleString() ?? "—"} EGP)
                   </>
                 ) : (
                   <>
-                    <CreditCard className="mr-2 h-4 w-4" />
+                    <CreditCard className="me-2 h-4 w-4" />
                     {t("enrollNow.payNow")} ${finalPrice?.toFixed(2) ?? "—"} {t("enrollNow.now")}
                   </>
                 )}
@@ -1251,7 +1251,7 @@ const EnrollNowPage = () => {
         onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(`${WHATSAPP_BASE}?text=${encodeURIComponent("Hi! I have a question before enrolling in Klovers.")}`, { cta_label: "enroll_questions_pill" }); }}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 left-6 z-50 flex items-center gap-2 bg-[#25D366] text-white text-sm font-semibold px-4 py-2.5 rounded-full shadow-lg hover:bg-[#1ebe5d] transition-colors"
+        className="fixed bottom-6 start-6 z-50 flex items-center gap-2 bg-whatsapp text-whatsapp-foreground text-sm font-semibold px-4 py-2.5 rounded-full shadow-lg hover:bg-whatsapp/90 transition-colors"
         aria-label="Chat on WhatsApp"
       >
         💬 Questions?

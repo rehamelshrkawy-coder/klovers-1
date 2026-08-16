@@ -109,7 +109,7 @@ const ResetPasswordPage = () => {
         <Header />
         <main id="main-content" className="pt-24 pb-16 flex items-center justify-center px-4">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary-text" />
             <p className="text-muted-foreground">{t("auth.verifyingLink")}</p>
           </div>
         </main>

@@ -160,7 +160,7 @@ const HangulQuizGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
           </Badge>
           {streak >= 2 && (
             <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 text-sm animate-in fade-in">
-              <Zap className="h-3.5 w-3.5 text-primary" /> {streak}x Streak!
+              <Zap className="h-3.5 w-3.5 text-primary-text" /> {streak}x Streak!
             </Badge>
           )}
         </div>
@@ -170,7 +170,7 @@ const HangulQuizGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
         {!gameOver && currentChar ? (
           <>
             <Card className="max-w-xs mx-auto mb-8 p-8 text-center border-2 border-border bg-card relative">
-              <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-medium text-muted-foreground">
+              <div className="absolute -top-3 -end-3 w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-medium text-muted-foreground">
                 {round + 1}/{totalRounds}
               </div>
               <span className="text-7xl md:text-8xl font-bold text-foreground block mb-3 select-none">
@@ -233,7 +233,7 @@ const HangulQuizGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
                 {Array.from({ length: 3 }).map((_, i) => (
                   <Trophy
                     key={i}
-                    className={`h-8 w-8 ${i < (score >= 8 ? 3 : score >= 5 ? 2 : 1) ? "text-primary [filter:drop-shadow(0_0_3px_hsl(var(--primary)))]" : "text-muted-foreground/30"}`}
+                    className={`h-8 w-8 ${i < (score >= 8 ? 3 : score >= 5 ? 2 : 1) ? "text-primary-text [filter:drop-shadow(0_0_3px_hsl(var(--primary)))]" : "text-muted-foreground/30"}`}
                   />
                 ))}
               </div>

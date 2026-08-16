@@ -29,12 +29,21 @@ interface Booking {
   trial_date: string;
   user_id: string | null;
   level: string | null;
+  start_time: string | null;
+  timezone: string | null;
+  confirmation_token: string | null;
   class_language: string | null;
   followup_prep_sent_at: string | null;
   followup_day1_sent_at: string | null;
   followup_day3_sent_at: string | null;
   followup_day7_sent_at: string | null;
 }
+
+/** Zone the day-offset stages are counted in — the students' market. */
+const FOLLOWUP_TIMEZONE = "Africa/Cairo";
+
+/** Mirrors TRIAL_ANCHOR_TIMEZONE in src/lib/siteConfig.ts. */
+const TRIAL_ANCHOR_TIMEZONE = "Asia/Kuala_Lumpur";
 
 function pickLanguage(classLanguage: string | null): "ar" | "en" {
   if (classLanguage === "arabic") return "ar";
@@ -74,18 +83,22 @@ async function dispatchStage(
   const column = STAGE_COLUMN[stage];
   const offset = STAGE_DAY_OFFSET[stage];
 
-  // Egypt has had no DST since 2011, so Cairo is a fixed UTC+2 — a pure
-  // JS offset is correct here. If DST is ever reinstated, move this to a
-  // Postgres RPC that uses `AT TIME ZONE 'Africa/Cairo'`.
-  const nowCairoMs = Date.now() + 2 * 60 * 60 * 1000;
-  const targetMs = nowCairoMs + offset * 86400000;
-  const targetDate = new Date(targetMs).toISOString().slice(0, 10);
+  // Ask Intl for the date in the zone rather than adding a fixed offset. This
+  // used to add a hardcoded two hours on the stated grounds that "Egypt has had
+  // no DST since 2011" — Egypt reinstated DST in 2023, so Africa/Cairo is UTC+3
+  // from late April to late October. Half the year the offset was wrong by an
+  // hour, and any run in the hour before local midnight therefore resolved to
+  // the wrong DATE and dispatched a stage to the wrong cohort.
+  const targetDate = new Intl.DateTimeFormat("en-CA", {
+    timeZone: FOLLOWUP_TIMEZONE,
+    year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(new Date(Date.now() + offset * 86_400_000));
 
   // Query bookings whose trial_date matches the target and whose stage column is null.
   // Exclude TBA placeholders and anyone with an APPROVED enrollment.
   const { data: bookings, error } = await supabase
     .from("trial_bookings")
-    .select(`id, name, email, trial_date, user_id, level, class_language, followup_prep_sent_at, followup_day1_sent_at, followup_day3_sent_at, followup_day7_sent_at`)
+    .select(`id, name, email, trial_date, start_time, timezone, confirmation_token, user_id, level, class_language, followup_prep_sent_at, followup_day1_sent_at, followup_day3_sent_at, followup_day7_sent_at`)
     .eq("trial_date", targetDate)
     .is(column, null)
     .not("is_tba", "is", true)
@@ -149,6 +162,18 @@ async function dispatchStage(
           level: b.level,
           ...(unsubscribeToken ? { unsubscribe_token: unsubscribeToken } : {}),
           ...(referralUrl ? { referral_url: referralUrl } : {}),
+          // The day-before email carries the RSVP. /rsvp was previously
+          // orphaned — nothing linked to it and it wrote nothing — which is
+          // why attendance_response was null for every booking ever made.
+          ...(stage === "prep" && b.confirmation_token
+            ? {
+                booking_id: b.id,
+                confirmation_token: b.confirmation_token,
+                trial_date: b.trial_date,
+                trial_time: b.start_time,
+                trial_timezone: b.timezone,
+              }
+            : {}),
         },
       });
       if (sendErr) throw new Error(sendErr.message);
@@ -162,7 +187,137 @@ async function dispatchStage(
   return { stage, attempted: rows.length, sent, skipped, errors };
 }
 
-// ── Auth helper ──────────────────────────────────────────────────────────────
+/**
+ * Resolve a wall-clock date + time in `tz` to the instant it denotes.
+ * Mirrors zonedDateTimeToInstant in src/lib/admin-utils.ts; the two runtimes
+ * cannot share a module.
+ */
+function zonedDateTimeToInstant(dateStr: string, timeHHMM: string, tz: string): Date | null {
+  if (!dateStr || !timeHHMM || !/^\d{1,2}:\d{2}/.test(timeHHMM)) return null;
+  const [y, mo, d] = dateStr.split("-").map(Number);
+  const [h, mi] = timeHHMM.split(":").map(Number);
+  if ([y, mo, d, h, mi].some((n) => Number.isNaN(n))) return null;
+  const guess = Date.UTC(y, mo - 1, d, h, mi);
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, hour12: false,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).formatToParts(new Date(guess)).reduce((a, part) => {
+    a[part.type] = part.value; return a;
+  }, {} as Record<string, string>);
+  const hour = parts.hour === "24" ? 0 : Number(parts.hour);
+  const asUTC = Date.UTC(
+    Number(parts.year), Number(parts.month) - 1, Number(parts.day),
+    hour, Number(parts.minute), Number(parts.second),
+  );
+  return new Date(guess - (asUTC - guess));
+}
+
+/**
+ * The reminder on the day itself.
+ *
+ * The cron runs hourly, so the window is generous enough that no booking falls
+ * between two runs, and `followup_hour_before_sent_at` guarantees one send
+ * regardless of overlap.
+ */
+const HOUR_BEFORE_WINDOW_MIN = 100;
+
+async function dispatchHourBefore(
+  supabase: ReturnType<typeof createClient>,
+): Promise<{ stage: string; attempted: number; sent: number; skipped: number; errors: string[] }> {
+  const errors: string[] = [];
+  let sent = 0;
+  let skipped = 0;
+
+  // Today and tomorrow in the anchor zone, so a session just after local
+  // midnight is still picked up by the run before it.
+  const anchorToday = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TRIAL_ANCHOR_TIMEZONE, year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(new Date());
+  const anchorTomorrow = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TRIAL_ANCHOR_TIMEZONE, year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(new Date(Date.now() + 86_400_000));
+
+  const { data, error } = await supabase
+    .from("trial_bookings")
+    .select("id, name, email, trial_date, start_time, timezone, user_id, class_language, followup_hour_before_sent_at")
+    .in("trial_date", [anchorToday, anchorTomorrow])
+    .is("followup_hour_before_sent_at", null)
+    .not("is_tba", "is", true)
+    .not("email", "is", null)
+    .not("status", "eq", "cancelled")
+    .limit(200);
+
+  if (error) throw new Error(`query hour_before: ${error.message}`);
+  const rows = (data ?? []) as unknown as Array<{
+    id: string; name: string | null; email: string | null;
+    trial_date: string; start_time: string | null; timezone: string | null;
+    user_id: string | null; class_language: string | null;
+  }>;
+
+  const now = Date.now();
+  for (const b of rows) {
+    if (!b.email || !b.start_time) { skipped++; continue; }
+    const startsAt = zonedDateTimeToInstant(
+      b.trial_date, b.start_time, b.timezone || TRIAL_ANCHOR_TIMEZONE,
+    );
+    if (!startsAt) { skipped++; continue; }
+
+    const minutesAway = (startsAt.getTime() - now) / 60_000;
+    // Not yet due, or already started — leave the row for a later run or drop it.
+    if (minutesAway > HOUR_BEFORE_WINDOW_MIN || minutesAway < 0) { skipped++; continue; }
+
+    // Respect unsubscribes, exactly as the other stages do.
+    let unsubscribeToken: string | undefined;
+    if (b.user_id) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("unsubscribe_token, email_unsubscribed")
+        .eq("user_id", b.user_id)
+        .maybeSingle();
+      if (profile?.email_unsubscribed) {
+        await supabase.from("trial_bookings")
+          .update({ followup_hour_before_sent_at: new Date().toISOString() }).eq("id", b.id);
+        skipped++;
+        continue;
+      }
+      unsubscribeToken = profile?.unsubscribe_token ?? undefined;
+    }
+
+    // Best-effort meeting link for the join button.
+    const { data: slot } = await supabase
+      .from("trial_slots")
+      .select("meeting_url")
+      .eq("trial_date", b.trial_date)
+      .eq("start_time", b.start_time)
+      .maybeSingle();
+
+    try {
+      const { error: sendErr } = await supabase.functions.invoke("send-confirmation-email", {
+        body: {
+          email: b.email,
+          name: b.name || "there",
+          language: pickLanguage(b.class_language),
+          template: "trial_hour_before",
+          trial_time: b.start_time,
+          trial_timezone: b.timezone,
+          class_link_url: (slot as { meeting_url?: string | null } | null)?.meeting_url ?? undefined,
+          ...(unsubscribeToken ? { unsubscribe_token: unsubscribeToken } : {}),
+        },
+      });
+      if (sendErr) throw new Error(sendErr.message);
+      await supabase.from("trial_bookings")
+        .update({ followup_hour_before_sent_at: new Date().toISOString() }).eq("id", b.id);
+      sent++;
+    } catch (e) {
+      errors.push(`${b.id}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+
+  return { stage: "hour_before", attempted: rows.length, sent, skipped, errors };
+}
+
+// ── Auth helper ─────────────────────────────────────────────────────────────
 // Accepts either:
 //   a) An admin JWT (Authorization: Bearer <token>) — for manual invocations
 //   b) A shared cron secret (x-cron-secret: <CRON_SECRET>) — for pg_cron
@@ -203,7 +358,10 @@ Deno.serve(async (req) => {
 
     // Run each stage independently so one failure doesn't block others
     const results = await Promise.allSettled(
-      (["prep", "day1", "day3", "day7"] as Stage[]).map(s => dispatchStage(supabase, s)),
+      [
+        ...(["prep", "day1", "day3", "day7"] as Stage[]).map(s => dispatchStage(supabase, s)),
+        dispatchHourBefore(supabase),
+      ],
     );
     const settled = results.map(r =>
       r.status === "fulfilled" ? r.value : { stage: "unknown", error: r.reason?.message ?? String(r.reason) }

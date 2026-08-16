@@ -191,7 +191,7 @@ const StudentPreferenceStep = ({
                         href={waHref}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-md bg-[#25D366] hover:bg-[#1fb855] text-white px-4 py-2 text-sm font-semibold transition-colors w-full sm:w-auto justify-center"
+                        className="inline-flex items-center gap-2 rounded-md bg-whatsapp hover:bg-whatsapp/90 text-whatsapp-foreground px-4 py-2 text-sm font-semibold transition-colors w-full sm:w-auto justify-center"
                       >
                         <MessageCircle className="h-4 w-4" />
                         Contact us on WhatsApp to arrange this time

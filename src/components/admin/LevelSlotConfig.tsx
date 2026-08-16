@@ -137,7 +137,7 @@ const LevelSlotConfig = () => {
                         {cfg.slot ? `${cfg.slot.day} · ${cfg.slot.time}` : cfg.slot_id.slice(0, 8) + "…"}
                       </span>
                       {cfg.slot && (
-                        <span className="text-muted-foreground ml-1.5">{cfg.slot.course_level}</span>
+                        <span className="text-muted-foreground ms-1.5">{cfg.slot.course_level}</span>
                       )}
                     </div>
                     <Button
@@ -159,7 +159,7 @@ const LevelSlotConfig = () => {
                     className="w-full h-7 text-xs"
                     onClick={() => { setAddingFor(level); setSelectedSlotId(""); }}
                   >
-                    <Plus className="h-3 w-3 mr-1" /> Add Slot
+                    <Plus className="h-3 w-3 me-1" /> Add Slot
                   </Button>
                 )}
 

@@ -172,7 +172,7 @@ const TrialRequestsPanel = () => {
                   <TableHead>Level</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Booked At</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-end">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -198,17 +198,17 @@ const TrialRequestsPanel = () => {
                     <TableRow key={b.id} className={b.status === "pending" ? "bg-yellow-50/50" : ""}>
                       <TableCell className="font-medium">{b.name}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{b.email}</TableCell>
-                      <TableCell className="text-sm">{b.phone || "â"}</TableCell>
+                      <TableCell className="text-sm">{b.phone || "—"}</TableCell>
                       <TableCell className="font-medium">{dayTime}</TableCell>
                       <TableCell>{trialDate}</TableCell>
-                      <TableCell className="text-sm">{b.level || "â"}</TableCell>
+                      <TableCell className="text-sm">{b.level || "—"}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${statusColor[b.status] || "bg-gray-100 text-gray-700"}`}>
                           {b.status}
                         </span>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{bookedAt}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-end">
                         {b.status === "pending" && (
                           <div className="flex items-center justify-end gap-1.5">
                             <Button
@@ -245,7 +245,7 @@ const TrialRequestsPanel = () => {
                             })}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                            className="inline-flex items-center gap-1 text-xs text-primary-text hover:underline"
                           >
                             <CalendarPlus className="h-3 w-3" /> Calendar
                           </a>

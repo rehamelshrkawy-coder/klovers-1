@@ -53,13 +53,13 @@ const HowItWorks = () => {
 
         {/* "What your first class looks like" — pedagogy + trust */}
         <div className="max-w-2xl mx-auto mt-12 bg-background border border-border rounded-2xl p-6">
-          <p className="text-xs font-bold text-primary uppercase tracking-widest mb-4 text-center">
+          <p className="text-xs font-bold text-primary-text uppercase tracking-widest mb-4 text-center">
             {isAr ? "ماذا يحدث في أول حصة" : "What your first class looks like"}
           </p>
           <ul className="space-y-2.5">
             {(isAr ? [
               "تقديم نفسك بالكورية — حتى لو مبتعرفش حرف واحد",
-              "تقرأ أول ١٠ أحرف هانغل وتعرف كيف تلفظها",
+              "تقرأ أول 10 أحرف هانغل وتعرف كيف تلفظها",
               "محادثة قصيرة مع باقي الطلاب",
               "المعلمة تحدد مستواك وتشرحلك الخطوة الجاية",
             ] : [
@@ -69,7 +69,7 @@ const HowItWorks = () => {
               "Your teacher identifies your level and maps out your next steps",
             ]).map((item) => (
               <li key={item} className="flex items-start gap-3 text-sm text-muted-foreground">
-                <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-4 w-4 text-primary-text shrink-0 mt-0.5" />
                 <span>{item}</span>
               </li>
             ))}

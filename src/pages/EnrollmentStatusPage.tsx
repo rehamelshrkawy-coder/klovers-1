@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { WHATSAPP_BASE } from "@/lib/siteConfig";
 
 interface Step {
   label: string;
@@ -55,7 +56,7 @@ export default function EnrollmentStatusPage() {
   }, [navigate]);
 
   const isAr = lang === "ar";
-  const waUrl = "https://wa.me/201010003084";
+  const waUrl = WHATSAPP_BASE;
 
   const steps: Step[] = enrollment ? [
     {
@@ -145,7 +146,7 @@ export default function EnrollmentStatusPage() {
                       <div>
                         <p className={`font-semibold text-sm ${step.done ? "text-green-700 dark:text-green-400" : step.active ? "text-foreground" : "text-muted-foreground"}`}>
                           {isAr ? step.labelAr : step.label}
-                          {step.active && <span className="ml-2 text-yellow-600 text-xs font-normal">{isAr ? "← أنت هنا" : "← you're here"}</span>}
+                          {step.active && <span className="ms-2 text-yellow-600 text-xs font-normal">{isAr ? "← أنت هنا" : "← you're here"}</span>}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">{isAr ? step.detailAr : step.detail}</p>
                       </div>
@@ -158,7 +159,7 @@ export default function EnrollmentStatusPage() {
                     <p className="text-yellow-800 dark:text-yellow-300">
                       {isAr ? "هل لديك سؤال؟ تواصل معنا مباشرة." : "Have a question? We're here."}
                     </p>
-                    <a href={waUrl} className="inline-block mt-2 bg-[#25D366] text-white px-4 py-1.5 rounded-lg text-xs font-semibold no-underline">
+                    <a href={waUrl} className="inline-block mt-2 bg-whatsapp text-whatsapp-foreground px-4 py-1.5 rounded-lg text-xs font-semibold no-underline">
                       💬 {isAr ? "واتساب" : "WhatsApp"}
                     </a>
                   </div>

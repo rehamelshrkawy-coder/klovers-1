@@ -6,44 +6,23 @@ import { ClipboardCheck, Gamepad2, BookOpen, X, ChevronRight, Sparkles } from "l
 import { useLanguage } from "@/contexts/LanguageContext";
 import { markOnboardingDone } from "@/lib/onboarding";
 
+/**
+ * Presentation and routing only — every string comes from the translation file.
+ * These used to be `titleEn`/`titleAr` literal pairs living in the component,
+ * untranslatable on a bilingual site, while the `welcomeModal` translation
+ * section described a different tour that nothing rendered.
+ */
 const STEPS = [
-  {
-    icon: ClipboardCheck,
-    color: "text-blue-500",
-    bg: "bg-blue-500/10",
-    titleEn: "Take Your Placement Test",
-    titleAr: "اختبر مستواك",
-    descEn: "Find out your exact Korean level (A1–C2) with our free TOPIK-based assessment. It only takes 10 minutes!",
-    descAr: "اكتشف مستواك الدقيق في الكورية من A1 إلى C2 باختبار TOPIK المجاني. يستغرق فقط 10 دقائق!",
-    cta: "/placement-test",
-    ctaEn: "Take Free Test",
-    ctaAr: "ابدأ الاختبار",
-  },
-  {
-    icon: BookOpen,
-    color: "text-green-500",
-    bg: "bg-green-500/10",
-    titleEn: "Explore Your Textbook",
-    titleAr: "استكشف كتابك المدرسي",
-    descEn: "Browse 75+ structured Korean lessons organised by level. Study vocabulary, grammar, and culture at your pace.",
-    descAr: "تصفح أكثر من 75 درساً كورياً منظماً حسب المستوى. ادرس المفردات والقواعد والثقافة بوتيرتك الخاصة.",
-    cta: "/textbook",
-    ctaEn: "Open Textbook",
-    ctaAr: "افتح الكتاب",
-  },
-  {
-    icon: Gamepad2,
-    color: "text-primary",
-    bg: "bg-primary/10",
-    titleEn: "Play & Earn XP",
-    titleAr: "العب واكسب نقاطاً",
-    descEn: "13 interactive games to practise Korean — every game you play earns XP and unlocks badges. Learning is fun!",
-    descAr: "13 لعبة تفاعلية لتدريب الكورية — كل لعبة تلعبها تكسبك نقاطاً وتفتح شارات. التعلم ممتع!",
-    cta: "/games",
-    ctaEn: "Play Games",
-    ctaAr: "العب الآن",
-  },
+  { icon: ClipboardCheck, color: "text-blue-500",       bg: "bg-blue-500/10",  href: "/placement-test" },
+  { icon: BookOpen,       color: "text-green-500",      bg: "bg-green-500/10", href: "/textbook" },
+  { icon: Gamepad2,       color: "text-primary-text",   bg: "bg-primary/10",   href: "/games" },
 ];
+
+interface WelcomeStep {
+  title: string;
+  description: string;
+  cta: string;
+}
 
 interface WelcomeModalProps {
   open: boolean;
@@ -53,8 +32,8 @@ interface WelcomeModalProps {
 const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
   const [step, setStep] = useState(0);
   const navigate = useNavigate();
-  const { language } = useLanguage();
-  const isAr = language === "ar";
+  const { t, tArray } = useLanguage();
+  const steps = tArray("welcomeModal.steps") as WelcomeStep[];
 
   const handleClose = () => {
     markOnboardingDone();
@@ -76,7 +55,11 @@ const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
   };
 
   const current = STEPS[step];
+  const copy = steps[step];
   const Icon = current.icon;
+
+  // The tour is decoration; if its copy is missing there is nothing to show.
+  if (!copy) return null;
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) handleClose(); }}>
@@ -85,8 +68,8 @@ const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
         <div className="bg-gradient-to-br from-primary to-primary/80 px-6 pt-8 pb-6 text-center relative">
           <button
             onClick={handleClose}
-            className="absolute top-3 right-3 h-7 w-7 rounded-full bg-primary-foreground/15 flex items-center justify-center hover:bg-primary-foreground/25 transition-colors"
-            aria-label="Close"
+            className="absolute top-3 end-3 h-7 w-7 rounded-full bg-primary-foreground/15 flex items-center justify-center hover:bg-primary-foreground/25 transition-colors"
+            aria-label={t("welcomeModal.close")}
           >
             <X className="h-4 w-4 text-primary-foreground" />
           </button>
@@ -95,10 +78,10 @@ const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
             <Sparkles className="h-7 w-7 text-primary-foreground" />
           </div>
           <h2 className="text-xl font-extrabold text-primary-foreground mb-1">
-            {isAr ? "مرحباً بك في Klovers! 🇰🇷" : "Welcome to Klovers! 🇰🇷"}
+            {t("welcomeModal.title")}
           </h2>
           <p className="text-primary-foreground/80 text-sm">
-            {isAr ? "إليك كيف تبدأ رحلتك الكورية" : "Here's how to kick off your Korean journey"}
+            {t("welcomeModal.subtitle")}
           </p>
 
           {/* Step dots */}
@@ -126,10 +109,10 @@ const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
             </div>
             <div>
               <h3 className="font-bold text-foreground text-base leading-tight mb-1.5">
-                {isAr ? current.titleAr : current.titleEn}
+                {copy.title}
               </h3>
               <p id="welcome-desc" className="text-muted-foreground text-sm leading-relaxed">
-                {isAr ? current.descAr : current.descEn}
+                {copy.description}
               </p>
             </div>
           </div>
@@ -137,16 +120,14 @@ const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
           {/* Buttons */}
           <div className="flex gap-2">
             <Button
-              onClick={() => handleCta(current.cta)}
+              onClick={() => handleCta(current.href)}
               className="flex-1 gap-1.5 h-10"
             >
-              {isAr ? current.ctaAr : current.ctaEn}
+              {copy.cta}
               <ChevronRight className="h-4 w-4" />
             </Button>
             <Button variant="outline" onClick={handleNext} className="h-10 px-4 text-sm">
-              {step < STEPS.length - 1
-                ? (isAr ? "التالي" : "Next")
-                : (isAr ? "تم" : "Done")}
+              {step < STEPS.length - 1 ? t("welcomeModal.next") : t("welcomeModal.done")}
             </Button>
           </div>
 
@@ -155,7 +136,7 @@ const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
             onClick={handleClose}
             className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            {isAr ? "تخطي جولة الترحيب" : "Skip welcome tour"}
+            {t("welcomeModal.skip")}
           </button>
         </div>
       </DialogContent>

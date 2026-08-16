@@ -55,7 +55,7 @@ const TextbookProgressPage = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <main id="main-content" className="pt-24 pb-16 container mx-auto px-4 max-w-3xl text-center">
-          <Trophy className="h-16 w-16 text-primary mx-auto mb-4" />
+          <Trophy className="h-16 w-16 text-primary-text mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-foreground mb-2">
             {isAr ? "تقدمك في التعلم" : "Your Learning Progress"}
           </h1>
@@ -99,7 +99,7 @@ const TextbookProgressPage = () => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
             <div>
               <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                <Trophy className="h-6 w-6 text-primary" /> {isAr ? "تقدمي" : "My Progress"}
+                <Trophy className="h-6 w-6 text-primary-text" /> {isAr ? "تقدمي" : "My Progress"}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {completedLessons} / {lessons.length} {isAr ? "مهمة مكتملة" : "missions completed"}
@@ -135,7 +135,7 @@ const TextbookProgressPage = () => {
           {/* WORLDS OVERVIEW */}
           <TabsContent value="worlds">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-              <Map className="h-5 w-5 text-primary" /> {isAr ? "خريطة العوالم" : "World Map"}
+              <Map className="h-5 w-5 text-primary-text" /> {isAr ? "خريطة العوالم" : "World Map"}
             </h2>
             <div className="space-y-4">
               {WORLDS.map((world) => {
@@ -163,9 +163,9 @@ const TextbookProgressPage = () => {
                           {isAr ? world.descriptionAr : world.description}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-end">
                         <p className="font-bold text-foreground">{wp.completed}/{wp.total}</p>
-                        {isComplete && <span className="text-sm text-primary">✓</span>}
+                        {isComplete && <span className="text-sm text-primary-text">✓</span>}
                       </div>
                     </div>
                     <Progress value={wp.percent} className="h-2 mb-3" />
@@ -179,7 +179,7 @@ const TextbookProgressPage = () => {
                             to={`/textbook/${l.book}/${l.sort_order}`}
                             className={cn(
                               "w-8 h-8 rounded-full flex items-center justify-center text-xs transition-all hover:scale-110",
-                              done ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                              done ? "bg-primary/20 text-primary-text" : "bg-muted text-muted-foreground"
                             )}
                             title={l.title_en}
                           >
@@ -197,7 +197,7 @@ const TextbookProgressPage = () => {
           {/* LEAGUES */}
           <TabsContent value="leagues">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-primary" /> {isAr ? "نظام الدوريات" : "League System"}
+              <Trophy className="h-5 w-5 text-primary-text" /> {isAr ? "نظام الدوريات" : "League System"}
             </h2>
             <LeagueCard leagueKey={league.key} totalXp={progress.totalXp} />
           </TabsContent>
@@ -205,7 +205,7 @@ const TextbookProgressPage = () => {
           {/* BADGES */}
           <TabsContent value="badges">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-              <Award className="h-5 w-5 text-primary" /> {isAr ? "الإنجازات" : "Achievements"}
+              <Award className="h-5 w-5 text-primary-text" /> {isAr ? "الإنجازات" : "Achievements"}
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
               {progress.badges.length} / {14} {isAr ? "شارة مكتسبة" : "badges earned"}
@@ -216,7 +216,7 @@ const TextbookProgressPage = () => {
           {/* LEADERBOARD */}
           <TabsContent value="leaderboard">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" /> {isAr ? "لوحة الترتيب" : "Leaderboard"}
+              <Users className="h-5 w-5 text-primary-text" /> {isAr ? "لوحة الترتيب" : "Leaderboard"}
             </h2>
             {leaderboard.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
@@ -240,7 +240,7 @@ const TextbookProgressPage = () => {
                       </span>
                       <div className="flex-1">
                         <p className="font-medium text-foreground text-sm">
-                          {entry.name || (isAr ? "متعلم مجهول" : "Anonymous Learner")} {isMe && <span className="text-xs text-primary">({isAr ? "أنت" : "you"})</span>}
+                          {entry.name || (isAr ? "متعلم مجهول" : "Anonymous Learner")} {isMe && <span className="text-xs text-primary-text">({isAr ? "أنت" : "you"})</span>}
                         </p>
                         <p className="text-xs text-muted-foreground">{entryLeague.emoji} {entryLeague.name}</p>
                       </div>

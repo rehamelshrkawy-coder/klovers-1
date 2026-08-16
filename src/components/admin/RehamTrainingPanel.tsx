@@ -1883,7 +1883,7 @@ export default function RehamTrainingPanel() {
               <button
                 key={field.key}
                 onClick={() => setSelectedField(field.key)}
-                className={`flex flex-col items-start gap-1 p-3 rounded-xl border text-left transition-all ${
+                className={`flex flex-col items-start gap-1 p-3 rounded-xl border text-start transition-all ${
                   selectedField === field.key
                     ? "border-primary bg-primary/5 ring-1 ring-primary"
                     : "border-border hover:border-primary/50"
@@ -1964,7 +1964,7 @@ export default function RehamTrainingPanel() {
 
           {/* ── Introduction Script Tab ── */}
           <TabsContent value="introduction">
-            <ScrollArea className="h-[600px] pr-3">
+            <ScrollArea className="h-[600px] pe-3">
               <div className="space-y-3">
                 {SELF_INTRO_LINES.map((line) => (
                   <div
@@ -2137,12 +2137,12 @@ export default function RehamTrainingPanel() {
                 <p className="text-xs font-semibold text-muted-foreground mb-2">
                   All {filteredConversationData.length} Questions — tap to jump
                 </p>
-                <div className="max-h-64 overflow-y-auto space-y-1 pr-1">
+                <div className="max-h-64 overflow-y-auto space-y-1 pe-1">
                   {filteredConversationData.map((ex, i) => (
                     <button
                       key={ex.id}
                       onClick={() => goTo(i)}
-                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-xs transition-colors ${
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-start text-xs transition-colors ${
                         i === currentIndex
                           ? "bg-primary/10 border border-primary/30 font-semibold"
                           : completed.has(ex.id)
@@ -2285,7 +2285,7 @@ export default function RehamTrainingPanel() {
                 </div>
               )}
 
-              <ScrollArea className="h-[520px] pr-3">
+              <ScrollArea className="h-[520px] pe-3">
                 <div className="space-y-3">
                   {quizOrder.map((ex) => (
                     <Card key={ex.id} className="rounded-xl">
@@ -2476,7 +2476,7 @@ export default function RehamTrainingPanel() {
                         <div className="text-muted-foreground text-xs">Total Time</div>
                       </div>
                     </div>
-                    <ScrollArea className="h-[300px] text-left">
+                    <ScrollArea className="h-[300px] text-start">
                       <div className="space-y-2">
                         {mockQuestions.map((q, i) => (
                           <div key={q.id} className="flex items-center gap-2 p-2 rounded-lg border text-xs">
@@ -2553,7 +2553,7 @@ export default function RehamTrainingPanel() {
                     </Button>
                     <span className="text-xl">{cat.icon}</span>
                     <span className="text-sm font-semibold">{cat.name}</span>
-                    <span className="text-xs text-muted-foreground ml-auto">
+                    <span className="text-xs text-muted-foreground ms-auto">
                       {catIndex + 1} / {catExchanges.length}
                     </span>
                   </div>
@@ -2609,7 +2609,7 @@ export default function RehamTrainingPanel() {
 
           {/* ── Cheat Sheet Tab ── */}
           <TabsContent value="cheatsheet">
-            <ScrollArea className="h-[600px] pr-3">
+            <ScrollArea className="h-[600px] pe-3">
               <div className="space-y-6">
                 {/* Key Metrics */}
                 <Card className="rounded-xl">
@@ -2686,7 +2686,7 @@ export default function RehamTrainingPanel() {
 
           {/* ── Vocabulary Tab ── */}
           <TabsContent value="vocabulary">
-            <ScrollArea className="h-[600px] pr-3">
+            <ScrollArea className="h-[600px] pe-3">
               <div className="space-y-6">
                 {VOCAB_GROUPS.map((group) => {
                   const learned = group.words.filter((w) => learnedVocab.has(w.korean)).length;
@@ -2803,9 +2803,9 @@ export default function RehamTrainingPanel() {
                     className="text-xs h-7"
                     onClick={() => { setFcCategoryIdx(i); setFcCardIdx(0); setFcFlipped(false); }}
                   >
-                    {fcLevel === 0 && <span className="mr-1 opacity-60">{cat.level}급</span>}
+                    {fcLevel === 0 && <span className="me-1 opacity-60">{cat.level}급</span>}
                     {cat.category.split("(")[0].trim()}
-                    <Badge variant="secondary" className="ml-1 text-[10px] h-4">
+                    <Badge variant="secondary" className="ms-1 text-[10px] h-4">
                       {cat.words.filter((w) => fcMastered.has(w.korean)).length}/{cat.words.length}
                     </Badge>
                   </Button>
@@ -2826,7 +2826,7 @@ export default function RehamTrainingPanel() {
                   <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500" />
                   <span className="text-muted-foreground">Mastered {fcStats.mastered}</span>
                 </div>
-                <span className="ml-auto font-medium">{Math.round((fcStats.mastered / fcStats.total) * 100)}%</span>
+                <span className="ms-auto font-medium">{Math.round((fcStats.mastered / fcStats.total) * 100)}%</span>
               </div>
 
               {/* Progress */}
@@ -2859,7 +2859,7 @@ export default function RehamTrainingPanel() {
                   }
                 }}
               >
-                <div className="absolute top-3 left-3">
+                <div className="absolute top-3 start-3">
                   <Badge
                     variant="outline"
                     className={cn("text-[10px]", fcMastered.has(fcCurrent.korean)
@@ -2871,7 +2871,7 @@ export default function RehamTrainingPanel() {
                     {fcMastered.has(fcCurrent.korean) ? "✓ Mastered" : fcSeen.has(fcCurrent.korean) ? "Seen" : "New"}
                   </Badge>
                 </div>
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-3 end-3">
                   <Badge variant="outline" className="text-[10px]">
                     {fcFlipped ? "Click to flip back" : "Click to reveal"}
                   </Badge>
@@ -3095,7 +3095,7 @@ export default function RehamTrainingPanel() {
                     Starred Questions ({(collections.find((c) => c.id === selectedCollectionId)?.questionIds.length || 0) + (collections.find((c) => c.id === selectedCollectionId)?.introIds.length || 0)})
                   </h3>
 
-                  <ScrollArea className="h-[500px] pr-3">
+                  <ScrollArea className="h-[500px] pe-3">
                     <div className="space-y-2">
                       {/* Intro Lines */}
                       {collections

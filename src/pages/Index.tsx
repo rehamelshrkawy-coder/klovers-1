@@ -10,6 +10,8 @@ import StickyEnrollBar from "@/components/StickyEnrollBar";
 import ReturningStudentBanner from "@/components/ReturningStudentBanner";
 import InterviewBannerChip from "@/components/InterviewBannerChip";
 import HomeExitNudge from "@/components/HomeExitNudge";
+import { COMMUNITY_MEMBERS } from "@/lib/siteConfig";
+import { formatNumber } from "@/lib/formatNumber";
 
 // Lazy-load below-fold sections for faster initial paint
 const MeetTeacher = lazy(() => import("@/components/MeetTeacher"));
@@ -21,19 +23,25 @@ const PlacementTestCTA = lazy(() => import("@/components/PlacementTestCTA"));
 const HomeGamesSection = lazy(() => import("@/components/HomeGamesSection"));
 const FinalCTA = lazy(() => import("@/components/FinalCTA"));
 const ReturningStudentOffer = lazy(() => import("@/components/ReturningStudentOffer"));
+const PricingSection = lazy(() => import("@/components/PricingSection"));
 
 const CommunityBand = () => {
   const { language } = useLanguage();
   const isAr = language === "ar";
   return (
-    <section className="py-10 bg-gradient-to-r from-amber-50 to-yellow-50 border-y border-amber-200/60">
+    <section className="py-12 md:py-14 bg-gradient-to-r from-primary/10 to-primary/5 border-y border-primary/40">
       <div className="container mx-auto px-4">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-center sm:text-start">
           <div className="flex items-center gap-3">
             <span className="text-3xl" aria-hidden="true">🌍</span>
             <div>
+              {/* "Korean Learners" read as enrolled students and collided with
+                  the 500+ figure elsewhere on the same page. These are
+                  community members — a different quantity, now labelled so. */}
               <p className="font-extrabold text-foreground text-lg leading-tight">
-                {isAr ? "انضم لأكثر من ٢٠٠٠+ متعلم" : "Join 2,000+ Korean Learners"}
+                {isAr
+                  ? `انضم لأكثر من ${formatNumber(COMMUNITY_MEMBERS, "ar")} عضو`
+                  : `Join ${formatNumber(COMMUNITY_MEMBERS, "en")}+ members`}
               </p>
               <p className="text-muted-foreground text-sm">
                 {isAr ? "في مجتمعنا على تيليغرام وفيسبوك" : "in our Telegram & Facebook community"}
@@ -253,7 +261,24 @@ const Index = () => {
         <Suspense fallback={<SectionFallback />}>
           <ReturningStudentOffer />
         </Suspense>
-        {/* Interest — fun differentiator */}
+        {/* Action — the homepage answers "what does it cost?" before it asks.
+            Price lived only on /pricing, so the single most common objection
+            was never addressed on the page most visitors ever see. */}
+        <div id="pricing">
+          <Suspense fallback={<SectionFallback />}>
+            <PricingSection />
+          </Suspense>
+        </div>
+        {/* Action — final conversion push. Games and blog used to sit here,
+            between the emotional peak and the final ask: two content-marketing
+            surfaces routing high-intent visitors off the conversion path at the
+            exact moment of maximum intent. They now come after. */}
+        <div id="final-cta">
+          <Suspense fallback={<SectionFallback />}>
+            <FinalCTA />
+          </Suspense>
+        </div>
+        {/* Interest — fun differentiator, for visitors who did not convert */}
         <Suspense fallback={<SectionFallback />}>
           <HomeGamesSection />
         </Suspense>
@@ -261,12 +286,6 @@ const Index = () => {
         <Suspense fallback={<SectionFallback />}>
           <HomeBlogSection />
         </Suspense>
-        {/* Action — final conversion push */}
-        <div id="final-cta">
-          <Suspense fallback={<SectionFallback />}>
-            <FinalCTA />
-          </Suspense>
-        </div>
       </main>
       <Footer />
       <StickyEnrollBar />

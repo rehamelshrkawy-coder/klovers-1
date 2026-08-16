@@ -788,8 +788,8 @@ const GroupAttendanceManager = ({
                           return (
                             <SelectItem key={g.id} value={g.id}>
                               <span className="font-medium">{g.name}</span>
-                              {g.level && <Badge variant="secondary" className="ml-2 text-[10px] py-0">{g.level}</Badge>}
-                              {schedule && <span className="text-muted-foreground ml-2 text-xs">({schedule})</span>}
+                              {g.level && <Badge variant="secondary" className="ms-2 text-[10px] py-0">{g.level}</Badge>}
+                              {schedule && <span className="text-muted-foreground ms-2 text-xs">({schedule})</span>}
                             </SelectItem>
                           );
                         })}
@@ -849,7 +849,7 @@ const GroupAttendanceManager = ({
 
                 <div>
                   <Button onClick={createSession} disabled={!selectedGroup || !sessionDate || creating}>
-                    <Plus className="h-4 w-4 mr-1" /> Create Session
+                    <Plus className="h-4 w-4 me-1" /> Create Session
                   </Button>
                 </div>
               </div>
@@ -886,7 +886,7 @@ const GroupAttendanceManager = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="default" size="sm" onClick={handleMarkAllPresent} disabled={loading || totalCount === 0}>
-                    <CheckCheck className="h-4 w-4 mr-1" /> Mark All Present
+                    <CheckCheck className="h-4 w-4 me-1" /> Mark All Present
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => loadAttendance(selectedSession)}>
                     <RefreshCw className="h-4 w-4" />
@@ -1091,7 +1091,7 @@ const GroupAttendanceManager = ({
                                 <TableHead className="py-2 px-3">Date</TableHead>
                                 <TableHead className="py-2 px-3">Submitted</TableHead>
                                 <TableHead className="py-2 px-3">Status</TableHead>
-                                <TableHead className="py-2 px-3 text-right">Actions</TableHead>
+                                <TableHead className="py-2 px-3 text-end">Actions</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -1106,19 +1106,19 @@ const GroupAttendanceManager = ({
                                       {a.status}
                                     </Badge>
                                   </TableCell>
-                                  <TableCell className="py-2 px-3 text-right">
+                                  <TableCell className="py-2 px-3 text-end">
                                     {a.status === "PENDING" ? (
                                       <div className="flex items-center justify-end gap-1">
                                         <Button size="sm" onClick={() => onAttendanceAction?.(a, "APPROVED")}>
-                                          <Check className="h-4 w-4 mr-1" /> Approve
+                                          <Check className="h-4 w-4 me-1" /> Approve
                                         </Button>
                                         <Button size="sm" variant="destructive" onClick={() => onAttendanceAction?.(a, "REJECTED")}>
-                                          <X className="h-4 w-4 mr-1" /> Reject
+                                          <X className="h-4 w-4 me-1" /> Reject
                                         </Button>
                                       </div>
                                     ) : (
                                       <Button size="sm" variant="outline" onClick={() => onRevertAttendance?.(a)}>
-                                        <Undo2 className="h-4 w-4 mr-1" /> Undo
+                                        <Undo2 className="h-4 w-4 me-1" /> Undo
                                       </Button>
                                     )}
                                   </TableCell>
@@ -1145,10 +1145,10 @@ const GroupAttendanceManager = ({
               </CardTitle>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => setNotifyDialog(true)}>
-                  <Mail className="h-4 w-4 mr-1" /> Notify Active Groups
+                  <Mail className="h-4 w-4 me-1" /> Notify Active Groups
                 </Button>
                 <Button variant="outline" size="sm" onClick={fetchEnrichedGroups} disabled={enrichedLoading}>
-                  <RefreshCw className={`h-4 w-4 mr-1 ${enrichedLoading ? "animate-spin" : ""}`} /> Refresh
+                  <RefreshCw className={`h-4 w-4 me-1 ${enrichedLoading ? "animate-spin" : ""}`} /> Refresh
                 </Button>
               </div>
             </CardHeader>
@@ -1219,7 +1219,7 @@ const GroupAttendanceManager = ({
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             <Badge variant={activeMembers.length >= g.capacity ? "default" : "outline"} className="text-xs">
-                              <Users className="h-3 w-3 mr-1" />
+                              <Users className="h-3 w-3 me-1" />
                               {activeMembers.length}/{g.capacity}
                               {waitlistMembers.length > 0 && ` (+${waitlistMembers.length} waitlist)`}
                             </Badge>
@@ -1412,11 +1412,11 @@ const GroupAttendanceManager = ({
                       <p className="text-sm font-medium text-foreground">{s.full_name}</p>
                       <p className="text-xs text-muted-foreground">
                         {s.email}
-                        {s.group_name && <span className="ml-1 text-muted-foreground/70">({s.group_name})</span>}
+                        {s.group_name && <span className="ms-1 text-muted-foreground/70">({s.group_name})</span>}
                       </p>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => handleAddStudentToGroup(s)}>
-                      <Plus className="h-3 w-3 mr-1" /> Add
+                      <Plus className="h-3 w-3 me-1" /> Add
                     </Button>
                   </div>
                 ))

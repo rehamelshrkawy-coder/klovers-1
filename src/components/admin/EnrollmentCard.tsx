@@ -181,7 +181,7 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                 {e.plan_type} · {e.duration}mo · {e.classes_included} classes · {formatMoney(e.amount, e.currency)} · Ref: {e.tx_ref || "—"}
                 {e.payment_method && <> · <span className="font-medium">{paymentMethodLabel(e.payment_method)}</span></>}
                 {egyptMissingPaymentMethod && (
-                  <span className="inline-flex items-center gap-1.5 ml-2">
+                  <span className="inline-flex items-center gap-1.5 ms-2">
                     <Badge variant="outline" className="text-xs border-amber-400 text-amber-700 bg-amber-50">
                       ⚠ Missing payment method
                     </Badge>
@@ -281,13 +281,13 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                 title={hasReceipt ? "View payment receipt" : approveBlockedNoReceipt && isActionableStatus ? "Receipt required before approval" : "No receipt uploaded yet"}
                 onClick={() => onViewReceipt(e)}
               >
-                <Eye className="h-4 w-4 mr-1" />
+                <Eye className="h-4 w-4 me-1" />
                 {hasReceipt ? "Receipt ✓" : approveBlockedNoReceipt && isActionableStatus ? "⚠ Receipt Missing" : "No Receipt"}
               </Button>
               {isActionableStatus && (
                 <>
                   <Button size="sm" variant="outline" onClick={() => onStartEditPrice(e)}>
-                    <Pencil className="h-4 w-4 mr-1" /> Edit
+                    <Pencil className="h-4 w-4 me-1" /> Edit
                   </Button>
                   {e.plan_type === "group" ? (
                     <Button
@@ -296,7 +296,7 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                       title={approveBlockReason}
                       onClick={() => onApproveAndMatch(e)}
                     >
-                      <Check className="h-4 w-4 mr-1" /> Approve & Match
+                      <Check className="h-4 w-4 me-1" /> Approve & Match
                     </Button>
                   ) : (
                     <Button
@@ -305,11 +305,11 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                       title={approveBlockReason}
                       onClick={() => onApprove(e)}
                     >
-                      <Check className="h-4 w-4 mr-1" /> Approve
+                      <Check className="h-4 w-4 me-1" /> Approve
                     </Button>
                   )}
                   <Button size="sm" variant="destructive" onClick={() => onReject(e)}>
-                    <X className="h-4 w-4 mr-1" /> Reject
+                    <X className="h-4 w-4 me-1" /> Reject
                   </Button>
                 </>
               )}
@@ -321,7 +321,7 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                   onClick={() => onSendClassLink(e)}
                   title="Send class meeting link to this student"
                 >
-                  <Link className="h-4 w-4 mr-1" /> Send Class Link
+                  <Link className="h-4 w-4 me-1" /> Send Class Link
                 </Button>
               )}
               {e.payment_status === "PAID" && (
@@ -332,7 +332,7 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                   title="Resend payment confirmed email"
                   onClick={() => onResendPaymentEmail(e)}
                 >
-                  <Mail className="h-3.5 w-3.5 mr-1" /> Resend ✉
+                  <Mail className="h-3.5 w-3.5 me-1" /> Resend ✉
                 </Button>
               )}
               {e.approval_status === "APPROVED" && (
@@ -343,7 +343,7 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                   title="Resend approval email"
                   onClick={() => onResendApprovalEmail(e)}
                 >
-                  <Mail className="h-3.5 w-3.5 mr-1" /> Resend ✅
+                  <Mail className="h-3.5 w-3.5 me-1" /> Resend ✅
                 </Button>
               )}
               <Button
@@ -366,7 +366,7 @@ function EnrollmentCardInner(props: EnrollmentCardProps) {
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button size="sm" variant="outline">
-                      <Undo2 className="h-4 w-4 mr-1" /> Revert
+                      <Undo2 className="h-4 w-4 me-1" /> Revert
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>

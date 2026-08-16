@@ -20,7 +20,7 @@ const DAY_NAMES_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "F
 const DAY_NAMES_AR = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
 import { formatTime, convertSlotToTimezone } from "@/lib/admin-utils";
-import { getUserTimezone } from "@/lib/viewerTimezone";
+import { getUserTimezone, supportedTimeZones } from "@/lib/viewerTimezone";
 
 interface ResubRequest {
   id: string;
@@ -150,7 +150,7 @@ const ResubmitSchedulePage = () => {
         <Header />
         <main id="main-content" className="container mx-auto px-4 pt-24 pb-12 max-w-lg">
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary-text" />
           </div>
         </main>
         <Footer />
@@ -182,7 +182,7 @@ const ResubmitSchedulePage = () => {
         <main id="main-content" className="container mx-auto px-4 pt-24 pb-12 max-w-lg">
           <Card>
             <CardContent className="pt-6 text-center space-y-4">
-              <CheckCircle2 className="h-12 w-12 text-primary mx-auto" />
+              <CheckCircle2 className="h-12 w-12 text-primary-text mx-auto" />
               <h2 className="text-xl font-bold text-foreground">{t("resubmitSchedule.successTitle")}</h2>
               <p className="text-muted-foreground">{t("resubmitSchedule.successDesc")}</p>
             </CardContent>
@@ -224,7 +224,7 @@ const ResubmitSchedulePage = () => {
               <Select value={timezone} onValueChange={setTimezone}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {(Intl as any).supportedValuesOf("timeZone").map((tz: string) => (
+                  {supportedTimeZones().map((tz) => (
                     <SelectItem key={tz} value={tz}>{tz.replace(/_/g, " ")}</SelectItem>
                   ))}
                 </SelectContent>
@@ -244,7 +244,7 @@ const ResubmitSchedulePage = () => {
                         key={pkg.id}
                         type="button"
                         onClick={() => setSelectedPackageId(pkg.id)}
-                        className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                        className={`w-full text-start p-4 rounded-lg border-2 transition-all ${
                           selectedPackageId === pkg.id
                             ? "border-primary bg-accent"
                             : "border-border hover:border-primary/50"
@@ -284,7 +284,7 @@ const ResubmitSchedulePage = () => {
               onClick={handleSubmit}
             >
               {submitting ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("resubmitSchedule.saving")}</>
+                <><Loader2 className="h-4 w-4 me-2 animate-spin" /> {t("resubmitSchedule.saving")}</>
               ) : (
                 t("resubmitSchedule.submitScheduleBtn")
               )}

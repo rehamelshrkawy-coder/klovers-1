@@ -80,7 +80,7 @@ const StudentHealthPanel = ({ overviewRows }: Props) => {
             <CardContent className="p-4">
               <button
                 type="button"
-                className="flex w-full items-start justify-between gap-2 text-left"
+                className="flex w-full items-start justify-between gap-2 text-start"
                 aria-expanded={openCard === key}
                 onClick={() => setOpenCard(openCard === key ? null : key)}
               >

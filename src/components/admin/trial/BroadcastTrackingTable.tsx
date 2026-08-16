@@ -135,10 +135,10 @@ export default function BroadcastTrackingTable() {
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-muted-foreground">
             <tr>
-              <th className="px-3 py-2 text-left font-medium">Name</th>
-              <th className="px-3 py-2 text-left font-medium">Email</th>
-              <th className="px-3 py-2 text-left font-medium">Source</th>
-              <th className="px-3 py-2 text-left font-medium">Campaign</th>
+              <th className="px-3 py-2 text-start font-medium">Name</th>
+              <th className="px-3 py-2 text-start font-medium">Email</th>
+              <th className="px-3 py-2 text-start font-medium">Source</th>
+              <th className="px-3 py-2 text-start font-medium">Campaign</th>
               <th className="px-3 py-2 text-center font-medium">📧 Sent</th>
               <th className="px-3 py-2 text-center font-medium">👁 Opened</th>
               <th className="px-3 py-2 text-center font-medium">✅ RSVP</th>

@@ -5,21 +5,39 @@ import { Link } from "react-router-dom";
 const heroPoster = "/hero-korean.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
-import { WHATSAPP_BASE } from "@/lib/siteConfig";
+import {
+  AVERAGE_RATING,
+  STUDENTS_TAUGHT,
+  TRIAL_DURATION_MIN,
+  TRIAL_GROUP_SIZE_MAX,
+  WHATSAPP_BASE,
+} from "@/lib/siteConfig";
+import { useTrialAvailability, formatSession } from "@/hooks/useTrialAvailability";
+import { formatNumber } from "@/lib/formatNumber";
+
+/** True when the visitor has asked their OS to reduce motion. */
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
 const useCountUp = (target: number, duration = 1800) => {
-  const [count, setCount] = useState(0);
+  // Starts at the target when motion is reduced: the animation is decoration,
+  // the number is the content.
+  const [count, setCount] = useState(() => (prefersReducedMotion() ? target : 0));
   const ref = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (prefersReducedMotion()) { setCount(target); return; }
     const obs = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return;
       obs.disconnect();
       const start = performance.now();
       const tick = (now: number) => {
         const t = Math.min((now - start) / duration, 1);
-        setCount(Math.round(t * target));
+        // Clamped: a school selling trust must never paint "-2+ students
+        // taught" or "0.0 ★" on a cold visitor's first frame.
+        setCount(Math.max(0, Math.min(target, Math.round(t * target))));
         if (t < 1) requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
@@ -30,52 +48,36 @@ const useCountUp = (target: number, duration = 1800) => {
   return { count, ref };
 };
 
-/** 4 official trial class timestamps stored as MYT (UTC+8) ISO instants. */
-const TRIAL_INSTANTS_MYT = [
-  "2026-07-03T01:00:00+08:00",
-  "2026-07-04T23:00:00+08:00",
-  "2026-07-05T09:00:00+08:00",
-  "2026-07-07T23:00:00+08:00",
-];
-
-/** Returns the label for the next upcoming trial class in the visitor's timezone. */
-const nextClassLabel = () => {
-  const now = Date.now();
-  const upcoming = TRIAL_INSTANTS_MYT
-    .map((iso) => new Date(iso))
-    .filter((d) => d.getTime() > now);
-  if (upcoming.length === 0) return { en: "soon", ar: "قريباً" };
-  const next = upcoming[0];
-  const userTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return "Asia/Kuala_Lumpur"; } })();
-  const en = next.toLocaleDateString("en-US", { weekday: "long", timeZone: userTz });
-  const ar = next.toLocaleDateString("ar-EG", { weekday: "long", timeZone: userTz });
-  return { en, ar };
-};
-
-/** Formats a trial instant for display in the visitor's local timezone. */
-function formatTrialPill(iso: string, lang: "en" | "ar"): string | null {
-  const d = new Date(iso);
-  if (d.getTime() <= Date.now()) return null;
-  const userTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return "Asia/Kuala_Lumpur"; } })();
-  const day = d.toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", { weekday: "short", month: "short", day: "numeric", timeZone: userTz });
-  const time = d.toLocaleTimeString(lang === "ar" ? "ar-EG" : "en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: userTz });
-  return `${day} · ${time}`;
-}
-
 const HeroSection = () => {
   const { t, language } = useLanguage();
   const isAr = language === "ar";
-  const nextDay = useMemo(() => nextClassLabel(), []);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoReady, setVideoReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
-  const { count: studentCount, ref: studentRef } = useCountUp(500);
-  const { count: ratingCount, ref: ratingRef } = useCountUp(49, 1200);
-  const { count: countryCount, ref: countryRef } = useCountUp(15);
+  const { count: studentCount, ref: studentRef } = useCountUp(STUDENTS_TAUGHT);
+  const { count: ratingCount, ref: ratingRef } = useCountUp(Math.round(AVERAGE_RATING * 10), 1200);
+
+  // Live schedule — replaces three hardcoded arrays of ISO instants that had
+  // all expired, leaving the chip permanently reading "Next class: soon".
+  const { sessions } = useTrialAvailability();
+  const nextSessions = useMemo(() => sessions.slice(0, 4), [sessions]);
+  const nextUp = nextSessions[0];
 
   useEffect(() => {
-    const conn = (navigator as Navigator & { connection?: { type?: string; effectiveType?: string } }).connection;
-    const isFast = !conn || conn.type === "wifi" || conn.effectiveType === "4g";
+    const conn = (navigator as Navigator & {
+      connection?: { type?: string; effectiveType?: string; saveData?: boolean };
+    }).connection;
+
+    if (conn?.saveData === true || prefersReducedMotion()) return;
+
+    // The background video is 30–45 MB. `!conn` used to count as "fast", and
+    // Safari/iOS does not implement the Network Information API at all — so
+    // every iPhone downloaded the whole file regardless of network. With no
+    // connection signal, fall back to viewport width as a coarse proxy for
+    // "probably not on a metered cellular plan".
+    const isFast = conn
+      ? conn.type === "wifi" || conn.effectiveType === "4g" || conn.effectiveType === "5g"
+      : window.innerWidth >= 1024;
     if (!isFast) return;
 
     const timer = setTimeout(() => {
@@ -169,16 +171,26 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Next-class urgency chip */}
-          <div className="inline-flex items-center gap-2 bg-black/40 border border-white/20 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-semibold text-white/90">
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
-            </span>
-            {isAr
-              ? `الحصة التالية: ${nextDay.ar} — سجّل دلوقتي`
-              : `Next class: ${nextDay.en} — spots filling fast`}
-          </div>
+          {/* Next-class chip — rendered only when there genuinely is a next
+              class. The urgency clause is driven by real remaining capacity;
+              the old copy asserted "spots filling fast" unconditionally against
+              a set of dates that had expired six weeks earlier. */}
+          {nextUp && (
+            <div className="inline-flex items-center gap-2 bg-black/40 border border-white/20 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-semibold text-white/90">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
+              </span>
+              {(() => {
+                const { weekdayLong, time } = formatSession(nextUp, isAr ? "ar" : "en");
+                const seats = nextUp.spotsLeft;
+                if (isAr) {
+                  return `الحصة الجاية: ${weekdayLong} ${time}${seats <= 3 ? ` — باقي ${seats} أماكن` : ""}`;
+                }
+                return `Next class: ${weekdayLong} ${time}${seats <= 3 ? ` — ${seats} seat${seats === 1 ? "" : "s"} left` : ""}`;
+              })()}
+            </div>
+          )}
 
           {/* Main headline */}
           <h1
@@ -228,7 +240,7 @@ const HeroSection = () => {
             <Button
               size="lg"
               asChild
-              className="gap-2.5 text-base font-bold px-8 bg-[#25D366] hover:bg-[#1ebe5d] text-white border-0"
+              className="gap-2.5 text-base font-bold px-8 bg-whatsapp hover:bg-whatsapp/90 text-whatsapp-foreground border-0"
             >
               <a
                 href={WHATSAPP_BASE}
@@ -242,24 +254,29 @@ const HeroSection = () => {
             </Button>
           </div>
 
-          {/* Micro trust line */}
+          {/* Micro trust line — states the format up front. The trial is a
+              GROUP class and neither page used to say so anywhere. */}
           <p className="text-white/60 text-xs" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.8)" }}>
-            {isAr ? "✓ بدون بطاقة بنكية · ✓ ٩٨٪ راضون · ✓ رد خلال دقائق" : "✓ No credit card · ✓ 98% satisfaction · ✓ Reply in minutes"}
+            {isAr
+              ? `✓ بدون بطاقة بنكية · ✓ ${TRIAL_DURATION_MIN} دقيقة · ✓ حصة جماعية حتى ${TRIAL_GROUP_SIZE_MAX} طلاب`
+              : `✓ No credit card · ✓ ${TRIAL_DURATION_MIN} minutes · ✓ Group class, up to ${TRIAL_GROUP_SIZE_MAX} students`}
           </p>
 
-          {/* Upcoming class sessions — auto-localised to visitor timezone */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            {TRIAL_INSTANTS_MYT.map((iso) => {
-              const label = formatTrialPill(iso, isAr ? "ar" : "en");
-              if (!label) return null;
-              return (
-                <div key={iso} className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/80">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
-                  {label}
-                </div>
-              );
-            })}
-          </div>
+          {/* Upcoming sessions — live from get_trial_availability, rendered in
+              the visitor's timezone and locale. */}
+          {nextSessions.length > 0 && (
+            <div className="flex flex-wrap gap-2 justify-center">
+              {nextSessions.map((session) => {
+                const { weekdayShort, dateLabel, time } = formatSession(session, isAr ? "ar" : "en");
+                return (
+                  <div key={session.key} className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/80">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+                    {`${weekdayShort}, ${dateLabel} · ${time}`}
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Hangul sheet — reciprocity trigger */}
           <Link
@@ -280,12 +297,17 @@ const HeroSection = () => {
           <div className="w-full h-px bg-gradient-to-r from-transparent via-white/25 to-transparent mb-6" />
           <div className="grid grid-cols-3 gap-4 md:gap-8">
             {[
-              { icon: Users, ref: studentRef, display: `${studentCount.toLocaleString('en-US')}+`, label: isAr ? "طالب تعلّموا" : "Students Taught" },
-              { icon: Star,  ref: ratingRef,  display: `${(ratingCount / 10).toFixed(1)} ★`, label: isAr ? "متوسط التقييم" : "Average Rating" },
-              { icon: Globe, ref: countryRef, display: isAr ? "٦ أشهر" : "6 Months", label: isAr ? "للمحادثة" : "To Conversational" },
+              { icon: Users, ref: studentRef, display: `${formatNumber(studentCount, isAr ? "ar" : "en")}+`, label: isAr ? "طالب تعلّموا" : "Students Taught" },
+              { icon: Star,  ref: ratingRef,  display: `${(Math.max(0, ratingCount) / 10).toFixed(1)} ★`, label: isAr ? "متوسط التقييم" : "Average Rating" },
+              // Was "6 Months → To Conversational". Six months is 24 sessions,
+              // which is Level 1 / TOPIK 1 / A1 by the site's own roadmap — not
+              // conversational. Replaced with a fact the trial actually keeps.
+              { icon: Globe, ref: null, display: `≤ ${TRIAL_GROUP_SIZE_MAX}`, label: isAr ? "طلاب في الحصة" : "Students Per Class" },
             ].map(({ icon: Icon, ref: itemRef, display, label }) => (
               <div key={label} className="flex flex-col items-center gap-1 text-center group">
                 <div className="flex items-center gap-1.5">
+                  {/* Hero is always dark (#1a1a1a), so the bright brand yellow is
+                      the correct value here rather than the light-surface one. */}
                   <Icon className="h-4 w-4 text-primary hidden sm:block" />
                   <span
                     ref={itemRef}
