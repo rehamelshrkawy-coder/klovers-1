@@ -74,7 +74,7 @@ export function AnalyticsSection() {
               <>
                 <div className="mb-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
                   <p className="text-sm text-muted-foreground">Total XP (Last 8 weeks)</p>
-                  <p className="text-3xl font-bold text-primary">{totalXp}</p>
+                  <p className="text-3xl font-bold text-primary-text">{totalXp}</p>
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={weeklyXp} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>

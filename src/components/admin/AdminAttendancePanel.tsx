@@ -475,7 +475,7 @@ const AdminAttendancePanel = ({
                   DB shows {enrollment.sessions_remaining} remaining, but {stats.totalUsed} used of {stats.packageSize} = {stats.remaining} remaining
                 </span>
                 <Button size="sm" variant="destructive" onClick={handleSyncRemaining} disabled={saving}>
-                  <Check className="h-3 w-3 mr-1" /> Sync
+                  <Check className="h-3 w-3 me-1" /> Sync
                 </Button>
               </div>
             ) : (
@@ -491,12 +491,12 @@ const AdminAttendancePanel = ({
         <div className="flex flex-wrap gap-2">
           {isLocked && (
             <Badge variant="destructive" className="cursor-pointer" onClick={handleUnlock} title="Click to unlock">
-              <AlertTriangle className="h-3 w-3 mr-1" /> LOCKED — click to unlock
+              <AlertTriangle className="h-3 w-3 me-1" /> LOCKED — click to unlock
             </Badge>
           )}
           {duplicates.length > 0 && (
             <Button size="sm" variant="outline" onClick={handleRemoveDuplicates} disabled={saving}>
-              <Eraser className="h-3 w-3 mr-1" /> Remove {duplicates.length} duplicate(s)
+              <Eraser className="h-3 w-3 me-1" /> Remove {duplicates.length} duplicate(s)
             </Button>
           )}
         </div>
@@ -611,7 +611,7 @@ const AdminAttendancePanel = ({
 
         {/* Add button */}
         <Button onClick={handleAddAttendance} disabled={adding || !selectedDate || isLocked} className="w-full" size="sm">
-          <Plus className="h-4 w-4 mr-1" />
+          <Plus className="h-4 w-4 me-1" />
           {adding ? "Adding..." : selectedDate ? `Add attendance for ${format(selectedDate, "MMM d, yyyy")}` : "Select a date to add"}
         </Button>
 
@@ -628,7 +628,7 @@ const AdminAttendancePanel = ({
             {records.map((r, idx) => (
               <div key={`${r.source}-${r.id}-${idx}`} className="flex items-center justify-between p-2 rounded-lg border border-border hover:bg-accent/30 transition-colors">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-5 text-right">{idx + 1}.</span>
+                  <span className="text-xs text-muted-foreground w-5 text-end">{idx + 1}.</span>
                   {editingDate === `${r.source}-${r.id}` ? (
                     <div className="flex items-center gap-1">
                       <Input type="date" value={editNewDate} onChange={(e) => setEditNewDate(e.target.value)} className="h-6 text-xs w-36" />

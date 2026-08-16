@@ -77,7 +77,7 @@ const HomeGamesSection = () => {
                 <div className="h-7 w-7 rounded-lg bg-amber-100 border border-black/10 flex items-center justify-center">
                   <Icon className="h-3.5 w-3.5 text-foreground" />
                 </div>
-                <div className="text-left">
+                <div className="text-start">
                   <p className="font-bold text-foreground text-sm leading-none">{value}</p>
                   <p className="text-[11px] text-muted-foreground">{label}</p>
                 </div>
@@ -96,10 +96,10 @@ const HomeGamesSection = () => {
             <button
               key={game.title}
               onClick={() => navigate("/games")}
-              className={`group relative rounded-2xl bg-gradient-to-br ${game.color} border border-border ${game.border} hover:shadow-lg transition-all duration-200 p-4 text-left cursor-pointer`}
+              className={`group relative rounded-2xl bg-gradient-to-br ${game.color} border border-border ${game.border} hover:shadow-lg transition-all duration-200 p-4 text-start cursor-pointer`}
             >
               {game.hot && (
-                <span className="absolute top-2 right-2 text-[10px] bg-rose-500 text-white font-bold px-1.5 py-0.5 rounded-full">
+                <span className="absolute top-2 end-2 text-[10px] bg-rose-500 text-white font-bold px-1.5 py-0.5 rounded-full">
                   🔥
                 </span>
               )}
@@ -115,7 +115,7 @@ const HomeGamesSection = () => {
           {/* "Play All" card */}
           <button
             onClick={() => navigate("/games")}
-            className="group rounded-2xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all duration-200 p-4 text-left cursor-pointer flex flex-col justify-between shadow-lg shadow-primary/20"
+            className="group rounded-2xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all duration-200 p-4 text-start cursor-pointer flex flex-col justify-between shadow-lg shadow-primary/20"
           >
             <Badge className="bg-primary-foreground/20 text-primary-foreground border-0 text-[10px] w-fit mb-2">
               All Free
@@ -136,7 +136,7 @@ const HomeGamesSection = () => {
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <div className="text-center sm:text-left">
+          <div className="text-center sm:text-start">
             <p className="font-bold text-foreground text-sm">🏆 Earn XP with every game you play</p>
             <p className="text-xs text-muted-foreground">Climb the leaderboard · Unlock badges · Show off your streak</p>
           </div>

@@ -91,12 +91,12 @@ export default function HistoricalBookings({
                   <div className="flex flex-wrap items-baseline gap-3">
                     <span className="font-semibold">
                       {lcl.weekday || first.day_name} · {lcl.dateStr}
-                      <span className="ml-2 text-[10px] font-normal text-muted-foreground">(src: {first.day_name} {first.trial_date})</span>
+                      <span className="ms-2 text-[10px] font-normal text-muted-foreground">(src: {first.day_name} {first.trial_date})</span>
                     </span>
                     <span className="font-mono text-sm">
                       {lcl.timeFormatted}{' '}
                       {first.slot_duration_min ? `(${first.slot_duration_min} min)` : ''}
-                      <span className="ml-1 text-[10px] text-muted-foreground">({first.start_time} {srcTz})</span>
+                      <span className="ms-1 text-[10px] text-muted-foreground">({first.start_time} {srcTz})</span>
                     </span>
                     <SlotLifecycleBadge lifecycle={lifecycle} />
                   </div>

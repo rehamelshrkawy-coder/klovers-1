@@ -134,7 +134,7 @@ const BlogPage = () => {
                 variant={activeType === null ? "default" : "outline"}
                 onClick={() => { setActiveType(null); setVisibleCount(18); }}
               >
-                All <span className="ml-1.5 text-xs opacity-70">({posts.length})</span>
+                All <span className="ms-1.5 text-xs opacity-70">({posts.length})</span>
               </Button>
               {typeOptions.map(type => (
                 <Button
@@ -147,7 +147,7 @@ const BlogPage = () => {
                   <span className={activeType !== type ? TYPE_COLOR[type]?.split(" ").slice(0, 2).join(" ") : ""}>
                     {TYPE_LABEL[type] || type}
                   </span>
-                  <span className="ml-1.5 text-xs opacity-70">({posts.filter(p => p.article_type?.toLowerCase() === type).length})</span>
+                  <span className="ms-1.5 text-xs opacity-70">({posts.filter(p => p.article_type?.toLowerCase() === type).length})</span>
                 </Button>
               ))}
             </div>
@@ -251,7 +251,7 @@ const BlogPage = () => {
                           </div>
 
                           {/* Read more */}
-                          <div className="flex items-center gap-1 text-primary text-outlined text-sm font-semibold mt-3 group-hover:gap-2 transition-all">
+                          <div className="flex items-center gap-1 text-primary-text text-outlined text-sm font-semibold mt-3 group-hover:gap-2 transition-all">
                             {language === "ar" ? "اقرأ المزيد" : "Read article"}
                             <ArrowRight className="h-4 w-4" />
                           </div>
@@ -271,7 +271,7 @@ const BlogPage = () => {
                     onClick={() => setVisibleCount(c => c + 18)}
                   >
                     {language === "ar" ? "تحميل المزيد" : "Load more articles"}
-                    <span className="ml-2 text-xs opacity-60">
+                    <span className="ms-2 text-xs opacity-60">
                       ({filteredPosts.length - visibleCount} {language === "ar" ? "متبقية" : "remaining"})
                     </span>
                   </Button>

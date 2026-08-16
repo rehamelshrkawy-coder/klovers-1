@@ -55,7 +55,7 @@ const ContactPage = () => {
                 onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(WA_DIRECT, { cta_label: "contact_direct" }); }}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-4 bg-[#25D366] hover:bg-[#1ebe5d] text-white rounded-2xl px-6 py-5 shadow-lg transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]"
+                className="flex items-center gap-4 bg-whatsapp hover:bg-whatsapp/90 text-whatsapp-foreground rounded-2xl px-6 py-5 shadow-lg transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]"
               >
                 <div className="flex-shrink-0 w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                   <MessageCircle className="h-6 w-6" />
@@ -73,9 +73,9 @@ const ContactPage = () => {
                 onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(WA_GROUP, { cta_label: "contact_group" }); }}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-4 bg-card border border-border hover:border-[#25D366]/50 rounded-2xl px-6 py-4 transition-all hover:shadow-md"
+                className="flex items-center gap-4 bg-card border border-border hover:border-whatsapp/50 rounded-2xl px-6 py-4 transition-all hover:shadow-md"
               >
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-whatsapp/10 flex items-center justify-center">
                   <Users className="h-5 w-5 text-[#25D366]" />
                 </div>
                 <div className="flex-1">

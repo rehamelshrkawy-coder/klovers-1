@@ -204,7 +204,7 @@ const StoryGapGame = ({ onGameComplete }: { onGameComplete?: (score: number, tot
         );
       }
       if (isCurrentGap) {
-        return <span key={i} className="inline-block border-b-2 border-primary text-primary font-bold px-2 min-w-[3rem] text-center">___</span>;
+        return <span key={i} className="inline-block border-b-2 border-primary text-primary-text font-bold px-2 min-w-[3rem] text-center">___</span>;
       }
       return <span key={i} className="inline-block border-b-2 border-muted-foreground/30 px-2 min-w-[3rem] text-center text-muted-foreground">___</span>;
     });
@@ -278,7 +278,7 @@ const StoryGapGame = ({ onGameComplete }: { onGameComplete?: (score: number, tot
       </div>
 
       {selected && (
-        <Card className={`p-3 border-l-4 text-sm ${selected === gap.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
+        <Card className={`p-3 border-s-4 text-sm ${selected === gap.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
           <p className="font-semibold">{selected === gap.correct ? `✅ Correct! "${gap.correct}"` : `❌ Answer: "${gap.correct}"`}</p>
         </Card>
       )}

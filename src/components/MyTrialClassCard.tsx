@@ -6,6 +6,7 @@ import { CalendarDays, CalendarPlus, Clock, Loader2, Clock3 } from "lucide-react
 import { buildGoogleCalendarUrl, formatTime12h } from "@/lib/calendarUrl";
 import { convertDateTimeToTimezone } from "@/lib/admin-utils";
 import { getUserTimezone } from "@/lib/viewerTimezone";
+import { TRIAL_ANCHOR_TIMEZONE, TRIAL_DURATION_MIN } from "@/lib/siteConfig";
 
 interface TrialBookingRow {
   id: string;
@@ -18,7 +19,10 @@ interface TrialBookingRow {
   rollover_status: "pending_notification" | "notified" | null;
 }
 
-const TRIAL_DURATION_MIN = 45;
+// Duration and the anchor timezone come from siteConfig. This card used to
+// declare its own 45 (against 30 everywhere in marketing, so the calendar
+// invite blocked 45 minutes for a class sold as 30) and fall back to
+// Africa/Cairo, up to seven hours away from the picker's fallback.
 
 function formatDate(d: string) {
   const date = new Date(d + "T12:00:00");
@@ -134,7 +138,7 @@ const MyTrialClassCard = () => {
   }
 
   const isConfirmed = booking.status === "confirmed";
-  const timezone = booking.timezone || "Africa/Cairo";
+  const timezone = booking.timezone || TRIAL_ANCHOR_TIMEZONE;
   const userTz = getUserTimezone();
   const local = convertDateTimeToTimezone(booking.trial_date, booking.start_time, timezone, userTz);
   const days = daysUntil(local.dateStr);
@@ -152,7 +156,7 @@ const MyTrialClassCard = () => {
     <Card className="border-primary/20">
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
-          <CalendarDays className="h-4 w-4 text-primary" />
+          <CalendarDays className="h-4 w-4 text-primary-text" />
           My Trial Class
         </CardTitle>
       </CardHeader>

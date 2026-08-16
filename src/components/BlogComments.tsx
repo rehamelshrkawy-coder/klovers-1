@@ -192,7 +192,7 @@ const BlogComments = ({ postId, isAr }: BlogCommentsProps) => {
         />
         <div className={isAr ? "text-left" : "text-right"}>
           <Button type="submit" disabled={submitting}>
-            <Send className={`h-4 w-4 ${isAr ? "ml-2" : "mr-2"}`} />
+            <Send className={`h-4 w-4 ${isAr ? "ms-2" : "me-2"}`} />
             {submitting ? t.submitting : t.submit}
           </Button>
         </div>

@@ -18,8 +18,8 @@ export function XpBadge({ xp, className }: { xp: number; className?: string }) {
 export function XpEarnedToast({ xp }: { xp: number }) {
   return (
     <div className="flex items-center gap-2">
-      <Zap className="h-5 w-5 text-primary" />
-      <span className="font-bold text-primary text-outlined">+{xp} XP</span>
+      <Zap className="h-5 w-5 text-primary-text" />
+      <span className="font-bold text-primary-text text-outlined">+{xp} XP</span>
     </div>
   );
 }
@@ -49,7 +49,7 @@ export function LeagueProgressBar({ totalXp }: { totalXp: number }) {
           </div>
         </div>
         {nextLeague && (
-          <p className="text-xs text-muted-foreground text-right">
+          <p className="text-xs text-muted-foreground text-end">
             {(nextLeague.minXp - totalXp).toLocaleString()} XP to<br />
             <span className="font-medium">{nextLeague.emoji} {nextLeague.name}</span>
           </p>
@@ -90,7 +90,7 @@ export function LeagueCard({ leagueKey, totalXp }: { leagueKey: string; totalXp:
               </span>
             )}
             {unlocked && !isCurrent && (
-              <span className="mt-2 inline-block text-xs text-primary">✓ Unlocked</span>
+              <span className="mt-2 inline-block text-xs text-primary-text">✓ Unlocked</span>
             )}
           </div>
         );
@@ -127,7 +127,7 @@ export function StreakDisplay({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Trophy className="h-5 w-5 text-primary" />
+        <Trophy className="h-5 w-5 text-primary-text" />
         <div>
           <p className="text-lg font-bold text-foreground">{longestStreak}</p>
           <p className="text-xs text-muted-foreground">Best Streak</p>
@@ -204,7 +204,7 @@ export function LessonProgressDots({ progress }: {
           {s.label}
         </span>
       ))}
-      {progress.chapter_completed && <span className="text-xs ml-1">⭐</span>}
+      {progress.chapter_completed && <span className="text-xs ms-1">⭐</span>}
     </div>
   );
 }

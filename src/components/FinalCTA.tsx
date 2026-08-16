@@ -3,13 +3,22 @@ import { ArrowRight, Sparkles, Users, Star, Zap, MessageCircle } from "lucide-re
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { WHATSAPP_BASE } from "@/lib/siteConfig";
+import {
+  AVERAGE_RATING,
+  COMMUNITY_MEMBERS,
+  STUDENTS_TAUGHT,
+  TRIAL_DURATION_MIN,
+  TRIAL_GROUP_SIZE_MAX,
+  WHATSAPP_BASE,
+} from "@/lib/siteConfig";
 import { trackAndOpenWhatsApp, logLeadEvent } from "@/lib/leadTracking";
 
+// Values come from siteConfig so the homepage hero, this block and the About
+// page cannot drift apart — they previously disagreed by 4x across locales.
 const SOCIAL_PROOF = [
-  { icon: Users, value: "500+", label: "Active Students" },
-  { icon: Star,  value: "4.9★",   label: "Average Rating" },
-  { icon: Zap,   value: "98%",    label: "Would Recommend" },
+  { icon: Users, value: `${STUDENTS_TAUGHT}+`, label: "Students Taught" },
+  { icon: Star,  value: `${AVERAGE_RATING}★`,  label: "Average Rating" },
+  { icon: Zap,   value: "98%",                 label: "Would Recommend" },
 ];
 
 // Floating Korean characters for visual texture
@@ -31,11 +40,15 @@ const FinalCTA = () => {
     return () => obs.disconnect();
   }, []);
 
-  // Animate student count 0 → 1000
+  // Animate the student count up to the single sitewide figure.
   useEffect(() => {
     if (!visible) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setCount(STUDENTS_TAUGHT);
+      return;
+    }
     let start = 0;
-    const target = 500;
+    const target = STUDENTS_TAUGHT;
     const step = Math.ceil(target / 60);
     const id = setInterval(() => {
       start = Math.min(start + step, target);
@@ -151,7 +164,7 @@ const FinalCTA = () => {
           <Button
             size="lg"
             asChild
-            className="gap-2 h-12 px-8 text-base bg-[#25D366] hover:bg-[#1ebe5d] text-white border-0 min-w-[200px] font-semibold"
+            className="gap-2 h-12 px-8 text-base bg-whatsapp hover:bg-whatsapp/90 text-whatsapp-foreground border-0 min-w-[200px] font-semibold"
           >
             <a
               href={WHATSAPP_BASE}
@@ -166,14 +179,18 @@ const FinalCTA = () => {
         </div>
 
         <p className="text-primary-foreground/50 text-xs mb-6">
-          {isAr ? "لا بطاقة ائتمان · ٣٠ دقيقة · معلمة حقيقية · نرد خلال دقائق" : "No credit card · 30 minutes · Real teacher · We reply in minutes"}
+          {isAr
+            ? `لا بطاقة ائتمان · ${TRIAL_DURATION_MIN} دقيقة · حصة جماعية حتى ${TRIAL_GROUP_SIZE_MAX} طلاب · معلمة حقيقية`
+            : `No credit card · ${TRIAL_DURATION_MIN} minutes · Group class, up to ${TRIAL_GROUP_SIZE_MAX} students · Real teacher`}
         </p>
 
         {/* Community proof */}
         <p className="text-primary-foreground/50 text-xs mb-4">
           {isAr
-            ? "🌍 انضم لأكثر من ٢٠٠٠ متعلم في مجتمعنا على تيليجرام وفيسبوك"
-            : "🌍 Join 2,000+ Korean learners in our Telegram & Facebook community"}
+            // Community members, not students. These are different quantities
+            // and are now labelled as such in both locales.
+            ? `🌍 انضم لأكثر من ${COMMUNITY_MEMBERS.toLocaleString("ar-EG")} عضو في مجتمعنا على تيليجرام وفيسبوك`
+            : `🌍 Join ${COMMUNITY_MEMBERS.toLocaleString("en-US")}+ members in our Telegram & Facebook community`}
         </p>
 
         {/* Guarantee badge */}

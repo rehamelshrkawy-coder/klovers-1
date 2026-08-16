@@ -101,7 +101,7 @@ const UpcomingSessionsCard = () => {
     <Card className="border-primary/20">
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
-          <CalendarDays className="h-4 w-4 text-primary" />
+          <CalendarDays className="h-4 w-4 text-primary-text" />
           Upcoming Classes
         </CardTitle>
       </CardHeader>
@@ -110,7 +110,7 @@ const UpcomingSessionsCard = () => {
         <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">Next Class</p>
+              <p className="text-xs font-semibold text-primary-text uppercase tracking-wider mb-1">Next Class</p>
               <p className="font-bold text-foreground text-lg">{formatDate(nextLocal.dateStr)}</p>
               <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                 <Clock className="h-3.5 w-3.5" />

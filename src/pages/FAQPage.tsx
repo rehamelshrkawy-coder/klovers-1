@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { HelpCircle, MessageCircle, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { trackAndOpenWhatsApp } from "@/lib/leadTracking";
+import { WHATSAPP_BASE } from "@/lib/siteConfig";
 
 // Inject JSON-LD into document head
 const FAQSchemaScript = ({ schema }: { schema: object }) => {
@@ -94,17 +95,17 @@ const FAQPage = () => {
 
             {/* Search */}
             <div className="relative max-w-md mx-auto mb-6">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
                 placeholder="Search questions..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="pl-9 pr-9"
+                className="ps-9 pe-9"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -139,7 +140,7 @@ const FAQPage = () => {
                 <div className="text-center py-12 text-muted-foreground">
                   <Search className="h-8 w-8 mx-auto mb-3 opacity-40" />
                   <p className="font-medium">No results for "{searchQuery}"</p>
-                  <button onClick={() => { setSearchQuery(""); setActiveCategory(null); }} className="mt-2 text-sm text-primary hover:underline">
+                  <button onClick={() => { setSearchQuery(""); setActiveCategory(null); }} className="mt-2 text-sm text-primary-text hover:underline">
                     Clear search
                   </button>
                 </div>
@@ -147,7 +148,7 @@ const FAQPage = () => {
                 <Accordion type="single" collapsible className="w-full">
                   {filteredFaqs.map((faq, index) => (
                     <AccordionItem key={index} value={`item-${index}`}>
-                      <AccordionTrigger className="text-left text-foreground hover:text-foreground/80">
+                      <AccordionTrigger className="text-start text-foreground hover:text-foreground/80">
                         {faq.question}
                       </AccordionTrigger>
                       <AccordionContent className="text-muted-foreground">
@@ -161,7 +162,7 @@ const FAQPage = () => {
 
             {/* CTA Section */}
             <div className="max-w-2xl mx-auto mt-16 text-center p-8 rounded-2xl bg-card border">
-              <HelpCircle className="h-10 w-10 text-primary mx-auto mb-4" />
+              <HelpCircle className="h-10 w-10 text-primary-text mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-foreground mb-2">
                 {t("faqPage", "ctaTitle")}
               </h2>
@@ -170,14 +171,14 @@ const FAQPage = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button variant="outline" asChild>
-                  <a href="https://wa.me/201010003084?text=Hi!%20I%20have%20a%20question%20about%20Klovers." onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp("https://wa.me/201010003084?text=Hi!%20I%20have%20a%20question%20about%20Klovers.", { cta_label: "faq_contact" }); }} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" />
+                  <a href={`${WHATSAPP_BASE}?text=Hi!%20I%20have%20a%20question%20about%20Klovers.`} onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(`${WHATSAPP_BASE}?text=Hi!%20I%20have%20a%20question%20about%20Klovers.`, { cta_label: "faq_contact" }); }} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="me-2 h-4 w-4" />
                     WhatsApp
                   </a>
                 </Button>
                 <Button variant="outline" asChild>
                   <a href="https://t.me/+Fu5T7d4wLMsxNDY9" target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" />
+                    <MessageCircle className="me-2 h-4 w-4" />
                     Telegram
                   </a>
                 </Button>

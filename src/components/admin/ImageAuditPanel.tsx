@@ -117,7 +117,7 @@ function PostRow({ item }: { item: PostAuditResult }) {
   return (
     <div className="border rounded-xl overflow-hidden">
       <button
-        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/40 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 text-start hover:bg-muted/40 transition-colors"
         onClick={() => setOpen((v) => !v)}
       >
         {open ? <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />}
@@ -205,7 +205,7 @@ function DebugInfo({ group }: { group: ParityGroup }) {
       </button>
       {open && (
         <div className="mt-1.5 p-2 rounded bg-muted/30 text-xs font-mono space-y-1">
-          <div>Slug base: <span className="text-primary">{group.slug_base}</span></div>
+          <div>Slug base: <span className="text-primary-text">{group.slug_base}</span></div>
           <div>Match method: {group.match_method}</div>
           <div>EN slug searched: {group.debug.en_slug_searched ?? "—"}</div>
           <div>AR slug searched: {group.debug.ar_slug_searched ?? "—"}</div>
@@ -235,13 +235,13 @@ function ParitySection({ groups }: { groups: ParityGroup[] }) {
   return (
     <Card className="rounded-xl">
       <button
-        className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-muted/40 transition-colors"
+        className="w-full flex items-center gap-2 px-4 py-3 text-start hover:bg-muted/40 transition-colors"
         onClick={() => setOpen((v) => !v)}
       >
         {open ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-        <Globe className="h-4 w-4 text-primary" />
+        <Globe className="h-4 w-4 text-primary-text" />
         <span className="font-medium text-sm">Arabic ↔ English Bilingual Parity ({groups.length})</span>
-        <span className="ml-auto text-xs text-muted-foreground">
+        <span className="ms-auto text-xs text-muted-foreground">
           {completeCount} complete · {groups.length - completeCount} incomplete
         </span>
       </button>
@@ -261,8 +261,8 @@ function ParitySection({ groups }: { groups: ParityGroup[] }) {
                   </span>
                 )}
                 {group.is_complete
-                  ? <CheckCircle className="h-4 w-4 text-green-500 ml-auto shrink-0" />
-                  : <XCircle className="h-4 w-4 text-red-500 ml-auto shrink-0" />
+                  ? <CheckCircle className="h-4 w-4 text-green-500 ms-auto shrink-0" />
+                  : <XCircle className="h-4 w-4 text-red-500 ms-auto shrink-0" />
                 }
               </div>
 
@@ -271,10 +271,10 @@ function ParitySection({ groups }: { groups: ParityGroup[] }) {
                 {group.posts.map((p) => (
                   <div key={p.id} className="flex items-center gap-2 text-xs">
                     <LangBadge lang={p.lang} />
-                    <span className="font-mono text-primary truncate max-w-[200px]" title={`/blog/${p.slug}`}>
+                    <span className="font-mono text-primary-text truncate max-w-[200px]" title={`/blog/${p.slug}`}>
                       /{p.slug}
                     </span>
-                    <span className="ml-auto flex items-center gap-2 shrink-0">
+                    <span className="ms-auto flex items-center gap-2 shrink-0">
                       {p.has_alt
                         ? <CheckCircle className="h-3.5 w-3.5 text-green-500" aria-label="Has alt text" />
                         : <XCircle className="h-3.5 w-3.5 text-red-500" aria-label="Missing alt text" />
@@ -372,7 +372,7 @@ function ImageAuditPanel() {
       <Card className="rounded-2xl">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Image className="h-5 w-5 text-primary" />
+            <Image className="h-5 w-5 text-primary-text" />
             Image & Alt Text Audit
           </CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -383,15 +383,15 @@ function ImageAuditPanel() {
         <CardContent className="flex flex-wrap gap-3">
           <Button onClick={() => runAudit("analyze")} disabled={loading || fixing}>
             {loading
-              ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Auditing…</>
-              : <><Play className="h-4 w-4 mr-2" /> Run Audit</>
+              ? <><Loader2 className="h-4 w-4 animate-spin me-2" /> Auditing…</>
+              : <><Play className="h-4 w-4 me-2" /> Run Audit</>
             }
           </Button>
           {result && result.summary.ai_fixes_available > 0 && (
             <Button variant="outline" onClick={() => runAudit("fix")} disabled={loading || fixing}>
               {fixing
-                ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Applying…</>
-                : <><Wrench className="h-4 w-4 mr-2" /> Apply Alt Text Fixes ({result.summary.ai_fixes_available})</>
+                ? <><Loader2 className="h-4 w-4 animate-spin me-2" /> Applying…</>
+                : <><Wrench className="h-4 w-4 me-2" /> Apply Alt Text Fixes ({result.summary.ai_fixes_available})</>
               }
             </Button>
           )}
@@ -462,18 +462,18 @@ function ImageAuditPanel() {
         <div className="flex gap-1 border-b">
           <button
             onClick={() => setActiveTab("posts")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "posts" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "posts" ? "border-primary text-primary-text" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             Post Issues ({result.report.length})
           </button>
           <button
             onClick={() => setActiveTab("parity")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === "parity" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === "parity" ? "border-primary text-primary-text" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             <Globe className="h-3.5 w-3.5" />
             Bilingual Parity
             {incompleteGroupCount > 0 && (
-              <span className="ml-1 rounded-full bg-destructive text-destructive-foreground text-xs px-1.5 py-0.5 leading-none">
+              <span className="ms-1 rounded-full bg-destructive text-destructive-foreground text-xs px-1.5 py-0.5 leading-none">
                 {incompleteGroupCount}
               </span>
             )}

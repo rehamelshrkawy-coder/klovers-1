@@ -57,7 +57,7 @@ const CoursesPage = () => {
                 return (
                   <Card key={index} className="text-center border-border">
                     <CardContent className="p-6">
-                      <Icon className="h-8 w-8 text-primary mx-auto mb-3" />
+                      <Icon className="h-8 w-8 text-primary-text mx-auto mb-3" />
                       <h3 className="font-semibold text-foreground mb-1">{item.title}</h3>
                       <p className="text-sm text-muted-foreground">{item.description}</p>
                     </CardContent>

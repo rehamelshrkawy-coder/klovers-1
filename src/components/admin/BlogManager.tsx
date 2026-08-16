@@ -417,8 +417,8 @@ const BlogManager = () => {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between">
         <div className="relative flex-1 w-full sm:max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search posts..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search posts..." value={search} onChange={(e) => setSearch(e.target.value)} className="ps-9" />
         </div>
         <div className="flex gap-2">
           <Button variant="outline" className="gap-2" disabled={!!translating} onClick={async () => {
@@ -450,7 +450,7 @@ const BlogManager = () => {
                 <TableHead>SEO Score</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-end">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -479,7 +479,7 @@ const BlogManager = () => {
                   <TableCell className="text-sm text-muted-foreground">
                     {new Date(post.published_at || post.created_at).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-right space-x-1">
+                  <TableCell className="text-end space-x-1 rtl:space-x-reverse">
                     {post.lang === "en" && (
                       <Button variant="ghost" size="icon" onClick={() => handleTranslate(post)} disabled={translating === post.id} title="Translate to Arabic">
                         <Languages className={`h-4 w-4 ${translating === post.id ? "animate-spin" : ""}`} />

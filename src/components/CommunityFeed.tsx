@@ -96,7 +96,7 @@ export default function CommunityFeed() {
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
-          <Users className="w-4 h-4 text-primary" aria-hidden="true" />
+          <Users className="w-4 h-4 text-primary-text" aria-hidden="true" />
           Community Achievements
         </CardTitle>
       </CardHeader>
@@ -113,7 +113,7 @@ export default function CommunityFeed() {
                 <span className="text-2xl" aria-hidden="true">{badge.emoji}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
-                    <span className="text-primary">{item.displayName}</span>
+                    <span className="text-primary-text">{item.displayName}</span>
                     {" earned "}
                     <span className="font-semibold">{badge.name}</span>
                   </p>

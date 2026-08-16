@@ -141,7 +141,7 @@ export default function KoreanOrchestrator() {
   };
 
   const sectionStatusIcon = (status: SectionStatus) => {
-    if (status === "running") return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
+    if (status === "running") return <Loader2 className="h-4 w-4 animate-spin text-primary-text" />;
     if (status === "done") return <CheckCircle2 className="h-4 w-4 text-green-500" />;
     if (status === "error") return <AlertCircle className="h-4 w-4 text-destructive" />;
     return <span className="h-4 w-4 rounded-full bg-muted inline-block" />;
@@ -163,7 +163,7 @@ export default function KoreanOrchestrator() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {Object.entries(CURRICULUM_STATS.byBook).map(([book, count]) => (
           <Card key={book} className="text-center p-4">
-            <p className="text-2xl font-bold text-primary">{count}</p>
+            <p className="text-2xl font-bold text-primary-text">{count}</p>
             <p className="text-xs text-muted-foreground">{book}</p>
           </Card>
         ))}
@@ -209,7 +209,7 @@ export default function KoreanOrchestrator() {
                   onClick={() => handleSeed(true)}
                   disabled={seedStatus === "running"}
                 >
-                  {seedStatus === "running" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                  {seedStatus === "running" ? <Loader2 className="h-4 w-4 me-2 animate-spin" /> : null}
                   Dry Run (Preview)
                 </Button>
                 <Button
@@ -338,7 +338,7 @@ export default function KoreanOrchestrator() {
                         {sectionStatusIcon(status)}
                       </div>
                       <p className="font-bold text-sm text-foreground">{section.name}</p>
-                      <p className="text-xs text-primary font-medium mb-1">{section.nameKo}</p>
+                      <p className="text-xs text-primary-text font-medium mb-1">{section.nameKo}</p>
                       <p className="text-xs text-muted-foreground leading-relaxed">{section.desc}</p>
                     </CardContent>
                   </Card>

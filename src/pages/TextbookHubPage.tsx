@@ -131,7 +131,7 @@ const TextbookHubPage = () => {
                   )}
                 >
                   {hasBadge && (
-                    <span className="absolute top-3 right-3 text-xs font-bold px-2 py-0.5 rounded-full bg-violet-500 text-white">
+                    <span className="absolute top-3 end-3 text-xs font-bold px-2 py-0.5 rounded-full bg-violet-500 text-white">
                       {(book as { badge?: string }).badge}
                     </span>
                   )}

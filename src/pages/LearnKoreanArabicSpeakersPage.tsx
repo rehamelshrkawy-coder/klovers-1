@@ -105,7 +105,7 @@ const LearnKoreanArabicSpeakersPage = () => {
               {t("learnArabicSpeakers.heroTitle")}
             </h1>
             <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
-              {t("learnArabicSpeakers.heroSubtitlePre")} <span className="font-semibold text-primary">{t("learnArabicSpeakers.heroSubtitleBold")}</span> {t("learnArabicSpeakers.heroSubtitlePost")}
+              {t("learnArabicSpeakers.heroSubtitlePre")} <span className="font-semibold text-primary-text">{t("learnArabicSpeakers.heroSubtitleBold")}</span> {t("learnArabicSpeakers.heroSubtitlePost")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild>
@@ -130,7 +130,7 @@ const LearnKoreanArabicSpeakersPage = () => {
                   desc: t("learnArabicSpeakers.advGrammarDesc")
                 },
                 {
-                  icon: <Award className="h-8 w-8 text-primary" />,
+                  icon: <Award className="h-8 w-8 text-primary-text" />,
                   title: t("learnArabicSpeakers.advFormalTitle"),
                   desc: t("learnArabicSpeakers.advFormalDesc")
                 },
@@ -224,7 +224,7 @@ const LearnKoreanArabicSpeakersPage = () => {
                   </div>
                   <div className="flex-grow pt-1">
                     <p className="font-bold text-lg">{item.month}</p>
-                    <p className="text-sm font-semibold text-primary mb-2">{item.level}</p>
+                    <p className="text-sm font-semibold text-primary-text mb-2">{item.level}</p>
                     <p className="text-foreground/70">{item.skills}</p>
                   </div>
                 </div>
@@ -301,7 +301,7 @@ const LearnKoreanArabicSpeakersPage = () => {
               </Button>
             </div>
             <p className="text-sm text-white/80 mt-6">
-              <Clock className="h-4 w-4 inline mr-2" />
+              <Clock className="h-4 w-4 inline me-2" />
               {t("learnArabicSpeakers.ctaFooter")}
             </p>
           </div>

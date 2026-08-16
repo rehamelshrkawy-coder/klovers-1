@@ -58,6 +58,7 @@ import { getLevelByKey } from "@/constants/levels";
 import WelcomeModal from "@/components/WelcomeModal";
 import { isOnboardingDone } from "@/lib/onboarding";
 import { useCountUp } from "@/hooks/useCountUp";
+import { WHATSAPP_BASE } from "@/lib/siteConfig";
 
 interface EnrollmentRecord {
   id: string;
@@ -113,7 +114,7 @@ const AttendanceHistoryCard = ({ dates }: { dates: AttendanceDate[] }) => {
               {dates.map((d, i) => (
                 <div key={`${d.date}-${i}`} className="flex items-center justify-between p-2 rounded-lg border border-border">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground w-5 text-right">{i + 1}.</span>
+                    <span className="text-xs text-muted-foreground w-5 text-end">{i + 1}.</span>
                     <CalendarCheck className="h-4 w-4 text-amber-600" />
                     <span className="text-sm font-medium text-foreground">
                       {new Date(d.date + "T00:00:00").toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })}
@@ -567,7 +568,7 @@ const StudentDashboard = () => {
           {/* ── Hero greeting ── */}
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/15 px-5 py-5">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl shrink-0 select-none ring-2 ring-primary/30">
+              <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-xl shrink-0 select-none ring-2 ring-primary/30">
                 {displayName?.[0]?.toUpperCase() ?? "K"}
               </div>
               <div className="flex-1 min-w-0">
@@ -674,7 +675,7 @@ const StudentDashboard = () => {
                       <span className="font-semibold text-foreground">Weekly XP</span>
                       <div className="flex items-center gap-1.5">
                         <span className="text-muted-foreground text-xs">{weeklyXp}/{WEEKLY_GOAL}</span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${pct >= 100 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-primary/10 text-primary"}`}>{pct}%</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${pct >= 100 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-primary/10 text-primary-text"}`}>{pct}%</span>
                       </div>
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -685,14 +686,14 @@ const StudentDashboard = () => {
                 );
               })()}
               <a
-                href={`https://wa.me/201010003084?text=${encodeURIComponent("Hi! I'd like to book my next Korean class.")}`}
-                onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(`https://wa.me/201010003084?text=${encodeURIComponent("Hi! I'd like to book my next Korean class.")}`, { cta_label: "dashboard_book" }); }}
+                href={`${WHATSAPP_BASE}?text=${encodeURIComponent("Hi! I'd like to book my next Korean class.")}`}
+                onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp(`${WHATSAPP_BASE}?text=${encodeURIComponent("Hi! I'd like to book my next Korean class.")}`, { cta_label: "dashboard_book" }); }}
                 target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 text-[#1a9e4f] dark:text-[#4ade80] rounded-xl px-3.5 py-2.5 transition-all text-sm font-medium"
+                className="flex items-center gap-2.5 bg-whatsapp/10 hover:bg-whatsapp/20 border border-whatsapp/30 text-[#1a9e4f] dark:text-[#4ade80] rounded-xl px-3.5 py-2.5 transition-all text-sm font-medium"
               >
                 <span className="text-base">📅</span>
                 <span>Book a Class</span>
-                <span className="text-xs opacity-60 ml-auto">WhatsApp →</span>
+                <span className="text-xs opacity-60 ms-auto">WhatsApp →</span>
               </a>
             </div>
           </div>
@@ -753,7 +754,7 @@ const StudentDashboard = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {quickActions.map(({ label, desc, emoji, path, bg }) => (
                 <button key={label} onClick={() => navigate(path)} aria-label={`${label}: ${desc}`}
-                  className={`group rounded-xl p-3 text-left shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 ${bg}`}>
+                  className={`group rounded-xl p-3 text-start shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 ${bg}`}>
                   <div className="text-xl mb-1">{emoji}</div>
                   <p className="font-semibold text-white text-sm">{label}</p>
                   <p className="text-white/75 text-[11px]">{desc}</p>
@@ -829,7 +830,7 @@ const StudentDashboard = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="flex -space-x-1">
+                    <div className="flex -space-x-1 rtl:space-x-reverse">
                       {["🇪🇬","🇸🇦","🇦🇪","🇯🇴"].map((flag, i) => (
                         <span key={i} className="w-7 h-7 rounded-full bg-muted border-2 border-background flex items-center justify-center text-sm">{flag}</span>
                       ))}
@@ -872,14 +873,14 @@ const StudentDashboard = () => {
                         )}
                       </div>
                       <Button variant="outline" size="sm" onClick={() => navigate("/placement-test")}>
-                        <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Retake
+                        <RotateCcw className="h-3.5 w-3.5 me-1.5" /> Retake
                       </Button>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">Find your Korean level</p>
                       <Button size="sm" onClick={() => navigate("/placement-test")}>
-                        <GraduationCap className="h-3.5 w-3.5 mr-1.5" /> Take Test
+                        <GraduationCap className="h-3.5 w-3.5 me-1.5" /> Take Test
                       </Button>
                     </div>
                   )}
@@ -969,14 +970,14 @@ const StudentDashboard = () => {
                           )}
                         </div>
                         <Button variant="outline" size="sm" onClick={() => navigate("/placement-test")}>
-                          <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Retake
+                          <RotateCcw className="h-3.5 w-3.5 me-1.5" /> Retake
                         </Button>
                       </div>
                     ) : (
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">Take the placement test to find your level</p>
                         <Button size="sm" onClick={() => navigate("/placement-test")}>
-                          <GraduationCap className="h-3.5 w-3.5 mr-1.5" /> Take Test
+                          <GraduationCap className="h-3.5 w-3.5 me-1.5" /> Take Test
                         </Button>
                       </div>
                     )}
@@ -1086,7 +1087,7 @@ const StudentDashboard = () => {
                         <CardTitle className="text-base flex items-center gap-2">
                           <Package className="h-4 w-4" />
                           <span className="capitalize">{enrollment.plan_type}</span> — {enrollment.duration}mo
-                          <Badge variant="outline" className="ml-1 text-xs">Older</Badge>
+                          <Badge variant="outline" className="ms-1 text-xs">Older</Badge>
                         </CardTitle>
                         <Badge variant={remaining >= 0 ? "secondary" : "destructive"}>
                           {remaining >= 0 ? `${remaining} left` : `${extra} extra`}

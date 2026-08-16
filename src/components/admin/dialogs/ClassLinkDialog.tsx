@@ -104,7 +104,7 @@ export function ClassLinkDialog({
             disabled={!classLinkUrl.trim() || isSending}
             onClick={onSend}
           >
-            {isSending ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending…</> : <><Link className="h-4 w-4 mr-2" /> Send Link</>}
+            {isSending ? <><Loader2 className="h-4 w-4 me-2 animate-spin" /> Sending…</> : <><Link className="h-4 w-4 me-2" /> Send Link</>}
           </Button>
         </DialogFooter>
       </DialogContent>

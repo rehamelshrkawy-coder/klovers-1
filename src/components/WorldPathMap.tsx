@@ -56,9 +56,9 @@ function WorldHeader({ world, progress, isAr }: { world: World; progress: { comp
               {isAr ? world.descriptionAr : world.description}
             </p>
           </div>
-          <div className="text-right">
+          <div className="text-end">
             <p className="text-sm font-bold text-foreground">{progress.completed}/{progress.total}</p>
-            {isComplete && <CheckCircle2 className="h-5 w-5 text-primary ml-auto" />}
+            {isComplete && <CheckCircle2 className="h-5 w-5 text-primary-text ms-auto" />}
           </div>
         </div>
         <Progress value={progress.percent} className="h-2" />
@@ -121,10 +121,10 @@ function LessonNode({
           }}
         >
           {boss && !completed && (
-            <Crown className="absolute -top-2 -right-2 h-5 w-5 text-destructive" />
+            <Crown className="absolute -top-2 -end-2 h-5 w-5 text-destructive" />
           )}
           {completed && (
-            <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-0.5">
+            <div className="absolute -bottom-1 -end-1 bg-primary rounded-full p-0.5">
               <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
             </div>
           )}
@@ -135,7 +135,7 @@ function LessonNode({
         <div className="mt-2 text-center max-w-[140px]">
           <p className={cn(
             "text-[10px] font-bold uppercase tracking-wider",
-            boss ? "text-destructive" : checkpoint ? "text-primary" : "text-muted-foreground"
+            boss ? "text-destructive" : checkpoint ? "text-primary-text" : "text-muted-foreground"
           )}>
             {boss ? "🐉 Boss" : checkpoint ? "🏁 CP" : `M${lesson.sort_order}`}
           </p>
@@ -195,7 +195,7 @@ export default function WorldPathMap({ lessons, lessonProgress, userId, bookSlug
           <div className="rounded-full bg-primary border border-black/25 p-2.5 group-hover:bg-[#E6E600] transition-colors">
             <Gamepad2 className="h-6 w-6 text-primary-foreground" />
           </div>
-          <div className="text-left">
+          <div className="text-start">
             <p className="font-bold text-foreground text-lg">
               {isAr ? "العب ألعاباً لكسب المزيد من XP!" : "Play Games for More XP!"}
             </p>

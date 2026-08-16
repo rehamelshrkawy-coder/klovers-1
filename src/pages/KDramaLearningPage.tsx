@@ -192,7 +192,7 @@ const KDramaLearningPage = () => {
                       <p className="text-sm text-pink-600 font-semibold mt-1">{item.time}</p>
                     </div>
                   </div>
-                  <p className="text-foreground/70 ml-14">{item.desc}</p>
+                  <p className="text-foreground/70 ms-14">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -381,7 +381,7 @@ const KDramaLearningPage = () => {
               </Button>
             </div>
             <p className="text-sm text-pink-100 mt-6">
-              <Tv className="h-4 w-4 inline mr-2" />
+              <Tv className="h-4 w-4 inline me-2" />
               {t("kdrama.finalCtaFooter")}
             </p>
           </div>

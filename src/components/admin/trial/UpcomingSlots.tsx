@@ -119,15 +119,15 @@ export default function UpcomingSlots({
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-muted-foreground">
               <tr>
-                <th className="px-3 py-2 text-left font-medium">Date</th>
-                <th className="px-3 py-2 text-left font-medium">Day</th>
-                <th className="px-3 py-2 text-left font-medium">Start</th>
-                <th className="px-3 py-2 text-left font-medium">Duration</th>
-                <th className="px-3 py-2 text-right font-medium">Capacity</th>
-                <th className="px-3 py-2 text-right font-medium">Booked</th>
-                <th className="px-3 py-2 text-right font-medium">Seats left</th>
-                <th className="px-3 py-2 text-left font-medium">Status</th>
-                <th className="px-3 py-2 text-left font-medium">Class Link</th>
+                <th className="px-3 py-2 text-start font-medium">Date</th>
+                <th className="px-3 py-2 text-start font-medium">Day</th>
+                <th className="px-3 py-2 text-start font-medium">Start</th>
+                <th className="px-3 py-2 text-start font-medium">Duration</th>
+                <th className="px-3 py-2 text-end font-medium">Capacity</th>
+                <th className="px-3 py-2 text-end font-medium">Booked</th>
+                <th className="px-3 py-2 text-end font-medium">Seats left</th>
+                <th className="px-3 py-2 text-start font-medium">Status</th>
+                <th className="px-3 py-2 text-start font-medium">Class Link</th>
               </tr>
             </thead>
             <tbody>
@@ -149,9 +149,9 @@ export default function UpcomingSlots({
                     <div className="text-[10px] text-muted-foreground">{s.start_time} {s.timezone}</div>
                   </td>
                   <td className="px-3 py-2">{s.duration_min} min</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{s.capacity}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{s.booked_count}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{s.seats_left}</td>
+                  <td className="px-3 py-2 text-end tabular-nums">{s.capacity}</td>
+                  <td className="px-3 py-2 text-end tabular-nums">{s.booked_count}</td>
+                  <td className="px-3 py-2 text-end tabular-nums">{s.seats_left}</td>
                   <td className="px-3 py-2">
                     <StatusBadge slot={s} />
                   </td>

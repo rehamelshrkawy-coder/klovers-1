@@ -16,7 +16,7 @@ interface SessionRow {
 }
 
 const statusConfig: Record<string, { icon: React.ElementType; label: string; color: string }> = {
-  present: { icon: CheckCircle2, label: "Present", color: "text-primary" },
+  present: { icon: CheckCircle2, label: "Present", color: "text-primary-text" },
   absent: { icon: XCircle, label: "Absent", color: "text-destructive" },
   late: { icon: Clock, label: "Late", color: "text-secondary-foreground" },
   excused: { icon: AlertCircle, label: "Excused", color: "text-muted-foreground" },

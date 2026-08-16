@@ -69,7 +69,7 @@ const ForgotPasswordPage = () => {
                   {loading ? t("auth.sending") : t("auth.sendResetLink")}
                 </Button>
                 <p className="text-sm text-center text-muted-foreground">
-                  <Link to="/login" className="text-primary underline">{t("auth.backToLogin")}</Link>
+                  <Link to="/login" className="text-primary-text underline">{t("auth.backToLogin")}</Link>
                 </p>
               </form>
             )}

@@ -1,5 +1,7 @@
-import { Star, Facebook, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { Star, Facebook, CheckCircle2, Pause, Play } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { AVERAGE_RATING } from "@/lib/siteConfig";
 
 const reviews = [
   {
@@ -170,33 +172,53 @@ const ReviewCard = ({ review }: { review: (typeof reviews)[0] }) => {
 const ScrollRow = ({
   items,
   direction,
+  paused,
 }: {
   items: (typeof reviews)[0][];
   direction: "left" | "right";
+  paused: boolean;
 }) => {
-  const doubled = [...items, ...items]; // duplicate for seamless loop
-
+  // The duplicate half is the seam of the infinite loop. It carries the same
+  // text as the first half, so it is hidden from assistive tech and taken out
+  // of the tab order — otherwise every review is announced twice and keyboard
+  // users have to tab through twelve unreachable, permanently-moving cards.
   return (
-    <div className="overflow-hidden relative">
+    // Hovering or focusing anywhere in the row also pauses it: a moving target
+    // is hard to read and hard to click.
+    <div className="overflow-hidden relative group/marquee">
       {/* fade edges */}
       <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent z-10" />
       <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
 
       <div
-        className={`flex gap-4 w-max ${
+        className={`flex gap-4 w-max group-hover/marquee:[animation-play-state:paused] group-focus-within/marquee:[animation-play-state:paused] ${
           direction === "left" ? "animate-scroll-left" : "animate-scroll-right"
-        }`}
+        } ${paused ? "marquee-paused" : ""}`}
       >
-        {doubled.map((r, i) => (
-          <ReviewCard key={i} review={r} />
+        {items.map((r, i) => (
+          <ReviewCard key={`a-${i}`} review={r} />
         ))}
+        {/* `contents` keeps the layout byte-identical to a flat list while
+            letting the duplicate half be hidden from assistive tech. */}
+        <div className="contents" aria-hidden="true">
+          {items.map((r, i) => (
+            <ReviewCard key={`b-${i}`} review={r} />
+          ))}
+        </div>
       </div>
     </div>
   );
 };
 
 const TestimonialsSection = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isAr = language === "ar";
+  // Two counter-scrolling infinite rows with no way to stop them is a WCAG
+  // 2.2.2 Level A failure. Starts paused when the OS asks for reduced motion.
+  const [paused, setPaused] = useState(
+    () => typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true,
+  );
   return (
     <section className="py-20 md:py-28 bg-background overflow-hidden">
       <div className="container mx-auto px-4 mb-10 text-center">
@@ -227,15 +249,31 @@ const TestimonialsSection = () => {
               <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
             ))}
           </div>
-          <span className="text-lg font-bold text-foreground">4.9</span>
+          <span className="text-lg font-bold text-foreground">{AVERAGE_RATING.toFixed(1)}</span>
           <span className="text-muted-foreground text-sm">{t("testimonialsSection.ratingSuffix")}</span>
         </div>
       </div>
 
       {/* Scrolling rows */}
       <div className="space-y-4">
-        <ScrollRow items={row1} direction="left" />
-        <ScrollRow items={row2} direction="right" />
+        <ScrollRow items={row1} direction="left" paused={paused} />
+        <ScrollRow items={row2} direction="right" paused={paused} />
+      </div>
+
+      {/* Pause control (WCAG 2.2.2). Keyboard-reachable, and it says which
+          state the next press produces. */}
+      <div className="container mx-auto px-4 mt-6 flex justify-center">
+        <button
+          type="button"
+          onClick={() => setPaused((p) => !p)}
+          aria-pressed={paused}
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-colors min-h-[44px]"
+        >
+          {paused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}
+          {paused
+            ? (isAr ? "تشغيل التمرير" : "Resume scrolling")
+            : (isAr ? "إيقاف التمرير" : "Pause scrolling")}
+        </button>
       </div>
     </section>
   );

@@ -178,7 +178,7 @@ const PlacementTestCTA = () => {
               </div>
 
               {/* Floating badge */}
-              <div className="absolute -top-3 -right-3 bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+              <div className="absolute -top-3 -end-3 bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
                 {t("placementCta.instant")}
               </div>
             </div>

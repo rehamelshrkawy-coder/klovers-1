@@ -70,7 +70,7 @@ const LetterGrid = ({ items, label }: { items: LetterRow[]; label: string }) => 
           className="flex flex-col items-center bg-card border border-border rounded-xl p-3 hover:border-primary/50 transition-colors"
         >
           <span className="text-3xl font-black text-foreground leading-none mb-1">{item.char}</span>
-          <span className="text-xs font-bold text-primary">{item.rom}</span>
+          <span className="text-xs font-bold text-primary-text">{item.rom}</span>
           <span className="text-[10px] text-muted-foreground mt-0.5">{item.ex}</span>
         </div>
       ))}

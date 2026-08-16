@@ -10,12 +10,25 @@ export default {
   	container: {
   		center: true,
   		padding: '2rem',
+  		// NOTE: supplying `screens` REPLACES Tailwind's breakpoint set for
+  		// `.container` — it does not merge. An `xs: '400px'` entry here used to
+  		// cap every viewport from 400px to 1399px at 400px wide, which collapsed
+  		// the whole site into a ribbon on a 1366x768 laptop. Only widen here.
   		screens: {
-  			xs: '400px',
+  			sm: '640px',
+  			md: '768px',
+  			lg: '1024px',
+  			xl: '1280px',
   			'2xl': '1400px'
   		}
   	},
   	extend: {
+  		// `h-13` is used on the primary conversion button in several places but
+  		// is not on Tailwind's spacing scale, so it was silently dropped at build
+  		// time and those buttons rendered at their default height.
+  		spacing: {
+  			'13': '3.25rem'
+  		},
   		colors: {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
@@ -24,7 +37,16 @@ export default {
   			foreground: 'hsl(var(--foreground))',
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				foreground: 'hsl(var(--primary-foreground))',
+  				// Readable brand accent for TEXT. --primary is pure spectral
+  				// yellow: superb as a background (black-on-yellow is 19.6:1) and
+  				// unusable as a foreground (1.07:1 on white). Use `text-primary-text`
+  				// for any brand-coloured text/icon; keep `bg-primary` as-is.
+  				text: 'hsl(var(--primary-text))'
+  			},
+  			whatsapp: {
+  				DEFAULT: 'hsl(var(--whatsapp))',
+  				foreground: 'hsl(var(--whatsapp-foreground))'
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
@@ -61,10 +83,17 @@ export default {
   				ring: 'hsl(var(--sidebar-ring))'
   			}
   		},
+  		// Monotonic radius ramp, every step derived from --radius so changing the
+  		// token actually re-skins the site. Previously `md` (14px) was larger than
+  		// `xl` (12px, stock Tailwind) and `sm` equalled `xl`.
   		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			sm: 'calc(var(--radius) - 8px)',
+  			DEFAULT: 'calc(var(--radius) - 6px)',
+  			md: 'calc(var(--radius) - 4px)',
+  			lg: 'calc(var(--radius) - 2px)',
+  			xl: 'var(--radius)',
+  			'2xl': 'calc(var(--radius) + 4px)',
+  			'3xl': 'calc(var(--radius) + 8px)'
   		},
   		keyframes: {
   			'accordion-down': {
@@ -101,6 +130,9 @@ export default {
   		},
   		fontFamily: {
   			sans: [
+  				// unicode-range-gated to Arabic (see index.css @font-face), so Latin
+  				// text falls through to the system stack with zero extra requests.
+  				'Noto Sans Arabic',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',

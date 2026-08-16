@@ -352,7 +352,7 @@ const DailyQuizPage = () => {
                 {t("dailyQuiz.passNote")}
               </p>
               <Button onClick={() => setQuizStarted(true)} size="lg" className="w-full">
-                {t("dailyQuiz.startQuizBtn")} <ArrowRight className="ml-2 h-4 w-4" />
+                {t("dailyQuiz.startQuizBtn")} <ArrowRight className="ms-2 h-4 w-4" />
               </Button>
             </CardContent>
           </Card>
@@ -473,7 +473,7 @@ const DailyQuizPage = () => {
                       <div
                         key={idx}
                         className={cn(
-                          "flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all",
+                          "flex items-center space-x-2 rtl:space-x-reverse p-3 rounded-lg border cursor-pointer transition-all",
                           showAnswer && isCorrect && "bg-green-50 dark:bg-green-900/20 border-green-500",
                           showAnswer && selected && !isCorrect && "bg-red-50 dark:bg-red-900/20 border-red-500",
                           !showAnswer && "hover:border-amber-300 hover:bg-amber-50"
@@ -519,7 +519,7 @@ const DailyQuizPage = () => {
               onClick={handlePrevious}
               disabled={currentIndex === 0}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 me-2" />
               {t("dailyQuiz.previous")}
             </Button>
 
@@ -532,7 +532,7 @@ const DailyQuizPage = () => {
                 onClick={handleNext}
                 disabled={!showResults[currentExercise.id]}
               >
-                {t("dailyQuiz.nextBtn")} <ArrowRight className="h-4 w-4 ml-2" />
+                {t("dailyQuiz.nextBtn")} <ArrowRight className="h-4 w-4 ms-2" />
               </Button>
             )}
           </div>

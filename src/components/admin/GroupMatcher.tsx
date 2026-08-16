@@ -806,7 +806,7 @@ const GroupMatcher = () => {
               <CardTitle className="text-base flex items-center gap-2">
                 <RefreshCw className="h-4 w-4 text-blue-500" />
                 Schedule Resubmission Requests
-                <Badge className="ml-1 bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                <Badge className="ms-1 bg-blue-100 text-blue-700 border-blue-200 text-xs">
                   {resubmitRequests.length}
                 </Badge>
               </CardTitle>
@@ -867,7 +867,7 @@ const GroupMatcher = () => {
                         }}
                         title="Reject this enrollment"
                       >
-                        <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                        <XCircle className="h-3.5 w-3.5 me-1" /> Reject
                       </Button>
                     </div>
                   </div>
@@ -899,7 +899,7 @@ const GroupMatcher = () => {
         <Card className="border-primary/50 bg-primary/5">
           <CardContent className="pt-5 space-y-4">
             <div className="flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <CheckCircle2 className="h-5 w-5 text-primary-text mt-0.5 shrink-0" />
               <div>
                 <p className="font-semibold text-foreground">Group "{createdGroup.name}" created & assigned!</p>
                 <p className="text-sm text-muted-foreground">Students have been notified by email.</p>
@@ -909,7 +909,7 @@ const GroupMatcher = () => {
             {suggestedSlots.length > 0 && (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                  <Lightbulb className="h-4 w-4 text-primary" />
+                  <Lightbulb className="h-4 w-4 text-primary-text" />
                   Suggested new slots for <Badge variant="outline">{getLevelShortLabel(createdGroup.level)}</Badge>
                 </div>
                 <div className="grid gap-2">
@@ -927,7 +927,7 @@ const GroupMatcher = () => {
                           </span>
                         </div>
                         <Badge variant={seatsLeft > 3 ? "secondary" : "default"}>
-                          <Users className="h-3 w-3 mr-1" />
+                          <Users className="h-3 w-3 me-1" />
                           {seatsLeft} seats left
                         </Badge>
                       </div>
@@ -1021,7 +1021,7 @@ const GroupMatcher = () => {
                                 onClick={() => { setRejectTarget(m); setRejectReason("no_slots"); setRejectNote(""); }}
                                 title="Reject this enrollment"
                               >
-                                <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                                <XCircle className="h-3.5 w-3.5 me-1" /> Reject
                               </Button>
                             </div>
                           </div>
@@ -1065,8 +1065,8 @@ const GroupMatcher = () => {
                             <div className="flex flex-wrap gap-1 mt-1">
                               {(!m.name || m.name === "Unknown") && <Badge variant="destructive" className="text-xs">Missing name</Badge>}
                               {!m.level && <Badge variant="destructive" className="text-xs">Missing level</Badge>}
-                              {!m.timezone && <Badge variant="secondary" className="text-xs"><Clock className="h-3 w-3 mr-1" />Missing timezone</Badge>}
-                              {m.plan_type === "private" && !m.preferred_day && !m.preferred_time && <Badge variant="secondary" className="text-xs"><Clock className="h-3 w-3 mr-1" />Missing schedule</Badge>}
+                              {!m.timezone && <Badge variant="secondary" className="text-xs"><Clock className="h-3 w-3 me-1" />Missing timezone</Badge>}
+                              {m.plan_type === "private" && !m.preferred_day && !m.preferred_time && <Badge variant="secondary" className="text-xs"><Clock className="h-3 w-3 me-1" />Missing schedule</Badge>}
                               <Badge className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300">📧 Reminder sent</Badge>
                             </div>
                           )}
@@ -1081,9 +1081,9 @@ const GroupMatcher = () => {
                         disabled={creating === cluster.key}
                       >
                         {creating === cluster.key ? (
-                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Creating group...</>
+                          <><Loader2 className="h-4 w-4 me-2 animate-spin" /> Creating group...</>
                         ) : (
-                          <><Plus className="h-4 w-4 mr-2" /> Create Group ({cluster.members.length} students)</>
+                          <><Plus className="h-4 w-4 me-2" /> Create Group ({cluster.members.length} students)</>
                         )}
                       </Button>
                     )}
@@ -1134,7 +1134,7 @@ const GroupMatcher = () => {
                             }}
                             title="Reject this enrollment"
                           >
-                            <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                            <XCircle className="h-3.5 w-3.5 me-1" /> Reject
                           </Button>
                         </div>
                       </div>
@@ -1179,9 +1179,9 @@ const GroupMatcher = () => {
                     className="shrink-0"
                   >
                     {sendingAllReminders ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin me-1" />
                     ) : (
-                      <Send className="h-3.5 w-3.5 mr-1" />
+                      <Send className="h-3.5 w-3.5 me-1" />
                     )}
                     Send All Reminders
                   </Button>
@@ -1234,7 +1234,7 @@ const GroupMatcher = () => {
                               className="text-destructive hover:bg-destructive/10"
                               onClick={() => { setRejectTarget(m); setRejectReason("no_slots"); setRejectNote(""); }}
                             >
-                              <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                              <XCircle className="h-3.5 w-3.5 me-1" /> Reject
                             </Button>
                           </div>
                         </div>
@@ -1317,13 +1317,13 @@ const GroupMatcher = () => {
                           <div className="flex flex-wrap gap-2 mt-1">
                             {missingLevel && (
                               <Badge variant="destructive" className="text-xs">
-                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                <AlertTriangle className="h-3 w-3 me-1" />
                                 Missing level — ask student to complete placement test
                               </Badge>
                             )}
                             {missingSchedule && (
                               <Badge variant="secondary" className="text-xs">
-                                <Clock className="h-3 w-3 mr-1" />
+                                <Clock className="h-3 w-3 me-1" />
                                 No schedule preference set
                               </Badge>
                             )}
@@ -1346,7 +1346,7 @@ const GroupMatcher = () => {
                 <CardTitle className="text-base flex items-center gap-2 text-green-800 dark:text-green-300">
                   <CheckCircle className="h-4 w-4" />
                   Assigned Private Students ({privateMatched.length})
-                  <ChevronDown className={`h-4 w-4 ml-auto transition-transform ${showAssigned ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`h-4 w-4 ms-auto transition-transform ${showAssigned ? "rotate-180" : ""}`} />
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">Click to {showAssigned ? "hide" : "show"} — these students were marked as assigned.</p>
               </CardHeader>
@@ -1360,7 +1360,7 @@ const GroupMatcher = () => {
                           <p className="text-xs text-muted-foreground">
                             {m.email} · {m.level || "no level"} · Assigned {new Date(m.matched_at).toLocaleDateString()}
                             {m.assigned_day && m.assigned_time && (
-                              <span className="ml-1 text-green-700 dark:text-green-400 font-medium">
+                              <span className="ms-1 text-green-700 dark:text-green-400 font-medium">
                                 — {m.assigned_day} {m.assigned_time} ({m.assigned_timezone || "?"})
                               </span>
                             )}
@@ -1382,7 +1382,7 @@ const GroupMatcher = () => {
                             onClick={() => { setRejectTarget(m); setRejectReason("no_slots"); setRejectNote(""); }}
                             title="Reject this enrollment"
                           >
-                            <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                            <XCircle className="h-3.5 w-3.5 me-1" /> Reject
                           </Button>
                         </div>
                       </div>
@@ -1403,7 +1403,7 @@ const GroupMatcher = () => {
                 <CardTitle className="text-base flex items-center gap-2 text-destructive">
                   <XCircle className="h-4 w-4" />
                   Rejected Students ({rejectedEnrollments.length})
-                  <ChevronDown className={`h-4 w-4 ml-auto transition-transform ${showRejected ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`h-4 w-4 ms-auto transition-transform ${showRejected ? "rotate-180" : ""}`} />
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Click to {showRejected ? "hide" : "show"} — enrollments rejected by admin with reasons.
@@ -1439,7 +1439,7 @@ const GroupMatcher = () => {
                                 {unrejecting === m.id ? (
                                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                 ) : (
-                                  <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                                  <RefreshCw className="h-3.5 w-3.5 me-1" />
                                 )}
                                 Undo
                               </Button>
@@ -1569,7 +1569,7 @@ const GroupMatcher = () => {
               disabled={!assignDay || !assignTime || markingAssigned === assignTarget?.id}
               onClick={handleMarkAssigned}
             >
-              {markingAssigned === assignTarget?.id ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5 mr-1.5" />}
+              {markingAssigned === assignTarget?.id ? <Loader2 className="h-3.5 w-3.5 me-1.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5 me-1.5" />}
               Assign Slot
             </Button>
           </DialogFooter>
@@ -1620,7 +1620,7 @@ const GroupMatcher = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejectTarget(null)}>Cancel</Button>
             <Button variant="destructive" disabled={rejecting} onClick={handleRejectClassRequest}>
-              {rejecting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5 mr-1.5" />}
+              {rejecting ? <Loader2 className="h-3.5 w-3.5 me-1.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5 me-1.5" />}
               Reject & Notify
             </Button>
           </DialogFooter>

@@ -363,8 +363,8 @@ const LeadsPanel: React.FC = () => {
         </div>
         <div className={`flex gap-2 ${isMobile ? "flex-col" : "flex-row"}`}>
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search by name or email..." value={search} onChange={(e) => { setSearch(e.target.value); setLeadsPage(0); }} className="pl-9" />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search by name or email..." value={search} onChange={(e) => { setSearch(e.target.value); setLeadsPage(0); }} className="ps-9" />
           </div>
           <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setLeadsPage(0); }}>
             <SelectTrigger className="w-full sm:w-44"><SelectValue placeholder="Filter status" /></SelectTrigger>
@@ -393,19 +393,19 @@ const LeadsPanel: React.FC = () => {
           )}
           <Button variant="outline" size={isMobile ? "icon" : "sm"} onClick={handleDeduplicateLeads}>
             <Eraser className="h-4 w-4" />
-            {!isMobile && <span className="ml-1">Deduplicate</span>}
+            {!isMobile && <span className="ms-1">Deduplicate</span>}
           </Button>
           <Button variant="outline" size={isMobile ? "icon" : "sm"} onClick={handleLinkLeadsByEmail}>
             <Sparkles className="h-4 w-4" />
-            {!isMobile && <span className="ml-1">Link All</span>}
+            {!isMobile && <span className="ms-1">Link All</span>}
           </Button>
           <Button variant="outline" size={isMobile ? "icon" : "sm"} onClick={handleSendNameCollectionEmails} disabled={sendingNameEmails}>
             <Mail className="h-4 w-4" />
-            {!isMobile && <span className="ml-1">{sendingNameEmails ? "Sending\u2026" : "Request Names"}</span>}
+            {!isMobile && <span className="ms-1">{sendingNameEmails ? "Sending\u2026" : "Request Names"}</span>}
           </Button>
           <Button variant="outline" size={isMobile ? "icon" : "sm"} onClick={exportCSV}>
             <Download className="h-4 w-4" />
-            {!isMobile && <span className="ml-1">Export CSV</span>}
+            {!isMobile && <span className="ms-1">Export CSV</span>}
           </Button>
         </div>
       </CardHeader>
@@ -417,11 +417,11 @@ const LeadsPanel: React.FC = () => {
             <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-semibold">Abandoned Checkout Recovery</span>
-              <span className="text-xs text-muted-foreground ml-1">— automated email sequence</span>
+              <span className="text-xs text-muted-foreground ms-1">— automated email sequence</span>
               <Button
                 size="sm"
                 variant="ghost"
-                className="ml-auto h-7 px-2 text-xs"
+                className="ms-auto h-7 px-2 text-xs"
                 onClick={() => setShowRecoveryTracker(v => !v)}
               >
                 {showRecoveryTracker ? "Hide details" : "View details"}
@@ -457,7 +457,7 @@ const LeadsPanel: React.FC = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead className="bg-muted/50">
-                      <tr className="text-left text-muted-foreground">
+                      <tr className="text-start text-muted-foreground">
                         <th className="px-3 py-2 font-medium">Lead</th>
                         <th className="px-3 py-2 font-medium">Plan</th>
                         <th className="px-3 py-2 font-medium text-center">Stage</th>
@@ -519,7 +519,7 @@ const LeadsPanel: React.FC = () => {
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                 <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">{abandoned.length} Abandoned Checkout{abandoned.length > 1 ? "s" : ""}</span>
-                <span className="text-xs text-amber-600 dark:text-amber-400 ml-1">— reached checkout but didn't pay</span>
+                <span className="text-xs text-amber-600 dark:text-amber-400 ms-1">— reached checkout but didn't pay</span>
               </div>
               <div className="space-y-2">
                 {abandoned.map(l => {
@@ -547,14 +547,14 @@ const LeadsPanel: React.FC = () => {
                             setTimeout(() => setCopiedLeadId(id => id === l.id ? null : id), 1500);
                           }}>
                           {copiedLeadId === l.id
-                            ? <><Check className="h-3 w-3 mr-1 text-green-600" />Copied!</>
+                            ? <><Check className="h-3 w-3 me-1 text-green-600" />Copied!</>
                             : contactedLeadIds.has(l.id)
-                              ? <><Check className="h-3 w-3 mr-1 text-green-600" />Sent ✓</>
-                              : <><Copy className="h-3 w-3 mr-1" />Copy</>}
+                              ? <><Check className="h-3 w-3 me-1 text-green-600" />Sent ✓</>
+                              : <><Copy className="h-3 w-3 me-1" />Copy</>}
                         </Button>
                         <Button size="sm" variant="outline" className="h-7 px-2 text-xs" asChild>
                           <a href={`mailto:${l.email}?subject=Your Korean class spot is waiting!&body=Hi ${(l.name || "").split(" ")[0]},%0A%0AWe noticed you were almost done enrolling in Klovers Korean. Your spot is still available!%0A%0AComplete your enrollment: https://kloversegy.com/enroll-now%0A%0ABest,%0AKlovers Team`} target="_blank" rel="noreferrer">
-                            <Mail className="h-3 w-3 mr-1" />Email
+                            <Mail className="h-3 w-3 me-1" />Email
                           </a>
                         </Button>
                       </div>
@@ -649,12 +649,12 @@ const LeadsPanel: React.FC = () => {
               <TableHeader>
                 <TableRow className="sticky top-0 bg-background/95 backdrop-blur z-10 border-b">
                   <TableHead
-                    className="py-3 px-3 font-semibold cursor-pointer select-none hover:text-primary"
+                    className="py-3 px-3 font-semibold cursor-pointer select-none hover:text-primary-text"
                     onClick={() => setLeadsSort(s => ({ col: "name", dir: s.col === "name" && s.dir === "asc" ? "desc" : "asc" }))}
                   >Name {leadsSort.col === "name" ? (leadsSort.dir === "asc" ? "\u2191" : "\u2193") : "\u2195"}</TableHead>
                   <TableHead className="py-3 px-3 font-semibold">Email</TableHead>
                   <TableHead
-                    className="py-3 px-3 hidden md:table-cell font-semibold cursor-pointer select-none hover:text-primary"
+                    className="py-3 px-3 hidden md:table-cell font-semibold cursor-pointer select-none hover:text-primary-text"
                     onClick={() => setLeadsSort(s => ({ col: "country", dir: s.col === "country" && s.dir === "asc" ? "desc" : "asc" }))}
                   >Country {leadsSort.col === "country" ? (leadsSort.dir === "asc" ? "\u2191" : "\u2193") : "\u2195"}</TableHead>
                   <TableHead className="py-3 px-3 hidden md:table-cell font-semibold">Plan</TableHead>
@@ -664,7 +664,7 @@ const LeadsPanel: React.FC = () => {
                   <TableHead className="py-3 px-3 font-semibold">Status</TableHead>
                   <TableHead className="py-3 px-3 hidden sm:table-cell font-semibold">Linked</TableHead>
                   <TableHead
-                    className="py-3 px-3 hidden sm:table-cell font-semibold cursor-pointer select-none hover:text-primary"
+                    className="py-3 px-3 hidden sm:table-cell font-semibold cursor-pointer select-none hover:text-primary-text"
                     onClick={() => setLeadsSort(s => ({ col: "created_at", dir: s.col === "created_at" && s.dir === "asc" ? "desc" : "asc" }))}
                   >Date {leadsSort.col === "created_at" ? (leadsSort.dir === "asc" ? "\u2191" : "\u2193") : "\u2195"}</TableHead>
                   <TableHead className="py-3 px-3 w-10"></TableHead>
@@ -789,7 +789,7 @@ const LeadsPanel: React.FC = () => {
                         {editingLeadId === lead.id ? (
                           <>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleEditLead}>
-                              <Check className="h-4 w-4 text-primary" />
+                              <Check className="h-4 w-4 text-primary-text" />
                             </Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={cancelEditLead}>
                               <X className="h-4 w-4 text-muted-foreground" />

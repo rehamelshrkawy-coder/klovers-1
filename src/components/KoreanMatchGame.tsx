@@ -243,7 +243,7 @@ const KoreanMatchGame = ({ onGameComplete }: { onGameComplete?: (score: number, 
               {Array.from({ length: 3 }).map((_, i) => (
                 <Trophy
                   key={i}
-                  className={`h-8 w-8 ${i < getStars() ? "text-primary [filter:drop-shadow(0_0_3px_hsl(var(--primary)))]" : "text-muted-foreground/30"}`}
+                  className={`h-8 w-8 ${i < getStars() ? "text-primary-text [filter:drop-shadow(0_0_3px_hsl(var(--primary)))]" : "text-muted-foreground/30"}`}
                 />
               ))}
             </div>

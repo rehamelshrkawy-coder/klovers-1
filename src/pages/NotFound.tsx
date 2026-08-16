@@ -40,7 +40,7 @@ const NotFound = () => {
               {["잠", "깐", "!"].map((ch, i) => (
                 <span
                   key={ch}
-                  className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 font-bold text-primary text-outlined border border-primary/20 animate-bounce"
+                  className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 font-bold text-primary-text text-outlined border border-primary/20 animate-bounce"
                   style={{ animationDelay: `${i * 150}ms`, animationDuration: "2s" }}
                 >
                   {ch}
@@ -63,12 +63,12 @@ const NotFound = () => {
                 className="group flex flex-col items-center gap-2 p-4 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-md transition-all duration-200 text-center relative"
               >
                 {badge && (
-                  <span className="absolute top-2 right-2 text-[9px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800 px-1.5 py-0.5 rounded-full font-semibold leading-none">
+                  <span className="absolute top-2 end-2 text-[9px] bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800 px-1.5 py-0.5 rounded-full font-semibold leading-none">
                     {badge}
                   </span>
                 )}
                 <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                  <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary-text transition-colors" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-foreground leading-tight">{label}</p>

@@ -183,7 +183,7 @@ const SessionAttendanceManager = () => {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <CalendarDays className="h-5 w-5 text-primary" />
+            <CalendarDays className="h-5 w-5 text-primary-text" />
             Session Attendance
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">Generate sessions and mark attendance per session</p>
@@ -262,7 +262,7 @@ const SessionAttendanceManager = () => {
                   No sessions yet — click Generate above
                 </div>
               ) : (
-                <div className="space-y-1.5 max-h-[480px] overflow-y-auto pr-1">
+                <div className="space-y-1.5 max-h-[480px] overflow-y-auto pe-1">
                   {sessions.map(s => {
                     const isSelected = s.session_id === selectedSessionId;
                     const isPast = new Date(s.session_date) < new Date();
@@ -271,7 +271,7 @@ const SessionAttendanceManager = () => {
                       <button
                         key={s.session_id}
                         onClick={() => setSelectedSessionId(s.session_id)}
-                        className={`w-full text-left p-3 rounded-lg border transition-all ${
+                        className={`w-full text-start p-3 rounded-lg border transition-all ${
                           isSelected
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-primary/40 hover:bg-accent/30"
@@ -352,7 +352,7 @@ const SessionAttendanceManager = () => {
                   </div>
 
                   {/* Student rows */}
-                  <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+                  <div className="space-y-2 max-h-[380px] overflow-y-auto pe-1">
                     {roster.map(student => {
                       const status = attendance[student.user_id] || "unmarked";
                       const cfg = STATUS_CONFIG[status];

@@ -24,7 +24,7 @@ export function ReceiptModal({ receiptModal, onClose }: Props) {
             <div className="text-center space-y-3 p-6">
               <p className="text-muted-foreground text-sm">PDF receipt — cannot preview inline.</p>
               <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank", "noopener,noreferrer")}>
-                <Eye className="h-4 w-4 mr-2" /> Open PDF
+                <Eye className="h-4 w-4 me-2" /> Open PDF
               </Button>
             </div>
           ) : receiptModal ? (
@@ -38,7 +38,7 @@ export function ReceiptModal({ receiptModal, onClose }: Props) {
         <DialogFooter className="gap-2">
           {receiptModal && !receiptModal.isPdf && (
             <Button variant="outline" onClick={() => window.open(receiptModal.url, "_blank", "noopener,noreferrer")}>
-              <Eye className="h-4 w-4 mr-2" /> Open full size
+              <Eye className="h-4 w-4 me-2" /> Open full size
             </Button>
           )}
           <Button onClick={onClose}>Close</Button>

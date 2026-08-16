@@ -203,9 +203,9 @@ export default function MarketingPostsArchive() {
                     disabled={downloading}
                   >
                     {downloading ? (
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      <Loader2 className="h-4 w-4 me-1 animate-spin" />
                     ) : (
-                      <Download className="h-4 w-4 mr-1" />
+                      <Download className="h-4 w-4 me-1" />
                     )}
                     Download All
                   </Button>
@@ -226,13 +226,13 @@ export default function MarketingPostsArchive() {
                       {post.caption_text && (
                         <Button size="sm" variant="ghost" className="h-7 text-xs"
                           onClick={() => copyToClipboard(post.caption_text, "Caption")}>
-                          <Copy className="h-3 w-3 mr-1" /> Caption
+                          <Copy className="h-3 w-3 me-1" /> Caption
                         </Button>
                       )}
                       {post.ad_primary_text && (
                         <Button size="sm" variant="ghost" className="h-7 text-xs"
                           onClick={() => copyToClipboard(post.ad_primary_text, "Ad copy")}>
-                          <Copy className="h-3 w-3 mr-1" /> Ad
+                          <Copy className="h-3 w-3 me-1" /> Ad
                         </Button>
                       )}
                     </div>
@@ -266,7 +266,7 @@ export default function MarketingPostsArchive() {
                             downloadImage(post.video_url!, `${slug}-reel.webm`);
                           }}
                         >
-                          <Download className="h-3 w-3 mr-1" /> Download
+                          <Download className="h-3 w-3 me-1" /> Download
                         </Button>
                       </div>
                     </div>

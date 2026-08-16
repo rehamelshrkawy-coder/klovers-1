@@ -172,7 +172,7 @@ const TrialRequestsPanel = () => {
                   <TableHead>Level</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Booked At</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-end">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -208,7 +208,7 @@ const TrialRequestsPanel = () => {
                         </span>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{bookedAt}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-end">
                         {b.status === "pending" && (
                           <div className="flex items-center justify-end gap-1.5">
                             <Button
@@ -245,7 +245,7 @@ const TrialRequestsPanel = () => {
                             })}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                            className="inline-flex items-center gap-1 text-xs text-primary-text hover:underline"
                           >
                             <CalendarPlus className="h-3 w-3" /> Calendar
                           </a>

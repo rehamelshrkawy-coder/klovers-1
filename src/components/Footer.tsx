@@ -42,10 +42,10 @@ const Footer = () => {
               {t("footer", "tagline")}
             </p>
             <div className="space-y-1.5 text-background/70 text-sm">
-              <a href="mailto:koreanlovers.net@gmail.com" className="flex items-center gap-2 hover:text-primary transition-colors">
+              <a href="mailto:koreanlovers.net@gmail.com" className="flex items-center gap-2 hover:text-primary-text transition-colors">
                 <Mail className="h-3.5 w-3.5 shrink-0" /> koreanlovers.net@gmail.com
               </a>
-              <a href="tel:+201010003084" className="flex items-center gap-2 hover:text-primary transition-colors">
+              <a href="tel:+201010003084" className="flex items-center gap-2 hover:text-primary-text transition-colors">
                 <Phone className="h-3.5 w-3.5 shrink-0" /> +201010003084
               </a>
             </div>
@@ -57,7 +57,7 @@ const Footer = () => {
             <ul className="space-y-2">
               {learnLinks.map(({ to, label }) => (
                 <li key={to}>
-                  <Link to={to} className="text-background/65 hover:text-primary text-sm transition-colors">
+                  <Link to={to} className="text-background/65 hover:text-primary-text text-sm transition-colors">
                     {label}
                   </Link>
                 </li>
@@ -71,7 +71,7 @@ const Footer = () => {
             <ul className="space-y-2">
               {companyLinks.map(({ to, label }) => (
                 <li key={to}>
-                  <Link to={to} className="text-background/65 hover:text-primary text-sm transition-colors">
+                  <Link to={to} className="text-background/65 hover:text-primary-text text-sm transition-colors">
                     {label}
                   </Link>
                 </li>

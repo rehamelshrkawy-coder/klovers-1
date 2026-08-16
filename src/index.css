@@ -12,7 +12,9 @@ All colors MUST be HSL.
     --background: 0 0% 100%;
     --foreground: 0 0% 0%;
 
-    --card: 0 0% 100%;
+    /* Was 0 0% 100% — identical to --background, so every alternating
+       bg-card / bg-background section boundary was carried by whitespace alone. */
+    --card: 0 0% 97.5%;
     --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
@@ -20,6 +22,18 @@ All colors MUST be HSL.
 
     --primary: 60 100% 50%;
     --primary-foreground: 0 0% 0%;
+
+    /* Readable brand accent for TEXT and icons.
+       --primary is pure spectral yellow (#FFFF00): 19.6:1 as a background behind
+       black, but 1.07:1 as a foreground on white — unusable as text. #946F00 is
+       the same brand hue darkened until it clears 4.5:1 against BOTH white
+       (4.63:1) and black (4.53:1), so it is safe on every surface in this theme.
+       Use `text-primary-text`, never `text-primary`. */
+    --primary-text: 45 100% 29%;
+    /* Used inside sections that invert their surface with the theme
+       (bg-foreground / bg-secondary): those are near-black in light mode, so
+       brand text there flips to the bright value. Wired up in the base layer. */
+    --primary-text-inverse: 55 100% 62%;
 
     --secondary: 0 0% 10%;
     --secondary-foreground: 0 0% 100%;
@@ -33,9 +47,18 @@ All colors MUST be HSL.
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 86.7%;
-    --input: 0 0% 86.7%;
-    --ring: 60 100% 50%;
+    /* WhatsApp CTA. Brand green #25D366 carries white text at only 1.98:1;
+       against black it is 10.6:1, so the brand colour is kept and the label
+       darkened rather than the other way round. */
+    --whatsapp: 142 70% 49%;
+    --whatsapp-foreground: 0 0% 0%;
+
+    /* 0 0% 86.7% rendered at 1.36:1 — invisible, which is why the
+       bg-card/bg-background section banding never read as bands. */
+    --border: 0 0% 70%;
+    /* Form-control borders are UI components: WCAG 1.4.11 wants 3:1. */
+    --input: 0 0% 56%;
+    --ring: var(--primary-text);
 
     --radius: 1rem;
 
@@ -45,8 +68,8 @@ All colors MUST be HSL.
     --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 60 60% 88%;
     --sidebar-accent-foreground: 0 0% 0%;
-    --sidebar-border: 0 0% 86.7%;
-    --sidebar-ring: 60 100% 50%;
+    --sidebar-border: 0 0% 70%;
+    --sidebar-ring: var(--primary-text);
 
     --chart-1: 60 100% 50%;
     --chart-2: 60 100% 60%;
@@ -56,27 +79,34 @@ All colors MUST be HSL.
 
     --sidebar: 0 0% 100%;
 
-    --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    /* 'Noto Sans Arabic' is listed FIRST deliberately: its @font-face is
+       unicode-range-gated to Arabic, so Latin text falls straight through to
+       the system stack while Arabic gets a real Arabic typeface instead of an
+       arbitrary OS substitution. */
+    --font-sans: 'Noto Sans Arabic', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
 
     --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
 
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    /* Monotonic elevation ramp. Previously every step used a 3px blur and
+       --shadow-2xl was visually SMALLER than --shadow-sm, so the four
+       components asking for 2xl drama got a hairline. */
+    --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.04);
 
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.06);
 
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.08);
 
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow: 0 2px 6px -1px hsl(0 0% 0% / 0.10), 0 1px 3px -1px hsl(0 0% 0% / 0.08);
 
-    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+    --shadow-md: 0 4px 10px -2px hsl(0 0% 0% / 0.12), 0 2px 4px -2px hsl(0 0% 0% / 0.08);
 
-    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 10px 20px -4px hsl(0 0% 0% / 0.14), 0 4px 8px -4px hsl(0 0% 0% / 0.08);
 
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
+    --shadow-xl: 0 18px 32px -8px hsl(0 0% 0% / 0.18), 0 8px 14px -6px hsl(0 0% 0% / 0.10);
 
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --shadow-2xl: 0 28px 56px -12px hsl(0 0% 0% / 0.28);
 
     --tracking-normal: 0em;
 
@@ -97,6 +127,15 @@ All colors MUST be HSL.
     --primary: 60 100% 50%;
     --primary-foreground: 0 0% 0%;
 
+    /* Dark theme: surfaces are near-black, so brand text can be bright.
+       The inverse pair is the light-theme value, because bg-foreground
+       sections are WHITE in this theme. */
+    --primary-text: 51 100% 65%;
+    --primary-text-inverse: 45 100% 29%;
+
+    --whatsapp: 142 70% 42%;
+    --whatsapp-foreground: 0 0% 0%;
+
     --secondary: 0 0% 90%;
     --secondary-foreground: 0 0% 0%;
 
@@ -109,33 +148,50 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 25%;
-    --input: 0 0% 25%;
-    --ring: 60 100% 50%;
+    --border: 0 0% 34%;
+    --input: 0 0% 45%;
+    --ring: var(--primary-text);
     --sidebar-background: 0 0% 5%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 60 100% 50%;
     --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 60 100% 20%;
     --sidebar-accent-foreground: 60 100% 50%;
-    --sidebar-border: 0 0% 25%;
-    --sidebar-ring: 60 100% 50%;
+    --sidebar-border: 0 0% 34%;
+    --sidebar-ring: var(--primary-text);
     --chart-1: 60 100% 50%;
     --chart-2: 60 100% 60%;
     --chart-3: 60 100% 40%;
     --chart-4: 0 0% 80%;
     --chart-5: 0 0% 50%;
     --sidebar: 0 0% 10%;
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
-    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.20);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.24);
+    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.30), 0 1px 2px -1px hsl(0 0% 0% / 0.24);
+    --shadow: 0 2px 6px -1px hsl(0 0% 0% / 0.32), 0 1px 3px -1px hsl(0 0% 0% / 0.24);
+    --shadow-md: 0 4px 10px -2px hsl(0 0% 0% / 0.36), 0 2px 4px -2px hsl(0 0% 0% / 0.24);
+    --shadow-lg: 0 10px 20px -4px hsl(0 0% 0% / 0.42), 0 4px 8px -4px hsl(0 0% 0% / 0.28);
+    --shadow-xl: 0 18px 32px -8px hsl(0 0% 0% / 0.50), 0 8px 14px -6px hsl(0 0% 0% / 0.32);
+    --shadow-2xl: 0 28px 56px -12px hsl(0 0% 0% / 0.62);
 
   }
+}
+
+/* ── Arabic typeface ──────────────────────────────────────────────────────
+   The system-font-only decision is right for a 3G Egyptian audience and is kept
+   for Latin. Arabic gets the one careful exception: the old stack named "Noto
+   Sans" (Latin-only), so half the audience rendered in whatever their OS
+   happened to substitute. Self-hosted, `unicode-range`-gated so a Latin-only
+   visitor never requests a byte of it, `swap` so it never blocks paint. */
+@font-face {
+  font-family: 'Noto Sans Arabic';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/noto-sans-arabic-subset.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1,
+    U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF,
+    U+FE70-FE74, U+FE76-FEFC;
 }
 
 @layer base {
@@ -146,6 +202,107 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* ── Arabic / RTL typography ──────────────────────────────────────────
+     Arabic is cursive: letters must join. `letter-spacing` forces gaps
+     between glyphs that are required to connect, so it is cancelled
+     wholesale under RTL — including the tracking-tight/tighter utilities
+     applied to the hero headline. Arabic also needs more leading than Latin
+     at the same size because of its deep descenders and diacritics. */
+  [dir='rtl'],
+  [dir='rtl'] * {
+    letter-spacing: normal !important;
+  }
+
+  [dir='rtl'] body,
+  [dir='rtl'] p,
+  [dir='rtl'] li,
+  [dir='rtl'] h1,
+  [dir='rtl'] h2,
+  [dir='rtl'] h3,
+  [dir='rtl'] h4 {
+    line-height: calc(1em + 0.35rem);
+  }
+
+  /* Brand text inside sections whose surface inverts with the theme
+     (bg-foreground / bg-secondary are near-black in light mode and near-white
+     in dark mode) has to flip the opposite way to stay legible. */
+  .bg-foreground .text-primary-text,
+  .bg-secondary .text-primary-text,
+  .bg-black .text-primary-text {
+    color: hsl(var(--primary-text-inverse));
+  }
+
+  /* A visible keyboard focus indicator on every focusable element.
+     --ring used to be pure #FFFF00 — 1.07:1 on white, i.e. no perceivable
+     focus indicator anywhere on the site (WCAG 2.4.7). */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: calc(var(--radius) - 8px);
+  }
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────
+   Honours the OS-level "reduce motion" setting site-wide (WCAG 2.3.3), and in
+   particular stops the two infinite testimonial marquees, which are a WCAG
+   2.2.2 Level A failure without a way to pause them. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-scroll-left,
+  .animate-scroll-right,
+  .animate-ken-burns,
+  .animate-mascot-bounce,
+  .animate-flame-flicker,
+  .animate-pulse-glow {
+    animation: none !important;
+  }
+}
+
+
+/* NOTE: this block lives OUTSIDE `@layer base` on purpose. Tailwind
+   tree-shakes layered CSS against the source files, and `lucide-arrow-right`
+   & friends are stamped on at runtime by lucide-react — they appear nowhere
+   in the source, so inside a layer the whole rule is stripped from the build.
+   Verified against the compiled stylesheet. */
+/* ── Directional icons under RTL ──────────────────────────────────────
+   "Forward" in Arabic points left. lucide-react stamps every icon with a
+   `lucide-<name>` class, so the whole family of directional arrows can be
+   mirrored in one rule instead of branching at ~17 call sites — and any new
+   arrow added later is handled automatically.
+
+   Only arrows that mean *direction of travel* are listed. Icons whose
+   leftness is intrinsic (play, chart axes, code chevrons) are not mirrored. */
+[dir='rtl'] .lucide-arrow-right,
+[dir='rtl'] .lucide-arrow-left,
+[dir='rtl'] .lucide-arrow-big-right,
+[dir='rtl'] .lucide-arrow-big-left,
+[dir='rtl'] .lucide-arrow-up-right,
+[dir='rtl'] .lucide-arrow-down-right,
+[dir='rtl'] .lucide-move-right,
+[dir='rtl'] .lucide-move-left,
+[dir='rtl'] .lucide-chevron-right,
+[dir='rtl'] .lucide-chevron-left,
+[dir='rtl'] .lucide-chevrons-right,
+[dir='rtl'] .lucide-chevrons-left,
+[dir='rtl'] .lucide-corner-down-right,
+[dir='rtl'] .lucide-log-out,
+[dir='rtl'] .lucide-log-in,
+[dir='rtl'] .lucide-reply {
+  transform: scaleX(-1);
+}
+
+/* Pause control for the testimonial marquees (WCAG 2.2.2). */
+.marquee-paused {
+  animation-play-state: paused !important;
 }
 
 

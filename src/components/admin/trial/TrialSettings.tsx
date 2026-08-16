@@ -181,15 +181,15 @@ export default function TrialSettingsPanel({
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-muted-foreground">
               <tr>
-                <th className="px-3 py-2 text-left font-medium">Date</th>
-                <th className="px-3 py-2 text-left font-medium">Day</th>
-                <th className="px-3 py-2 text-left font-medium">Time</th>
-                <th className="px-3 py-2 text-left font-medium">Language</th>
-                <th className="px-3 py-2 text-left font-medium">Period</th>
-                <th className="px-3 py-2 text-right font-medium">Capacity</th>
-                <th className="px-3 py-2 text-right font-medium">Min. to run</th>
-                <th className="px-3 py-2 text-left font-medium">Lifecycle</th>
-                <th className="px-3 py-2 text-right font-medium">Actions</th>
+                <th className="px-3 py-2 text-start font-medium">Date</th>
+                <th className="px-3 py-2 text-start font-medium">Day</th>
+                <th className="px-3 py-2 text-start font-medium">Time</th>
+                <th className="px-3 py-2 text-start font-medium">Language</th>
+                <th className="px-3 py-2 text-start font-medium">Period</th>
+                <th className="px-3 py-2 text-end font-medium">Capacity</th>
+                <th className="px-3 py-2 text-end font-medium">Min. to run</th>
+                <th className="px-3 py-2 text-start font-medium">Lifecycle</th>
+                <th className="px-3 py-2 text-end font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -213,8 +213,8 @@ export default function TrialSettingsPanel({
                   </td>
                   <td className="px-3 py-2 capitalize">{s.class_language ?? '—'}</td>
                   <td className="px-3 py-2 capitalize">{s.session_period ?? '—'}</td>
-                  <td className="px-3 py-2 text-right">{s.capacity}</td>
-                  <td className="px-3 py-2 text-right">{s.min_to_run ?? <span className="text-muted-foreground">default</span>}</td>
+                  <td className="px-3 py-2 text-end">{s.capacity}</td>
+                  <td className="px-3 py-2 text-end">{s.min_to_run ?? <span className="text-muted-foreground">default</span>}</td>
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-2">
                       <LifecycleBadge value={s.lifecycle} />
@@ -232,7 +232,7 @@ export default function TrialSettingsPanel({
                       </select>
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="px-3 py-2 text-end">
                     <button
                       onClick={() => setEditingSlot(s)}
                       className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"

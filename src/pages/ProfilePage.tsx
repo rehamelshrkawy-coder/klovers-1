@@ -124,7 +124,7 @@ const ProfilePage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <User className="h-4 w-4 text-primary" />
+                <User className="h-4 w-4 text-primary-text" />
                 {isAr ? "الصورة الشخصية والاسم" : "Photo & Name"}
               </CardTitle>
             </CardHeader>
@@ -153,7 +153,7 @@ const ProfilePage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Mail className="h-4 w-4 text-primary" />
+                <Mail className="h-4 w-4 text-primary-text" />
                 {isAr ? "البريد الإلكتروني" : "Email Address"}
               </CardTitle>
             </CardHeader>
@@ -172,7 +172,7 @@ const ProfilePage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-primary" />
+                <GraduationCap className="h-4 w-4 text-primary-text" />
                 {isAr ? "معلومات التعلم" : "Learning Info"}
               </CardTitle>
             </CardHeader>
@@ -193,7 +193,7 @@ const ProfilePage = () => {
 
               <div>
                 <p className="text-xs text-muted-foreground mb-1.5">
-                  <Globe className="h-3 w-3 inline mr-1" />
+                  <Globe className="h-3 w-3 inline me-1" />
                   {isAr ? "الدولة" : "Country"}
                 </p>
                 <Select value={country} onValueChange={setCountry}>
@@ -231,9 +231,9 @@ const ProfilePage = () => {
                   <button
                     key={href}
                     onClick={() => navigate(href)}
-                    className="flex items-center gap-2 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors text-sm font-medium text-foreground text-left"
+                    className="flex items-center gap-2 p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors text-sm font-medium text-foreground text-start"
                   >
-                    <Icon className="h-4 w-4 text-primary shrink-0" />
+                    <Icon className="h-4 w-4 text-primary-text shrink-0" />
                     {label}
                   </button>
                 ))}

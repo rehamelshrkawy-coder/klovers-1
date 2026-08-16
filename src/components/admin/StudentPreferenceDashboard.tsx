@@ -222,7 +222,7 @@ const StudentPreferenceDashboard = () => {
               <table className="w-full text-sm">
                 <thead>
                   <tr>
-                    <th className="text-left font-semibold px-2 py-2">Day / Time</th>
+                    <th className="text-start font-semibold px-2 py-2">Day / Time</th>
                     {sortedTimes.map((time) => (
                       <th key={time} className="text-center font-semibold px-2 py-2 min-w-16">
                         {time}
