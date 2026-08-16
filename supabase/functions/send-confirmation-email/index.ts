@@ -1,5 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { authorizationError, authorizeRequest } from "../_shared/authorize.ts";
+import {
+  TRIAL_DURATION_MIN,
+  TRIAL_GROUP_SIZE_MAX,
+  POST_TRIAL_OFFER_CODE,
+  POST_TRIAL_OFFER_DAYS,
+  POST_TRIAL_OFFER_PERCENT,
+  postTrialOfferIsUsable,
+} from "../_shared/trialContract.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,7 +23,7 @@ interface EmailPayload {
   sessions_total?: number;
   amount?: number;
   language?: string;
-  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_followup_day1" | "trial_followup_day3" | "trial_followup_day7" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation" | "trial_group_full" | "trial_rollover";
+  template?: "welcome" | "enrollment" | "group_match" | "slot_confirmed" | "approval" | "pending_review" | "payment_confirmed" | "class_link" | "payment_method_reminder" | "rejection" | "trial_confirmed" | "trial_rebook_request" | "trial_prep" | "trial_hour_before" | "trial_followup_day1" | "trial_followup_day3" | "trial_followup_day7" | "group_forming" | "receipt_nudge" | "group_forming_escalation" | "rejection_followup" | "pre_class_reminder" | "class_feedback" | "trial_attendance_confirmation" | "trial_group_full" | "trial_rollover";
   class_link_url?: string;
   tx_ref?: string;
   payment_date?: string;
@@ -1192,6 +1200,78 @@ function buildTrialRolloverEmail(p: EmailPayload) {
 }
 
 // Post-trial nurture sequence. Three stages, shared shell.
+/**
+ * Yes / no RSVP buttons for the day-before email.
+ *
+ * Links land on /rsvp, which records the answer through
+ * respond_to_trial_invite. Both the page and the column it writes already
+ * existed; nothing had ever linked them, so the column was null for every
+ * booking ever taken.
+ *
+ * Returns "" when the payload carries no booking credentials, so the email
+ * still sends rather than rendering a dead link.
+ */
+function rsvpBlock(p: EmailPayload, isAr: boolean): string {
+  if (!p.booking_id || !p.confirmation_token) return "";
+  const base = `${SITE_URL}/rsvp?id=${encodeURIComponent(p.booking_id)}`
+    + `&token=${encodeURIComponent(p.confirmation_token)}`
+    + (p.trial_date ? `&day=${encodeURIComponent(String(p.trial_date))}` : "")
+    + (p.trial_time ? `&time=${encodeURIComponent(String(p.trial_time))}` : "")
+    + (p.trial_timezone ? `&tz=${encodeURIComponent(String(p.trial_timezone))}` : "");
+  const heading = isAr ? "هتقدر تحضر؟" : "Can you make it?";
+  const yesLabel = isAr ? "✅ أيوة، هحضر" : "✅ Yes, I'll be there";
+  const noLabel = isAr ? "🗓️ مش هقدر" : "🗓️ I can't make it";
+  const note = isAr
+    ? "لو مش هتقدر، مكانك محجوز لحد ما تختار موعد تاني — مش هنلغيه."
+    : "If you can't, your place is held until you pick a new date — we won't cancel it.";
+  return `
+    <div style="background: ${BRAND_GRAY}; border-radius: 8px; padding: 18px; margin: 22px 0; text-align: center;">
+      <p style="margin: 0 0 14px; font-weight: bold; color: ${BRAND_DARK}; font-size: 16px;">${heading}</p>
+      <a href="${base}&r=yes" style="display:inline-block;background:${BRAND_DARK};color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:700;font-size:15px;margin:4px;">${yesLabel}</a>
+      <a href="${base}&r=no" style="display:inline-block;background:#ffffff;color:${BRAND_DARK};border:2px solid ${BRAND_DARK};text-decoration:none;padding:10px 22px;border-radius:8px;font-weight:700;font-size:15px;margin:4px;">${noLabel}</a>
+      <p style="margin: 12px 0 0; color: ${BRAND_MUTED}; font-size: 12px;">${note}</p>
+    </div>`;
+}
+
+/**
+ * Sent about an hour before the trial starts.
+ *
+ * Short by design: at this point the only thing that matters is the join link
+ * and the fact that it is happening now. Everything preparatory was in the
+ * day-before email.
+ */
+function buildTrialHourBeforeEmail(p: EmailPayload) {
+  const isAr = p.language === "ar";
+  const joinUrl = p.class_link_url || "";
+  const timeStr = p.trial_time ? String(p.trial_time) : "";
+  const joinCta = joinUrl
+    ? `<div style="margin: 20px 0; text-align: center;">${brandButton(isAr ? "ادخل الحصة" : "Join the class", joinUrl)}</div>`
+    : `<p style="color: ${BRAND_MUTED}; font-size: 13px;">${isAr ? "رابط الحصة في إيميل التأكيد." : "The class link is in your confirmation email."}</p>`;
+
+  if (isAr) {
+    return {
+      subject: "KLovers — حصتك بتبدأ خلال ساعة ⏰",
+      html: brandWrapper(`
+        <h1 style="color: ${BRAND_DARK}; font-size: 22px;">يا ${p.name}، حصتك قربت! ⏰</h1>
+        <p>حصتك التجريبية بتبدأ خلال حوالي ساعة${timeStr ? ` (${timeStr})` : ""}. مدتها ${TRIAL_DURATION_MIN} دقيقة.</p>
+        ${joinCta}
+        <p style="color: ${BRAND_MUTED}; font-size: 13px;">جهّز سماعاتك ودوّر على مكان هادي. نشوفك بعد شوية!</p>
+        ${unsubscribeFooter(p.unsubscribe_token, true)}
+      `, true),
+    };
+  }
+  return {
+    subject: "KLovers — your class starts in an hour ⏰",
+    html: brandWrapper(`
+      <h1 style="color: ${BRAND_DARK}; font-size: 22px;">${p.name}, your class is nearly here! ⏰</h1>
+      <p>Your trial class starts in about an hour${timeStr ? ` (${timeStr})` : ""}. It runs for ${TRIAL_DURATION_MIN} minutes.</p>
+      ${joinCta}
+      <p style="color: ${BRAND_MUTED}; font-size: 13px;">Grab your headphones and find a quiet spot. See you shortly!</p>
+      ${unsubscribeFooter(p.unsubscribe_token, false)}
+    `, false),
+  };
+}
+
 function buildTrialPrepEmail(p: EmailPayload) {
   const isAr = p.language === "ar";
   const placementUrl = `${SITE_URL}/placement-test`;
@@ -1212,8 +1292,9 @@ function buildTrialPrepEmail(p: EmailPayload) {
         <ul style="color: ${BRAND_TEXT}; padding-right: 20px; line-height: 1.8;">
           <li>🎧 جهّز سماعات وجرّب الكاميرا قبل الحصة</li>
           <li>📝 اكتب 2–3 أسباب ليه بتتعلم كوري (هيساعد المعلم)</li>
-          <li>☕ خذ حاجة تشربها — الحصة 45 دقيقة</li>
+          <li>☕ خذ حاجة تشربها — الحصة ${TRIAL_DURATION_MIN} دقيقة</li>
         </ul>
+        ${rsvpBlock(p, true)}
         <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">في أي سؤال؟ رد على الإيميل ده أو راسلنا واتساب.</p>
         ${unsubscribeFooter(p.unsubscribe_token, true)}
       `, true),
@@ -1235,12 +1316,39 @@ function buildTrialPrepEmail(p: EmailPayload) {
       <ul style="color: ${BRAND_TEXT}; padding-left: 20px; line-height: 1.8;">
         <li>🎧 Test your headphones + camera beforehand</li>
         <li>📝 Jot down 2–3 reasons you're learning Korean (helps your teacher)</li>
-        <li>☕ Grab a drink — it's a 45-minute session</li>
+        <li>☕ Grab a drink — it's a ${TRIAL_DURATION_MIN}-minute session</li>
       </ul>
+      ${rsvpBlock(p, false)}
       <p style="color: ${BRAND_MUTED}; font-size: 13px; margin-top: 20px;">Any questions? Reply to this email or message us on WhatsApp.</p>
       ${unsubscribeFooter(p.unsubscribe_token, false)}
     `, false),
   };
+}
+
+/**
+ * The single post-trial offer, with its deadline.
+ *
+ * Returns "" unless the offer is enabled AND fully specified in
+ * _shared/trialContract.ts, so this email never invents terms. See that file
+ * for the three values a human has to set.
+ */
+function offerBlock(isAr: boolean): string {
+  if (!postTrialOfferIsUsable()) return "";
+  const heading = isAr
+    ? `خصم ${POST_TRIAL_OFFER_PERCENT}% على أول اشتراك`
+    : `${POST_TRIAL_OFFER_PERCENT}% off your first plan`;
+  const deadline = isAr
+    ? `العرض ساري ${POST_TRIAL_OFFER_DAYS} أيام من تاريخ حصتك التجريبية.`
+    : `Valid for ${POST_TRIAL_OFFER_DAYS} days from your trial class.`;
+  const codeLabel = isAr ? "كود الخصم" : "Use code";
+  return `
+    <div style="border: 2px solid ${BRAND_DARK}; border-radius: 8px; padding: 18px; margin: 22px 0; text-align: center;">
+      <p style="margin: 0 0 6px; font-weight: bold; color: ${BRAND_DARK}; font-size: 18px;">${heading}</p>
+      <p style="margin: 0 0 12px; color: ${BRAND_TEXT}; font-size: 14px;">${deadline}</p>
+      <p style="margin: 0; font-size: 14px; color: ${BRAND_MUTED};">
+        ${codeLabel}: <strong style="color: ${BRAND_DARK}; font-size: 16px; letter-spacing: 1px;">${POST_TRIAL_OFFER_CODE}</strong>
+      </p>
+    </div>`;
 }
 
 function buildTrialFollowupDay1Email(p: EmailPayload) {
@@ -1251,16 +1359,17 @@ function buildTrialFollowupDay1Email(p: EmailPayload) {
       subject: "KLovers — ازاي كانت حصتك التجريبية؟ 💭",
       html: brandWrapper(`
         <h1 style="color: ${BRAND_DARK}; font-size: 22px;">مرحباً ${p.name}! 🌱</h1>
-        <p>ازاي كانت حصتك التجريبية أمس؟ نتمنى تكون حبيتها.</p>
+        <p>ازاي كانت حصتك التجريبية؟ نتمنى تكون حبيتها.</p>
         <p>لو جاهز تكمل رحلة الكورية، شوف خططنا — فيه <strong>حصص جماعية تبدأ من 25$</strong> وحصص خاصة لو بتفضّل الاهتمام الشخصي.</p>
         <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
           <p style="margin: 0 0 8px; font-weight: bold;">✨ ليه يسجّل الطلاب معانا:</p>
           <ul style="margin: 6px 0 0; padding-right: 20px; color: ${BRAND_TEXT}; line-height: 1.7;">
-            <li>مجموعات صغيرة (4–8 طلاب)</li>
+            <li>مجموعات صغيرة — ${TRIAL_GROUP_SIZE_MAX} طلاب كحد أقصى</li>
             <li>معلمين أصليين بخبرة TOPIK</li>
             <li>استرداد كامل بعد أول حصة مدفوعة لو مش حبّيت</li>
           </ul>
         </div>
+        ${offerBlock(true)}
         <div style="margin: 20px 0; text-align: center;">
           ${brandButton("شوف الخطط", pricingUrl)}
         </div>
@@ -1273,16 +1382,17 @@ function buildTrialFollowupDay1Email(p: EmailPayload) {
     subject: "KLovers — how was your trial class? 💭",
     html: brandWrapper(`
       <h1 style="color: ${BRAND_DARK}; font-size: 22px;">Hi ${p.name}! 🌱</h1>
-      <p>How was your trial class yesterday? We hope you loved it.</p>
+      <p>How was your trial class? We hope you loved it.</p>
       <p>If you're ready to keep going, here are our plans — <strong>group classes from just $25</strong> and private 1-on-1 if you want dedicated attention.</p>
       <div style="background: ${BRAND_GRAY}; border-left: 4px solid ${BRAND_YELLOW}; padding: 14px 18px; border-radius: 4px; margin: 16px 0;">
         <p style="margin: 0 0 8px; font-weight: bold;">✨ Why students stay with us:</p>
         <ul style="margin: 6px 0 0; padding-left: 20px; color: ${BRAND_TEXT}; line-height: 1.7;">
-          <li>Small groups (4–8 students)</li>
+          <li>Small groups — ${TRIAL_GROUP_SIZE_MAX} students maximum</li>
           <li>Native teachers with TOPIK experience</li>
           <li>Full refund after your first paid class if you don't love it</li>
         </ul>
       </div>
+      ${offerBlock(false)}
       <div style="margin: 20px 0; text-align: center;">
         ${brandButton("See the plans", pricingUrl)}
       </div>
@@ -1878,6 +1988,9 @@ serve(async (req) => {
         break;
       case "trial_prep":
         ({ subject, html } = buildTrialPrepEmail(payload));
+        break;
+      case "trial_hour_before":
+        ({ subject, html } = buildTrialHourBeforeEmail(payload));
         break;
       case "trial_followup_day1":
         ({ subject, html } = buildTrialFollowupDay1Email(payload));
