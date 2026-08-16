@@ -2,6 +2,7 @@ name: CI
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches:
       - main
@@ -16,11 +17,13 @@ jobs:
     name: Build & Test
     runs-on: ubuntu-latest
     steps:
+      # v5 — v4 targets Node 20, which GitHub has deprecated and is already
+      # force-running on Node 24. Currently a warning; will become a failure.
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -31,6 +34,12 @@ jobs:
       - name: Run tests
         run: npm test
 
+      # This is the step that matters most. On a pull_request event the
+      # checkout above is the MERGE of the PR into main, not the PR branch,
+      # so this compiles the actual post-merge tree. That is what caught
+      # PR #36: git merged it cleanly, but the result had duplicate
+      # slotMatch / sessionLanguage declarations because main already had
+      # the feature.
       - name: Build
         run: npm run build
 
@@ -39,4 +48,12 @@ jobs:
       # continue-on-error once those are cleaned up to make lint a hard gate.
       - name: Lint (advisory)
         run: npm run lint
+        continue-on-error: true
+
+      # Advisory only: ~10 files have pre-existing type errors (stale generated
+      # Supabase types, a too-narrow LeadSource union). Vite does not typecheck
+      # at build time, which is why production has been fine regardless. Shown
+      # here for visibility; promote to blocking once the backlog is cleared.
+      - name: Typecheck (advisory)
+        run: npx tsc --noEmit -p tsconfig.app.json
         continue-on-error: true
