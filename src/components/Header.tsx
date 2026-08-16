@@ -70,7 +70,7 @@ const Header = () => {
 
   return (
     <>
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
+      {/* No skip-nav here — App.tsx renders the single app-wide one. */}
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/98 backdrop-blur-md shadow-sm" : "bg-background/95 backdrop-blur-sm"} border-b border-border`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
@@ -126,16 +126,19 @@ const Header = () => {
               {t("header", "langToggle")}
             </Button>
 
-            {!user && (
-              <Button size="sm" variant="outline" asChild className="gap-1.5 border-primary/40 text-primary hover:bg-primary/10">
-                <Link
-                  to="/free-trial"
-                  onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "header_free_trial" }); } catch { /* Analytics must not block navigation. */ } }}
-                >
-                  🎁 {isAr ? "حصة مجانية" : "Free Trial"}
-                </Link>
-              </Button>
-            )}
+            {/*
+              Shown to signed-in users too. This was gated on `!user`, so the
+              moment someone created an account they lost the only visible path
+              back to booking — exactly the people closest to converting.
+            */}
+            <Button size="sm" variant="outline" asChild className="gap-1.5 border-primary/40 text-primary-text hover:bg-primary/10">
+              <Link
+                to="/free-trial"
+                onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "header_free_trial" }); } catch { /* Analytics must not block navigation. */ } }}
+              >
+                🎁 {t("common.ctaBookFreeClass")}
+              </Link>
+            </Button>
 
             {user ? (
               <DropdownMenu>

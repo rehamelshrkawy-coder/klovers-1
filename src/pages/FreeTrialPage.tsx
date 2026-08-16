@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,6 +11,12 @@ import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { Gift, Users, Clock, Star, ArrowRight, Video, ClipboardList, Sparkles, CalendarDays, AlertCircle, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import AvatarInitials from "@/components/AvatarInitials";
+import { useTrialAvailability, formatSlot, type TrialSlot } from "@/hooks/useTrialAvailability";
+import { getUserTimezone } from "@/lib/viewerTimezone";
+import { PENDING_TRIAL_SLOT_KEY } from "@/lib/pendingTrialSlot";
+
+/** Stable identity for a slot across re-fetches. */
+const slotKey = (s: TrialSlot) => `${s.day_of_week}|${s.start_time}|${s.next_trial_date ?? ""}`;
 
 const Stars = ({ count = 5 }: { count?: number }) => (
   <div className="flex gap-0.5" role="img" aria-label={`${count} out of 5 stars`}>
@@ -21,8 +27,9 @@ const Stars = ({ count = 5 }: { count?: number }) => (
 );
 
 const FreeTrialPage = () => {
-  const { t, language } = useLanguage();
+  const { t, tPlural, language } = useLanguage();
   const isAr = language === "ar";
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const PERKS = [
     { icon: Gift,  text: t("freeTrial.perkFree") },
@@ -37,25 +44,24 @@ const FreeTrialPage = () => {
     { icon: Sparkles,      num: "3", text: t("trialBooking.expectItem3") },
   ];
 
-  /** 4 official trial class timestamps (MYT / UTC+8). */
-  const TRIAL_INSTANTS_MYT = [
-    "2026-05-29T01:00:00+08:00",
-    "2026-05-30T23:00:00+08:00",
-    "2026-06-02T23:00:00+08:00",
-    "2026-06-07T09:00:00+08:00",
-  ];
+  /*
+    The class-language selector. /free-trial previously had none, so the seat
+    counts below were filtered by the *UI* language — an English-reading
+    visitor who wanted the Arabic-taught track saw the wrong availability.
+    Defaulting to the UI language is a reasonable first guess; the toggle
+    makes it correctable.
+  */
+  const [classLanguage, setClassLanguage] = useState<"arabic" | "english">(
+    isAr ? "arabic" : "english",
+  );
 
-  const userTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return "Asia/Kuala_Lumpur"; } })();
+  const availability = useTrialAvailability(classLanguage);
+  const userTz = getUserTimezone();
 
-  const SLOT_HIGHLIGHTS = TRIAL_INSTANTS_MYT
-    .map((iso) => {
-      const d = new Date(iso);
-      if (d.getTime() <= Date.now()) return null;
-      const day = d.toLocaleDateString(isAr ? "ar-EG" : "en-US", { weekday: "long", month: "short", day: "numeric", timeZone: userTz });
-      const time = d.toLocaleTimeString(isAr ? "ar-EG" : "en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: userTz });
-      return { day, time };
-    })
-    .filter(Boolean) as { day: string; time: string }[];
+  const SLOT_HIGHLIGHTS = availability.slots.map((slot) => {
+    const label = formatSlot(slot, isAr ? "ar" : "en", userTz);
+    return { slot, label };
+  });
 
   const TESTIMONIALS: { quote: string; name: string; role: string }[] = [
     {
@@ -76,11 +82,41 @@ const FreeTrialPage = () => {
     canonical: "https://kloversegy.com/free-trial",
   });
 
+  /*
+    Structured data is built from the same fetched slots the page renders.
+
+    It used to carry four hardcoded CourseInstance dates and a fifth,
+    contradictory set inside the FAQ answer ("July 3, July 4, July 5 and
+    July 7") — so Google was being fed expired course markup that disagreed
+    with itself. The CourseInstance and Event nodes are now omitted entirely
+    when there is nothing scheduled, rather than advertising a class that
+    cannot be booked.
+  */
   useEffect(() => {
-    const el = document.createElement("script");
-    el.id = "free-trial-jsonld";
-    el.setAttribute("type", "application/ld+json");
-    el.textContent = JSON.stringify([
+    if (availability.status === "loading") return;
+
+    const instances = availability.slots
+      .filter((s) => s.startsAt)
+      .map((s) => ({
+        "@type": "CourseInstance",
+        courseMode: "online",
+        startDate: s.startsAt!.toISOString(),
+        endDate: new Date(s.startsAt!.getTime() + s.duration_min * 60_000).toISOString(),
+      }));
+
+    const course: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": "Course",
+      "name": "Free Trial Korean Class",
+      "description": "30-minute live Korean class with a real teacher. Free, no credit card required.",
+      "provider": { "@type": "Organization", "name": "Klovers Korean Academy", "url": "https://kloversegy.com" },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "category": "Free Trial" },
+      "inLanguage": "ko",
+      "url": "https://kloversegy.com/free-trial",
+    };
+    if (instances.length > 0) course.hasCourseInstance = instances;
+
+    const nodes: Record<string, unknown>[] = [
       {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
@@ -89,23 +125,11 @@ const FreeTrialPage = () => {
           { "@type": "ListItem", "position": 2, "name": "Free Korean Trial Class", "item": "https://kloversegy.com/free-trial" },
         ],
       },
-      {
-        "@context": "https://schema.org",
-        "@type": "Course",
-        "name": "Free Trial Korean Class",
-        "description": "30-minute live Korean class with a real teacher. Free, no credit card required.",
-        "provider": { "@type": "Organization", "name": "Klovers Korean Academy", "url": "https://kloversegy.com" },
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "category": "Free Trial" },
-        "inLanguage": "ko",
-        "url": "https://kloversegy.com/free-trial",
-        "hasCourseInstance": [
-          { "@type": "CourseInstance", "courseMode": "online", "startDate": "2026-05-29T01:00:00+08:00", "endDate": "2026-05-29T01:30:00+08:00" },
-          { "@type": "CourseInstance", "courseMode": "online", "startDate": "2026-05-30T23:00:00+08:00", "endDate": "2026-05-30T23:30:00+08:00" },
-          { "@type": "CourseInstance", "courseMode": "online", "startDate": "2026-06-02T23:00:00+08:00", "endDate": "2026-06-02T23:30:00+08:00" },
-          { "@type": "CourseInstance", "courseMode": "online", "startDate": "2026-06-07T09:00:00+08:00", "endDate": "2026-06-07T09:30:00+08:00" },
-        ],
-      },
-      {
+      course,
+    ];
+
+    if (availability.nextSlot?.startsAt) {
+      nodes.push({
         "@context": "https://schema.org",
         "@type": "Event",
         "name": "Free Korean Trial Class — Klovers Academy",
@@ -113,25 +137,41 @@ const FreeTrialPage = () => {
         "url": "https://kloversegy.com/free-trial",
         "eventStatus": "https://schema.org/EventScheduled",
         "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+        "startDate": availability.nextSlot.startsAt.toISOString(),
+        "endDate": new Date(
+          availability.nextSlot.startsAt.getTime() + availability.nextSlot.duration_min * 60_000,
+        ).toISOString(),
         "organizer": { "@type": "Organization", "name": "Klovers Korean Academy", "url": "https://kloversegy.com" },
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "validFrom": new Date().toISOString() },
+        "offers": {
+          "@type": "Offer", "price": "0", "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock", "validFrom": new Date().toISOString(),
+        },
         "location": { "@type": "VirtualLocation", "url": "https://kloversegy.com/free-trial" },
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-          { "@type": "Question", "name": "Is the trial class really free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — completely free, no credit card required. You attend a 30-minute live class with a real teacher." } },
-          { "@type": "Question", "name": "What level do I need to be?", "acceptedAnswer": { "@type": "Answer", "text": "Any level is welcome. Most students start from zero (Hangul). The teacher will assess your level during the class." } },
-          { "@type": "Question", "name": "When are the trial classes?", "acceptedAnswer": { "@type": "Answer", "text": "Upcoming sessions: July 3, July 4, July 5, and July 7 2026. All times are automatically shown in your local timezone when you visit the booking page." } },
-          { "@type": "Question", "name": "How do I book?", "acceptedAnswer": { "@type": "Answer", "text": "Click 'Book My Free Class', choose a day, and confirm. You'll receive an email with the class link and a Google Calendar invite." } },
-          { "@type": "Question", "name": "What happens after the trial?", "acceptedAnswer": { "@type": "Answer", "text": "After your trial you'll receive a level recommendation and pricing options if you'd like to continue with a full course." } },
-        ],
-      },
-    ]);
+      });
+    }
+
+    nodes.push({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Is the trial class really free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — completely free, no credit card required. You attend a 30-minute live class with a real teacher." } },
+        { "@type": "Question", "name": "What level do I need to be?", "acceptedAnswer": { "@type": "Answer", "text": "Any level is welcome. Most students start from zero (Hangul). The teacher will assess your level during the class." } },
+        // No literal dates here. They contradicted the CourseInstance nodes
+        // above, and they went stale the moment the schedule moved.
+        { "@type": "Question", "name": "When are the trial classes?", "acceptedAnswer": { "@type": "Answer", "text": "Upcoming sessions are listed on this page and shown automatically in your own timezone. New sessions are added regularly." } },
+        { "@type": "Question", "name": "How do I book?", "acceptedAnswer": { "@type": "Answer", "text": "Pick a time on this page and confirm. You'll receive an email with the class link and a calendar invite." } },
+        { "@type": "Question", "name": "What happens after the trial?", "acceptedAnswer": { "@type": "Answer", "text": "After your trial you'll receive a level recommendation and pricing options if you'd like to continue with a full course." } },
+      ],
+    });
+
+    const el = document.createElement("script");
+    el.id = "free-trial-jsonld";
+    el.setAttribute("type", "application/ld+json");
+    el.textContent = JSON.stringify(nodes);
     document.head.appendChild(el);
     return () => { el.remove(); };
-  }, []);
+  }, [availability.status, availability.slots, availability.nextSlot]);
+
 
   const navigate = useNavigate();
   const { user, loading } = useAuth();
@@ -148,24 +188,28 @@ const FreeTrialPage = () => {
       .then(({ count }) => { if (count !== null) setBookedCount(count); });
   }, []);
 
-  // Live spots remaining across all upcoming slots (summed) + nearest deadline
-  const [spotsRemaining, setSpotsRemaining] = useState<number | null>(null);
-  const [daysToDeadline, setDaysToDeadline] = useState<number | null>(null);
-  useEffect(() => {
-    supabase.rpc("get_trial_availability").then(({ data }) => {
-      if (!data || data.length === 0) return;
-      const total = (data as { booked_count: number; capacity: number; next_trial_date: string }[])
-        .reduce((sum, row) => sum + (row.capacity - row.booked_count), 0);
-      setSpotsRemaining(total);
-      // Deadline = earliest next_trial_date minus 1 day (booking cutoff)
-      const earliest = data[0].next_trial_date as string;
-      if (earliest) {
-        const deadlineMs = new Date(earliest + "T00:00:00Z").getTime() - 86_400_000;
-        const days = Math.max(0, Math.ceil((deadlineMs - Date.now()) / 86_400_000));
-        setDaysToDeadline(days);
-      }
-    });
-  }, []);
+  /*
+    Seats and booking deadline, both derived from the same fetched slots.
+
+    Three separate bugs lived in the previous version of this block:
+      · it summed capacity across BOTH language tracks, so it over-reported
+        seats to everyone;
+      · it took `data[0]` as the earliest session without sorting, trusting
+        whatever order Postgres happened to return;
+      · it computed the deadline against UTC midnight rather than the
+        viewer's, which shifted the countdown by up to a day.
+  */
+  const spotsRemaining = availability.status === "ready" ? availability.spotsRemaining : null;
+
+  const daysToDeadline = useMemo(() => {
+    const next = availability.nextSlot;
+    if (!next?.startsAt) return null;
+    // Booking closes 24h before the session starts.
+    const deadlineMs = next.startsAt.getTime() - 86_400_000;
+    const days = Math.ceil((deadlineMs - Date.now()) / 86_400_000);
+    // Never render a zero-or-negative countdown as a countdown.
+    return days >= 0 ? days : null;
+  }, [availability.nextSlot]);
 
 
   useEffect(() => {
@@ -195,6 +239,24 @@ const FreeTrialPage = () => {
   const handleBookCta = () => {
     logLeadEvent({ source_type: "free_trial", cta_label: "free_trial_landing_primary" });
     if (loading) return;
+
+    /*
+      Carry the chosen slot through the account step so the visitor never has
+      to pick twice. sessionStorage rather than the URL: the selection is
+      transient, and it should not survive being shared or bookmarked.
+    */
+    const chosen = availability.slots.find((s) => slotKey(s) === selectedKey);
+    if (chosen) {
+      try {
+        sessionStorage.setItem(PENDING_TRIAL_SLOT_KEY, JSON.stringify({
+          day_of_week: chosen.day_of_week,
+          start_time: chosen.start_time,
+          trial_date: chosen.next_trial_date,
+          class_language: classLanguage,
+        }));
+      } catch { /* Storage is optional; they just re-pick on the next page. */ }
+    }
+
     if (user) {
       navigate("/trial-booking");
     } else {
@@ -284,20 +346,22 @@ const FreeTrialPage = () => {
                   {/* Live availability chips */}
                   {(spotsRemaining !== null || daysToDeadline !== null) && (
                     <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start" aria-live="polite" aria-atomic="false">
-                      {spotsRemaining !== null && spotsRemaining <= 15 && (
-                        <span className="inline-flex items-center gap-1 bg-red-100 dark:bg-red-950/40 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-400 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                      {spotsRemaining !== null && spotsRemaining > 0 && spotsRemaining <= 15 && (
+                        <span className="inline-flex items-center gap-1 bg-red-100 dark:bg-red-950/40 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 text-[11px] font-bold px-2.5 py-1 rounded-full">
                           <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                          {spotsRemaining} {spotsRemaining === 1 ? "spot" : "spots"} left
+                          {/* Real capacity − booked, pluralised through CLDR
+                              so Arabic gets its dual and `many` forms. */}
+                          {tPlural("common.spotsLeft", spotsRemaining)}
                         </span>
                       )}
                       {daysToDeadline !== null && (
-                        <span className="inline-flex items-center gap-1 bg-orange-100 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-400 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                        <span className="inline-flex items-center gap-1 bg-orange-100 dark:bg-orange-950/40 border border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-300 text-[11px] font-bold px-2.5 py-1 rounded-full">
                           <Clock className="h-3 w-3" />
                           {daysToDeadline === 0
-                            ? "Booking closes today"
+                            ? t("common.bookingClosesToday")
                             : daysToDeadline === 1
-                            ? "Booking closes tomorrow"
-                            : `Booking closes in ${daysToDeadline} days`}
+                            ? t("common.bookingClosesTomorrow")
+                            : tPlural("common.bookingClosesIn", daysToDeadline)}
                         </span>
                       )}
                     </div>
@@ -384,57 +448,173 @@ const FreeTrialPage = () => {
         <section className="py-20 pb-28">
           <div className="container mx-auto px-4 max-w-xl">
 
-            <div className="text-center mb-10">
+            <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 mb-2">
-                <CalendarDays className="h-5 w-5 text-primary" />
+                <CalendarDays className="h-5 w-5 text-primary-text" />
                 <h2 className="text-3xl font-black text-foreground">{t("freeTrial.slotsTitle")}</h2>
               </div>
               <p className="text-sm text-muted-foreground">{t("freeTrial.slotsSubtitle")}</p>
             </div>
 
-            {/* Ticket cards — 1-col mobile, 2-col / 4-col desktop */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-              {SLOT_HIGHLIGHTS.map((s, i) => (
-                <div
-                  key={i}
-                  className="border-2 border-foreground rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_black] hover:shadow-[2px_2px_0px_0px_black] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150 cursor-default"
-                >
-                  {/* Header */}
-                  <div className="bg-foreground py-2.5 px-4 text-center">
-                    <p className="text-xs font-black text-primary uppercase tracking-widest">{s.day}</p>
-                  </div>
-                  {/* Perforated divider */}
-                  <div className="relative flex items-center bg-background">
-                    <div className="absolute -left-[9px] w-4 h-4 bg-background border-2 border-foreground rounded-full z-10" />
-                    <div className="flex-1 border-t-2 border-dashed border-foreground/25 mx-1" />
-                    <div className="absolute -right-[9px] w-4 h-4 bg-background border-2 border-foreground rounded-full z-10" />
-                  </div>
-                  {/* Body */}
-                  <div className="bg-background py-5 px-4 text-center">
-                    <p className="text-2xl font-black text-foreground">{s.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/*
+              Class-language selector. Availability is per language track, and
+              with no selector the page had to guess from the UI language —
+              so a visitor browsing in English who wanted the Arabic-taught
+              class was shown the wrong seats. A radiogroup, not two coloured
+              buttons: the selection is announced, and it is marked by a check
+              and a border rather than by background colour alone.
+            */}
+            <fieldset className="mb-8">
+              <legend className="sr-only">{t("freeTrial.classLanguageLegend")}</legend>
+              <p className="text-xs font-semibold text-muted-foreground text-center mb-2">
+                {t("freeTrial.classLanguageLegend")}
+              </p>
+              <div role="radiogroup" aria-label={t("freeTrial.classLanguageLegend")} className="flex gap-2 justify-center">
+                {(["arabic", "english"] as const).map((lang) => {
+                  const selected = classLanguage === lang;
+                  return (
+                    <button
+                      key={lang}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => { setClassLanguage(lang); setSelectedKey(null); }}
+                      className={`min-h-[44px] px-4 py-2 rounded-xl border-2 text-sm font-bold inline-flex items-center gap-2 transition-colors ${
+                        selected
+                          ? "border-foreground bg-accent text-foreground"
+                          : "border-border bg-background text-muted-foreground hover:border-foreground/40"
+                      }`}
+                    >
+                      {/* Non-colour indicator, so the choice is legible to a
+                          colour-blind reader and in high-contrast mode. */}
+                      <span aria-hidden="true">{selected ? "●" : "○"}</span>
+                      {t(lang === "arabic" ? "freeTrial.taughtInArabic" : "freeTrial.taughtInEnglish")}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
 
-            {/* Urgency */}
-            <div className="flex items-center justify-center gap-1.5 mb-5 text-xs font-semibold text-orange-600 dark:text-orange-400">
-              <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
-              {t("freeTrial.urgency")}
-            </div>
+            {/* ── Slots ──────────────────────────────────────────
+                Four explicit states. The grid can no longer render empty,
+                and no urgency copy appears when there is nothing to book. */}
+            {availability.status === "loading" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8" aria-hidden="true">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="h-32 rounded-2xl border-2 border-border bg-muted animate-pulse" />
+                ))}
+              </div>
+            )}
+
+            {availability.status === "error" && (
+              <div className="text-center py-10 px-4 border-2 border-border rounded-2xl mb-8">
+                <AlertCircle className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
+                <p className="text-sm font-semibold text-foreground mb-1">{t("freeTrial.slotsErrorTitle")}</p>
+                <p className="text-xs text-muted-foreground mb-4">{t("freeTrial.slotsErrorBody")}</p>
+                <Button variant="outline" size="sm" className="min-h-[44px]" onClick={availability.refresh}>
+                  {t("common.retry")}
+                </Button>
+              </div>
+            )}
+
+            {(availability.status === "unscheduled" || availability.status === "full") && (
+              <div className="text-center py-10 px-4 border-2 border-border rounded-2xl mb-8">
+                <CalendarDays className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
+                <p className="text-sm font-semibold text-foreground mb-1">
+                  {/* "All sessions are full" used to fire for zero rows of any
+                      cause. Full and not-scheduled are now different messages. */}
+                  {availability.status === "full"
+                    ? t("freeTrial.slotsFullTitle")
+                    : t("freeTrial.slotsNoneTitle")}
+                </p>
+                <p className="text-xs text-muted-foreground mb-4">{t("freeTrial.slotsNoneBody")}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="min-h-[44px] gap-2"
+                  onClick={() => trackAndOpenWhatsApp(WHATSAPP_BASE, { cta_label: "free_trial_no_slots" })}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  {t("freeTrial.slotsNoneCta")}
+                </Button>
+              </div>
+            )}
+
+            {availability.status === "ready" && (
+              <>
+                <p className="sr-only" aria-live="polite">
+                  {tPlural("common.sessionsAvailable", availability.slots.length)}
+                </p>
+                <div
+                  role="radiogroup"
+                  aria-label={t("freeTrial.slotsTitle")}
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8"
+                >
+                  {SLOT_HIGHLIGHTS.map(({ slot, label }) => {
+                    if (!label) return null;
+                    const key = slotKey(slot);
+                    const selected = selectedKey === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => setSelectedKey(key)}
+                        className={`text-start border-2 rounded-2xl overflow-hidden transition-all duration-150 ${
+                          selected
+                            ? "border-foreground shadow-[2px_2px_0px_0px_black] translate-x-[2px] translate-y-[2px]"
+                            : "border-foreground/70 shadow-[4px_4px_0px_0px_black] hover:shadow-[2px_2px_0px_0px_black] hover:translate-x-[2px] hover:translate-y-[2px]"
+                        }`}
+                      >
+                        <div className="bg-foreground py-2.5 px-4 text-center flex items-center justify-center gap-2">
+                          <span aria-hidden="true" className="text-primary text-xs">{selected ? "●" : "○"}</span>
+                          <p className="text-xs font-black text-primary uppercase tracking-widest">{label.day}</p>
+                        </div>
+                        <div className="relative flex items-center bg-background">
+                          <div className="absolute -start-[9px] w-4 h-4 bg-background border-2 border-foreground rounded-full z-10" />
+                          <div className="flex-1 border-t-2 border-dashed border-foreground/25 mx-1" />
+                          <div className="absolute -end-[9px] w-4 h-4 bg-background border-2 border-foreground rounded-full z-10" />
+                        </div>
+                        <div className="bg-background py-5 px-4 text-center">
+                          <p className="text-2xl font-black text-foreground">{label.time}</p>
+                          <p className="text-[11px] font-semibold text-muted-foreground mt-1">
+                            {tPlural("common.spotsLeft", slot.spotsLeft)}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Honest scarcity: a statement about how the classes are run,
+                    not an invented countdown. */}
+                <div className="flex items-center justify-center gap-1.5 mb-5 text-xs font-semibold text-muted-foreground">
+                  <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                  {t("freeTrial.urgency")}
+                </div>
+              </>
+            )}
 
             <Button
               size="lg"
               onClick={handleBookCta}
+              disabled={availability.status === "ready" && !selectedKey}
               className="w-full gap-2 text-base font-bold h-14 shadow-xl hover:scale-[1.01] transition-transform"
-              aria-label="Book your free Korean trial class"
             >
-              {t("freeTrial.ctaSecondary")}
-              <ArrowRight className="h-5 w-5" />
+              {availability.status === "ready" && !selectedKey
+                ? t("freeTrial.pickATimeFirst")
+                : t("common.ctaBookFreeClass")}
+              <ArrowRight className="h-5 w-5 rtl-flip" />
             </Button>
 
             <p className="text-xs text-muted-foreground text-center mt-3">
-              {user ? t("freeTrial.noteSignedIn") : t("freeTrial.noteSignedOut")}
+              {/*
+                The account comes after the choice, not before it. A visitor
+                previously had to create an account before seeing a single
+                available time — the picker was behind the signup wall.
+              */}
+              {user ? t("freeTrial.noteSignedIn") : t("freeTrial.noteAccountAfter")}
             </p>
 
             {/* Trust guarantee */}

@@ -19,6 +19,8 @@ import { toast } from "@/hooks/use-toast";
 import { CheckCircle, Mail, RefreshCw, Users, XCircle } from "lucide-react";
 import { formatTime, convertDateTimeToTimezone } from "@/lib/admin-utils";
 import { getAdminTimezone } from "@/lib/viewerTimezone";
+import { ADMIN_TIMEZONE } from "@/constants/scheduling";
+import { TRIAL_CONFIRMATION_EMAIL_ENABLED } from "@/lib/siteConfig";
 import { getLevelShortLabel } from "@/constants/levels";
 import { useAllTrialSlots } from "@/hooks/useTrialAdmin";
 import AddTrialClassDialog from "@/components/admin/trial/AddTrialClassDialog";
@@ -262,21 +264,64 @@ const TrialClassesManager = () => {
       // Normalise "arabic"→"ar", "english"→"en" for the email template
       const emailLang = rawLang === "arabic" ? "ar" : rawLang === "english" ? "en" : rawLang;
 
-      // Send confirmation email with join link to the student
-      const emailBody: Record<string, unknown> = {
-        template: "trial_confirmed",
-        email: booking.email,
-        name: booking.name || booking.email,
-        language: emailLang,
-        trial_date: date,
-        trial_time: time,
-        trial_timezone: "Africa/Cairo",
-        level: booking.level?.trim() || "",
-      };
-      if (meetingUrl) emailBody.class_link_url = meetingUrl;
-      await supabase.functions.invoke("send-confirmation-email", { body: emailBody });
+      /*
+        The confirmation email.
 
-      toast({ title: "Confirmed & email sent", description: `${booking.name || booking.email} → ${date} at ${time}` });
+        Three things were wrong here:
+          · TRIAL_CONFIRMATION_EMAIL_ENABLED was never imported, so the
+            kill-switch did not gate this call at all — turning it "off"
+            turned nothing off;
+          · trial_timezone was the literal "Africa/Cairo" regardless of where
+            the class actually is. The slots are anchored to Asia/Kuala_Lumpur,
+            so confirmation emails were stating a time up to seven hours wrong;
+          · the invoke result was discarded and the toast claimed "Confirmed &
+            email sent" whether or not anything was sent.
+      */
+      const emailTimezone = booking.timezone || (effectiveSlot as any)?.timezone || ADMIN_TIMEZONE;
+
+      let emailSent = false;
+      let emailError: string | null = null;
+
+      if (TRIAL_CONFIRMATION_EMAIL_ENABLED) {
+        const emailBody: Record<string, unknown> = {
+          template: "trial_confirmed",
+          email: booking.email,
+          name: booking.name || booking.email,
+          language: emailLang,
+          trial_date: date,
+          trial_time: time,
+          trial_timezone: emailTimezone,
+          level: booking.level?.trim() || "",
+        };
+        if (meetingUrl) emailBody.class_link_url = meetingUrl;
+
+        const { error: invokeError } = await supabase.functions.invoke(
+          "send-confirmation-email",
+          { body: emailBody },
+        );
+        if (invokeError) {
+          console.error("send-confirmation-email failed:", invokeError);
+          emailError = invokeError.message;
+        } else {
+          emailSent = true;
+        }
+      }
+
+      // Say what actually happened.
+      if (emailError) {
+        toast({
+          title: "Confirmed — but the email failed",
+          description: `${booking.name || booking.email} → ${date} at ${time}. Email error: ${emailError}`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: emailSent ? "Confirmed & email sent" : "Confirmed — email skipped",
+          description: emailSent
+            ? `${booking.name || booking.email} → ${date} at ${time}`
+            : `${booking.name || booking.email} → ${date} at ${time}. Confirmation emails are switched off (TRIAL_CONFIRMATION_EMAIL_ENABLED).`,
+        });
+      }
       fetchData();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });

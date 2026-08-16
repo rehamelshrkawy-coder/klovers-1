@@ -1,23 +1,50 @@
+import { useLocation } from "react-router-dom";
 import { WHATSAPP_NUMBER } from "@/lib/siteConfig";
 import { trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const WA_NUMBER = WHATSAPP_NUMBER;
 
+/**
+ * Routes where a floating "chat with us" button is noise rather than help:
+ * internal tooling, and the two focused tasks where an overlay sitting on the
+ * bottom-right corner covers the thing the user is working on.
+ */
+const SUPPRESSED_PREFIXES = ["/admin", "/placement-test", "/textbook", "/hangul-book"];
+
 const WhatsAppButton = () => {
   const { t, language } = useLanguage();
+  const { pathname } = useLocation();
   const isAr = language === "ar";
+
+  if (SUPPRESSED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+    return null;
+  }
+
   const waUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(t("whatsappFab.message"))}`;
+
   return (
     <button
       type="button"
       onClick={() => trackAndOpenWhatsApp(waUrl, { cta_label: "floating_fab" })}
       aria-label={t("whatsappFab.ariaLabel")}
-      className="group fixed bottom-24 right-5 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] shadow-lg hover:bg-[#1ebe5d] hover:scale-105 active:scale-95 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+      /*
+        `end-5` rather than `right-5`, so in Arabic the button moves to the
+        left with the rest of the layout instead of staying pinned to the
+        right where it overlaps content that now flows that way.
+
+        The bottom offset clears both the sticky enrol bar and the phone's
+        home indicator; it used to be a flat bottom-24 that sat on top of the
+        bar on short screens.
+      */
+      className="group fixed end-5 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] shadow-lg hover:bg-[#1ebe5d] hover:scale-105 active:scale-95 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+      style={{ bottom: "calc(6rem + env(safe-area-inset-bottom, 0px))" }}
     >
       {/* Tooltip label — desktop only */}
       <span
-        className={`pointer-events-none absolute top-1/2 -translate-y-1/2 bg-foreground text-background text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg hidden sm:block ${isAr ? "left-[calc(100%+0.75rem)]" : "right-[calc(100%+0.75rem)]"}`}
+        className={`pointer-events-none absolute top-1/2 -translate-y-1/2 bg-foreground text-background text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg hidden sm:block ${
+          isAr ? "left-[calc(100%+0.75rem)]" : "right-[calc(100%+0.75rem)]"
+        }`}
         aria-hidden="true"
       >
         {isAr ? "تواصل معنا" : "Chat with us"}

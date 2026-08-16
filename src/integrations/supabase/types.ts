@@ -1432,6 +1432,7 @@ export type Database = {
           level: string
           language: string | null
           name: string
+          phone: string | null
           reset_version: string | null
           status: string
           timezone: string | null
@@ -1448,6 +1449,7 @@ export type Database = {
           level?: string
           language?: string | null
           name: string
+          phone?: string | null
           reset_version?: string | null
           status?: string
           timezone?: string | null
@@ -1464,6 +1466,7 @@ export type Database = {
           level?: string
           language?: string | null
           name?: string
+          phone?: string | null
           reset_version?: string | null
           status?: string
           timezone?: string | null

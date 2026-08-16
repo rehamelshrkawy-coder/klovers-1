@@ -10,6 +10,7 @@ import { X, ArrowRight } from "lucide-react";
 import { logLeadEvent } from "@/lib/leadTracking";
 import { track } from "@/lib/tracking";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useClaimBottomOverlay } from "@/lib/bottomOverlay";
 
 const STORAGE_KEY = "klovers_home_exit_nudge_shown_at";
 // Only show again after 24h to avoid hammering returning visitors.
@@ -47,28 +48,28 @@ const HomeExitNudge = () => {
       if (e.clientY < 60) trigger();
     };
 
-    let scrolledUp = 0;
-    let lastY = window.scrollY;
-    const handleScroll = () => {
-      if (dismissed.current) return;
-      const y = window.scrollY;
-      if (y < lastY) scrolledUp += lastY - y;
-      else scrolledUp = 0;
-      lastY = y;
-      if (scrolledUp > 250) trigger();
-    };
+    /*
+      The 250px-of-upward-scroll trigger is gone.
+
+      Scrolling back up is what reading looks like — re-checking a price, going
+      back to a heading, comparing two rows. Treating it as exit intent fired
+      the nudge at the most engaged visitors, mid-thought, and it was the only
+      trigger that worked on touch devices at all (where a real exit intent
+      signal does not exist), so on mobile this was effectively "interrupt
+      anyone who scrolls up".
+
+      Mouse-to-the-top is a genuine exit signal, and it is the only one kept.
+    */
 
     // Engagement gate: don't fire on landing — wait until they've spent
     // 8s reading. Filters out instant-bouncers from search-result mistakes.
     const timer = window.setTimeout(() => {
       document.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("scroll", handleScroll, { passive: true });
     }, 8000);
 
     return () => {
       if (timer) window.clearTimeout(timer);
       document.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -77,17 +78,20 @@ const HomeExitNudge = () => {
     logLeadEvent({ source_type: "homepage", cta_label: "exit_intent_placement" });
   };
 
+  // Own the bottom edge while visible; the sticky bar hides itself.
+  useClaimBottomOverlay("nudge", visible);
+
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-3 sm:p-4 pointer-events-none animate-in slide-in-from-bottom-2 duration-300">
+    <div className="fixed bottom-0 start-0 end-0 z-50 p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pointer-events-none animate-in slide-in-from-bottom-2 duration-300">
       <div className="relative pointer-events-auto mx-auto max-w-lg bg-card border-2 border-primary/60 shadow-[0_20px_60px_rgba(0,0,0,0.25)] rounded-2xl overflow-hidden">
         <button
           onClick={() => setVisible(false)}
           aria-label={isAr ? "إغلاق" : "Dismiss"}
-          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-muted transition-colors z-10"
+          className="absolute top-1 end-1 inline-flex items-center justify-center min-h-[44px] min-w-[44px] text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition-colors z-10"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="h-4 w-4" aria-hidden="true" />
         </button>
         <Link
           to="/placement-test"

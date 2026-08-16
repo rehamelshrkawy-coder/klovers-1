@@ -1,4 +1,5 @@
-import { Star, Facebook, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { Star, Facebook, CheckCircle2, Pause, Play } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const reviews = [
@@ -62,8 +63,8 @@ const reviews = [
     lang: "ar",
     text: "ميرسي جداً على تعليمنا اللغة الكورية 😍 متشكرة جداً على المستويات اللي وصلنالها من الصفر — تعليم الحروف والكتابة والقراءة والكلام. الكلام ده مايوصفش جهدك وصبرك 선생님 감사합니다",
     date: "Jul 2023",
-    duration: "٦ أشهر",
-    level: "A1 ← B1",
+    duration: "6 أشهر",
+    level: "A1 → B1",
   },
   {
     name: "يمنى دراهم",
@@ -71,8 +72,8 @@ const reviews = [
     lang: "ar",
     text: "من الكورسات اللذيذة والممتعة جداً! طريقتها حلوة جداً وبتوضح الحاجة بصورة بسيطة وسهلة، دا غير شخصيتها العسولة وأنها هتساعدك في أي وقت 💕💕💕",
     date: "Jul 2023",
-    duration: "٤ أشهر",
-    level: "A1 ← A2",
+    duration: "4 أشهر",
+    level: "A1 → A2",
   },
   {
     name: "سامة آدم",
@@ -80,8 +81,8 @@ const reviews = [
     lang: "ar",
     text: "بجد أحلى سونتسينيم في الدنيا 😍 الكورس خفيف وبستمتع بيه جداً. قربت أكمل سنة وبجد اتحسنت كتير في الكوري والجرامر بتسهله جداً علينا ❤️❤️❤️",
     date: "Nov 2022",
-    duration: "١١ شهر",
-    level: "A1 ← B2",
+    duration: "11 شهر",
+    level: "A1 → B2",
   },
   {
     name: "مريم ميرا",
@@ -89,8 +90,8 @@ const reviews = [
     lang: "ar",
     text: "بجد يستفاد كتير في الكورس ده ويتعلم أكتر. ممكن اني أكتب جملة كاملة بالكوري رغم اني مكنتش أعرف أقرأ أو أكتب كوري من قبل! 선생님 감사합니다 ❤️",
     date: "Nov 2022",
-    duration: "٣ أشهر",
-    level: "A0 ← A1",
+    duration: "3 أشهر",
+    level: "A0 → A1",
   },
   {
     name: "بوسي محمد",
@@ -98,7 +99,7 @@ const reviews = [
     lang: "ar",
     text: "تعلمت الحروف والأرقام وأبدأت أحس بالفرق! بالصدفة شوفت البوست وكنت فخورة جداً. أجرب وحقيقي انا من أوائل المحاضرين حسيت بفرق جامد ❤️❤️",
     date: "Nov 2022",
-    duration: "٢ شهر",
+    duration: "2 شهر",
     level: "مبتدئ",
   },
   {
@@ -107,8 +108,8 @@ const reviews = [
     lang: "ar",
     text: "استفدت حلو أوي وبجد المستوى هايل ❤️",
     date: "Nov 2022",
-    duration: "٣ أشهر",
-    level: "A1 ← A2",
+    duration: "3 أشهر",
+    level: "A1 → A2",
   },
 ];
 
@@ -125,6 +126,7 @@ const StarRow = () => (
 );
 
 const ReviewCard = ({ review }: { review: (typeof reviews)[0] }) => {
+  const { t } = useLanguage();
   const initials = review.name
     .split(" ")
     .map((w) => w[0])
@@ -133,63 +135,97 @@ const ReviewCard = ({ review }: { review: (typeof reviews)[0] }) => {
     .toUpperCase();
 
   return (
-    <div
+    <figure
       className="flex-shrink-0 w-72 bg-card border border-border rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow"
+      /*
+        Each quote keeps the direction and language of the language it was
+        actually written in. Translating a testimonial would falsify it, so
+        the card adapts to the review rather than the review to the reader.
+      */
       dir={review.lang === "ar" ? "rtl" : "ltr"}
+      lang={review.lang}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-sm flex-shrink-0 border border-black/10">
+          <div
+            className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center text-amber-800 dark:text-amber-200 font-bold text-sm flex-shrink-0 border border-black/10 dark:border-white/10"
+            aria-hidden="true"
+          >
             {initials}
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
+            <figcaption className="flex items-center gap-1.5">
               <span className="font-semibold text-sm text-foreground truncate">{review.name}</span>
-              <span className="text-base leading-none">{review.flag}</span>
-            </div>
+              <span className="text-base leading-none" aria-hidden="true">{review.flag}</span>
+            </figcaption>
             <div className="flex items-center gap-2 mt-0.5">
               <StarRow />
               <span className="text-xs text-muted-foreground">{review.date}</span>
             </div>
             <div className="flex items-center gap-1 mt-1 flex-wrap">
-              <CheckCircle2 className="h-3 w-3 text-green-500 flex-shrink-0" />
-              <span className="text-[10px] text-green-600 font-semibold">Verified Student</span>
+              <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400 flex-shrink-0" aria-hidden="true" />
+              <span className="text-[10px] text-green-700 dark:text-green-400 font-semibold">
+                {t("testimonialsSection.verified")}
+              </span>
               {review.duration && (
                 <span className="text-[10px] text-muted-foreground">· {review.duration} · {review.level}</span>
               )}
             </div>
           </div>
         </div>
-        <Facebook className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
+        <Facebook className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
       </div>
-      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4">{review.text}</p>
-    </div>
+      <blockquote className="text-sm text-muted-foreground leading-relaxed line-clamp-4">
+        {review.text}
+      </blockquote>
+    </figure>
   );
 };
 
 const ScrollRow = ({
   items,
   direction,
+  paused,
+  label,
 }: {
   items: (typeof reviews)[0][];
   direction: "left" | "right";
+  paused: boolean;
+  label: string;
 }) => {
   const doubled = [...items, ...items]; // duplicate for seamless loop
 
   return (
     <div className="overflow-hidden relative">
       {/* fade edges */}
-      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent z-10" />
-      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
+      <div className="pointer-events-none absolute start-0 top-0 bottom-0 w-16 bg-gradient-to-r rtl:bg-gradient-to-l from-background to-transparent z-10" />
+      <div className="pointer-events-none absolute end-0 top-0 bottom-0 w-16 bg-gradient-to-l rtl:bg-gradient-to-r from-background to-transparent z-10" />
 
+      {/*
+        The row is a horizontally scrollable region and is focusable, so the
+        reviews are reachable by keyboard at all. Twelve testimonials were
+        previously impossible to read without a mouse: the track scrolled on a
+        CSS animation with no scroll container and nothing tabbable inside it.
+
+        `marquee-track` gives the CSS hover/focus-within pause; `marquee-paused`
+        is the explicit button state. See index.css.
+      */}
       <div
-        className={`flex gap-4 w-max ${
-          direction === "left" ? "animate-scroll-left" : "animate-scroll-right"
-        }`}
+        role="group"
+        aria-label={label}
+        tabIndex={0}
+        className="overflow-x-auto scrollbar-none focus-visible:outline-2 focus-visible:outline-offset-2"
+        style={{ outlineColor: "hsl(var(--ring))" }}
       >
-        {doubled.map((r, i) => (
-          <ReviewCard key={i} review={r} />
-        ))}
+        <div
+          className={`marquee-track flex gap-4 w-max ${paused ? "marquee-paused" : ""} ${
+            direction === "left" ? "animate-scroll-left" : "animate-scroll-right"
+          }`}
+        >
+          {doubled.map((r, i) => (
+            <ReviewCard key={i} review={r} />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -197,6 +233,14 @@ const ScrollRow = ({
 
 const TestimonialsSection = () => {
   const { t } = useLanguage();
+
+  /*
+    WCAG 2.2.2 (Level A): any motion that starts automatically, lasts more
+    than five seconds and runs alongside other content must have a mechanism
+    to pause it. These two rows loop forever and had none.
+  */
+  const [paused, setPaused] = useState(false);
+
   return (
     <section className="py-20 md:py-28 bg-background overflow-hidden">
       <div className="container mx-auto px-4 mb-10 text-center">
@@ -234,8 +278,23 @@ const TestimonialsSection = () => {
 
       {/* Scrolling rows */}
       <div className="space-y-4">
-        <ScrollRow items={row1} direction="left" />
-        <ScrollRow items={row2} direction="right" />
+        <ScrollRow items={row1} direction="left" paused={paused} label={t("testimonialsSection.rowLabel1")} />
+        <ScrollRow items={row2} direction="right" paused={paused} label={t("testimonialsSection.rowLabel2")} />
+      </div>
+
+      <div className="flex justify-center mt-6">
+        <button
+          type="button"
+          onClick={() => setPaused((p) => !p)}
+          aria-pressed={paused}
+          /* 44×44 minimum target. */
+          className="inline-flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] px-4 rounded-full border border-border bg-card text-sm font-semibold text-foreground hover:bg-accent transition-colors"
+        >
+          {paused
+            ? <Play className="h-4 w-4" aria-hidden="true" />
+            : <Pause className="h-4 w-4" aria-hidden="true" />}
+          {paused ? t("testimonialsSection.play") : t("testimonialsSection.pause")}
+        </button>
       </div>
     </section>
   );

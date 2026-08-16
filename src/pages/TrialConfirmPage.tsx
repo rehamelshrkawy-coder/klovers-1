@@ -1,10 +1,21 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { WHATSAPP_BASE } from "@/lib/siteConfig";
 
 type PageState = "loading" | "success" | "already" | "error";
 
+/**
+ * The attendance-confirmation landing page.
+ *
+ * This is reached by clicking a link in the confirmation email — including
+ * the Arabic one — and every string on it was hardcoded English. It also
+ * never imported the language context at all, so an Arabic reader who clicked
+ * an Arabic email landed on a fully English page.
+ */
 const TrialConfirmPage = () => {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id") ?? "";
   const token = searchParams.get("token") ?? "";
@@ -86,72 +97,69 @@ const TrialConfirmPage = () => {
           <span className="text-4xl font-black tracking-tight text-black">
             K<span className="text-yellow-400">lovers</span>
           </span>
-          <p className="text-gray-500 text-sm mt-1">Korean Language Academy</p>
+          <p className="text-gray-500 text-sm mt-1">{t("trialConfirm.academy")}</p>
         </div>
 
         {state === "loading" && (
-          <div className="py-8">
-            <div className="w-10 h-10 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Confirming your attendance…</p>
+          <div className="py-8" aria-busy="true">
+            <div className="w-10 h-10 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" aria-hidden="true" />
+            <p className="text-gray-600">{t("trialConfirm.confirming")}</p>
           </div>
         )}
 
         {(state === "success" || state === "already") && (
           <div className="py-4">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4" aria-hidden="true">
               <span className="text-3xl">✅</span>
             </div>
-            <h1 className="text-2xl font-bold text-black mb-2">Attendance Confirmed!</h1>
+            <h1 className="text-2xl font-bold text-black mb-2">{t("trialConfirm.title")}</h1>
             <p className="text-gray-600 mb-6">
-              {state === "already"
-                ? "You've already confirmed your attendance. See you in class!"
-                : "You're all set. See you in class!"}
+              {state === "already" ? t("trialConfirm.bodyAlready") : t("trialConfirm.body")}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              {/* The class link is the one thing they came here for — it goes
+                  first, as the primary action, when we have it. */}
+              {classLink && (
+                <a
+                  href={classLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ backgroundColor: "#000", color: "#FACC15" }}
+                  className="inline-flex items-center justify-center min-h-[44px] font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
+                >
+                  {t("trialConfirm.joinClass")}
+                </a>
+              )}
               <a
                 href="/placement-test"
                 style={{ backgroundColor: "#000", color: "#FACC15" }}
-                className="inline-block font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
+                className="inline-flex items-center justify-center min-h-[44px] font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
               >
-                📝 Take Placement Test
-              </a>
-              <a
-                href="/pricing"
-                style={{ backgroundColor: "#000", color: "#FACC15" }}
-                className="inline-block font-bold px-6 py-3 rounded-xl text-base hover:opacity-80 transition-opacity"
-              >
-                💰 View Prices
+                {t("trialConfirm.placementTest")}
               </a>
             </div>
-            {classLink && (
-              <a
-                href={classLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block mt-3 text-sm text-gray-500 underline hover:text-gray-700"
-              >
-                Join via Google Meet
-              </a>
-            )}
+            <a href="/pricing" className="inline-block mt-3 text-sm text-gray-600 underline hover:text-gray-800">
+              {t("trialConfirm.viewPrices")}
+            </a>
           </div>
         )}
 
         {state === "error" && (
           <div className="py-4">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4" aria-hidden="true">
               <span className="text-3xl">❌</span>
             </div>
-            <h1 className="text-2xl font-bold text-black mb-2">Link Invalid</h1>
-            <p className="text-gray-600 mb-6">
-              This link is invalid or has already been used. Please contact us if you need help.
-            </p>
+            <h1 className="text-2xl font-bold text-black mb-2">{t("trialConfirm.errorTitle")}</h1>
+            <p className="text-gray-600 mb-6">{t("trialConfirm.errorBody")}</p>
             <a
-              href="https://wa.me/201010003084"
+              /* The shared number, not a second hardcoded one that may not be
+                 monitored. */
+              href={WHATSAPP_BASE}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-black text-yellow-400 font-bold px-6 py-3 rounded-xl text-base hover:opacity-90 transition-opacity"
+              className="inline-flex items-center justify-center min-h-[44px] bg-black text-yellow-400 font-bold px-6 py-3 rounded-xl text-base hover:opacity-90 transition-opacity"
             >
-              Contact us on WhatsApp
+              {t("trialConfirm.contactWhatsApp")}
             </a>
           </div>
         )}

@@ -40,7 +40,7 @@ export function formatTime(t: string): string {
 
 const WEEKDAY_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-function tzOffsetMs(date: Date, tz: string): number {
+export function tzOffsetMs(date: Date, tz: string): number {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: tz, hour12: false,
     year: "numeric", month: "2-digit", day: "2-digit",

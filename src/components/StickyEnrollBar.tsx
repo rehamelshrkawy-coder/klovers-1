@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { X, ArrowRight } from "lucide-react";
 import { logLeadEvent } from "@/lib/leadTracking";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBottomOverlayOccupant } from "@/lib/bottomOverlay";
 
 /**
  * StickyEnrollBar — appears after the user scrolls past the hero CTA buttons.
@@ -32,11 +33,14 @@ const StickyEnrollBar = () => {
     sessionStorage.setItem("enroll_bar_dismissed", "1");
   };
 
-  if (dismissed || !visible) return null;
+  // Step aside while the exit nudge is up — they share this anchor.
+  const bottomOccupant = useBottomOverlayOccupant();
+
+  if (dismissed || !visible || bottomOccupant === "nudge") return null;
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-40 animate-in slide-in-from-bottom-2 duration-300"
+      className="fixed bottom-0 start-0 end-0 z-40 animate-in slide-in-from-bottom-2 duration-300"
       role="complementary"
       aria-label={t("stickyBar.ariaLabel")}
     >
@@ -61,16 +65,21 @@ const StickyEnrollBar = () => {
           <Link
             to="/enroll-now"
             onClick={() => { try { logLeadEvent({ source_type: "enroll", cta_label: "sticky_bar_enroll_now" }); } catch { /* Analytics must not block navigation. */ } }}
-            className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-bold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity border border-black/25"
+            className="inline-flex items-center justify-center gap-1.5 min-h-[44px] bg-primary text-primary-foreground text-xs font-bold px-4 rounded-lg hover:opacity-90 transition-opacity border border-black/25"
           >
-            {t("stickyBar.enrollNow")} <ArrowRight className="h-3.5 w-3.5" />
+            {t("stickyBar.enrollNow")} <ArrowRight className="h-3.5 w-3.5 rtl-flip" />
           </Link>
+          {/*
+            44×44 with real separation from the CTA. This was a ~16px icon
+            four pixels from "Enroll now", on a bar pinned to the bottom edge
+            of a phone — every mis-tap landed on the paid CTA.
+          */}
           <button
             onClick={dismiss}
             aria-label={t("stickyBar.dismiss")}
-            className="text-white/60 hover:text-white/90 transition-colors ml-1"
+            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] ms-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
       </div>

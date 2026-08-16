@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -138,19 +138,29 @@ const App = () => (
         <Toaster />
         <Sonner position="bottom-center" />
         <AppInner />
-        {/* Skip-nav — keyboard/screen-reader accessibility */}
+        {/*
+          The single skip-nav for the whole app. Header.tsx used to render a
+          second, identical one, so keyboard users tabbed through "Skip to main
+          content" twice on every page that has a header.
+        */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[300] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:font-semibold focus:outline-none focus:shadow-xl"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:start-4 focus:z-[300] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:font-semibold focus:outline-none focus:shadow-xl"
         >
           Skip to main content
         </a>
-        <WhatsAppButton />
-        <CookieBanner />
         <BrowserRouter>
           <PageViewTracker />
-          <InstallPrompt />
           <ErrorBoundary>
+            {/*
+              The floating components live inside the error boundary and inside
+              the router: inside the boundary so one of them throwing can't take
+              the page down, and inside the router so they can suppress
+              themselves per-route.
+            */}
+            <WhatsAppButton />
+            <CookieBanner />
+            <InstallPrompt />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -193,7 +203,6 @@ const App = () => (
                 <Route path="/interview-training" element={<KoreanInterviewPage />} />
                 <Route path="/welcome-back" element={<ReturningStudentsLandingPage />} />
                 <Route path="/hangul-book" element={<AuthProtectedRoute><HangulBookPage /></AuthProtectedRoute>} />
-                <Route path="/trial-book" element={<AuthProtectedRoute><TrialBookPage /></AuthProtectedRoute>} />
                 <Route path="/trial-confirm" element={<TrialConfirmPage />} />
                 <Route path="/enrollment-status" element={<AuthProtectedRoute><EnrollmentStatusPage /></AuthProtectedRoute>} />
                 <Route path="/hangul-starter" element={<HangulStarterPage />} />
@@ -202,6 +211,15 @@ const App = () => (
                 <Route path="/admin/reset" element={<ProtectedRoute><AdminResetPage /></ProtectedRoute>} />
                 <Route path="/admin/marketing" element={<ProtectedRoute><MarketingGeneratorPage /></ProtectedRoute>} />
                 <Route path="/admin/korean-orchestra" element={<ProtectedRoute><KoreanOrchestratorPage /></ProtectedRoute>} />
+                {/*
+                  The teacher's trial handbook. It used to sit at /trial-book,
+                  one character away from the student-facing /trial-booking, and
+                  any student who guessed wrong landed in an internal document
+                  with no way back. It is staff-only content, so it lives under
+                  /admin/ behind the admin guard; /trial-book now redirects.
+                */}
+                <Route path="/admin/trial-book" element={<ProtectedRoute><TrialBookPage /></ProtectedRoute>} />
+                <Route path="/trial-book" element={<Navigate to="/trial-booking" replace />} />
                 <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
