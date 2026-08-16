@@ -20,7 +20,7 @@ const DAY_NAMES_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "F
 const DAY_NAMES_AR = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
 import { formatTime, convertSlotToTimezone } from "@/lib/admin-utils";
-import { getUserTimezone } from "@/lib/viewerTimezone";
+import { getUserTimezone, supportedTimeZones } from "@/lib/viewerTimezone";
 
 interface ResubRequest {
   id: string;
@@ -224,7 +224,7 @@ const ResubmitSchedulePage = () => {
               <Select value={timezone} onValueChange={setTimezone}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {(Intl as any).supportedValuesOf("timeZone").map((tz: string) => (
+                  {supportedTimeZones().map((tz) => (
                     <SelectItem key={tz} value={tz}>{tz.replace(/_/g, " ")}</SelectItem>
                   ))}
                 </SelectContent>

@@ -29,7 +29,7 @@ import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 import { track } from "@/lib/tracking";
 import { convertSlotToTimezone } from "@/lib/admin-utils";
-import { setUserTimezone } from "@/lib/viewerTimezone";
+import { setUserTimezone, supportedTimeZones } from "@/lib/viewerTimezone";
 import type { Database } from "@/integrations/supabase/types";
 
 type Step = 1 | 2 | 3 | 4;
@@ -861,7 +861,7 @@ const EnrollNowPage = () => {
                 <Select value={timezone} onValueChange={(tz) => { setTimezone(tz); setUserTimezone(tz); }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {Intl.supportedValuesOf("timeZone").map((tz) => (
+                    {supportedTimeZones().map((tz) => (
                       <SelectItem key={tz} value={tz}>{tz.replace(/_/g, " ")}</SelectItem>
                     ))}
                   </SelectContent>
