@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { X, ArrowRight } from "lucide-react";
 import { logLeadEvent } from "@/lib/leadTracking";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBottomSurface } from "@/hooks/useBottomSurface";
 
 /**
  * StickyEnrollBar — appears after the user scrolls past the hero CTA buttons.
@@ -32,7 +33,10 @@ const StickyEnrollBar = () => {
     sessionStorage.setItem("enroll_bar_dismissed", "1");
   };
 
-  if (dismissed || !visible) return null;
+  // Yields the bottom strip to the exit nudge and the cookie banner rather
+  // than rendering underneath them.
+  const granted = useBottomSurface("stickyBar", visible && !dismissed);
+  if (!granted) return null;
 
   return (
     <div
@@ -43,9 +47,9 @@ const StickyEnrollBar = () => {
       <div className="bg-black border-t border-primary/40 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3 max-w-4xl mx-auto">
         {/* Left: text */}
         <div className="flex items-center gap-3 min-w-0">
-          <span className="text-primary text-lg flex-shrink-0">🇰🇷</span>
+          <span className="text-primary-text text-lg flex-shrink-0">🇰🇷</span>
           <p className="text-white text-sm font-medium truncate">
-            <span className="text-primary font-bold">Klovers</span> — {t("stickyBar.tagline")}
+            <span className="text-primary-text font-bold">Klovers</span> — {t("stickyBar.tagline")}
           </p>
         </div>
 
@@ -68,7 +72,7 @@ const StickyEnrollBar = () => {
           <button
             onClick={dismiss}
             aria-label={t("stickyBar.dismiss")}
-            className="text-white/60 hover:text-white/90 transition-colors ml-1"
+            className="text-white/60 hover:text-white/90 transition-colors ms-1"
           >
             <X className="h-4 w-4" />
           </button>

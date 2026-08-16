@@ -40,7 +40,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Klovers" />
-    <meta name="theme-color" content="#f59e0b" />
+    <!-- Was #f59e0b (amber) — a colour the site never uses, so Android browser
+         chrome rendered a brand that does not exist. This is --primary. -->
+    <meta name="theme-color" content="#ffff00" />
 
     <!-- Preconnect to external origins for faster resource loading -->
     <link rel="preconnect" href="https://ewtdgpbybkceokfohhyg.supabase.co" crossorigin />
@@ -53,7 +55,34 @@
     <!-- LCP hero image — preloaded from stable public path to avoid render-blocking discovery -->
     <link rel="preload" as="image" href="/hero-korean.jpg" fetchpriority="high" />
 
-    <!-- Fonts: system font stack used globally; marketing fonts loaded on-demand by Creator Hub -->
+    <!-- Fonts: system font stack used globally for Latin (zero render-blocking
+         requests); Arabic is the one exception — a self-hosted, unicode-range
+         gated subset, so Latin-only visitors never fetch it. Marketing fonts are
+         loaded on-demand by Creator Hub. -->
+
+    <!--
+      Resolve language BEFORE first paint.
+
+      React sets dir/lang in an effect, which is at least one frame after the
+      document renders — so an Arabic visitor saw the whole page flash
+      left-to-right before it snapped into RTL. This runs synchronously in the
+      head and must stay in sync with initialLanguage() in LanguageContext.tsx.
+    -->
+    <script>
+      (function () {
+        try {
+          var fromUrl = new URLSearchParams(window.location.search).get('lang');
+          var saved = null;
+          try { saved = localStorage.getItem('k-lovers-lang'); } catch (e) { /* Storage is optional. */ }
+          var lang =
+            fromUrl === 'ar' || fromUrl === 'en' ? fromUrl :
+            saved === 'ar' || saved === 'en' ? saved :
+            (navigator.language || '').indexOf('ar') === 0 ? 'ar' : 'en';
+          document.documentElement.lang = lang;
+          document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        } catch (e) { /* Never block first paint on this. */ }
+      })();
+    </script>
 
     <!-- Google Analytics (GA4) — deferred to avoid blocking render -->
     <script>

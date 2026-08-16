@@ -370,7 +370,7 @@ function AllTemplateCards({ post, theme, format, active, onSelect, bgImage }: {
 
   return (
     <div className="space-y-2">
-      <h3 className="text-[10px] font-bold uppercase tracking-wider text-primary">All Templates ({TEMPLATE_CARDS.length})</h3>
+      <h3 className="text-[10px] font-bold uppercase tracking-wider text-primary-text">All Templates ({TEMPLATE_CARDS.length})</h3>
       <div className="grid grid-cols-5 gap-2">
         {TEMPLATE_CARDS.map((tpl, i) => {
           const meta = TEMPLATE_LABELS[tpl];
@@ -379,7 +379,7 @@ function AllTemplateCards({ post, theme, format, active, onSelect, bgImage }: {
             <button
               key={tpl}
               onClick={() => onSelect(tpl)}
-              className={`rounded-xl overflow-hidden border-2 transition-all text-left ${
+              className={`rounded-xl overflow-hidden border-2 transition-all text-start ${
                 isActive ? "border-primary shadow-lg shadow-primary/20 scale-[1.03]" : "border-border hover:border-primary/50"
               }`}
             >
@@ -817,18 +817,18 @@ export default function CreatorHub() {
 
           <div className="flex justify-center gap-2 flex-wrap">
             <Button onClick={handleDownload}>
-              <Download className="h-4 w-4 mr-2" /> Download
+              <Download className="h-4 w-4 me-2" /> Download
             </Button>
             {posts.length > 1 && (
               <Button variant="outline" onClick={handleDownloadAll}>
-                <DownloadCloud className="h-4 w-4 mr-2" /> Download All ({posts.length})
+                <DownloadCloud className="h-4 w-4 me-2" /> Download All ({posts.length})
               </Button>
             )}
           </div>
         </div>
 
         {/* Right: Controls */}
-        <div className="space-y-5 overflow-y-auto max-h-[80vh] pr-1">
+        <div className="space-y-5 overflow-y-auto max-h-[80vh] pe-1">
           {/* Template */}
           <div className="space-y-3">
             <AllTemplateCards
@@ -846,7 +846,7 @@ export default function CreatorHub() {
                   <button
                     key={t.key}
                     onClick={() => setTemplate(t.key)}
-                    className={`text-left p-2.5 rounded-lg border text-sm transition-colors ${
+                    className={`text-start p-2.5 rounded-lg border text-sm transition-colors ${
                       template === t.key
                         ? "border-primary bg-accent"
                         : "border-border hover:border-muted-foreground/30"
@@ -982,7 +982,7 @@ export default function CreatorHub() {
                 <button
                   key={key}
                   onClick={() => setFormat(key)}
-                  className={`p-2.5 rounded-lg border text-left transition-colors ${
+                  className={`p-2.5 rounded-lg border text-start transition-colors ${
                     format === key ? "border-primary bg-accent" : "border-border hover:border-muted-foreground/30"
                   }`}
                 >
@@ -998,7 +998,7 @@ export default function CreatorHub() {
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Posts ({posts.length})</h3>
               <Button size="sm" variant="outline" onClick={addPost}>
-                <Plus className="h-3 w-3 mr-1" /> Add Post
+                <Plus className="h-3 w-3 me-1" /> Add Post
               </Button>
             </div>
             <div className="space-y-1 max-h-40 overflow-y-auto">
@@ -1077,7 +1077,7 @@ export default function CreatorHub() {
       <div className="border-t pt-6 space-y-4">
         <div>
           <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" /> Campaign
+            <Sparkles className="h-4 w-4 text-primary-text" /> Campaign
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">Pick a goal, generate 30 posts</p>
         </div>
@@ -1088,7 +1088,7 @@ export default function CreatorHub() {
             <button
               key={c.id}
               onClick={() => setSelectedCampaign(c.id)}
-              className={`rounded-xl border p-3 text-left transition-all ${
+              className={`rounded-xl border p-3 text-start transition-all ${
                 selectedCampaign === c.id
                   ? "ring-2 ring-primary border-primary bg-primary/5 shadow-sm"
                   : "border-border hover:border-primary/40 hover:bg-muted/50"
@@ -1103,13 +1103,13 @@ export default function CreatorHub() {
 
         <div className="flex flex-wrap items-center gap-2">
           <Button onClick={generateMonthlyDrafts} disabled={groupsLoading}>
-              <Sparkles className="h-4 w-4 mr-1.5" />
+              <Sparkles className="h-4 w-4 me-1.5" />
               {groupsLoading ? "Loading…" : "Generate 30 Posts"}
             </Button>
             {monthlyDrafts.length > 0 && (
               <>
                 <Button variant="outline" onClick={handleBulkDownload} disabled={bulkDownloading}>
-                  {bulkDownloading ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <DownloadCloud className="h-4 w-4 mr-1.5" />}
+                  {bulkDownloading ? <Loader2 className="h-4 w-4 me-1.5 animate-spin" /> : <DownloadCloud className="h-4 w-4 me-1.5" />}
                   {bulkDownloading ? "Zipping…" : `Download All ${monthlyDrafts.length} (ZIP)`}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setMonthlyDrafts([])} className="text-xs text-muted-foreground">
@@ -1161,14 +1161,14 @@ export default function CreatorHub() {
                       Edit
                     </Button>
                     <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => downloadSinglePost(draft)}>
-                      <DownloadCloud className="h-3 w-3 mr-1" /> PNG
+                      <DownloadCloud className="h-3 w-3 me-1" /> PNG
                     </Button>
                     <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => openReelMaker(draft)}>
-                      <Film className="h-3 w-3 mr-1" /> Reel
+                      <Film className="h-3 w-3 me-1" /> Reel
                     </Button>
                     <button
                       onClick={() => setMonthlyDrafts(prev => prev.map(d => d.id === draft.id ? { ...d, approved: !d.approved } : d))}
-                      className={`ml-auto h-7 w-7 rounded-full flex items-center justify-center transition-colors ${draft.approved ? "bg-green-500 text-white" : "bg-muted text-muted-foreground hover:bg-muted/70"}`}
+                      className={`ms-auto h-7 w-7 rounded-full flex items-center justify-center transition-colors ${draft.approved ? "bg-green-500 text-white" : "bg-muted text-muted-foreground hover:bg-muted/70"}`}
                       title={draft.approved ? "Approved" : "Mark approved"}
                     >
                       <CheckCircle2 className="h-4 w-4" />
@@ -1243,21 +1243,21 @@ export default function CreatorHub() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-6 ml-2 text-xs"
+                    className="h-6 ms-2 text-xs"
                     disabled={reelSearching || reelComposing}
                     onClick={() => {
                       const q = reelDraft.reelScript?.bgQuery || `korean ${reelDraft.postType.replace(/_/g, " ")}`;
                       void fetchStockVideos(reelDraft.postType, q);
                     }}
                   >
-                    <RefreshCw className={`h-3 w-3 mr-1 ${reelSearching ? "animate-spin" : ""}`} />
+                    <RefreshCw className={`h-3 w-3 me-1 ${reelSearching ? "animate-spin" : ""}`} />
                     Refresh
                   </Button>
                 </div>
 
                 {reelSearching && (
                   <div className="flex items-center justify-center py-12 text-muted-foreground">
-                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    <Loader2 className="h-5 w-5 animate-spin me-2" />
                     Searching Pexels for Korea-themed clips…
                   </div>
                 )}
@@ -1292,11 +1292,11 @@ export default function CreatorHub() {
                             className="w-full aspect-[9/16] object-cover"
                             loading="lazy"
                           />
-                          <span className="absolute top-1.5 right-1.5 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
+                          <span className="absolute top-1.5 end-1.5 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
                             {v.duration}s
                           </span>
                           {reelPickedVideoId === v.id && (
-                            <span className="absolute bottom-1.5 left-1.5 bg-primary text-primary-foreground rounded-full p-1">
+                            <span className="absolute bottom-1.5 start-1.5 bg-primary text-primary-foreground rounded-full p-1">
                               <CheckCircle2 className="h-3.5 w-3.5" />
                             </span>
                           )}
@@ -1329,12 +1329,12 @@ export default function CreatorHub() {
                 >
                   {reelComposing ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                      <Loader2 className="h-4 w-4 me-1.5 animate-spin" />
                       Composing…
                     </>
                   ) : (
                     <>
-                      <Video className="h-4 w-4 mr-1.5" />
+                      <Video className="h-4 w-4 me-1.5" />
                       Generate Reel (9s)
                     </>
                   )}

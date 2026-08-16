@@ -97,7 +97,7 @@ export default function SuggestedSlots({
                   {s.duration_min} min · {adminTz}
                 </div>
 
-                <ul className="mt-3 list-disc space-y-1 pl-4 text-sm">
+                <ul className="mt-3 list-disc space-y-1 ps-4 text-sm">
                   {s.reasons.map((r, i) => (
                     <li key={i}>{r}</li>
                   ))}

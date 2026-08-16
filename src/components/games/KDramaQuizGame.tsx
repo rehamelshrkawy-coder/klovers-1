@@ -117,7 +117,7 @@ const KDramaQuizGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
           <Badge variant="outline">{t("games.round")} {round + 1}/{totalRounds}</Badge>
           <div className="flex items-center gap-2">
             {usingLessonVocab && <Badge variant="outline" className="text-xs gap-1">📚 From your lessons</Badge>}
-            <Badge variant="secondary"><Sparkles className="h-3 w-3 mr-1" />{score * 5} XP</Badge>
+            <Badge variant="secondary"><Sparkles className="h-3 w-3 me-1" />{score * 5} XP</Badge>
           </div>
         </div>
         <Card className="p-6 text-center space-y-4">
@@ -127,7 +127,7 @@ const KDramaQuizGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
           <div className="grid gap-3">
             {q.options.map(opt => (
               <button key={opt} onClick={() => handleAnswer(opt)} disabled={!!feedback}
-                className={`p-3 rounded-lg font-medium border-2 transition-all text-left ${
+                className={`p-3 rounded-lg font-medium border-2 transition-all text-start ${
                   feedback && opt === q.answer ? "border-green-500 bg-green-500/10 text-foreground" :
                   feedback && opt === selected ? "border-destructive bg-destructive/10 text-foreground" :
                   "border-border bg-card text-foreground hover:border-foreground/30"

@@ -240,7 +240,7 @@ const ErrorCatchGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
       </Card>
 
       {selected && (
-        <Card className={`p-3 border-l-4 text-sm ${selected === q.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
+        <Card className={`p-3 border-s-4 text-sm ${selected === q.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
           <p className="font-semibold mb-1">
             {selected === q.correct
               ? `✅ Correct! ${isTrick && q.correct === q.error ? "The sentence was correct all along!" : ""}`

@@ -190,7 +190,7 @@ const LegacyAttendancePanel = ({
           className="w-full"
           size="sm"
         >
-          <Plus className="h-4 w-4 mr-1" />
+          <Plus className="h-4 w-4 me-1" />
           {adding ? "Adding..." : selectedDate ? `Add attendance for ${format(selectedDate, "MMM d, yyyy")}` : "Select a date to add"}
         </Button>
 
@@ -203,7 +203,7 @@ const LegacyAttendancePanel = ({
             {records.map((r) => (
               <div key={r.id} className="flex items-center justify-between p-2 rounded-lg border border-border hover:bg-accent/30 transition-colors">
                 <div className="flex items-center gap-2">
-                  <CalendarCheck className="h-4 w-4 text-primary" />
+                  <CalendarCheck className="h-4 w-4 text-primary-text" />
                   <span className="text-sm font-medium text-foreground">
                     {new Date(r.session_date + "T00:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
                   </span>

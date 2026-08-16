@@ -35,7 +35,7 @@ const MeetTeacher = () => {
               {/* Subtle warm glow backdrop */}
               <div className="absolute -inset-6 rounded-3xl bg-amber-200/20 blur-3xl" />
               {/* Decorative border offset */}
-              <div className="absolute -bottom-4 -right-4 w-full h-full rounded-3xl border-2 border-amber-300/50" />
+              <div className="absolute -bottom-4 -end-4 w-full h-full rounded-3xl border-2 border-amber-300/50" />
               {/* Photo card */}
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-amber-200 ring-1 ring-black/10 w-72 md:w-80 lg:w-96">
                 <img
@@ -90,7 +90,7 @@ const MeetTeacher = () => {
             </div>
 
             {/* Team note */}
-            <p className="text-muted-foreground text-sm md:text-base leading-relaxed border-l-2 border-amber-400 pl-4 italic">
+            <p className="text-muted-foreground text-sm md:text-base leading-relaxed border-s-2 border-amber-400 ps-4 italic">
               {t("teacher", "bio4")}
             </p>
 
@@ -115,7 +115,7 @@ const MeetTeacher = () => {
                       <div className="w-3 h-3 rounded-full bg-primary border-2 border-background shrink-0" />
                       <div className={`h-px flex-1 bg-border ${i === arr.length - 1 ? "opacity-0" : ""}`} />
                     </div>
-                    <p className="text-[10px] font-bold text-primary">{m}</p>
+                    <p className="text-[10px] font-bold text-primary-text">{m}</p>
                     <p className="text-[10px] text-muted-foreground leading-tight">{desc}</p>
                   </div>
                 ))}

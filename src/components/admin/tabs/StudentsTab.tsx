@@ -103,7 +103,7 @@ export const StudentsTab = memo(function StudentsTab({
                   <button
                     type="button"
                     onClick={() => setAdminTab("manage")}
-                    className="underline underline-offset-2 hover:text-foreground ml-1"
+                    className="underline underline-offset-2 hover:text-foreground ms-1"
                   >
                     Student Admin →
                   </button>
@@ -141,12 +141,12 @@ export const StudentsTab = memo(function StudentsTab({
             {/* Search + Level filter + Export */}
             <div className={`flex gap-2 ${isMobile ? "flex-col" : "flex-row"}`}>
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={t("students.searchPlaceholder")}
                   value={studentSearch}
                   onChange={(e) => setStudentSearch(e.target.value)}
-                  className="pl-9"
+                  className="ps-9"
                   aria-label="Search students by name or email"
                   type="search"
                 />
@@ -166,7 +166,7 @@ export const StudentsTab = memo(function StudentsTab({
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size={isMobile ? "icon" : "sm"} aria-label="Toggle table columns">
                     <Columns3 className="h-4 w-4" />
-                    {!isMobile && <span className="ml-1">{t("students.columns")}</span>}
+                    {!isMobile && <span className="ms-1">{t("students.columns")}</span>}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
@@ -192,7 +192,7 @@ export const StudentsTab = memo(function StudentsTab({
                 );
               }}>
                 <Download className="h-4 w-4" />
-                {!isMobile && <span className="ml-1">{t("students.exportCsv")}</span>}
+                {!isMobile && <span className="ms-1">{t("students.exportCsv")}</span>}
               </Button>
             </div>
           </div>
@@ -232,7 +232,7 @@ export const StudentsTab = memo(function StudentsTab({
                 size="sm"
                 onClick={() => { setStudentFilter("all"); setLevelFilter("all"); setStudentSearch(""); }}
               >
-                <Eraser className="h-4 w-4 mr-1.5" /> {t("students.clearFilters")}
+                <Eraser className="h-4 w-4 me-1.5" /> {t("students.clearFilters")}
               </Button>
             </div>
           ) : (
@@ -293,7 +293,7 @@ export const StudentsTab = memo(function StudentsTab({
                         <TableHead className="py-3 px-3 font-semibold">Level</TableHead>
                       )}
                       <TableHead
-                        className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary"
+                        className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary-text"
                         onClick={() => setStudentSort(s => ({ col: "sessions_remaining", dir: s.col === "sessions_remaining" && s.dir === "asc" ? "desc" : "asc" }))}
                         aria-sort={studentSort.col === "sessions_remaining" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                       >
@@ -301,7 +301,7 @@ export const StudentsTab = memo(function StudentsTab({
                       </TableHead>
                       {visibleStudentCols.has("attendance") && (
                         <TableHead
-                          className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary"
+                          className="py-3 px-3 font-semibold text-center cursor-pointer select-none hover:text-primary-text"
                           onClick={() => setStudentSort(s => ({ col: "attendance_pct", dir: s.col === "attendance_pct" && s.dir === "asc" ? "desc" : "asc" }))}
                           aria-sort={studentSort.col === "attendance_pct" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                         >
@@ -310,14 +310,14 @@ export const StudentsTab = memo(function StudentsTab({
                       )}
                       <TableHead className="py-3 px-3 font-semibold text-center">Negative</TableHead>
                       <TableHead
-                        className="py-3 px-3 font-semibold text-right cursor-pointer select-none hover:text-primary"
+                        className="py-3 px-3 font-semibold text-end cursor-pointer select-none hover:text-primary-text"
                         onClick={() => setStudentSort(s => ({ col: "amount_due", dir: s.col === "amount_due" && s.dir === "asc" ? "desc" : "asc" }))}
                         aria-sort={studentSort.col === "amount_due" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                       >
                         Amount Due {studentSort.col === "amount_due" ? (studentSort.dir === "asc" ? "↑" : "↓") : "↕"}
                       </TableHead>
                       <TableHead
-                        className="py-3 px-3 font-semibold text-right cursor-pointer select-none hover:text-primary"
+                        className="py-3 px-3 font-semibold text-end cursor-pointer select-none hover:text-primary-text"
                         onClick={() => setStudentSort(s => ({ col: "remaining_balance", dir: s.col === "remaining_balance" && s.dir === "asc" ? "desc" : "asc" }))}
                         aria-sort={studentSort.col === "remaining_balance" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                       >
@@ -329,7 +329,7 @@ export const StudentsTab = memo(function StudentsTab({
                       )}
                       {visibleStudentCols.has("joined") && (
                         <TableHead
-                          className="py-3 px-3 font-semibold cursor-pointer select-none hover:text-primary"
+                          className="py-3 px-3 font-semibold cursor-pointer select-none hover:text-primary-text"
                           onClick={() => setStudentSort(s => ({ col: "joined_at", dir: s.col === "joined_at" && s.dir === "asc" ? "desc" : "asc" }))}
                           aria-sort={studentSort.col === "joined_at" ? (studentSort.dir === "asc" ? "ascending" : "descending") : "none"}
                         >
@@ -356,7 +356,7 @@ export const StudentsTab = memo(function StudentsTab({
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-6 w-6 shrink-0 text-muted-foreground hover:text-primary"
+                                className="h-6 w-6 shrink-0 text-muted-foreground hover:text-primary-text"
                                 title="Manually enroll"
                                 aria-label={`Manually enroll ${u.name || u.email}`}
                                 onClick={e => { e.stopPropagation(); onManualEnroll(u); }}
@@ -403,7 +403,7 @@ export const StudentsTab = memo(function StudentsTab({
                               </span>
                             ) : "—"}
                           </TableCell>
-                          <TableCell className="py-3 px-3 text-right font-mono" onClick={(e) => e.stopPropagation()}>
+                          <TableCell className="py-3 px-3 text-end font-mono" onClick={(e) => e.stopPropagation()}>
                             {u.amount_due > 0 ? (
                               <TooltipProvider>
                                 <Tooltip>
@@ -422,7 +422,7 @@ export const StudentsTab = memo(function StudentsTab({
                               </TooltipProvider>
                             ) : "—"}
                           </TableCell>
-                          <TableCell className="py-3 px-3 text-right font-mono">
+                          <TableCell className="py-3 px-3 text-end font-mono">
                             {u.remaining_balance > 0 ? (
                               <span className="text-xs font-medium text-green-700 dark:text-green-400">
                                 {formatMoney(u.remaining_balance, u.currency)}

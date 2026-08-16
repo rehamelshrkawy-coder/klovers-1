@@ -49,7 +49,7 @@ export function RejectEnrollmentDialog({
                   key={opt.value}
                   type="button"
                   onClick={() => setReason(opt.value)}
-                  className={`w-full text-left p-3 rounded-lg border-2 transition-all ${reason === opt.value ? "border-destructive bg-destructive/5" : "border-border hover:border-destructive/40"}`}
+                  className={`w-full text-start p-3 rounded-lg border-2 transition-all ${reason === opt.value ? "border-destructive bg-destructive/5" : "border-border hover:border-destructive/40"}`}
                 >
                   <p className="text-sm font-medium text-foreground">{opt.label}</p>
                   <p className="text-xs text-muted-foreground">{opt.desc}</p>

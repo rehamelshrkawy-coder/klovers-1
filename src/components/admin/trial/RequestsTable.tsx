@@ -109,18 +109,18 @@ export default function RequestsTable({ bookings }: { bookings: AdminTrialBookin
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-muted-foreground">
             <tr>
-              <th className="px-3 py-2 text-left font-medium">Student</th>
-              <th className="px-3 py-2 text-left font-medium">Contact</th>
-              <th className="px-3 py-2 text-left font-medium">Selected Slot</th>
-              <th className="px-3 py-2 text-left font-medium">Slot State</th>
-              <th className="px-3 py-2 text-left font-medium">Status</th>
-              <th className="px-3 py-2 text-left font-medium" aria-label="Confirmation email sent"><span aria-hidden="true">📧</span> Sent</th>
-              <th className="px-3 py-2 text-left font-medium" aria-label="Email opened by student"><span aria-hidden="true">👁</span> Opened</th>
-              <th className="px-3 py-2 text-left font-medium" aria-label="RSVP attendance response"><span aria-hidden="true">✅</span> RSVP</th>
-              <th className="px-3 py-2 text-left font-medium">Phase</th>
-              <th className="px-3 py-2 text-left font-medium">Requested</th>
-              <th className="px-3 py-2 text-left font-medium">Changed</th>
-              <th className="px-3 py-2 text-left font-medium">Cancelled</th>
+              <th className="px-3 py-2 text-start font-medium">Student</th>
+              <th className="px-3 py-2 text-start font-medium">Contact</th>
+              <th className="px-3 py-2 text-start font-medium">Selected Slot</th>
+              <th className="px-3 py-2 text-start font-medium">Slot State</th>
+              <th className="px-3 py-2 text-start font-medium">Status</th>
+              <th className="px-3 py-2 text-start font-medium" aria-label="Confirmation email sent"><span aria-hidden="true">📧</span> Sent</th>
+              <th className="px-3 py-2 text-start font-medium" aria-label="Email opened by student"><span aria-hidden="true">👁</span> Opened</th>
+              <th className="px-3 py-2 text-start font-medium" aria-label="RSVP attendance response"><span aria-hidden="true">✅</span> RSVP</th>
+              <th className="px-3 py-2 text-start font-medium">Phase</th>
+              <th className="px-3 py-2 text-start font-medium">Requested</th>
+              <th className="px-3 py-2 text-start font-medium">Changed</th>
+              <th className="px-3 py-2 text-start font-medium">Cancelled</th>
             </tr>
           </thead>
           <tbody>

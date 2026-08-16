@@ -367,7 +367,7 @@ const TopikExamPage = () => {
               </Button>
             </div>
             <p className="text-sm text-green-100 mt-6">
-              <BookOpen className="h-4 w-4 inline mr-2" />
+              <BookOpen className="h-4 w-4 inline me-2" />
               {t("topikExam.finalCtaFooter")}
             </p>
           </div>

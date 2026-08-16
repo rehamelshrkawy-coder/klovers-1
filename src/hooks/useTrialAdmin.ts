@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { TRIAL_GROUP_SIZE_MAX } from '@/lib/siteConfig';
 import {
   AdminTrialBooking,
   AdminTrialSlotOccurrence,
@@ -177,7 +178,9 @@ export function useCreateTrialSlot() {
         p_day_of_week: args.day_of_week,
         p_start_time: args.start_time,
         p_duration_min: args.duration_min ?? null,
-        p_capacity: args.capacity ?? 8,
+        // Matches TRIAL_GROUP_SIZE_MAX. This defaulted to 8 while the picker
+        // defaulted to 6 and the scheduler to 5.
+        p_capacity: args.capacity ?? TRIAL_GROUP_SIZE_MAX,
         p_timezone: args.timezone ?? 'Africa/Cairo',
       });
       if (error) throw error;

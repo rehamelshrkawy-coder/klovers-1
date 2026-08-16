@@ -32,7 +32,7 @@ const STEPS = [
   },
   {
     icon: Gamepad2,
-    color: "text-primary",
+    color: "text-primary-text",
     bg: "bg-primary/10",
     titleEn: "Play & Earn XP",
     titleAr: "العب واكسب نقاطاً",
@@ -89,7 +89,7 @@ const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
         <div className="bg-gradient-to-br from-primary to-primary/80 px-6 pt-8 pb-6 text-center relative">
           <button
             onClick={handleClose}
-            className="absolute top-3 right-3 h-7 w-7 rounded-full bg-primary-foreground/15 flex items-center justify-center hover:bg-primary-foreground/25 transition-colors"
+            className="absolute top-3 end-3 h-7 w-7 rounded-full bg-primary-foreground/15 flex items-center justify-center hover:bg-primary-foreground/25 transition-colors"
             aria-label="Close"
           >
             <X className="h-4 w-4 text-primary-foreground" />

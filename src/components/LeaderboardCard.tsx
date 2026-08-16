@@ -56,7 +56,7 @@ function EntryRow({ rank, name, avatarUrl, value, unit, isCurrentUser }: EntryRo
         <p className={cn("text-sm font-medium truncate", isCurrentUser && "text-amber-700")}>
           {name}
           {isCurrentUser && (
-            <span className="ml-1 text-xs text-amber-700">(You)</span>
+            <span className="ms-1 text-xs text-amber-700">(You)</span>
           )}
         </p>
       </div>

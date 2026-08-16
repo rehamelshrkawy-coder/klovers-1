@@ -486,7 +486,7 @@ const LessonDetailPage = () => {
                               isStudied ? "border-amber-300 bg-amber-50" : "border-border bg-card hover:border-amber-200 hover:shadow-md"
                             )}
                           >
-                            {isStudied && <span className="absolute top-2 right-2 text-amber-600 text-xs z-10">✓</span>}
+                            {isStudied && <span className="absolute top-2 end-2 text-amber-600 text-xs z-10">✓</span>}
                             {/* Image */}
                             {v.image_url && (
                               <img
@@ -563,7 +563,7 @@ const LessonDetailPage = () => {
           <TabsContent value="grammar">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
               <Languages className="h-5 w-5 text-amber-600" /> {t("textbook.grammar")}
-              <span className="text-xs text-muted-foreground ml-auto">+{XP_VALUES.grammar} XP</span>
+              <span className="text-xs text-muted-foreground ms-auto">+{XP_VALUES.grammar} XP</span>
             </h2>
             {grammar.length === 0 ? (
               <p className="text-muted-foreground">{t("textbook.noGrammar")}</p>
@@ -583,7 +583,7 @@ const LessonDetailPage = () => {
                       {g.examples?.length > 0 && (
                         <div className="space-y-2 bg-muted/30 rounded-lg p-3">
                           {g.examples.map((ex, i) => (
-                            <div key={i} className="border-l-2 border-amber-300 pl-3">
+                            <div key={i} className="border-s-2 border-amber-300 ps-3">
                               <p className="text-sm font-medium text-foreground">{ex.korean}</p>
                               <p className="text-xs text-muted-foreground">{ex.english}</p>
                             </div>
@@ -602,7 +602,7 @@ const LessonDetailPage = () => {
           <TabsContent value="dialogue">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-amber-600" /> {t("textbook.dialogue")}
-              <span className="text-xs text-muted-foreground ml-auto">+{XP_VALUES.dialogue} XP</span>
+              <span className="text-xs text-muted-foreground ms-auto">+{XP_VALUES.dialogue} XP</span>
             </h2>
             {dialogue.length === 0 ? (
               <p className="text-muted-foreground">{t("textbook.noDialogue")}</p>
@@ -762,7 +762,7 @@ const LessonDetailPage = () => {
           <TabsContent value="reading">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
               <FileText className="h-5 w-5 text-amber-600" /> {t("textbook.reading")}
-              <span className="text-xs text-muted-foreground ml-auto">+{XP_VALUES.reading} XP</span>
+              <span className="text-xs text-muted-foreground ms-auto">+{XP_VALUES.reading} XP</span>
             </h2>
             {reading.length === 0 ? (
               <p className="text-muted-foreground">{t("textbook.noReading")}</p>
@@ -786,7 +786,7 @@ const LessonDetailPage = () => {
           <TabsContent value="writing">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
               <PenLine className="h-5 w-5 text-amber-600" /> {isAr ? "تمرين الكتابة" : "Writing Practice"}
-              <span className="text-xs text-muted-foreground ml-auto">+{XP_VALUES.writing} XP</span>
+              <span className="text-xs text-muted-foreground ms-auto">+{XP_VALUES.writing} XP</span>
             </h2>
             <p className="text-sm text-muted-foreground mb-6">
               {isAr

@@ -266,7 +266,7 @@ const SchedulePicker = ({
     const localConfirmed = convertSlotToTimezone(confirmed.day_of_week, confirmed.start_time, confirmed.timezone, userTimezone);
     return (
       <div className="bg-accent rounded-lg p-4 flex items-start gap-3">
-        <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+        <CheckCircle2 className="h-5 w-5 text-primary-text mt-0.5 shrink-0" />
         <div className="space-y-1">
           <p className="font-semibold text-foreground">
             {localConfirmed.weekday} · {localConfirmed.timeFormatted}
@@ -303,7 +303,7 @@ const SchedulePicker = ({
       const pLocal = convertSlotToTimezone(selectedPrivateOption.dayIndex, selectedPrivateOption.time, selectedPrivateOption.timezone, userTimezone);
       return (
         <div className="bg-accent rounded-lg p-4 flex items-start gap-3">
-          <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+          <CheckCircle2 className="h-5 w-5 text-primary-text mt-0.5 shrink-0" />
           <div className="space-y-1">
             <p className="font-semibold text-foreground">
               {pLocal.weekday} · {pLocal.timeFormatted}
@@ -328,7 +328,7 @@ const SchedulePicker = ({
     return (
       <div className="space-y-3">
         <div className="flex items-start gap-2 p-3 rounded-lg bg-accent/50 border border-border">
-          <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+          <Info className="h-4 w-4 text-primary-text mt-0.5 shrink-0" />
           <p className="text-sm text-muted-foreground">
             Private classes are only available on days without group classes.
           </p>
@@ -348,7 +348,7 @@ const SchedulePicker = ({
                 const label = `${oLocal.weekday} · ${oLocal.timeFormatted} · ${userTimezone}`;
                 onSelect(`private-${opt.dayIndex}-${opt.time}`, label);
               }}
-              className="w-full text-left p-4 rounded-lg border-2 border-border hover:border-primary hover:bg-accent transition-all"
+              className="w-full text-start p-4 rounded-lg border-2 border-border hover:border-primary hover:bg-accent transition-all"
             >
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
@@ -386,7 +386,7 @@ const SchedulePicker = ({
             key={pkg.id}
             type="button"
             onClick={() => handleClick(pkg)}
-            className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+            className={`w-full text-start p-4 rounded-lg border-2 transition-all ${
               pkg.seats_left === 0
                 ? "border-border opacity-60 hover:border-destructive/50"
                 : "border-border hover:border-primary hover:bg-accent"
@@ -418,7 +418,7 @@ const SchedulePicker = ({
                   : "destructive"
                 }
               >
-                <Users className="h-3 w-3 mr-1" />
+                <Users className="h-3 w-3 me-1" />
                 {pkg.seats_left > 0 ? `${pkg.seats_left} seats` : "Full"}
               </Badge>
             </div>
@@ -456,7 +456,7 @@ const SchedulePicker = ({
                   key={alt.id}
                   type="button"
                   onClick={() => selectPackage(alt, true)}
-                  className="w-full text-left p-3 rounded-lg border-2 border-border hover:border-primary hover:bg-accent transition-all"
+                  className="w-full text-start p-3 rounded-lg border-2 border-border hover:border-primary hover:bg-accent transition-all"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -468,7 +468,7 @@ const SchedulePicker = ({
                       </p>
                     </div>
                     <Badge variant="secondary" className="text-xs">
-                      <Users className="h-3 w-3 mr-1" /> {alt.seats_left} seats
+                      <Users className="h-3 w-3 me-1" /> {alt.seats_left} seats
                     </Badge>
                   </div>
                 </button>

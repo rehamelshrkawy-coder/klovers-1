@@ -108,7 +108,7 @@ const CompleteProfilePage = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
               <Button asChild>
                 <Link to="/enroll">
-                  {t("completeProfile.browseCourses")} <ArrowRight className="h-4 w-4 ml-2" />
+                  {t("completeProfile.browseCourses")} <ArrowRight className="h-4 w-4 ms-2" />
                 </Link>
               </Button>
               <Button asChild variant="outline">
@@ -130,7 +130,7 @@ const CompleteProfilePage = () => {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-1.5 mb-4">
-              <span className="text-primary text-outlined text-sm font-semibold">{t("completeProfile.badge")}</span>
+              <span className="text-primary-text text-outlined text-sm font-semibold">{t("completeProfile.badge")}</span>
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">{t("completeProfile.pageTitle")}</h1>
             <p className="text-muted-foreground">
@@ -215,7 +215,7 @@ const CompleteProfilePage = () => {
 
               <Button type="submit" className="w-full" size="lg" disabled={submitting}>
                 {submitting ? t("completeProfile.savingButton") : t("completeProfile.saveButton")}
-                {!submitting && <ArrowRight className="h-4 w-4 ml-2" />}
+                {!submitting && <ArrowRight className="h-4 w-4 ms-2" />}
               </Button>
             </form>
 

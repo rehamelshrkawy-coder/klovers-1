@@ -18,6 +18,7 @@ export interface GroupData {
 // what students see in the intake and admin. Falls back to a prettified form
 // for any unknown legacy values (beginner_1, etc.) during the transition.
 import { getLevelShortLabel } from "@/constants/levels";
+import { WHATSAPP_BASE } from "@/lib/siteConfig";
 
 export function getLevelLabel(level: string): string {
   if (!level) return "";
@@ -107,7 +108,7 @@ export function enrollUrl(campaign: CampaignDirection, postType: MonthlyPostType
 
 export function whatsappUrl(campaign: CampaignDirection, postType: MonthlyPostType): string {
   const msg = encodeURIComponent("Hi! I saw your post and I'm interested in learning Korean with Klovers 🇰🇷");
-  return `wa.me/201010003084?text=${msg}`;
+  return `${WHATSAPP_BASE}?text=${msg}`;
 }
 
 export function trialUrl(campaign: CampaignDirection): string {

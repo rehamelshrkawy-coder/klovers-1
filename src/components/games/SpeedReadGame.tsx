@@ -121,7 +121,7 @@ const SpeedReadGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
           <Badge variant="outline">Round {round + 1}/{totalRounds}</Badge>
           <div className="flex items-center gap-2">
             {usingLesson && <Badge variant="outline" className="text-xs">📚 From your lessons</Badge>}
-            <Badge variant="secondary"><Sparkles className="h-3 w-3 mr-1" />{score * 5} XP</Badge>
+            <Badge variant="secondary"><Sparkles className="h-3 w-3 me-1" />{score * 5} XP</Badge>
           </div>
         </div>
 
@@ -141,7 +141,7 @@ const SpeedReadGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
               <div className="grid grid-cols-2 gap-3 w-full">
                 {q.options.map(opt => (
                   <button key={opt} onClick={() => handleAnswer(opt)} disabled={!!feedback}
-                    className={`p-3 rounded-lg font-medium border-2 transition-all text-sm text-left ${
+                    className={`p-3 rounded-lg font-medium border-2 transition-all text-sm text-start ${
                       feedback && opt === q.meaning ? "border-green-500 bg-green-500/10 text-foreground" :
                       feedback && opt === selected ? "border-destructive bg-destructive/10 text-foreground" :
                       "border-border bg-card text-foreground hover:border-foreground/30"

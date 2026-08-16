@@ -247,8 +247,8 @@ export default function KoreanInterviewPage() {
         {/* ── Hero Section ── */}
         <section className="relative overflow-hidden bg-secondary text-white">
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-10 left-10 text-8xl font-bold rotate-12">면접</div>
-            <div className="absolute bottom-10 right-10 text-8xl font-bold -rotate-12">준비</div>
+            <div className="absolute top-10 start-10 text-8xl font-bold rotate-12">면접</div>
+            <div className="absolute bottom-10 end-10 text-8xl font-bold -rotate-12">준비</div>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-9xl font-bold opacity-50">합격</div>
           </div>
           <div className="relative max-w-5xl mx-auto px-4 py-16 md:py-24 text-center">
@@ -288,7 +288,7 @@ export default function KoreanInterviewPage() {
               <Card key={step.title} className="rounded-xl text-center">
                 <CardContent className="p-6 space-y-3">
                   <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto">
-                    <step.icon className="h-6 w-6 text-primary" />
+                    <step.icon className="h-6 w-6 text-primary-text" />
                   </div>
                   <h3 className="font-semibold">{step.title}</h3>
                   <p className="text-sm text-muted-foreground">{step.desc}</p>
@@ -382,7 +382,7 @@ export default function KoreanInterviewPage() {
                 </Button>
                 {!user && !authLoading && (
                   <p className="text-xs text-center text-muted-foreground">
-                    {t("koreanInterviewPage.authNotice")} <Link to="/login?redirect=/interview-training" className="text-primary underline">{t("koreanInterviewPage.authSignIn")}</Link>{t("koreanInterviewPage.authOr")}<Link to="/signup?redirect=/interview-training" className="text-primary underline">{t("koreanInterviewPage.authCreate")}</Link>{t("koreanInterviewPage.authPeriod")}
+                    {t("koreanInterviewPage.authNotice")} <Link to="/login?redirect=/interview-training" className="text-primary-text underline">{t("koreanInterviewPage.authSignIn")}</Link>{t("koreanInterviewPage.authOr")}<Link to="/signup?redirect=/interview-training" className="text-primary-text underline">{t("koreanInterviewPage.authCreate")}</Link>{t("koreanInterviewPage.authPeriod")}
                   </p>
                 )}
               </CardContent>
@@ -479,7 +479,7 @@ export default function KoreanInterviewPage() {
         {/* ── Demo Teacher Section ── */}
         <section className="bg-gray-50 dark:bg-gray-900 py-16">
           <div className="max-w-3xl mx-auto px-4 text-center space-y-4">
-            <GraduationCap className="h-10 w-10 mx-auto text-primary" />
+            <GraduationCap className="h-10 w-10 mx-auto text-primary-text" />
             <h2 className="text-xl font-bold">{t("koreanInterviewPage.demoTitle")}</h2>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
               {t("koreanInterviewPage.demoDesc")}
@@ -502,7 +502,7 @@ export default function KoreanInterviewPage() {
               { icon: Star, label: t("koreanInterviewPage.trustStudents"), desc: t("koreanInterviewPage.trustStudentsDesc") },
             ].map((item) => (
               <div key={item.label} className="space-y-2">
-                <item.icon className="h-8 w-8 mx-auto text-primary" />
+                <item.icon className="h-8 w-8 mx-auto text-primary-text" />
                 <p className="font-semibold text-sm">{item.label}</p>
                 <p className="text-xs text-muted-foreground">{item.desc}</p>
               </div>

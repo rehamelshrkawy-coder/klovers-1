@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -18,11 +18,33 @@ import { supabase } from "@/integrations/supabase/client";
 import TrialSlotPicker from "@/components/TrialSlotPicker";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { track } from "@/lib/tracking";
-import { WHATSAPP_BASE } from "@/lib/siteConfig";
+import { capture } from "@/lib/analytics";
+import {
+  TRIAL_ANCHOR_TIMEZONE,
+  TRIAL_DURATION_MIN,
+  TRIAL_GROUP_SIZE_MAX,
+  WHATSAPP_BASE,
+} from "@/lib/siteConfig";
 import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
 import { CheckCircle2, CalendarPlus, CalendarClock, CalendarX, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2, Globe, Link2, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { convertDateTimeToTimezone } from "@/lib/admin-utils";
+import { convertDateTimeToTimezone, todayInTimezone } from "@/lib/admin-utils";
+
+/**
+ * Raw backend errors must never reach a student.
+ *
+ * `err.message` was rendered unfiltered, so an Arabic-speaking student was told
+ * "FunctionsHttpError: Edge Function returned a non-2xx status code" as the
+ * explanation for why their free class did not book. Only short, human-written
+ * messages from our own edge function are shown; everything else falls back to
+ * the translated apology, with the real error kept in the console.
+ */
+const TECHNICAL_ERROR = /non-2xx|FunctionsHttpError|FetchError|TypeError|undefined|null|\bSQL\b|PGRST|JWT|fetch failed|status code/i;
+function studentFacingError(raw: unknown, fallback: string): string {
+  const message = typeof raw === "string" ? raw : (raw as { message?: string })?.message;
+  if (!message || message.length > 160 || TECHNICAL_ERROR.test(message)) return fallback;
+  return message;
+}
 
 // ── Country / pricing helpers ─────────────────────────────────────────────────
 
@@ -117,7 +139,7 @@ interface BookingResult {
 }
 
 const TrialBookingPage = () => {
-  const { t, language } = useLanguage();
+  const { t, tPlural, language } = useLanguage();
   useSEO({
     title: "Pick Your Free Trial Slot | Klovers Academy",
     description: "Confirm your free Korean trial class. Pick a day and time that works for you.",
@@ -132,6 +154,12 @@ const TrialBookingPage = () => {
   const [selectedLevel, setSelectedLevel] = useState("");
   const [loading, setLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
+  // Moves focus to the confirmation heading when the success screen replaces
+  // the form, so assistive tech lands on the outcome instead of nowhere.
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (bookingResult) successHeadingRef.current?.focus();
+  }, [bookingResult]);
   const [cancelling, setCancelling] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>(guessCountryFromTz);
   const [classLanguage, setClassLanguage] = useState<"arabic" | "english">(() =>
@@ -178,13 +206,20 @@ const TrialBookingPage = () => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const todayMyt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      // "Today" as it actually reads in the zone trial dates are stored in.
+      // This used to be `Date.now() + 8h` — a fixed offset that ignores DST and,
+      // for an Egyptian audience, rolls over to tomorrow from about 18:00 Cairo.
+      // From then until midnight a student whose trial is *today* failed this
+      // pre-check, so their existing booking vanished and they were shown a
+      // fresh empty form — inviting a duplicate booking on the evening of their
+      // own class, which is exactly when students browse.
+      const todayAnchor = todayInTimezone(TRIAL_ANCHOR_TIMEZONE);
       const { data } = await supabase
         .from("trial_bookings")
         .select("trial_date, start_time, duration_min, timezone, calendar_url, status")
         .eq("user_id", user.id)
         .in("status", ["pending", "confirmed"])
-        .gte("trial_date", todayMyt)
+        .gte("trial_date", todayAnchor)
         .neq("trial_date", "2099-12-31")
         .order("trial_date", { ascending: true })
         .limit(1)
@@ -286,8 +321,13 @@ const TrialBookingPage = () => {
 
       if (error) throw error;
       if (data?.error) {
+        console.error("book-trial returned an error:", data.error);
         logLeadEvent({ source_type: "free_trial", cta_label: "booking_failed", metadata: { reason: data.error } });
-        toast({ title: t("trialBooking.bookingFailed"), description: data.error, variant: "destructive" });
+        toast({
+          title: t("trialBooking.bookingFailed"),
+          description: studentFacingError(data.error, t("trialBooking.tryAgain")),
+          variant: "destructive",
+        });
         setLoading(false);
         return;
       }
@@ -328,10 +368,11 @@ const TrialBookingPage = () => {
         return;
       }
 
+      console.error("Trial booking failed:", err);
       logLeadEvent({ source_type: "free_trial", cta_label: "booking_failed", metadata: { reason: err?.message || "unknown" } });
       toast({
         title: t("trialBooking.somethingWrong"),
-        description: err.message || t("trialBooking.tryAgain"),
+        description: studentFacingError(err, t("trialBooking.tryAgain")),
         variant: "destructive",
       });
     } finally {
@@ -349,6 +390,14 @@ const TrialBookingPage = () => {
   useEffect(() => {
     if (bookingResult) {
       track.custom("post_trial_screen_shown", { trial_date: bookingResult.trial_date });
+      // The typed PostHog catalogue has declared `free_trial_booked` all along
+      // and nothing ever emitted it — grep returned exactly one hit, the type
+      // definition — so the single most important conversion in the funnel was
+      // invisible in PostHog.
+      capture({
+        event: "free_trial_booked",
+        slot: `${bookingResult.trial_date} ${bookingResult.start_time}`,
+      });
       // Meta Pixel Lead event with LTV signal for paid ads optimisation
       track.lead({ content_name: "trial_booked", trial_date: bookingResult.trial_date, value: 3, currency: "USD" });
       // Log funnel event for acquisition attribution
@@ -462,14 +511,21 @@ const TrialBookingPage = () => {
         <Header />
         <main className="pt-16">
           <div className="max-w-2xl mx-auto px-4 py-12">
-            {/* Hero */}
-            <div className="text-center mb-8">
+            {/* Hero.
+                The form → success transition replaces the whole page. Without
+                a live region and a focus move a screen-reader user hears
+                nothing at all: the booking they just made is confirmed silently
+                off-screen. The heading takes focus so the next Tab continues
+                from here rather than from the top of the document. */}
+            <div className="text-center mb-8" role="status" aria-live="polite">
               <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-                <CheckCircle2 className="h-10 w-10 text-green-600" />
+                <CheckCircle2 className="h-10 w-10 text-green-600" aria-hidden="true" />
               </div>
-              <h1 className="text-3xl font-black text-foreground mb-3">{t("trialBooking.successTitle")}</h1>
-              <div className="inline-flex items-center gap-3 bg-card border border-border rounded-2xl px-5 py-3 text-left">
-                <CalendarPlus className="h-5 w-5 text-primary shrink-0" />
+              <h1 ref={successHeadingRef} tabIndex={-1} className="text-3xl font-black text-foreground mb-3 outline-none">
+                {t("trialBooking.successTitle")}
+              </h1>
+              <div className="inline-flex items-center gap-3 bg-card border border-border rounded-2xl px-5 py-3 text-start">
+                <CalendarPlus className="h-5 w-5 text-primary-text shrink-0" />
                 <div>
                   <p className="font-bold text-foreground">{localFormattedDate}</p>
                   <p className="text-sm text-muted-foreground">
@@ -492,7 +548,7 @@ const TrialBookingPage = () => {
                   disabled={cancelling}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 text-sm font-semibold text-foreground transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <CalendarClock className="h-4 w-4 text-primary" />
+                  <CalendarClock className="h-4 w-4 text-primary-text" />
                   {t("trialBooking.changeDateBtn")}
                 </button>
                 <button
@@ -512,7 +568,9 @@ const TrialBookingPage = () => {
                   {language === "ar" ? "بلدك:" : "Your country:"}
                 </span>
                 <Select value={selectedCountry} onValueChange={handleCountryChange}>
-                  <SelectTrigger className="h-7 text-xs w-auto min-w-[130px] border-dashed">
+                  {/* Was h-7 (28px) on the screen a user reaches on their phone
+                      immediately after converting. 44px is the floor. */}
+                  <SelectTrigger className="min-h-[44px] text-xs w-auto min-w-[130px] border-dashed">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -531,29 +589,34 @@ const TrialBookingPage = () => {
                 <span className="text-xs text-muted-foreground">
                   {language === "ar" ? "لغة الحصة:" : "Class language:"}
                 </span>
-                <div className="flex gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setClassLanguage("arabic")}
-                    className={`px-2.5 py-1 rounded-md border text-xs font-medium transition-all ${
-                      classLanguage === "arabic"
-                        ? "border-gray-800 bg-gray-800 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
-                        : "border-border text-muted-foreground hover:border-primary/40"
-                    }`}
-                  >
-                    🇸🇦 {language === "ar" ? "عربي" : "Arabic"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setClassLanguage("english")}
-                    className={`px-2.5 py-1 rounded-md border text-xs font-medium transition-all ${
-                      classLanguage === "english"
-                        ? "border-gray-800 bg-gray-800 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
-                        : "border-border text-muted-foreground hover:border-primary/40"
-                    }`}
-                  >
-                    🇺🇸 {language === "ar" ? "إنجليزي" : "English"}
-                  </button>
+                {/* Selection was signalled by background colour alone, with no
+                    role and no pressed state, on the control that decides
+                    whether the student can understand the class. The chips were
+                    also ~24px tall on the screen a user reaches on their phone
+                    immediately after converting — well under the 44px floor. */}
+                <div className="flex gap-1.5" role="radiogroup" aria-label={language === "ar" ? "لغة الحصة" : "Class language"}>
+                  {(["arabic", "english"] as const).map((option) => {
+                    const selected = classLanguage === option;
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => setClassLanguage(option)}
+                        className={`inline-flex items-center justify-center gap-1 min-h-[44px] px-4 py-2 rounded-md border text-xs font-medium transition-all ${
+                          selected
+                            ? "border-gray-800 bg-gray-800 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
+                            : "border-border text-muted-foreground hover:border-primary/40"
+                        }`}
+                      >
+                        {selected && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
+                        {option === "arabic"
+                          ? `🇸🇦 ${language === "ar" ? "عربي" : "Arabic"}`
+                          : `🇺🇸 ${language === "ar" ? "إنجليزي" : "English"}`}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -566,7 +629,9 @@ const TrialBookingPage = () => {
             <div className="bg-gradient-to-b from-primary/10 to-transparent border border-primary/20 rounded-2xl p-6 mb-4 text-center">
               <div className="inline-flex items-center gap-2 text-xs font-bold bg-amber-500 text-black px-3 py-1 rounded-full uppercase tracking-wider mb-4">
                 <Sparkles className="h-3.5 w-3.5" />
-                {daysUntil > 0 ? (daysUntil === 1 ? t("trialBooking.whileWait").replace("{days}", String(daysUntil)) : t("trialBooking.whileWaitPlural").replace("{days}", String(daysUntil))) : t("trialBooking.trialToday")}
+                {daysUntil > 0
+                  ? tPlural("trialBooking.whileWaitCount", daysUntil)
+                  : t("trialBooking.trialToday")}
               </div>
 
               <div className="space-y-3">
@@ -577,9 +642,9 @@ const TrialBookingPage = () => {
                     const url = `${WHATSAPP_BASE}?text=${encodeURIComponent(t("trialBooking.whatsappSuccessMsg"))}`;
                     trackAndOpenWhatsApp(url, { cta_label: "post_booking_whatsapp" });
                   }}
-                  className="w-full flex items-center gap-4 bg-green-50 dark:bg-green-950/30 border-2 border-green-400 rounded-xl p-4 text-left hover:bg-green-100 dark:hover:bg-green-950/50 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-green-50 dark:bg-green-950/30 border-2 border-green-400 rounded-xl p-4 text-start hover:bg-green-100 dark:hover:bg-green-950/50 hover:shadow-md transition-all group"
                 >
-                  <div className="h-10 w-10 rounded-full bg-[#25D366] flex items-center justify-center shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-whatsapp flex items-center justify-center shrink-0">
                     <MessageCircle className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -596,7 +661,7 @@ const TrialBookingPage = () => {
                     logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_placement_test" });
                     navigate("/placement-test");
                   }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-blue-400 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-start hover:border-blue-400 hover:shadow-md transition-all group"
                 >
                   <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
                     <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -615,7 +680,7 @@ const TrialBookingPage = () => {
                     logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_pricing" });
                     navigate("/pricing");
                   }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-purple-400 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-start hover:border-purple-400 hover:shadow-md transition-all group"
                 >
                   <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
                     <Tag className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -645,7 +710,7 @@ const TrialBookingPage = () => {
                       window.open(`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`, "_blank", "noopener,noreferrer");
                     }
                   }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-orange-400 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-start hover:border-orange-400 hover:shadow-md transition-all group"
                 >
                   <div className="h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center shrink-0">
                     <Share2 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
@@ -666,7 +731,7 @@ const TrialBookingPage = () => {
             {/* Invite-a-friend card — referral growth loop */}
             <div className="border border-border rounded-2xl p-5 mb-4 bg-muted/30">
               <p className="text-sm font-bold text-foreground mb-1 flex items-center gap-1.5">
-                <Link2 className="h-4 w-4 text-primary" />
+                <Link2 className="h-4 w-4 text-primary-text" />
                 Got a friend who loves K-dramas?
               </p>
               <p className="text-xs text-muted-foreground mb-3">
@@ -814,29 +879,29 @@ const TrialBookingPage = () => {
                 <Label className="text-sm font-medium">
                   {language === "ar" ? "لغة الحصة" : "Class language"}
                 </Label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setClassLanguage("arabic")}
-                    className={`flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
-                      classLanguage === "arabic"
-                        ? "border-gray-800 bg-gray-800 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
-                        : "border-border bg-card text-muted-foreground hover:border-primary/40"
-                    }`}
-                  >
-                    🇸🇦 {language === "ar" ? "عربي" : "Arabic"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setClassLanguage("english")}
-                    className={`flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
-                      classLanguage === "english"
-                        ? "border-gray-800 bg-gray-800 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
-                        : "border-border bg-card text-muted-foreground hover:border-primary/40"
-                    }`}
-                  >
-                    🇺🇸 {language === "ar" ? "إنجليزي" : "English"}
-                  </button>
+                <div className="flex gap-2" role="radiogroup" aria-label={language === "ar" ? "لغة الحصة" : "Class language"}>
+                  {(["arabic", "english"] as const).map((option) => {
+                    const selected = classLanguage === option;
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => setClassLanguage(option)}
+                        className={`flex-1 inline-flex items-center justify-center gap-1.5 min-h-[44px] py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                          selected
+                            ? "border-gray-800 bg-gray-800 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
+                            : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                        }`}
+                      >
+                        {selected && <Check className="h-4 w-4" aria-hidden="true" />}
+                        {option === "arabic"
+                          ? `🇸🇦 ${language === "ar" ? "عربي" : "Arabic"}`
+                          : `🇺🇸 ${language === "ar" ? "إنجليزي" : "English"}`}
+                      </button>
+                    );
+                  })}
                 </div>
                 <p className="text-[11px] text-muted-foreground">
                   {language === "ar"
@@ -849,15 +914,18 @@ const TrialBookingPage = () => {
                 onSelect={handleSlotPicked}
                 onBack={() => navigate("/free-trial")}
                 classLanguage={classLanguage}
+                submitting={loading}
               />
 
               {loading && (
-                <p className="text-sm text-muted-foreground text-center mt-4">{t("trialBooking.bookingTrial")}</p>
+                <p role="status" className="text-sm text-muted-foreground text-center mt-4">
+                  {t("trialBooking.bookingTrial")}
+                </p>
               )}
 
               <p className="text-xs text-muted-foreground text-center mt-6">
                 {t("trialBooking.manageFromDashboard")}
-                <ArrowRight className="inline h-3 w-3 ml-1" />
+                <ArrowRight className="inline h-3 w-3 ms-1" />
               </p>
             </div>
           </div>

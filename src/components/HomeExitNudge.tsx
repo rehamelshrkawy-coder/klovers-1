@@ -10,6 +10,7 @@ import { X, ArrowRight } from "lucide-react";
 import { logLeadEvent } from "@/lib/leadTracking";
 import { track } from "@/lib/tracking";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBottomSurface } from "@/hooks/useBottomSurface";
 
 const STORAGE_KEY = "klovers_home_exit_nudge_shown_at";
 // Only show again after 24h to avoid hammering returning visitors.
@@ -47,6 +48,12 @@ const HomeExitNudge = () => {
       if (e.clientY < 60) trigger();
     };
 
+    // Upward scroll as an exit signal, but only a decisive one. The old
+    // threshold was 250px — that is ordinary reading behaviour, so scrolling
+    // back up to re-read the hero popped a modal over the CTA bar the visitor
+    // was about to use. A fast fling back towards the top of a page they have
+    // already scrolled deep into is the actual signal.
+    const SCROLL_UP_THRESHOLD = 900;
     let scrolledUp = 0;
     let lastY = window.scrollY;
     const handleScroll = () => {
@@ -55,7 +62,9 @@ const HomeExitNudge = () => {
       if (y < lastY) scrolledUp += lastY - y;
       else scrolledUp = 0;
       lastY = y;
-      if (scrolledUp > 250) trigger();
+      // Requires real depth first: someone who never got past the fold is not
+      // abandoning anything.
+      if (scrolledUp > SCROLL_UP_THRESHOLD && y < window.innerHeight) trigger();
     };
 
     // Engagement gate: don't fire on landing — wait until they've spent
@@ -77,7 +86,10 @@ const HomeExitNudge = () => {
     logLeadEvent({ source_type: "homepage", cta_label: "exit_intent_placement" });
   };
 
-  if (!visible) return null;
+  // Outranks the sticky enrol bar, which shares this exact anchor — so the two
+  // can no longer stack on top of each other.
+  const granted = useBottomSurface("exitNudge", visible);
+  if (!granted) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-3 sm:p-4 pointer-events-none animate-in slide-in-from-bottom-2 duration-300">
@@ -85,7 +97,7 @@ const HomeExitNudge = () => {
         <button
           onClick={() => setVisible(false)}
           aria-label={isAr ? "إغلاق" : "Dismiss"}
-          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-muted transition-colors z-10"
+          className="absolute top-2 end-2 text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-muted transition-colors z-10"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -95,7 +107,7 @@ const HomeExitNudge = () => {
           className="group flex items-center gap-4 p-4 hover:bg-primary/5 transition-colors"
         >
           <div className="text-3xl flex-shrink-0">🎯</div>
-          <div className="flex-1 min-w-0 pr-6">
+          <div className="flex-1 min-w-0 pe-6">
             <p className="font-bold text-foreground text-sm leading-tight">
               {isAr ? "قبل ما تمشي — اعرف مستواك في الكورية" : "Before you go — find your Korean level"}
             </p>

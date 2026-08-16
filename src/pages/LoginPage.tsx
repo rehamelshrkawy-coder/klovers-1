@@ -194,7 +194,7 @@ const LoginPage = () => {
           {isAr ? "جديد في Klovers؟ " : "New to Klovers? "}
           <Link
             to={redirectTo ? `/signup?redirect=${encodeURIComponent(redirectTo)}` : "/signup"}
-            className="text-primary font-semibold hover:underline"
+            className="text-primary-text font-semibold hover:underline"
           >
             {isAr ? "أنشئ حساب مجاني ←" : "Create a free account →"}
           </Link>

@@ -196,7 +196,7 @@ const DialogueFillGame = ({ onGameComplete }: { onGameComplete?: (score: number,
           <h2 className="text-2xl font-bold text-foreground">Conversation Complete!</h2>
           <p className="text-muted-foreground mt-1">You got {score} out of {totalRounds} correct ({pct}%)</p>
         </div>
-        <div className="text-4xl font-bold text-primary">{pct >= 80 ? "🌟 Excellent!" : pct >= 60 ? "👍 Good job!" : "📚 Keep practicing!"}</div>
+        <div className="text-4xl font-bold text-primary-text">{pct >= 80 ? "🌟 Excellent!" : pct >= 60 ? "👍 Good job!" : "📚 Keep practicing!"}</div>
         <Button onClick={restart} className="gap-2"><RotateCcw className="h-4 w-4" /> Play Again</Button>
       </div>
     );
@@ -229,7 +229,7 @@ const DialogueFillGame = ({ onGameComplete }: { onGameComplete?: (score: number,
               <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${isA ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300" : "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300"}`}>
                 {line.speaker}
               </div>
-              <div className={`flex-1 ${isA ? "" : "text-right"}`}>
+              <div className={`flex-1 ${isA ? "" : "text-end"}`}>
                 {isBlank ? (
                   <div className="inline-block bg-muted border-2 border-dashed border-primary/40 rounded-xl px-4 py-2 min-h-[40px] min-w-[120px]">
                     {selected ? (
@@ -252,7 +252,7 @@ const DialogueFillGame = ({ onGameComplete }: { onGameComplete?: (score: number,
 
       {/* Feedback */}
       {selected && (
-        <Card className={`p-3 border-l-4 text-sm ${selected === scene.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
+        <Card className={`p-3 border-s-4 text-sm ${selected === scene.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
           <p className="font-semibold mb-1">{selected === scene.correct ? "✅ Correct!" : `❌ The answer was: ${scene.correct}`}</p>
           <p className="text-muted-foreground text-xs">{scene.explanation}</p>
         </Card>
@@ -272,7 +272,7 @@ const DialogueFillGame = ({ onGameComplete }: { onGameComplete?: (score: number,
               key={opt}
               onClick={() => handleSelect(opt)}
               disabled={!!selected}
-              className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm transition-all duration-150 font-medium ${selected ? extra || "border-border text-muted-foreground opacity-60" : "border-border hover:border-primary hover:bg-primary/5"}`}
+              className={`w-full text-start px-4 py-3 rounded-xl border-2 text-sm transition-all duration-150 font-medium ${selected ? extra || "border-border text-muted-foreground opacity-60" : "border-border hover:border-primary hover:bg-primary/5"}`}
             >
               {opt}
             </button>

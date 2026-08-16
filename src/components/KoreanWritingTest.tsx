@@ -256,9 +256,9 @@ const KoreanWritingTest = ({ vocab, dialogue, lessonTitle, onComplete }: KoreanW
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center gap-2 mb-4">
           {current?.type === "free_write" ? (
-            <PenLine className="h-5 w-5 text-primary" />
+            <PenLine className="h-5 w-5 text-primary-text" />
           ) : (
-            <Keyboard className="h-5 w-5 text-primary" />
+            <Keyboard className="h-5 w-5 text-primary-text" />
           )}
           <p className="text-lg font-semibold text-foreground">{current?.prompt}</p>
         </div>
@@ -272,7 +272,7 @@ const KoreanWritingTest = ({ vocab, dialogue, lessonTitle, onComplete }: KoreanW
             ) : (
               <button
                 onClick={() => setShowHint(true)}
-                className="text-sm text-primary hover:underline"
+                className="text-sm text-primary-text hover:underline"
               >
                 {isAr ? "إظهار التلميح" : "Show hint"}
               </button>

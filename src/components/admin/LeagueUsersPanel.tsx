@@ -130,16 +130,16 @@ export default function LeagueUsersPanel() {
       <Card className="rounded-2xl">
         <CardHeader className="pb-3">
           <div className="flex flex-wrap items-center gap-2">
-            <CardTitle className="text-base mr-auto">
+            <CardTitle className="text-base me-auto">
               League Users <span className="text-muted-foreground font-normal">({filtered.length})</span>
             </CardTitle>
             <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search name or email…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 w-56 h-9 rounded-full text-sm"
+                className="ps-8 w-56 h-9 rounded-full text-sm"
               />
             </div>
             <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortKey)}>
@@ -155,7 +155,7 @@ export default function LeagueUsersPanel() {
               </SelectContent>
             </Select>
             <Button variant="outline" size="sm" className="rounded-full h-9" onClick={() => downloadCsv(filtered)}>
-              <Download className="h-4 w-4 mr-1" /> CSV
+              <Download className="h-4 w-4 me-1" /> CSV
             </Button>
           </div>
         </CardHeader>
@@ -166,9 +166,9 @@ export default function LeagueUsersPanel() {
                 <TableRow>
                   <TableHead>User</TableHead>
                   <TableHead>League</TableHead>
-                  <TableHead className="text-right">Total XP</TableHead>
-                  <TableHead className="text-right">Streak</TableHead>
-                  <TableHead className="text-right hidden md:table-cell">Badges</TableHead>
+                  <TableHead className="text-end">Total XP</TableHead>
+                  <TableHead className="text-end">Streak</TableHead>
+                  <TableHead className="text-end hidden md:table-cell">Badges</TableHead>
                   <TableHead className="hidden md:table-cell">Last Active</TableHead>
                 </TableRow>
               </TableHeader>
@@ -195,13 +195,13 @@ export default function LeagueUsersPanel() {
                           {r.league.emoji} {r.league.name.replace(" League", "")}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right font-mono text-sm">
+                      <TableCell className="text-end font-mono text-sm">
                         {r.total_xp.toLocaleString()}
                       </TableCell>
-                      <TableCell className="text-right text-sm">
+                      <TableCell className="text-end text-sm">
                         {r.current_streak > 0 ? `${r.current_streak} 🔥` : "0"}
                       </TableCell>
-                      <TableCell className="text-right text-sm hidden md:table-cell">
+                      <TableCell className="text-end text-sm hidden md:table-cell">
                         {r.badges_count}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground hidden md:table-cell">

@@ -339,11 +339,11 @@ function TrialLevelsAr() {
 /* Hangul Taste */
 function TrialHangulAr() {
   const chars = [
-    { char:"ㄱ", sound:"ك/غ", word:"가방", read:"غا-بانغ", mean:"حقيبة" },
-    { char:"ㄴ", sound:"ن",   word:"나비", read:"نا-بي",   mean:"فراشة" },
-    { char:"ㅅ", sound:"س",   word:"사랑", read:"سا-رانغ", mean:"حب" },
-    { char:"ㅁ", sound:"م",   word:"물",   read:"مول",     mean:"ماء" },
-    { char:"ㅎ", sound:"هـ",  word:"한국", read:"هان-غوك", mean:"كوريا" },
+    { char:"ㄱ", sound:"گ/ك", word:"고기", read:"گو-گي", mean:"لحمة" },
+    { char:"ㄴ", sound:"ن",   word:"나",   read:"نا",     mean:"أنا" },
+    { char:"ㅅ", sound:"س",   word:"소",   read:"سو",     mean:"بقرة" },
+    { char:"ㅁ", sound:"م",   word:"이마", read:"إي-ما",  mean:"جبهة" },
+    { char:"ㅎ", sound:"هـ",  word:"하나", read:"ها-نا",  mean:"واحد" },
   ];
   const vowels = [
     { char:"ㅏ", sound:"آ",  ex:"아" },
@@ -411,9 +411,9 @@ function TrialHangulAr() {
         </div>
         <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
           {[
-            { k:"사랑", r:"سا-رانغ", m:"حب" },
-            { k:"한국", r:"هان-غوك", m:"كوريا" },
-            { k:"나비", r:"نا-بي", m:"فراشة" },
+            { k:"고기", r:"گو-گي", m:"لحمة" },
+            { k:"하나", r:"ها-نا", m:"واحد" },
+            { k:"오이", r:"أو-إي", m:"خيار" },
           ].map(w => (
             <div key={w.k} style={{
               background:"#fff", borderRadius:"8px", padding:"8px 12px",
@@ -769,11 +769,11 @@ function TrialLevelsEn() {
 
 function TrialHangulEn() {
   const chars = [
-    { char:"ㄱ", sound:"g/k", word:"가방", read:"ga-bang", mean:"bag" },
-    { char:"ㄴ", sound:"n",   word:"나비", read:"na-bi",   mean:"butterfly" },
-    { char:"ㅅ", sound:"s",   word:"사랑", read:"sa-rang", mean:"love" },
-    { char:"ㅁ", sound:"m",   word:"물",   read:"mul",     mean:"water" },
-    { char:"ㅎ", sound:"h",   word:"한국", read:"han-guk", mean:"Korea" },
+    { char:"ㄱ", sound:"g/k", word:"고기", read:"go-gi",  mean:"meat" },
+    { char:"ㄴ", sound:"n",   word:"나",   read:"na",     mean:"I / me" },
+    { char:"ㅅ", sound:"s",   word:"소",   read:"so",     mean:"cow" },
+    { char:"ㅁ", sound:"m",   word:"이마", read:"i-ma",   mean:"forehead" },
+    { char:"ㅎ", sound:"h",   word:"하나", read:"ha-na",  mean:"one" },
   ];
   const vowels = [
     { char:"ㅏ", sound:"ah",  ex:"아" },
@@ -836,9 +836,9 @@ function TrialHangulEn() {
         <div style={{ fontSize:"11px", fontWeight:800, color:"#166534", marginBottom:"6px" }}>🎯 Try reading:</div>
         <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
           {[
-            { k:"사랑", r:"sa-rang", m:"love" },
-            { k:"한국", r:"han-guk", m:"Korea" },
-            { k:"나비", r:"na-bi",   m:"butterfly" },
+            { k:"고기", r:"go-gi", m:"meat" },
+            { k:"하나", r:"ha-na", m:"one" },
+            { k:"오이", r:"o-i",   m:"cucumber" },
           ].map(w => (
             <div key={w.k} style={{
               background:"#fff", borderRadius:"8px", padding:"8px 12px",
@@ -890,7 +890,9 @@ function TrialDramaEn() {
       <div style={{ background:"#0047AB", borderRadius:"10px", padding:"10px 14px", textAlign:"center" }}>
         <div style={{ fontSize:"12px", fontWeight:800, color:Y, marginBottom:"3px" }}>💡 Fun Fact</div>
         <div style={{ fontSize:"10px", color:"#ddd" }}>
-          After just Level 1, you'll understand what's being said in romantic and funny scenes of any K-Drama!
+          By the end of Level 1 you'll read Hangul on sight and catch the greetings, names and
+          set phrases you already half-recognise from K-dramas. Following unscripted dialogue
+          comes later — that's what Levels 2-4 are for.
         </div>
       </div>
     </Page>

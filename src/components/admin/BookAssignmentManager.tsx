@@ -131,12 +131,12 @@ const BookAssignmentManager = () => {
       {/* Header row */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+          <Search className="absolute start-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             placeholder="Search students…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="pl-8 h-8 text-xs w-56"
+            className="ps-8 h-8 text-xs w-56"
           />
         </div>
         <Button size="sm" className="gap-1.5 h-8 text-xs" onClick={() => setShowDialog(true)}>
@@ -154,7 +154,7 @@ const BookAssignmentManager = () => {
               Assigned to students who purchased a class. Unlocks on the specified date (default: 1 week after assignment).
             </div>
           </div>
-          <div className="ml-auto flex items-center gap-2 shrink-0">
+          <div className="ms-auto flex items-center gap-2 shrink-0">
             <Badge variant="secondary">{assignments.length} assigned</Badge>
             <Button
               variant="outline" size="sm"
@@ -274,12 +274,12 @@ const BookAssignmentManager = () => {
               ) : (
                 <div className="space-y-1.5">
                   <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                    <Search className="absolute start-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                     <Input
                       placeholder="Search by name or email…"
                       value={userSearch}
                       onChange={e => setUserSearch(e.target.value)}
-                      className="pl-8 h-8 text-xs"
+                      className="ps-8 h-8 text-xs"
                     />
                   </div>
                   {userSearch.length > 1 && (
@@ -289,7 +289,7 @@ const BookAssignmentManager = () => {
                       ) : filteredProfiles.slice(0, 8).map(p => (
                         <button
                           key={p.user_id}
-                          className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors"
+                          className="w-full text-start px-3 py-2 hover:bg-muted/50 transition-colors"
                           onClick={() => setSelectedUser(p)}
                         >
                           <div className="text-xs font-medium">{p.name ?? "—"}</div>

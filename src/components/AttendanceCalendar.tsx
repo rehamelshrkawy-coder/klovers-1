@@ -17,7 +17,7 @@ interface AttendanceCalendarProps {
 }
 
 const statusDisplay: Record<string, { label: string; icon: React.ElementType; variant: "default" | "destructive" | "secondary" | "outline"; color: string }> = {
-  present: { label: "Present", icon: CheckCircle2, variant: "default", color: "text-primary" },
+  present: { label: "Present", icon: CheckCircle2, variant: "default", color: "text-primary-text" },
   absent: { label: "Absent", icon: XCircle, variant: "destructive", color: "text-destructive" },
   late: { label: "Late", icon: Clock, variant: "secondary", color: "text-muted-foreground" },
   excused: { label: "Excused", icon: Clock, variant: "outline", color: "text-muted-foreground" },
@@ -76,14 +76,14 @@ const AttendanceCalendar = ({ days, totalClasses, usedClasses }: AttendanceCalen
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Card>
           <CardContent className="pt-4 text-center space-y-1">
-            <TrendingUp className="h-5 w-5 mx-auto text-primary" />
+            <TrendingUp className="h-5 w-5 mx-auto text-primary-text" />
             <p className="text-2xl font-bold text-foreground">{attendanceRate}%</p>
             <p className="text-[10px] text-muted-foreground">Attendance Rate</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center space-y-1">
-            <CalendarCheck className="h-5 w-5 mx-auto text-primary" />
+            <CalendarCheck className="h-5 w-5 mx-auto text-primary-text" />
             <p className="text-2xl font-bold text-foreground">{presentCount}</p>
             <p className="text-[10px] text-muted-foreground">Classes Attended</p>
           </CardContent>

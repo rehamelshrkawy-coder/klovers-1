@@ -408,7 +408,7 @@ const LeadFunnelPanel: React.FC = () => {
                   </div>
                   <div className="text-2xl font-bold tabular-nums">
                     {kpi.value}
-                    {kpi.sub && <span className="text-xs font-normal text-muted-foreground ml-1">({kpi.sub})</span>}
+                    {kpi.sub && <span className="text-xs font-normal text-muted-foreground ms-1">({kpi.sub})</span>}
                   </div>
                   {d !== null && range !== "all" && (
                     <div className={`text-[10px] font-medium mt-0.5 ${d >= 0 ? "text-green-600" : "text-red-500"}`}>
@@ -531,7 +531,7 @@ const LeadFunnelPanel: React.FC = () => {
           <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-sm">Raw Events ({events.length})</CardTitle>
             <Button variant="outline" size="sm" onClick={exportEventsCSV} disabled={events.length === 0}>
-              <Download className="h-3.5 w-3.5 mr-1" /> CSV
+              <Download className="h-3.5 w-3.5 me-1" /> CSV
             </Button>
           </CardHeader>
           <CardContent className="p-0">
@@ -628,8 +628,8 @@ const LeadFunnelPanel: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-xs">Source</TableHead>
-                    <TableHead className="text-xs text-right">Clicks</TableHead>
-                    <TableHead className="text-xs text-right">Pages</TableHead>
+                    <TableHead className="text-xs text-end">Clicks</TableHead>
+                    <TableHead className="text-xs text-end">Pages</TableHead>
                     <TableHead className="text-xs">CTAs</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -641,8 +641,8 @@ const LeadFunnelPanel: React.FC = () => {
                           {s.type}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right text-sm font-semibold tabular-nums">{s.clicks}</TableCell>
-                      <TableCell className="text-right text-xs">{s.pages}</TableCell>
+                      <TableCell className="text-end text-sm font-semibold tabular-nums">{s.clicks}</TableCell>
+                      <TableCell className="text-end text-xs">{s.pages}</TableCell>
                       <TableCell className="text-xs max-w-[200px]">
                         <div className="flex flex-wrap gap-1">
                           {s.labels.slice(0, 5).map((l) => (
@@ -675,14 +675,14 @@ const LeadFunnelPanel: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-xs">Source</TableHead>
-                    <TableHead className="text-xs text-right">Events</TableHead>
+                    <TableHead className="text-xs text-end">Events</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {campaignBreakdown.map((c) => (
                     <TableRow key={c.source}>
                       <TableCell className="text-xs">{c.source}</TableCell>
-                      <TableCell className="text-right text-sm font-semibold tabular-nums">{c.count}</TableCell>
+                      <TableCell className="text-end text-sm font-semibold tabular-nums">{c.count}</TableCell>
                     </TableRow>
                   ))}
                   {campaignBreakdown.length === 0 && (
@@ -736,10 +736,10 @@ const LeadFunnelPanel: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-xs">Acquisition Source</TableHead>
-                    <TableHead className="text-xs text-right">Total</TableHead>
-                    <TableHead className="text-xs text-right">Approved</TableHead>
-                    <TableHead className="text-xs text-right">Conv. Rate</TableHead>
-                    <TableHead className="text-xs text-right">Share</TableHead>
+                    <TableHead className="text-xs text-end">Total</TableHead>
+                    <TableHead className="text-xs text-end">Approved</TableHead>
+                    <TableHead className="text-xs text-end">Conv. Rate</TableHead>
+                    <TableHead className="text-xs text-end">Share</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -765,14 +765,14 @@ const LeadFunnelPanel: React.FC = () => {
                             {s.source}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right text-sm font-semibold tabular-nums">{s.total}</TableCell>
-                        <TableCell className="text-right text-sm tabular-nums">{s.approved}</TableCell>
-                        <TableCell className="text-right text-sm tabular-nums">
+                        <TableCell className="text-end text-sm font-semibold tabular-nums">{s.total}</TableCell>
+                        <TableCell className="text-end text-sm tabular-nums">{s.approved}</TableCell>
+                        <TableCell className="text-end text-sm tabular-nums">
                           <span className={s.convRate >= 50 ? "text-green-600 font-semibold" : s.convRate >= 25 ? "text-amber-600" : "text-muted-foreground"}>
                             {s.convRate}%
                           </span>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-end">
                           <div className="flex items-center justify-end gap-1">
                             <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
                               <div

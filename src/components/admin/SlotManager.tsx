@@ -183,7 +183,7 @@ const SlotManager = () => {
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{slots.length} slots configured</p>
         <Button size="sm" onClick={() => setShowAdd(true)}>
-          <Plus className="h-4 w-4 mr-1" /> Add Slot
+          <Plus className="h-4 w-4 me-1" /> Add Slot
         </Button>
       </div>
 
@@ -196,7 +196,7 @@ const SlotManager = () => {
             <TableHead>TZ</TableHead>
             <TableHead>Students</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="text-end">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -208,10 +208,10 @@ const SlotManager = () => {
               <TableCell className="text-xs">{slot.timezone.replace(/_/g, " ")}</TableCell>
               <TableCell>
                 <span className="font-mono">{slot.current_count}/{slot.max_students}</span>
-                <span className="text-xs text-muted-foreground ml-1">(min {slot.min_students})</span>
+                <span className="text-xs text-muted-foreground ms-1">(min {slot.min_students})</span>
               </TableCell>
               <TableCell>{statusBadge(slot.status, slot.current_count, slot.max_students)}</TableCell>
-              <TableCell className="text-right space-x-1">
+              <TableCell className="text-end space-x-1 rtl:space-x-reverse">
                 <Button variant="ghost" size="sm" onClick={() => handleViewStudents(slot)}>
                   <Users className="h-4 w-4" />
                 </Button>

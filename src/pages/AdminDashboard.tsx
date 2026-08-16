@@ -166,7 +166,7 @@ function TrialInterestConfirmationCard() {
             />
           </div>
           <Button onClick={sendTest} disabled={testSending || !testEmail} variant="outline">
-            <Mail className="h-4 w-4 mr-2" />
+            <Mail className="h-4 w-4 me-2" />
             {testSending ? "Sending…" : testSent ? "✅ Test Sent — Send Again" : "Send Test Email"}
           </Button>
         </div>
@@ -185,7 +185,7 @@ function TrialInterestConfirmationCard() {
               disabled={bulkSending || !testSent}
               variant={testSent ? "default" : "outline"}
             >
-              <Mail className="h-4 w-4 mr-2" />
+              <Mail className="h-4 w-4 me-2" />
               {bulkSending ? "Sending to all…" : "Send to All Users"}
             </Button>
           ) : (
@@ -1101,7 +1101,7 @@ const AdminDashboard = () => {
       {/* Skip to main content — keyboard / screen reader shortcut */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:start-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
       >
         Skip to main content
       </a>
@@ -1191,8 +1191,8 @@ const AdminDashboard = () => {
                   <p className="text-xs text-muted-foreground">Referral Program</p>
                   <p className="font-semibold text-sm text-foreground">
                     {referralStats.total} conversion{referralStats.total !== 1 ? "s" : ""} · {referralStats.totalClicks} link click{referralStats.totalClicks !== 1 ? "s" : ""}
-                    {referralStats.thisMonth > 0 && <span className="text-green-600 dark:text-green-400 ml-2">· +{referralStats.thisMonth} this month</span>}
-                    {referralStats.clicksThisMonth > 0 && <span className="text-blue-600 dark:text-blue-400 ml-1">· {referralStats.clicksThisMonth} click{referralStats.clicksThisMonth !== 1 ? "s" : ""} this month</span>}
+                    {referralStats.thisMonth > 0 && <span className="text-green-600 dark:text-green-400 ms-2">· +{referralStats.thisMonth} this month</span>}
+                    {referralStats.clicksThisMonth > 0 && <span className="text-blue-600 dark:text-blue-400 ms-1">· {referralStats.clicksThisMonth} click{referralStats.clicksThisMonth !== 1 ? "s" : ""} this month</span>}
                   </p>
                 </div>
               </div>
@@ -1584,7 +1584,7 @@ const AdminDashboard = () => {
                     <button
                       type="button"
                       onClick={() => setAdminTab("students")}
-                      className="underline underline-offset-2 hover:text-foreground ml-1"
+                      className="underline underline-offset-2 hover:text-foreground ms-1"
                     >
                       Users →
                     </button>
@@ -1702,7 +1702,7 @@ const AdminDashboard = () => {
                         }
                       }}
                     >
-                      <Mail className="h-4 w-4 mr-2" /> Send Profile Reminder Emails
+                      <Mail className="h-4 w-4 me-2" /> Send Profile Reminder Emails
                     </Button>
                   </CardContent>
                 </Card>

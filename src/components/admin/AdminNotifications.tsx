@@ -216,7 +216,7 @@ const SlotFullPanel = ({ notification, onGroupCreated }: SlotFullPanelProps) => 
                   {creating ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : (
-                    <><Plus className="h-3.5 w-3.5 mr-1" /> Create</>
+                    <><Plus className="h-3.5 w-3.5 me-1" /> Create</>
                   )}
                 </Button>
               </div>
@@ -224,7 +224,7 @@ const SlotFullPanel = ({ notification, onGroupCreated }: SlotFullPanelProps) => 
           )}
 
           {createdGroupName && (
-            <div className="flex items-center gap-2 text-xs bg-primary/10 text-primary rounded px-3 py-2">
+            <div className="flex items-center gap-2 text-xs bg-primary/10 text-primary-text rounded px-3 py-2">
               <Check className="h-3.5 w-3.5 shrink-0" />
               Group <strong className="mx-1">"{createdGroupName}"</strong> created successfully
             </div>
@@ -316,12 +316,12 @@ const AdminNotifications = () => {
             size="sm"
             onClick={() => setFilter(filter === "unread" ? "all" : "unread")}
           >
-            <Filter className="h-4 w-4 mr-1" />
+            <Filter className="h-4 w-4 me-1" />
             {filter === "unread" ? "Show all" : "Unread only"}
           </Button>
           {unreadCount > 0 && (
             <Button variant="outline" size="sm" onClick={markAllRead}>
-              <Check className="h-4 w-4 mr-1" /> Mark all read
+              <Check className="h-4 w-4 me-1" /> Mark all read
             </Button>
           )}
         </div>
@@ -359,7 +359,7 @@ const AdminNotifications = () => {
 
                     {/* Show created group name badge if exists */}
                     {createdGroups[n.id] && (
-                      <div className="mt-2 flex items-center gap-1.5 text-xs text-primary font-medium">
+                      <div className="mt-2 flex items-center gap-1.5 text-xs text-primary-text font-medium">
                         <Users className="h-3.5 w-3.5" />
                         Group: {createdGroups[n.id]}
                       </div>

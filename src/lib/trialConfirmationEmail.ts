@@ -1,6 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 import { buildGoogleCalendarUrl, formatTime12h } from "@/lib/calendarUrl";
-import { TRIAL_CONFIRMATION_EMAIL_ENABLED } from "@/lib/siteConfig";
+import {
+  TRIAL_ANCHOR_TIMEZONE,
+  TRIAL_CONFIRMATION_EMAIL_ENABLED,
+  TRIAL_DURATION_MIN,
+} from "@/lib/siteConfig";
 
 /**
  * Sends the trial_confirmed email (calendar link + formatted date/time),
@@ -20,15 +24,20 @@ export async function sendTrialConfirmationEmail(params: {
   start_time: string; // HH:MM
   timezone?: string | null;
   language?: string; // defaults "ar"
+  /** Meeting link for this slot, when one is configured. */
+  classLinkUrl?: string | null;
 }): Promise<boolean> {
   if (!TRIAL_CONFIRMATION_EMAIL_ENABLED) return false;
 
-  const tz = params.timezone || "Africa/Cairo";
+  // The booking's own timezone wins. Hardcoding Africa/Cairo here stated a time
+  // up to seven hours wrong for any slot anchored to the teacher's zone.
+  const tz = params.timezone || TRIAL_ANCHOR_TIMEZONE;
   const calendarUrl = buildGoogleCalendarUrl({
     title: "Free Korean Trial Class — Klovers Academy",
     date: params.trial_date,
     time: params.start_time,
-    durationMin: 45,
+    // Was 45, so a student sold a 30-minute class had 45 minutes blocked out.
+    durationMin: TRIAL_DURATION_MIN,
     description: `Level: ${params.level || "Beginner"}`,
     timezone: tz,
   });
@@ -50,6 +59,7 @@ export async function sendTrialConfirmationEmail(params: {
       trial_timezone: tz,
       calendar_url: calendarUrl,
       language: params.language || "ar",
+      ...(params.classLinkUrl ? { class_link_url: params.classLinkUrl } : {}),
     },
   });
   if (error) throw error;

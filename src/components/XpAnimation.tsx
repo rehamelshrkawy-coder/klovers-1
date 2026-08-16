@@ -66,7 +66,7 @@ export function StreakCelebration({
           <p className="text-sm text-foreground">
             Keep it up! You're building an amazing habit! 🎉
           </p>
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-b border-r border-border rotate-45" />
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-b border-e border-border rotate-45" />
         </div>
 
         {/* Mascot with flame shield */}
@@ -75,7 +75,7 @@ export function StreakCelebration({
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 animate-pulse-glow rounded-full" />
           {/* Flame icon */}
           <div className="relative animate-mascot-bounce">
-            <Flame className="absolute -top-6 left-1/2 -translate-x-1/2 h-16 w-16 text-primary animate-flame-flicker drop-shadow-lg" strokeWidth={2.5} />
+            <Flame className="absolute -top-6 left-1/2 -translate-x-1/2 h-16 w-16 text-primary-text animate-flame-flicker drop-shadow-lg" strokeWidth={2.5} />
             <img
               src={mascotImg}
               alt="KLovers Mascot"
@@ -86,10 +86,10 @@ export function StreakCelebration({
 
         {/* Big streak number */}
         <div className="animate-count-pop">
-          <p className="text-7xl font-black text-primary text-outlined-lg leading-none tracking-tight">
+          <p className="text-7xl font-black text-primary-text text-outlined-lg leading-none tracking-tight">
             {currentStreak}
           </p>
-          <p className="text-2xl font-bold text-primary text-outlined-lg mt-1">day streak</p>
+          <p className="text-2xl font-bold text-primary-text text-outlined-lg mt-1">day streak</p>
         </div>
 
         {/* Weekly tracker */}
@@ -99,7 +99,7 @@ export function StreakCelebration({
               <span
                 className={cn(
                   "text-xs font-bold",
-                  day.isToday ? "text-primary" : "text-muted-foreground"
+                  day.isToday ? "text-primary-text" : "text-muted-foreground"
                 )}
               >
                 {day.label}
@@ -172,7 +172,7 @@ export function LeaguePromotionModal({
           {[0, 1, 2].map((i) => (
             <Star
               key={i}
-              className="text-primary animate-check-pop"
+              className="text-primary-text animate-check-pop"
               style={{ animationDelay: `${i * 150}ms` }}
               size={i === 1 ? 28 : 22}
               fill="hsl(var(--primary))"
@@ -187,7 +187,7 @@ export function LeaguePromotionModal({
               {from.emoji} {from.name} →{" "}
             </span>
           )}
-          <span className="font-bold text-primary">{to.name}</span>
+          <span className="font-bold text-primary-text">{to.name}</span>
         </p>
         <p className="text-sm text-muted-foreground mb-6">
           Keep studying to reach the next league! 화이팅! 🔥
@@ -239,7 +239,7 @@ export function MissionCompleteOverlay({ lessonTitle, xpEarned, onContinue }: {
         <div className="text-6xl mb-3 animate-count-pop">⭐</div>
         <h2 className="text-3xl font-black text-foreground mb-2">Mission Complete!</h2>
         <p className="text-muted-foreground mb-4">{lessonTitle}</p>
-        <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 text-primary font-bold text-lg mb-6">
+        <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 text-primary-text font-bold text-lg mb-6">
           <Zap className="h-5 w-5" /> +{xpEarned} XP
         </div>
         <button

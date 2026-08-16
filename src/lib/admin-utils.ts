@@ -52,6 +52,29 @@ function tzOffsetMs(date: Date, tz: string): number {
 }
 
 /**
+ * Resolve a wall-clock date + time in `tz` to the absolute instant it denotes.
+ * This is the only correct way to answer "has that session already started?" —
+ * comparing a naive `new Date("YYYY-MM-DD")` against `Date.now()` silently
+ * assumes the viewer's timezone and drops or resurrects sessions by up to a day.
+ */
+export function zonedDateTimeToInstant(dateStr: string, timeHHMM: string, tz: string): Date | null {
+  if (!dateStr || !timeHHMM || !/^\d{1,2}:\d{2}/.test(timeHHMM)) return null;
+  const [y, mo, d] = dateStr.split("-").map(Number);
+  const [h, mi] = timeHHMM.split(":").map(Number);
+  if ([y, mo, d, h, mi].some((n) => Number.isNaN(n))) return null;
+  const guess = Date.UTC(y, mo - 1, d, h, mi);
+  return new Date(guess - tzOffsetMs(new Date(guess), tz));
+}
+
+/** Today's date (YYYY-MM-DD) as it reads *in* `tz` right now. */
+export function todayInTimezone(tz: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(new Date()).reduce((a, p) => { a[p.type] = p.value; return a; }, {} as Record<string, string>);
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+/**
  * Convert a recurring weekly slot from source timezone to target timezone.
  * Returns the localized weekday + 12h time string. Handles DST correctly
  * by resolving against the next upcoming occurrence.

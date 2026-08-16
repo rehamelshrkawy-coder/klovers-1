@@ -142,7 +142,7 @@ export function VocabularyReview({
                   }}
                   className="mt-4"
                 >
-                  <Volume2 className="w-4 h-4 mr-2" />
+                  <Volume2 className="w-4 h-4 me-2" />
                   Pronounce
                 </Button>
               </div>
@@ -169,7 +169,7 @@ export function VocabularyReview({
             title="Complete blackout - did not recognize"
           >
             😕
-            <span className="hidden sm:inline ml-1">Again</span>
+            <span className="hidden sm:inline ms-1">Again</span>
           </Button>
           <Button
             variant="outline"
@@ -179,7 +179,7 @@ export function VocabularyReview({
             title="Incorrect response, but remembered correctly"
           >
             😐
-            <span className="hidden sm:inline ml-1">Hard</span>
+            <span className="hidden sm:inline ms-1">Hard</span>
           </Button>
           <Button
             variant="outline"
@@ -189,7 +189,7 @@ export function VocabularyReview({
             title="Correct response, but with serious difficulty"
           >
             🤔
-            <span className="hidden sm:inline ml-1">Ok</span>
+            <span className="hidden sm:inline ms-1">Ok</span>
           </Button>
           <Button
             variant="outline"
@@ -199,7 +199,7 @@ export function VocabularyReview({
             title="Correct response, but after some hesitation"
           >
             🙂
-            <span className="hidden sm:inline ml-1">Good</span>
+            <span className="hidden sm:inline ms-1">Good</span>
           </Button>
           <Button
             variant="default"
@@ -209,7 +209,7 @@ export function VocabularyReview({
             title="Correct response without hesitation"
           >
             😄
-            <span className="hidden sm:inline ml-1">Easy</span>
+            <span className="hidden sm:inline ms-1">Easy</span>
           </Button>
         </div>
         <p className="text-xs text-muted-foreground text-center mt-2">

@@ -253,7 +253,7 @@ const GamesPage = () => {
                 const isActive = activeGame === game.id;
                 const isLocked = !isLoggedIn && !game.free;
                 return (
-                  <button key={game.id} onClick={() => selectGame(game.id)} className="text-left">
+                  <button key={game.id} onClick={() => selectGame(game.id)} className="text-start">
                     <Card className={`p-4 transition-all duration-200 border-2 cursor-pointer h-full relative ${
                       isActive
                         ? "border-primary/50 bg-primary/5 shadow-md"
@@ -262,12 +262,12 @@ const GamesPage = () => {
                         : "border-border hover:border-foreground/20 hover:shadow-sm"
                     }`}>
                       {isLocked && (
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-2 end-2">
                           <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                         </div>
                       )}
                       {game.free && !isLoggedIn && (
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-2 end-2">
                           <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 dark:text-green-200 border border-green-200 dark:border-green-800 px-1.5 py-0.5 rounded-full font-medium">{isAr ? "مجاني" : "FREE"}</span>
                         </div>
                       )}
@@ -396,7 +396,7 @@ const GamesPage = () => {
           <div className="bg-background border border-border rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 relative">
             <button
               onClick={() => setShowSignupNudge(false)}
-              className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-muted transition-colors"
+              className="absolute top-3 end-3 p-1.5 rounded-full hover:bg-muted transition-colors"
               aria-label="Close"
             >
               <X className="h-4 w-4 text-muted-foreground" />

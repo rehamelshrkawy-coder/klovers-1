@@ -636,13 +636,13 @@ const BulkEmailManager = () => {
 
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={() => setShowPreview(true)} disabled={sending}>
-              <Eye className="h-4 w-4 mr-1" /> Preview
+              <Eye className="h-4 w-4 me-1" /> Preview
             </Button>
             <Button variant="outline" onClick={handleTestSend} disabled={testSending || sending}>
-              <TestTube className="h-4 w-4 mr-1" /> {testSending ? "Sending..." : "Test Send"}
+              <TestTube className="h-4 w-4 me-1" /> {testSending ? "Sending..." : "Test Send"}
             </Button>
             <Button onClick={() => setShowConfirm(true)} disabled={sending || !name || !subject || !htmlBody}>
-              <Send className="h-4 w-4 mr-1" /> Send Campaign
+              <Send className="h-4 w-4 me-1" /> Send Campaign
             </Button>
           </div>
 

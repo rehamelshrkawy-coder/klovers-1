@@ -136,15 +136,15 @@ const EnrollPage = () => {
           {/* Teacher card */}
           <div className="flex items-center gap-4 bg-card border border-border rounded-2xl px-5 py-4 shadow-sm">
             <div className="relative flex-shrink-0">
-              <div className="w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center text-xl font-bold text-primary select-none">
+              <div className="w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center text-xl font-bold text-primary-text select-none">
                 ريم
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 text-base leading-none">🇰🇷</span>
+              <span className="absolute -bottom-0.5 -end-0.5 text-base leading-none">🇰🇷</span>
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-bold text-foreground">Reham — 선생님</p>
-                <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">{t("enrollForm.certifiedTeacher")}</span>
+                <span className="text-xs bg-primary/10 text-primary-text font-semibold px-2 py-0.5 rounded-full">{t("enrollForm.certifiedTeacher")}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">{t("enrollForm.teacherExp")}</p>
               <p className="text-xs text-muted-foreground/80 italic mt-1 leading-relaxed">

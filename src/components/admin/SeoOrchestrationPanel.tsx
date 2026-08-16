@@ -38,7 +38,7 @@ function ScoreBar({ score, max = 10, label }: { score: number | null | undefined
       <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
         <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-xs font-semibold tabular-nums w-8 text-right">{score}/{max}</span>
+      <span className="text-xs font-semibold tabular-nums w-8 text-end">{score}/{max}</span>
       {label && <span className="text-xs text-muted-foreground hidden sm:block">{label}</span>}
     </div>
   );
@@ -76,7 +76,7 @@ function PostRow({ item }: { item: AgentReport }) {
   return (
     <div className={`border rounded-xl overflow-hidden transition-shadow ${open ? "shadow-md" : "hover:shadow-sm"}`}>
       <button
-        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/30 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 text-start hover:bg-muted/30 transition-colors"
         onClick={() => setOpen((v) => !v)}
       >
         {open ? <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />}
@@ -107,11 +107,11 @@ function PostRow({ item }: { item: AgentReport }) {
           {item.seo && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <Sparkles className="h-3.5 w-3.5 text-primary-text" />
                 <span className="font-semibold">SEO Analysis</span>
                 <ScoreBar score={item.seo.score} />
               </div>
-              <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs pl-1">
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs ps-1">
                 {item.seo.top_fixes.map((fix, i) => <li key={i}>{fix}</li>)}
               </ul>
               {item.seo.improved_description && (
@@ -127,8 +127,8 @@ function PostRow({ item }: { item: AgentReport }) {
           {item.keyword && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Target className="h-3.5 w-3.5 text-primary" />
-                <span className="font-semibold">Keyword — <span className="font-mono text-primary">"{item.keyword.primary_keyword}"</span></span>
+                <Target className="h-3.5 w-3.5 text-primary-text" />
+                <span className="font-semibold">Keyword — <span className="font-mono text-primary-text">"{item.keyword.primary_keyword}"</span></span>
                 <ScoreBar score={item.keyword.placement_score} />
               </div>
               <div className="flex flex-wrap gap-3">
@@ -137,7 +137,7 @@ function PostRow({ item }: { item: AgentReport }) {
                 <BoolDot value={item.keyword.in_headings} label="Headings" />
                 <BoolDot value={item.keyword.in_intro} label="Intro" />
               </div>
-              <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs pl-1">
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs ps-1">
                 {item.keyword.suggestions.map((s, i) => <li key={i}>{s}</li>)}
               </ul>
             </div>
@@ -147,7 +147,7 @@ function PostRow({ item }: { item: AgentReport }) {
           {item.alt_text && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Globe className="h-3.5 w-3.5 text-primary" />
+                <Globe className="h-3.5 w-3.5 text-primary-text" />
                 <span className="font-semibold">Alt Text</span>
                 <ScoreBar score={item.alt_text.alt1_score} />
               </div>
@@ -164,12 +164,12 @@ function PostRow({ item }: { item: AgentReport }) {
           {item.content && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <BookOpen className="h-3.5 w-3.5 text-primary" />
+                <BookOpen className="h-3.5 w-3.5 text-primary-text" />
                 <span className="font-semibold">Content Structure</span>
                 <ScoreBar score={item.content.structure_score} />
                 <span className="text-xs text-muted-foreground">{item.content.word_count}w · {item.content.heading_count}h</span>
               </div>
-              <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs pl-1">
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs ps-1">
                 {item.content.suggestions.map((s, i) => <li key={i}>{s}</li>)}
               </ul>
             </div>
@@ -179,12 +179,12 @@ function PostRow({ item }: { item: AgentReport }) {
           {item.marketing && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Zap className="h-3.5 w-3.5 text-primary" />
+                <Zap className="h-3.5 w-3.5 text-primary-text" />
                 <span className="font-semibold">Marketing Copy</span>
                 <ScoreBar score={item.marketing.cta_score} />
               </div>
               <div className="p-2.5 rounded-lg bg-background border text-xs space-y-1.5">
-                <p><span className="font-medium">CTA: </span>"{item.marketing.suggested_cta_text}" → <span className="font-mono text-primary">{item.marketing.suggested_cta_url}</span></p>
+                <p><span className="font-medium">CTA: </span>"{item.marketing.suggested_cta_text}" → <span className="font-mono text-primary-text">{item.marketing.suggested_cta_url}</span></p>
                 <p><span className="font-medium">Social: </span><span className="text-muted-foreground">{item.marketing.social_caption}</span></p>
               </div>
             </div>
@@ -194,16 +194,16 @@ function PostRow({ item }: { item: AgentReport }) {
           {item.internal_links && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Link className="h-3.5 w-3.5 text-primary" />
+                <Link className="h-3.5 w-3.5 text-primary-text" />
                 <span className="font-semibold">Internal Links</span>
                 <ScoreBar score={item.internal_links.missing_link_score} />
               </div>
               <div className="p-2.5 rounded-lg bg-background border text-xs space-y-2">
                 {item.internal_links.links_to_posts.map((l, i) => (
-                  <p key={i} className="text-muted-foreground">→ <span className="font-mono text-primary">/{l.target_slug}</span> — "{l.anchor_text}"</p>
+                  <p key={i} className="text-muted-foreground">→ <span className="font-mono text-primary-text">/{l.target_slug}</span> — "{l.anchor_text}"</p>
                 ))}
                 {item.internal_links.links_to_pages.map((l, i) => (
-                  <p key={i} className="text-muted-foreground">→ <span className="font-mono text-primary">{l.url}</span> — "{l.anchor_text}"</p>
+                  <p key={i} className="text-muted-foreground">→ <span className="font-mono text-primary-text">{l.url}</span> — "{l.anchor_text}"</p>
                 ))}
               </div>
             </div>
@@ -283,7 +283,7 @@ function TopicGapPanel({
           <CardContent className="pt-4 pb-3">
             <div className="flex items-center gap-3">
               {autoGenerating
-                ? <><Loader2 className="h-5 w-5 animate-spin text-primary shrink-0" /><div><p className="text-sm font-semibold text-primary">Auto-generating top 5 articles…</p><p className="text-xs text-muted-foreground mt-0.5">Writing full SEO-optimised drafts from your top priority gaps</p></div></>
+                ? <><Loader2 className="h-5 w-5 animate-spin text-primary-text shrink-0" /><div><p className="text-sm font-semibold text-primary-text">Auto-generating top 5 articles…</p><p className="text-xs text-muted-foreground mt-0.5">Writing full SEO-optimised drafts from your top priority gaps</p></div></>
                 : <><CheckCircle className="h-5 w-5 text-green-600 shrink-0" /><div><p className="text-sm font-semibold text-green-800">{autoCreatedCount} article draft{autoCreatedCount !== 1 ? "s" : ""} auto-generated</p><p className="text-xs text-muted-foreground mt-0.5">{autoGenResults.filter(r => r.status === "exists").length} already existed · Review and publish from the Blog tab</p></div></>
               }
             </div>
@@ -309,15 +309,15 @@ function TopicGapPanel({
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <CardTitle className="text-sm flex items-center gap-2">
-              <PlusCircle className="h-4 w-4 text-primary" />
+              <PlusCircle className="h-4 w-4 text-primary-text" />
               Topic Gaps — Recommended Articles ({data.recommended_articles.length})
             </CardTitle>
             <div className="flex items-center gap-2">
               {selected.size > 0 && <span className="text-xs text-muted-foreground">{selected.size}/{MAX_SELECT} selected</span>}
               <Button size="sm" onClick={generateSelected} disabled={selected.size === 0 || generating} className="h-7 text-xs">
                 {generating
-                  ? <><Loader2 className="h-3 w-3 animate-spin mr-1.5" /> Generating…</>
-                  : <><FileText className="h-3 w-3 mr-1.5" /> Generate {selected.size > 0 ? `(${selected.size})` : ""}</>
+                  ? <><Loader2 className="h-3 w-3 animate-spin me-1.5" /> Generating…</>
+                  : <><FileText className="h-3 w-3 me-1.5" /> Generate {selected.size > 0 ? `(${selected.size})` : ""}</>
                 }
               </Button>
             </div>
@@ -359,10 +359,10 @@ function TopicGapPanel({
                       <div className="flex items-center gap-1.5 shrink-0">
                         <PriorityBadge priority={a.priority} />
                         {isAutoGen && isCreated && (
-                          <span className="text-xs bg-primary/10 text-primary border border-primary/20 rounded px-1.5 py-0.5 font-semibold">Auto</span>
+                          <span className="text-xs bg-primary/10 text-primary-text border border-primary/20 rounded px-1.5 py-0.5 font-semibold">Auto</span>
                         )}
                         {isCreated && (
-                          <a href={`/blog/${a.slug}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-xs text-primary flex items-center gap-0.5 hover:underline">
+                          <a href={`/blog/${a.slug}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-xs text-primary-text flex items-center gap-0.5 hover:underline">
                             view <ExternalLink className="h-3 w-3" />
                           </a>
                         )}
@@ -408,9 +408,9 @@ function TopicGapPanel({
       {/* Topic clusters */}
       {data.topic_clusters.length > 0 && (
         <Card className="rounded-xl">
-          <button className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-muted/40 transition-colors" onClick={() => setClusterOpen((v) => !v)}>
+          <button className="w-full flex items-center gap-2 px-4 py-3 text-start hover:bg-muted/40 transition-colors" onClick={() => setClusterOpen((v) => !v)}>
             {clusterOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-            <TrendingUp className="h-4 w-4 text-primary" />
+            <TrendingUp className="h-4 w-4 text-primary-text" />
             <span className="font-medium text-sm">Topic Clusters ({data.topic_clusters.length})</span>
           </button>
           {clusterOpen && (
@@ -501,7 +501,7 @@ function SeoOrchestrationPanel() {
       <div className="rounded-2xl border bg-gradient-to-br from-background to-muted/30 p-6">
         <div className="flex items-start gap-3 mb-4">
           <div className="p-2 rounded-xl bg-primary/10">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <Sparkles className="h-5 w-5 text-primary-text" />
           </div>
           <div>
             <h2 className="font-semibold text-lg">SEO Orchestration</h2>
@@ -513,11 +513,11 @@ function SeoOrchestrationPanel() {
         </div>
         <div className="flex flex-wrap gap-3">
           <Button onClick={() => runOrchestration("analyze")} disabled={loading || fixing || autoGenerating} size="default">
-            {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Analyzing…</> : <><Play className="h-4 w-4 mr-2" /> Run Analysis + Auto-Generate</>}
+            {loading ? <><Loader2 className="h-4 w-4 animate-spin me-2" /> Analyzing…</> : <><Play className="h-4 w-4 me-2" /> Run Analysis + Auto-Generate</>}
           </Button>
           {result && (
             <Button variant="outline" onClick={() => runOrchestration("fix")} disabled={loading || fixing || autoGenerating}>
-              {fixing ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Applying…</> : <><Wrench className="h-4 w-4 mr-2" /> Apply All Fixes</>}
+              {fixing ? <><Loader2 className="h-4 w-4 animate-spin me-2" /> Applying…</> : <><Wrench className="h-4 w-4 me-2" /> Apply All Fixes</>}
             </Button>
           )}
         </div>
@@ -529,9 +529,9 @@ function SeoOrchestrationPanel() {
           {[
             { label: "Posts Scanned", value: summary.total_posts, icon: BarChart2, color: "text-foreground" },
             { label: "Needing Work", value: summary.posts_needing_work, icon: AlertCircle, color: "text-amber-600" },
-            { label: "AI Calls", value: summary.ai_calls_made, icon: Zap, color: "text-primary" },
+            { label: "AI Calls", value: summary.ai_calls_made, icon: Zap, color: "text-primary-text" },
             { label: "Avg SEO", value: summary.avg_seo_score != null ? `${summary.avg_seo_score}/10` : "—", icon: TrendingUp, color: summary.avg_seo_score != null && summary.avg_seo_score >= 7 ? "text-green-600" : "text-amber-600" },
-            { label: "Topic Gaps", value: summary.topic_gaps_found, icon: PlusCircle, color: "text-primary" },
+            { label: "Topic Gaps", value: summary.topic_gaps_found, icon: PlusCircle, color: "text-primary-text" },
             { label: "Cannibalization", value: summary.cannibalization_warnings, icon: AlertTriangle, color: summary.cannibalization_warnings > 0 ? "text-red-500" : "text-muted-foreground" },
           ].map(({ label, value, icon: Icon, color }) => (
             <Card key={label} className="rounded-xl">
@@ -564,18 +564,18 @@ function SeoOrchestrationPanel() {
         <div className="flex gap-1 border-b">
           <button
             onClick={() => setActiveTab("posts")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "posts" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "posts" ? "border-primary text-primary-text" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             Post Analysis ({result.report.length})
           </button>
           <button
             onClick={() => setActiveTab("topics")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === "topics" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 ${activeTab === "topics" ? "border-primary text-primary-text" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             <TrendingUp className="h-3.5 w-3.5" />
             Topic Intelligence
             {(result.summary.topic_gaps_found > 0 || autoGenerating || autoGenResults.length > 0) && (
-              <span className={`ml-1 rounded-full text-xs px-1.5 py-0.5 leading-none ${autoGenerating ? "bg-primary animate-pulse text-primary-foreground" : "bg-primary text-primary-foreground"}`}>
+              <span className={`ms-1 rounded-full text-xs px-1.5 py-0.5 leading-none ${autoGenerating ? "bg-primary animate-pulse text-primary-foreground" : "bg-primary text-primary-foreground"}`}>
                 {autoGenerating ? "…" : result.summary.topic_gaps_found + result.summary.cannibalization_warnings}
               </span>
             )}

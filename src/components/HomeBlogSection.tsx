@@ -109,7 +109,7 @@ const HomeBlogSection = () => {
                     </div>
                   ) : (
                     <div className="aspect-video bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                      <BookOpen className="h-10 w-10 text-primary/30" />
+                      <BookOpen className="h-10 w-10 text-primary-text/30" />
                     </div>
                   )}
 
@@ -121,12 +121,12 @@ const HomeBlogSection = () => {
 
                     {/* Attraction badges */}
                     {idx === 0 && (
-                      <span className="ml-2 inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                      <span className="ms-2 inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
                         ⭐ {isAr ? "مميز" : "Featured"}
                       </span>
                     )}
                     {idx > 0 && (post.seo_score ?? 0) >= 80 && (
-                      <span className="ml-2 inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                      <span className="ms-2 inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary-text border border-primary/20">
                         ✨ {isAr ? "موصى به" : "Top Pick"}
                       </span>
                     )}

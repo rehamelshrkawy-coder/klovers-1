@@ -274,7 +274,7 @@ const TeacherAvailabilityManager = () => {
               </div>
               <div className="flex items-end">
                 <Button type="submit" size="sm" className="w-full">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 me-2" />
                   Add Slot
                 </Button>
               </div>

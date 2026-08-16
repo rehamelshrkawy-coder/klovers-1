@@ -85,7 +85,7 @@ export function LearningGoalsCard() {
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" className="mt-2">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 me-2" />
                   Create Your First Goal
                 </Button>
               </DialogTrigger>

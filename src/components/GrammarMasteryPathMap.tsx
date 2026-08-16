@@ -69,11 +69,11 @@ function WorldHeader({
               {isAr ? world.descriptionAr : world.description}
             </p>
           </div>
-          <div className="text-right">
+          <div className="text-end">
             <p className="text-sm font-bold text-foreground">
               {progress.completed}/{progress.total}
             </p>
-            {isComplete && <CheckCircle2 className="h-5 w-5 text-primary ml-auto" />}
+            {isComplete && <CheckCircle2 className="h-5 w-5 text-primary-text ms-auto" />}
           </div>
         </div>
         <Progress value={progress.percent} className="h-2" />
@@ -155,7 +155,7 @@ export default function GrammarMasteryPathMap({ lessons, lessonProgress, userId,
                     >
                       <span className="text-2xl">{lesson.emoji}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-primary uppercase tracking-wide truncate">
+                        <p className="text-xs font-semibold text-primary-text uppercase tracking-wide truncate">
                           {isAr
                             ? `نمط ${lesson.sort_order}`
                             : `Pattern ${lesson.sort_order}`}
@@ -168,7 +168,7 @@ export default function GrammarMasteryPathMap({ lessons, lessonProgress, userId,
                       {locked ? (
                         <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
                       ) : completed ? (
-                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 text-primary-text shrink-0" />
                       ) : null}
                       {lp && !locked && (
                         <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2">
