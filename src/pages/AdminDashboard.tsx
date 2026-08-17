@@ -44,6 +44,7 @@ const AdminNotifications = lazy(() => import("@/components/admin/AdminNotificati
 const AdminAttendancePanel = lazy(() => import("@/components/admin/AdminAttendancePanel"));
 const GroupMatcher = lazy(() => import("@/components/admin/GroupMatcher"));
 const TeacherAvailabilityManager = lazy(() => import("@/components/admin/TeacherAvailabilityManager"));
+const TeacherScheduleManager = lazy(() => import("@/components/admin/TeacherScheduleManager"));
 const StudentPreferenceDashboard = lazy(() => import("@/components/admin/StudentPreferenceDashboard"));
 const BulkEmailManager = lazy(() => import("@/components/admin/BulkEmailManager"));
 const SchedulingManager = lazy(() => import("@/components/admin/SchedulingManager"));
@@ -75,7 +76,7 @@ const TAB_GROUPS: { id: string; label: string; icon: typeof Users; tabs: string[
   { id: "ops", label: "Operations", icon: BarChart3, tabs: ["students", "enrollments", "leads", "trials", "lead-funnel", "manage", "sales", "promos"] },
   { id: "learn", label: "Learning", icon: Users, tabs: ["group-attendance", "group-matcher", "placement-tests", "session-attendance", "preferences", "league-users", "books", "trial-books"] },
   { id: "content", label: "Content", icon: Sparkles, tabs: ["blog", "seo-orchestration", "image-audit", "campaigns"] },
-  { id: "config", label: "Config", icon: Settings, tabs: ["notifications", "scheduling", "availability", "settings"] },
+  { id: "config", label: "Config", icon: Settings, tabs: ["notifications", "scheduling", "availability", "teacher-schedule", "settings"] },
 ];
 
 // ── Trial Interest Confirmation Campaign Card ─────────────────────────────────
@@ -1483,6 +1484,11 @@ const AdminDashboard = () => {
                     <Clock className="h-3.5 w-3.5" /> Availability
                   </TabsTrigger>
                 )}
+                {inActiveGroup("teacher-schedule") && (
+                  <TabsTrigger value="teacher-schedule" className={TAB_CLS}>
+                    <Clock className="h-3.5 w-3.5" /> Schedule
+                  </TabsTrigger>
+                )}
                 {inActiveGroup("settings") && (
                   <TabsTrigger value="settings" className={TAB_CLS}>
                     <Settings className="h-3.5 w-3.5" /> Settings
@@ -1758,6 +1764,15 @@ const AdminDashboard = () => {
             <TabsContent value="availability">
               <TabErrorBoundary name="Teacher Availability">
                 <TeacherAvailabilityManager />
+              </TabErrorBoundary>
+            </TabsContent>
+
+            {/* TEACHER SCHEDULE TAB (dated free/busy blocks) */}
+            <TabsContent value="teacher-schedule">
+              <TabErrorBoundary name="Teaching Schedule">
+                <Suspense fallback={<TabLoader />}>
+                  <TeacherScheduleManager />
+                </Suspense>
               </TabErrorBoundary>
             </TabsContent>
 
