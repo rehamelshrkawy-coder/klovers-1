@@ -1101,7 +1101,7 @@ function HistoryAr() {
       <div style={{ borderTop:`3px solid ${Y}`, paddingTop:"4mm" }}>
         <div style={{ fontSize:"11px", fontWeight:800, color:T1, marginBottom:"3px" }}>حقيقة مذهلة!</div>
         <p style={{ fontSize:"11px", color:T2, lineHeight:1.7, margin:0 }}>
-          يتحدث الكورية أكثر من <strong>٨٠ مليون شخص</strong> حول العالم. وقد صنّفت منظمة اليونسكو الهانغول كواحد من أكثر أنظمة الكتابة علمية ومنطقية في التاريخ البشري!
+          يتحدث الكورية أكثر من <strong>80 مليون شخص</strong> حول العالم. وقد صنّفت منظمة اليونسكو الهانغول كواحد من أكثر أنظمة الكتابة علمية ومنطقية في التاريخ البشري!
         </p>
       </div>
     </Page>
@@ -4657,7 +4657,7 @@ export default function HangulBookPage() {
 
   if (access === "denied") return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-6 text-center">
-      <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
+      <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center dark:bg-amber-900/40">
         <Lock className="h-8 w-8 text-amber-600" />
       </div>
       <h1 className="text-2xl font-black">الكتاب غير متاح بعد</h1>

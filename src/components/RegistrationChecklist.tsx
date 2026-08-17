@@ -123,7 +123,7 @@ const RegistrationChecklist = ({ userId, enrollmentId, items, onItemCompleted, a
     if (key === "Preferred class days") {
       return (
         <Button size="sm" variant="default" onClick={() => navigate("/dashboard/schedule")}>
-          Go to My Schedule <ArrowRight className="h-3.5 w-3.5 ml-1" />
+          Go to My Schedule <ArrowRight className="h-3.5 w-3.5 ms-1 rtl-flip" />
         </Button>
       );
     }

@@ -49,7 +49,7 @@ export function LeagueProgressBar({ totalXp }: { totalXp: number }) {
           </div>
         </div>
         {nextLeague && (
-          <p className="text-xs text-muted-foreground text-right">
+          <p className="text-xs text-muted-foreground text-end">
             {(nextLeague.minXp - totalXp).toLocaleString()} XP to<br />
             <span className="font-medium">{nextLeague.emoji} {nextLeague.name}</span>
           </p>
@@ -204,7 +204,7 @@ export function LessonProgressDots({ progress }: {
           {s.label}
         </span>
       ))}
-      {progress.chapter_completed && <span className="text-xs ml-1">⭐</span>}
+      {progress.chapter_completed && <span className="text-xs ms-1">⭐</span>}
     </div>
   );
 }

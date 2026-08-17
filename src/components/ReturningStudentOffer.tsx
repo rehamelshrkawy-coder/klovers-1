@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   GraduationCap,
@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { RETURNING_STUDENT_CODE } from "@/lib/siteConfig";
 
@@ -24,19 +25,12 @@ const REFERRAL_ICONS = [UserPlus, Share2, Shield];
 const ReturningStudentOffer = () => {
   const { t, tArray, language } = useLanguage();
   const isAr = language === "ar";
-  const sectionRef = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
+  /* Shared reveal: falls back to visible when IntersectionObserver
+     is missing, and reveals after 2s regardless — a section that
+     never appears is worse than one that appears early. */
+  const { ref: sectionRef, visible } = useScrollReveal<HTMLElement>({ threshold: 0.1 });
   const [copied, setCopied] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.1 }
-    );
-    if (sectionRef.current) obs.observe(sectionRef.current);
-    return () => obs.disconnect();
-  }, []);
 
   const handleCopy = async () => {
     try {
@@ -264,10 +258,10 @@ const ReturningStudentOffer = () => {
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <Button size="lg" asChild className="gap-2 h-13 px-8 text-base font-bold shadow-lg">
+          <Button size="lg" asChild className="gap-2 h-14 px-8 text-base font-bold shadow-lg">
             <Link to="/placement-test">
               {t("returningStudents.section.cta")}
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-5 w-5 rtl-flip" />
             </Link>
           </Button>
         </div>

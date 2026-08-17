@@ -101,7 +101,7 @@ const RomanizationGame = ({ onGameComplete }: { onGameComplete?: (score: number,
           <Badge variant="outline">Round {round + 1}/{totalRounds}</Badge>
           <div className="flex items-center gap-2">
             {usingLesson && <Badge variant="outline" className="text-xs">📚 From your lessons</Badge>}
-            <Badge variant="secondary"><Sparkles className="h-3 w-3 mr-1" />{score * 5} XP</Badge>
+            <Badge variant="secondary"><Sparkles className="h-3 w-3 me-1" />{score * 5} XP</Badge>
           </div>
         </div>
         <Card className="p-6 text-center space-y-4">
@@ -126,7 +126,7 @@ const RomanizationGame = ({ onGameComplete }: { onGameComplete?: (score: number,
             </p>
           )}
         </Card>
-        {feedback && <Button onClick={nextRound} className="w-full gap-2">Next <ArrowRight className="h-4 w-4" /></Button>}
+        {feedback && <Button onClick={nextRound} className="w-full gap-2">Next <ArrowRight className="h-4 w-4 rtl-flip" /></Button>}
         <Button variant="ghost" size="sm" onClick={initQuestions} className="w-full gap-1"><RotateCcw className="h-3 w-3" /> Restart</Button>
       </div>
     </section>

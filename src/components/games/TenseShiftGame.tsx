@@ -203,7 +203,7 @@ const TenseShiftGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
       </Card>
 
       {selected && (
-        <Card className={`p-3 border-l-4 text-sm ${selected === q.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
+        <Card className={`p-3 border-s-4 text-sm ${selected === q.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
           <p className="font-semibold mb-1">{selected === q.correct ? "✅ Correct!" : `❌ Answer: ${q.correct}`}</p>
           <p className="text-xs text-muted-foreground">{q.explanation}</p>
         </Card>
@@ -218,7 +218,7 @@ const TenseShiftGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
           }
           return (
             <button key={opt} onClick={() => handleSelect(opt)} disabled={!!selected}
-              className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-150 ${selected ? extra || "border-border opacity-50" : "border-border hover:border-primary hover:bg-primary/5"}`}>
+              className={`w-full text-start px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-150 ${selected ? extra || "border-border opacity-50" : "border-border hover:border-primary hover:bg-primary/5"}`}>
               {opt}
             </button>
           );
@@ -227,7 +227,7 @@ const TenseShiftGame = ({ onGameComplete }: { onGameComplete?: (score: number, t
 
       {selected && (
         <Button onClick={next} className="w-full gap-2">
-          {round + 1 >= totalRounds ? <><Trophy className="h-4 w-4" /> See Results</> : <><ArrowRight className="h-4 w-4" /> Next</>}
+          {round + 1 >= totalRounds ? <><Trophy className="h-4 w-4" /> See Results</> : <><ArrowRight className="h-4 w-4 rtl-flip" /> Next</>}
         </Button>
       )}
     </div>

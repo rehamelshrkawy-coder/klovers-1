@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Users, Star, Zap, MessageCircle } from "lucide-react";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
 import { trackAndOpenWhatsApp, logLeadEvent } from "@/lib/leadTracking";
 
@@ -18,18 +19,11 @@ const KR_CHARS = ["안녕", "한국어", "공부", "화이팅", "수업", "최�
 const FinalCTA = () => {
   const { t, language } = useLanguage();
   const isAr = language === "ar";
-  const sectionRef = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
+  /* Shared reveal: falls back to visible when IntersectionObserver
+     is missing, and reveals after 2s regardless — a section that
+     never appears is worse than one that appears early. */
+  const { ref: sectionRef, visible } = useScrollReveal<HTMLElement>({ threshold: 0.2 });
   const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.2 }
-    );
-    if (sectionRef.current) obs.observe(sectionRef.current);
-    return () => obs.disconnect();
-  }, []);
 
   // Animate student count 0 → 1000
   useEffect(() => {
@@ -69,9 +63,9 @@ const FinalCTA = () => {
           </span>
         ))}
         {/* Gradient blobs */}
-        <div className="absolute top-0 left-0 w-80 h-80 bg-primary-foreground/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-primary-foreground/5 rounded-full translate-x-1/3 translate-y-1/3" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary-foreground/3 rounded-full" />
+        <div className="absolute top-0 start-0 w-80 h-80 bg-primary-foreground/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 end-0 w-64 h-64 bg-primary-foreground/5 rounded-full translate-x-1/3 translate-y-1/3" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary-foreground/[0.03] rounded-full" />
       </div>
 
       <div className="container mx-auto px-4 text-center relative z-10">
@@ -132,12 +126,12 @@ const FinalCTA = () => {
             size="lg"
             variant="secondary"
             asChild
-            className="gap-2 h-13 px-8 text-base shadow-xl min-w-[200px] font-bold"
+            className="gap-2 h-14 px-8 text-base shadow-xl min-w-[200px] font-bold"
             onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "final_cta_free_trial" }); } catch { /* Analytics must not block navigation. */ } }}
           >
             <Link to="/free-trial">
               {t("finalCta", "button")}
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-5 w-5 rtl-flip" />
             </Link>
           </Button>
 

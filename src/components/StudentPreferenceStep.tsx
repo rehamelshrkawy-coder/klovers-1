@@ -180,7 +180,7 @@ const StudentPreferenceStep = ({
                   );
                   const waHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
                   return (
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-3">
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-3 dark:bg-amber-950/40 dark:border-amber-800">
                       <div className="flex gap-2">
                         <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
                         <p className="text-sm text-amber-800">
@@ -218,7 +218,7 @@ const StudentPreferenceStep = ({
 
           {/* Error message */}
           {formError && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 dark:bg-red-950/40 dark:border-red-800">
               <p className="text-sm text-red-800">{formError}</p>
             </div>
           )}

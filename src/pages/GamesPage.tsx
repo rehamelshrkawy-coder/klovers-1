@@ -181,11 +181,11 @@ const GamesPage = () => {
       <main id="main-content" className="pt-20">
         {/* Hero */}
         <section className="relative overflow-hidden py-16 px-4 bg-muted/30">
-          <div className="absolute top-0 right-0 w-72 h-72 bg-primary/5 rounded-full translate-x-1/3 -translate-y-1/3" />
-          <div className="absolute bottom-0 left-0 w-60 h-60 bg-primary/5 rounded-full -translate-x-1/3 translate-y-1/3" />
-          <div className="absolute top-1/2 left-1/3 w-3 h-3 bg-primary/20 rounded-full animate-pulse" />
-          <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-primary/15 rounded-full animate-pulse delay-500" />
-          <div className="absolute bottom-1/3 right-1/3 w-2 h-2 bg-primary/25 rounded-full animate-pulse delay-300" />
+          <div className="absolute top-0 end-0 w-72 h-72 bg-primary/5 rounded-full translate-x-1/3 -translate-y-1/3" />
+          <div className="absolute bottom-0 start-0 w-60 h-60 bg-primary/5 rounded-full -translate-x-1/3 translate-y-1/3" />
+          <div className="absolute top-1/2 start-1/3 w-3 h-3 bg-primary/20 rounded-full animate-pulse" />
+          <div className="absolute top-1/4 end-1/4 w-4 h-4 bg-primary/15 rounded-full animate-pulse delay-500" />
+          <div className="absolute bottom-1/3 end-1/3 w-2 h-2 bg-primary/25 rounded-full animate-pulse delay-300" />
 
           <div className="max-w-4xl mx-auto text-center relative z-10 space-y-4">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-foreground border border-border px-4 py-2 rounded-full text-sm font-medium">
@@ -244,7 +244,7 @@ const GamesPage = () => {
                 const isActive = activeGame === game.id;
                 const isLocked = !isLoggedIn && !game.free;
                 return (
-                  <button key={game.id} onClick={() => selectGame(game.id)} className="text-left">
+                  <button key={game.id} onClick={() => selectGame(game.id)} className="text-start">
                     <Card className={`p-4 transition-all duration-200 border-2 cursor-pointer h-full relative ${
                       isActive
                         ? "border-primary/50 bg-primary/5 shadow-md"
@@ -253,12 +253,12 @@ const GamesPage = () => {
                         : "border-border hover:border-foreground/20 hover:shadow-sm"
                     }`}>
                       {isLocked && (
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-2 end-2">
                           <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                         </div>
                       )}
                       {game.free && !isLoggedIn && (
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-2 end-2">
                           <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 dark:text-green-200 border border-green-200 dark:border-green-800 px-1.5 py-0.5 rounded-full font-medium">{isAr ? "مجاني" : "FREE"}</span>
                         </div>
                       )}
@@ -310,7 +310,7 @@ const GamesPage = () => {
                       const rankEmojis = ["🥇", "🥈", "🥉"];
                       const emoji = idx < 3 ? rankEmojis[idx] : `${idx + 1}`;
                       return (
-                        <div key={p.user_id} className={`flex items-center gap-3 px-4 py-2.5 ${p.isCurrentUser ? "bg-amber-50" : ""}`}>
+                        <div key={p.user_id} className={`flex items-center gap-3 px-4 py-2.5 ${p.isCurrentUser ? "bg-amber-50" : ""} dark:bg-amber-950/40`}>
                           <span className="text-base w-6 text-center font-bold">{emoji}</span>
                           <span className={`flex-1 text-sm font-medium ${p.isCurrentUser ? "text-amber-700 font-bold" : "text-foreground"}`}>
                             {p.name}{p.isCurrentUser ? (isAr ? " (أنت)" : " (you)") : ""}
@@ -342,8 +342,8 @@ const GamesPage = () => {
               </div>
               {!isLoggedIn && (
                 <>
-                  <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-card to-transparent pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center justify-end pb-3">
+                  <div className="absolute bottom-0 start-0 end-0 h-20 bg-gradient-to-t from-card to-transparent pointer-events-none" />
+                  <div className="absolute bottom-0 start-0 end-0 flex flex-col items-center justify-end pb-3">
                     <a
                       href="/signup"
                       className="text-xs bg-amber-500 text-white px-4 py-1.5 rounded-full font-semibold hover:bg-amber-600 transition-colors shadow-md border border-black/15"
@@ -387,7 +387,7 @@ const GamesPage = () => {
           <div className="bg-background border border-border rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 relative">
             <button
               onClick={() => setShowSignupNudge(false)}
-              className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-muted transition-colors"
+              className="absolute top-3 end-3 p-1.5 rounded-full hover:bg-muted transition-colors"
               aria-label="Close"
             >
               <X className="h-4 w-4 text-muted-foreground" />

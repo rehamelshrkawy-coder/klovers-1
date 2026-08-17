@@ -230,7 +230,7 @@ const ConversationOrderGame = ({ onGameComplete }: { onGameComplete?: (score: nu
       </div>
 
       {submitted && !isCorrect && (
-        <Card className="p-3 border-l-4 border-amber-500 bg-amber-50 dark:bg-amber-950/30 text-sm">
+        <Card className="p-3 border-s-4 border-amber-500 bg-amber-50 dark:bg-amber-950/30 text-sm">
           <p className="font-semibold mb-1">Correct order:</p>
           {scene.lines.map((l, i) => (
             <p key={i} className="text-xs text-muted-foreground">{i + 1}. ({l.speaker}) {l.korean}</p>
@@ -242,7 +242,7 @@ const ConversationOrderGame = ({ onGameComplete }: { onGameComplete?: (score: nu
         <Button onClick={handleSubmit} className="w-full">Check Order</Button>
       ) : (
         <Button onClick={next} className="w-full gap-2">
-          {round + 1 >= totalRounds ? <><Trophy className="h-4 w-4" /> See Results</> : <><ArrowRight className="h-4 w-4" /> Next Round</>}
+          {round + 1 >= totalRounds ? <><Trophy className="h-4 w-4" /> See Results</> : <><ArrowRight className="h-4 w-4 rtl-flip" /> Next Round</>}
         </Button>
       )}
     </div>

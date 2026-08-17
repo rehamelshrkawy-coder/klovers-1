@@ -39,7 +39,7 @@ const CookieBanner = () => {
           {isAr ? "." : "."}
         </p>
         <div className="flex items-center gap-2 shrink-0">
-          <Button size="sm" onClick={accept} className="h-8 text-xs font-semibold">
+          <Button size="sm" onClick={accept} className="min-h-[44px] px-4 text-xs font-semibold">
             {isAr ? "موافق" : "Got it"}
           </Button>
           <button

@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -10,121 +9,81 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CalendarDays, Mail, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CalendarDays, Mail, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { convertDateTimeToTimezone } from "@/lib/admin-utils";
-
-/**
- * Fallback: next UTC occurrence of dayOfWeek — mirrors the edge function
- * logic exactly so client and server always agree on the date.
- */
-function nextDateForDayUTC(dayOfWeek: number): string {
-  const today = new Date();
-  const todayDay = today.getUTCDay();
-  let diff = dayOfWeek - todayDay;
-  if (diff <= 0) diff += 7; // always at least 1 day ahead
-  const next = new Date(today);
-  next.setUTCDate(today.getUTCDate() + diff);
-  return next.toISOString().split("T")[0];
-}
-
-interface TrialSlot {
-  day_of_week: number;
-  start_time: string;
-  booked_count: number;
-  capacity: number | null;
-  duration_min: number | null;
-  timezone: string | null;
-  /** Actual upcoming session date returned by the RPC (anchored to existing bookings). */
-  next_trial_date: string | null;
-}
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useTrialAvailability, formatSlot, type TrialSlot } from "@/hooks/useTrialAvailability";
+import { getUserTimezone } from "@/lib/viewerTimezone";
 
 interface TrialSlotPickerProps {
   onSelect: (dayOfWeek: number, startTime: string, trialDate: string) => void;
   onBack: () => void;
   classLanguage?: "arabic" | "english";
+  /**
+   * True while the parent is committing the booking. The button disables and
+   * shows a spinner, so a slow network cannot be turned into two bookings by
+   * an impatient second tap.
+   */
+  submitting?: boolean;
 }
 
-// Only used when the backend row somehow omits capacity (shouldn't happen in prod).
-const DEFAULT_CAPACITY = 6;
-
-const TrialSlotPicker = ({ onSelect, onBack, classLanguage }: TrialSlotPickerProps) => {
-  const [slots, setSlots] = useState<TrialSlot[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const TrialSlotPicker = ({ onSelect, onBack, classLanguage, submitting = false }: TrialSlotPickerProps) => {
+  const { t, tPlural, language } = useLanguage();
+  const isAr = language === "ar";
+  const availability = useTrialAvailability(classLanguage);
   const [selectedKey, setSelectedKey] = useState<string>("");
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
   const [waitlistDone, setWaitlistDone] = useState(false);
+  const [waitlistError, setWaitlistError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setSelectedKey(""); // reset selection when language changes
-    const fetchSlots = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { data, error: rpcError } = await supabase.rpc("get_trial_availability" as any, {
-          p_language: classLanguage ?? null,
-        });
-        if (rpcError) throw rpcError;
-        const rows = (data || []) as any[];
-        const normalised: TrialSlot[] = rows.map((s) => ({
-          day_of_week: s.day_of_week,
-          start_time: s.start_time,
-          booked_count: Number(s.booked_count ?? 0),
-          capacity: s.capacity ?? null,
-          duration_min: s.duration_min ?? null,
-          timezone: s.timezone ?? null,
-          // RPC now returns the actual session date anchored to existing bookings.
-          next_trial_date: s.next_trial_date ?? null,
-        }));
-        setSlots(normalised);
-      } catch (err: any) {
-        console.error("Failed to fetch trial slots:", err);
-        setError("Could not load available times. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSlots();
-  }, [classLanguage]);
+  const userTz = getUserTimezone();
+  const keyFor = (s: TrialSlot) => `${s.day_of_week}|${s.start_time}|${s.next_trial_date ?? ""}`;
 
-  // RPC already filters full slots server-side; keep defensive client filter too.
-  const availableSlots = slots.filter((s) => {
-    const cap = s.capacity ?? DEFAULT_CAPACITY;
-    return s.booked_count < cap;
-  });
+  const BackButton = ({ variant = "ghost" }: { variant?: "ghost" | "outline" }) => (
+    <Button variant={variant} size="sm" onClick={onBack} className="gap-1 min-h-[44px]">
+      <ArrowLeft className="h-4 w-4 rtl-flip" />
+      {t("common.back")}
+    </Button>
+  );
 
-  if (loading) {
+  if (availability.status === "loading") {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Button variant="ghost" size="sm" onClick={onBack} className="gap-1">
-            <ArrowLeft className="h-4 w-4" /> Back
-          </Button>
-        </div>
-        <Skeleton className="h-12 w-full rounded-xl" />
+      <div className="space-y-4" aria-busy="true">
+        <div className="flex items-center gap-2 mb-2"><BackButton /></div>
+        <div className="h-12 w-full rounded-xl bg-muted animate-pulse" aria-hidden="true" />
+        <p className="sr-only">{t("common.loading")}</p>
       </div>
     );
   }
 
-  if (error) {
+  if (availability.status === "error") {
     return (
       <div className="text-center py-8 space-y-3">
-        <p className="text-sm text-destructive">{error}</p>
-        <Button variant="outline" size="sm" onClick={onBack}>
-          Go back
-        </Button>
+        <AlertCircle className="h-8 w-8 mx-auto text-muted-foreground" aria-hidden="true" />
+        <p className="text-sm text-destructive" role="alert">{t("trialPicker.loadError")}</p>
+        <div className="flex gap-2 justify-center">
+          <Button variant="outline" size="sm" className="min-h-[44px]" onClick={availability.refresh}>
+            {t("common.retry")}
+          </Button>
+          <BackButton variant="outline" />
+        </div>
       </div>
     );
   }
 
-  if (availableSlots.length === 0) {
+  if (availability.status === "full" || availability.status === "unscheduled") {
     const handleWaitlist = async () => {
       const trimmed = waitlistEmail.trim().toLowerCase();
-      if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return;
+      if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+        setWaitlistError(t("trialPicker.waitlistInvalidEmail"));
+        return;
+      }
+      setWaitlistError(null);
       setWaitlistSubmitting(true);
-      await supabase.from("leads").upsert(
+      // The result was previously discarded and success claimed regardless —
+      // a failed insert still told the visitor they were on the list.
+      const { error } = await supabase.from("leads").upsert(
         {
           email: trimmed,
           name: trimmed.split("@")[0],
@@ -132,102 +91,108 @@ const TrialSlotPicker = ({ onSelect, onBack, classLanguage }: TrialSlotPickerPro
           status: "waitlist",
           goal: "Trial - notify when slot opens",
         },
-        { onConflict: "email" }
+        { onConflict: "email" },
       );
       setWaitlistSubmitting(false);
+      if (error) {
+        console.error("Waitlist signup failed:", error);
+        setWaitlistError(t("trialPicker.waitlistFailed"));
+        return;
+      }
       setWaitlistDone(true);
     };
 
     return (
       <div className="text-center py-8 space-y-4">
-        <CalendarDays className="h-10 w-10 mx-auto text-muted-foreground" />
-        <p className="text-sm font-semibold text-foreground">All sessions are currently full</p>
+        <CalendarDays className="h-10 w-10 mx-auto text-muted-foreground" aria-hidden="true" />
+        <p className="text-sm font-semibold text-foreground">
+          {/* Genuinely full is a different message from nothing scheduled. */}
+          {availability.status === "full"
+            ? t("trialPicker.allFull")
+            : t("trialPicker.noneScheduled")}
+        </p>
         {waitlistDone ? (
-          <div className="flex items-center justify-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
-            You're on the list! We'll email you when a spot opens.
+          <div
+            role="status"
+            className="flex items-center justify-center gap-2 text-sm text-green-800 dark:text-green-300 bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 rounded-xl px-4 py-3"
+          >
+            <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+            {t("trialPicker.waitlistDone")}
           </div>
         ) : (
           <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">
-              Leave your email and we'll notify you when a spot opens.
-            </p>
+            <Label htmlFor="waitlist-email" className="text-xs text-muted-foreground font-normal">
+              {t("trialPicker.waitlistPrompt")}
+            </Label>
             <div className="flex gap-2">
               <Input
+                id="waitlist-email"
                 type="email"
-                placeholder="your@email.com"
+                inputMode="email"
+                autoComplete="email"
+                placeholder={t("trialPicker.emailPlaceholder")}
                 value={waitlistEmail}
-                onChange={(e) => setWaitlistEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleWaitlist()}
-                className="flex-1 h-9 text-sm"
+                onChange={(e) => { setWaitlistEmail(e.target.value); setWaitlistError(null); }}
+                onKeyDown={(e) => { if (e.key === "Enter") void handleWaitlist(); }}
+                aria-invalid={waitlistError ? true : undefined}
+                aria-describedby={waitlistError ? "waitlist-error" : undefined}
+                className="flex-1 min-h-[44px] text-sm"
               />
               <Button
                 size="sm"
-                className="h-9 gap-1.5"
+                className="min-h-[44px] gap-1.5"
                 disabled={waitlistSubmitting || !waitlistEmail.trim()}
-                onClick={handleWaitlist}
+                onClick={() => void handleWaitlist()}
               >
-                <Mail className="h-3.5 w-3.5" />
-                Notify Me
+                {waitlistSubmitting
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                  : <Mail className="h-3.5 w-3.5" aria-hidden="true" />}
+                {t("trialPicker.notifyMe")}
               </Button>
             </div>
+            {waitlistError && (
+              <p id="waitlist-error" role="alert" className="text-xs text-destructive text-start">
+                {waitlistError}
+              </p>
+            )}
           </div>
         )}
-        <Button variant="outline" size="sm" onClick={onBack} className="gap-1">
-          <ArrowLeft className="h-4 w-4" /> Go back
-        </Button>
+        <BackButton variant="outline" />
       </div>
     );
   }
 
-  // Always read from browser — bypasses stale localStorage values.
-  const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kuala_Lumpur";
-
-  const sessionDateFor = (s: TrialSlot): string =>
-    s.next_trial_date ?? nextDateForDayUTC(s.day_of_week);
-
   const labelFor = (s: TrialSlot) => {
-    const srcTz = s.timezone || "Asia/Kuala_Lumpur";
-    const sessionDate = sessionDateFor(s);
-    // Use convertDateTimeToTimezone for specific-dated slots (accurate DST handling)
-    const { dateStr: localDateStr, timeFormatted, weekday } = convertDateTimeToTimezone(sessionDate, s.start_time, srcTz, userTz);
-    const [ly, lm, ld] = localDateStr.split("-").map(Number);
-    const dateLabel = new Date(ly, lm - 1, ld).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    const cap = s.capacity ?? DEFAULT_CAPACITY;
-    const spotsLeft = cap - s.booked_count;
-    return `${weekday}, ${dateLabel} at ${timeFormatted} — ${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} left`;
+    const label = formatSlot(s, isAr ? "ar" : "en", userTz);
+    const when = label ? `${label.weekday}, ${label.day} · ${label.time}` : s.start_time;
+    return `${when} — ${tPlural("common.spotsLeft", s.spotsLeft)}`;
   };
 
-  const keyFor = (s: TrialSlot) => `${s.day_of_week}|${s.start_time}`;
-
-  const selectedSlot = availableSlots.find((s) => keyFor(s) === selectedKey);
+  const selectedSlot = availability.slots.find((s) => keyFor(s) === selectedKey);
 
   const commit = () => {
-    if (!selectedKey || !selectedSlot) return;
-    const [dStr, time] = selectedKey.split("|");
-    const day = Number(dStr);
-    // Always pass a concrete date — never let the edge function guess.
-    const trialDate = sessionDateFor(selectedSlot);
-    onSelect(day, time, trialDate);
+    // Re-entrancy guard at the source as well as at the parent.
+    if (submitting || !selectedSlot) return;
+    const trialDate = selectedSlot.next_trial_date;
+    if (!trialDate) return;
+    onSelect(selectedSlot.day_of_week, selectedSlot.start_time, trialDate);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={onBack} className="gap-1">
-          <ArrowLeft className="h-4 w-4" /> Back
-        </Button>
-        <p className="text-sm text-muted-foreground">Pick your trial day</p>
+        <BackButton />
+        <p className="text-sm text-muted-foreground">{t("trialPicker.pickDay")}</p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="trial-day">Trial Day</Label>
-        <Select value={selectedKey} onValueChange={setSelectedKey}>
-          <SelectTrigger id="trial-day" className="w-full">
-            <SelectValue placeholder="Choose a trial session" />
+        <Label htmlFor="trial-day">{t("trialPicker.trialDayLabel")}</Label>
+        <Select value={selectedKey} onValueChange={setSelectedKey} disabled={submitting}>
+          <SelectTrigger id="trial-day" className="w-full min-h-[44px]">
+            <SelectValue placeholder={t("trialPicker.choosePlaceholder")} />
           </SelectTrigger>
           <SelectContent>
-            {availableSlots.map((s) => (
+            {availability.slots.map((s) => (
               <SelectItem key={keyFor(s)} value={keyFor(s)}>
                 {labelFor(s)}
               </SelectItem>
@@ -237,17 +202,22 @@ const TrialSlotPicker = ({ onSelect, onBack, classLanguage }: TrialSlotPickerPro
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        All times shown in your local timezone ({userTz.replace(/_/g, " ")})
+        {t("trialPicker.timezoneNote")} ({userTz.replace(/_/g, " ")})
       </p>
 
       <Button
         type="button"
         size="lg"
-        className="w-full gap-2 text-base font-bold h-13 mt-2"
-        disabled={!selectedKey}
+        className="w-full gap-2 text-base font-bold h-14 mt-2"
+        disabled={!selectedKey || submitting}
         onClick={commit}
       >
-        {selectedKey ? "Book this trial" : "Select a trial day"}
+        {submitting && <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />}
+        {submitting
+          ? t("trialPicker.booking")
+          : selectedKey
+          ? t("trialPicker.bookThis")
+          : t("trialPicker.selectFirst")}
       </Button>
     </div>
   );

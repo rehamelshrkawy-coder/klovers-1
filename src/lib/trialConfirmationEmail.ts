@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { buildGoogleCalendarUrl, formatTime12h } from "@/lib/calendarUrl";
 import { TRIAL_CONFIRMATION_EMAIL_ENABLED } from "@/lib/siteConfig";
+import { ADMIN_TIMEZONE } from "@/constants/scheduling";
 
 /**
  * Sends the trial_confirmed email (calendar link + formatted date/time),
@@ -23,12 +24,19 @@ export async function sendTrialConfirmationEmail(params: {
 }): Promise<boolean> {
   if (!TRIAL_CONFIRMATION_EMAIL_ENABLED) return false;
 
-  const tz = params.timezone || "Africa/Cairo";
+  /*
+    Trial slots are anchored to the teacher's timezone, not Cairo. Defaulting
+    to Africa/Cairo made the calendar invite and the stated time disagree with
+    the actual class by up to seven hours whenever the caller omitted it.
+  */
+  const tz = params.timezone || ADMIN_TIMEZONE;
   const calendarUrl = buildGoogleCalendarUrl({
     title: "Free Korean Trial Class — Klovers Academy",
     date: params.trial_date,
     time: params.start_time,
-    durationMin: 45,
+    // 30 minutes, matching every other statement of the trial length on the
+    // site and in the booking flow. This said 45.
+    durationMin: 30,
     description: `Level: ${params.level || "Beginner"}`,
     timezone: tz,
   });

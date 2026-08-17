@@ -10,7 +10,7 @@ export default function MarketingGeneratorPage() {
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b">
         <div className="max-w-7xl mx-auto flex items-center gap-3 py-3 px-4 md:px-6">
           <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 rtl-flip" />
           </Button>
           <div>
             <h1 className="text-lg font-bold text-foreground">Marketing</h1>

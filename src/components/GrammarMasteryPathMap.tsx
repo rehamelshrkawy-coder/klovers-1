@@ -69,11 +69,11 @@ function WorldHeader({
               {isAr ? world.descriptionAr : world.description}
             </p>
           </div>
-          <div className="text-right">
+          <div className="text-end">
             <p className="text-sm font-bold text-foreground">
               {progress.completed}/{progress.total}
             </p>
-            {isComplete && <CheckCircle2 className="h-5 w-5 text-primary ml-auto" />}
+            {isComplete && <CheckCircle2 className="h-5 w-5 text-primary ms-auto" />}
           </div>
         </div>
         <Progress value={progress.percent} className="h-2" />

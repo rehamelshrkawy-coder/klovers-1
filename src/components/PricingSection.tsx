@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Check, MapPin, Star, Crown, Globe, Sparkles, Users, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatPrice } from "@/lib/formatNumber";
 import { toast } from "@/hooks/use-toast";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
@@ -141,7 +142,8 @@ const PricingSection = () => {
   const [selectedCountry, setSelectedCountry] = useState<string>("Egypt");
   const [activeTier, setActiveTier] = useState<TierKey | null>("local");
   const [classType, setClassType] = useState<ClassType>("group");
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const uiLang = language === "ar" ? "ar" : "en";
 
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country);
@@ -155,8 +157,8 @@ const PricingSection = () => {
     const months = /^(\d+)/.exec(price.duration)?.[1];
     const n = months ? parseInt(months, 10) : 1;
     if (n <= 1) return "";
-    if (price.local && price.currency) return `${Math.round(price.local / n).toLocaleString()} ${price.currency}/mo`;
-    if (price.usd) return `$${Math.round(price.usd / n)}/mo`;
+    if (price.local && price.currency) return `${formatPrice(Math.round(price.local / n), price.currency, uiLang)}/mo`;
+    if (price.usd) return `${formatPrice(Math.round(price.usd / n), "USD", uiLang)}/mo`;
     return "";
   };
 
@@ -255,15 +257,15 @@ const PricingSection = () => {
                   </Badge>
                   {/* Most Popular: on local for discounted countries, on regional globally */}
                   {isDiscountedCountry && (
-                    <Badge className="bg-amber-500 text-white">⭐ Most Popular</Badge>
+                    <Badge className="bg-amber-600 text-white">{t("pricing", "mostPopularBadge")}</Badge>
                   )}
                   {isDiscountedCountry && (
-                    <Badge className="bg-green-500 text-white">
-                      <Sparkles className="h-3 w-3 mr-1" /> Discount!
+                    <Badge className="bg-green-700 text-white">
+                      <Sparkles className="h-3 w-3 me-1" aria-hidden="true" /> {t("pricing", "discountBadge")}
                     </Badge>
                   )}
                   {tierKey === "regional" && !isDiscountedCountry && isActive && (
-                    <Badge className="bg-amber-500 text-white">⭐ Most Popular</Badge>
+                    <Badge className="bg-amber-600 text-white">{t("pricing", "mostPopularBadge")}</Badge>
                   )}
                 </div>
 
@@ -322,13 +324,20 @@ const PricingSection = () => {
                               {t("pricing", `classes.${price.classes}`) !== `classes.${price.classes}` ? t("pricing", `classes.${price.classes}`) : price.classes}
                             </p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-end">
                             <p className="font-bold text-lg text-foreground">
-                              {price.local ? `${price.local.toLocaleString()} ${price.currency}` : `$${price.usd}`}
+                              {/* <bdi> isolates the price from the surrounding
+                                  Arabic text; without it the bidi algorithm
+                                  can reorder "1,200 EGP" into "EGP 1,200". */}
+                              <bdi>
+                                {price.local
+                                  ? formatPrice(price.local, price.currency ?? "EGP", uiLang)
+                                  : formatPrice(price.usd ?? 0, "USD", uiLang)}
+                              </bdi>
                             </p>
                             {derivePerMonth(price) && (
-                              <p className="text-[11px] text-green-600 dark:text-green-400 font-semibold">
-                                {derivePerMonth(price)}
+                              <p className="text-[11px] text-green-700 dark:text-green-400 font-semibold">
+                                <bdi>{derivePerMonth(price)}</bdi>
                               </p>
                             )}
                           </div>
@@ -360,13 +369,20 @@ const PricingSection = () => {
                               {t("pricing", `classes.${price.classes}`) !== `classes.${price.classes}` ? t("pricing", `classes.${price.classes}`) : price.classes}
                             </p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-end">
                             <p className="font-bold text-lg text-foreground">
-                              {price.local ? `${price.local.toLocaleString()} ${price.currency}` : `$${price.usd}`}
+                              {/* <bdi> isolates the price from the surrounding
+                                  Arabic text; without it the bidi algorithm
+                                  can reorder "1,200 EGP" into "EGP 1,200". */}
+                              <bdi>
+                                {price.local
+                                  ? formatPrice(price.local, price.currency ?? "EGP", uiLang)
+                                  : formatPrice(price.usd ?? 0, "USD", uiLang)}
+                              </bdi>
                             </p>
                             {derivePerMonth(price) && (
-                              <p className="text-[11px] text-green-600 dark:text-green-400 font-semibold">
-                                {derivePerMonth(price)}
+                              <p className="text-[11px] text-green-700 dark:text-green-400 font-semibold">
+                                <bdi>{derivePerMonth(price)}</bdi>
                               </p>
                             )}
                           </div>
@@ -434,9 +450,9 @@ const PricingSection = () => {
 
                   <div className="space-y-2">
                     {isActive && (
-                      <div className="flex items-center justify-center gap-1.5 text-xs text-orange-600 dark:text-orange-400 font-medium bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-lg py-2">
-                        <Users className="h-3.5 w-3.5" />
-                        <span>Limited spots this intake — enroll to reserve yours</span>
+                      <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground font-medium bg-muted border border-border rounded-lg py-2 px-3 text-center">
+                        <Users className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span>{t("pricing", "smallGroupsNote")}</span>
                       </div>
                     )}
                     <Button
@@ -463,8 +479,8 @@ const PricingSection = () => {
                       onClick={() => openFlexPaymentChat(tierKey, classType)}
                       className="w-full flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground py-1 transition-colors"
                     >
-                      <MessageCircle className="h-3 w-3" />
-                      Flexible / installment payment? Chat with us
+                      <MessageCircle className="h-3 w-3" aria-hidden="true" />
+                      {t("pricing", "flexiblePayment")}
                     </button>
                   </div>
                 </CardContent>

@@ -32,7 +32,7 @@ const AdminResetPage = () => {
   return (
     <div className="min-h-screen bg-background p-6 max-w-2xl mx-auto">
       <Button variant="ghost" onClick={() => navigate("/admin")} className="mb-6">
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
+        <ArrowLeft className="me-2 h-4 w-4 rtl-flip" /> Back to Dashboard
       </Button>
 
       <Card className="border-destructive">

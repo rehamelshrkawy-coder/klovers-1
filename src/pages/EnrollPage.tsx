@@ -14,6 +14,7 @@ import { trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { type TierKey, type ClassType, type Duration, tierPrices, getTierForCountry, DURATION_CLASSES } from "@/lib/stripePrices";
 import { track } from "@/lib/tracking";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { friendlyError } from "@/lib/friendlyError";
 
 const EnrollPage = () => {
   const { t } = useLanguage();
@@ -108,7 +109,7 @@ const EnrollPage = () => {
       toast({ title: t("enrollForm.submitted"), description: t("enrollForm.submittedDesc") });
       navigate("/dashboard");
     } catch (err: any) {
-      toast({ title: t("enrollForm.error"), description: err.message, variant: "destructive" });
+      toast({ title: t("enrollForm.error"), description: friendlyError(t, err).message, variant: "destructive" });
     } finally {
       setLoading(false);
     }

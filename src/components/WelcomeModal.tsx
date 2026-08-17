@@ -85,7 +85,7 @@ const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
         <div className="bg-gradient-to-br from-primary to-primary/80 px-6 pt-8 pb-6 text-center relative">
           <button
             onClick={handleClose}
-            className="absolute top-3 right-3 h-7 w-7 rounded-full bg-primary-foreground/15 flex items-center justify-center hover:bg-primary-foreground/25 transition-colors"
+            className="absolute top-3 end-3 h-7 w-7 rounded-full bg-primary-foreground/15 flex items-center justify-center hover:bg-primary-foreground/25 transition-colors"
             aria-label="Close"
           >
             <X className="h-4 w-4 text-primary-foreground" />
@@ -141,9 +141,9 @@ const WelcomeModal = ({ open, onClose }: WelcomeModalProps) => {
               className="flex-1 gap-1.5 h-10"
             >
               {isAr ? current.ctaAr : current.ctaEn}
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 rtl-flip" />
             </Button>
-            <Button variant="outline" onClick={handleNext} className="h-10 px-4 text-sm">
+            <Button variant="outline" onClick={handleNext} className="min-h-[44px] px-4 text-sm">
               {step < STEPS.length - 1
                 ? (isAr ? "التالي" : "Next")
                 : (isAr ? "تم" : "Done")}

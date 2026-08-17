@@ -21,6 +21,12 @@ All colors MUST be HSL.
     --primary: 60 100% 50%;
     --primary-foreground: 0 0% 0%;
 
+    /* Readable stand-in for --primary when the brand yellow is used as TEXT.
+       #FFFF00 on white is 1.07:1 — invisible. #856300 is 5.1:1 on white and
+       still unmistakably the brand hue. Use `text-primary-text`, never
+       `text-primary`, on a light surface. */
+    --primary-text: 45 100% 26%;
+
     --secondary: 0 0% 10%;
     --secondary-foreground: 0 0% 100%;
 
@@ -33,9 +39,13 @@ All colors MUST be HSL.
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 86.7%;
-    --input: 0 0% 86.7%;
-    --ring: 60 100% 50%;
+    /* 3.0:1 against --background, the WCAG 1.4.11 non-text minimum.
+       Was 0 0% 86.7% → 1.36:1, i.e. a border no low-vision user could see. */
+    --border: 0 0% 68%;
+    --input: 0 0% 68%;
+    /* The focus ring must never be the brand yellow: 1.07:1 on every light
+       surface meant keyboard users had no visible focus anywhere on the site. */
+    --ring: 45 100% 26%;
 
     --radius: 1rem;
 
@@ -97,6 +107,10 @@ All colors MUST be HSL.
     --primary: 60 100% 50%;
     --primary-foreground: 0 0% 0%;
 
+    /* On the dark surface the brand yellow is already 18.1:1 — the token
+       simply flips back to it so `text-primary-text` is correct in both modes. */
+    --primary-text: 60 100% 50%;
+
     --secondary: 0 0% 90%;
     --secondary-foreground: 0 0% 0%;
 
@@ -106,11 +120,12 @@ All colors MUST be HSL.
     --accent: 60 100% 20%;
     --accent-foreground: 60 100% 50%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    /* 3.78:1 on the dark background failed 4.5:1 for error text. */
+    --destructive: 0 91% 71%;
+    --destructive-foreground: 0 0% 0%;
 
-    --border: 0 0% 25%;
-    --input: 0 0% 25%;
+    --border: 0 0% 38%;
+    --input: 0 0% 38%;
     --ring: 60 100% 50%;
     --sidebar-background: 0 0% 5%;
     --sidebar-foreground: 0 0% 100%;
@@ -363,4 +378,79 @@ All colors MUST be HSL.
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;
+}
+
+/* ── Arabic typography ──────────────────────────────────────────────────
+   The global stack names "Noto Sans", which is Latin-only, so Arabic text
+   fell through to an arbitrary OS substitute. Noto Sans Arabic is loaded
+   from index.html (Arabic subset, 3 weights, non-render-blocking). */
+[dir="rtl"],
+[lang="ar"] {
+  font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, Arial, sans-serif;
+  /* Arabic ascenders/descenders need more room than Latin at the same size. */
+  line-height: 1.75;
+  /* Negative tracking breaks Arabic cursive joining — letters that must
+     connect get pulled apart. `tracking-tight`/`tracking-tighter` are used
+     across the hero and headings, so neutralise them under RTL. */
+  letter-spacing: normal !important;
+}
+
+/* ── RTL mirroring ──────────────────────────────────────────────────────
+   Directional "forward" arrows are drawn pointing right. In RTL, forward is
+   left. Anything explicitly marked as non-mirroring opts out. */
+[dir="rtl"] .rtl-flip:not(.rtl-no-flip) {
+  transform: scaleX(-1);
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────────
+   WCAG 2.3.3. There was previously no prefers-reduced-motion rule anywhere
+   in the codebase.
+
+   The escape hatch matters: several sections start at opacity-0 and are
+   revealed by an IntersectionObserver-driven transition. Killing every
+   animation outright would leave those sections permanently invisible, so
+   `.motion-safe-exempt` (applied to scroll-reveal wrappers) keeps its
+   opacity/visibility transition while everything decorative stops. */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.motion-safe-exempt),
+  *:not(.motion-safe-exempt)::before,
+  *:not(.motion-safe-exempt)::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Purely decorative loops are stopped outright rather than sped up. */
+  .animate-ken-burns,
+  .animate-pulse-glow,
+  .animate-flame-flicker,
+  .animate-mascot-bounce,
+  .animate-scroll-left,
+  .animate-scroll-right,
+  .animate-confetti-fall {
+    animation: none !important;
+  }
+
+  /* Anything that reveals content must still end up visible. */
+  .motion-safe-exempt {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Marquee pause — used by the testimonial rows for hover, focus and the
+   explicit pause button (WCAG 2.2.2: any motion lasting >5s needs a
+   mechanism to pause it). */
+.marquee-paused,
+.marquee-track:hover,
+.marquee-track:focus-within {
+  animation-play-state: paused !important;
+}
+
+/* Visible focus for keyboard users, on every interactive element. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 2px;
 }

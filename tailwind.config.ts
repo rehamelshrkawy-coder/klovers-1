@@ -4,14 +4,19 @@ import tailwindTypography from "@tailwindcss/typography";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  // Only ./src exists in this repo. The ./pages, ./components and ./app globs
+  // matched nothing and were silently skipped on every build.
+  content: ["./index.html", "./src/**/*.{ts,tsx}"],
   prefix: "",
   theme: {
   	container: {
   		center: true,
-  		padding: '2rem',
+  		// No `padding` here: every one of the call sites already sets px-4, and
+  		// a container padding of 2rem only fought with it.
+  		// No `xs: '400px'` breakpoint either — as a container screen it pinned
+  		// .container to 400px for the entire 400–1399px range, i.e. every
+  		// laptop and tablet. 2xl is the only container width we actually want.
   		screens: {
-  			xs: '400px',
   			'2xl': '1400px'
   		}
   	},
@@ -24,7 +29,10 @@ export default {
   			foreground: 'hsl(var(--foreground))',
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				foreground: 'hsl(var(--primary-foreground))',
+  				/* `text-primary-text` — the accessible text form of the brand
+  				   yellow. See --primary-text in index.css. */
+  				text: 'hsl(var(--primary-text))'
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
@@ -100,6 +108,17 @@ export default {
   			'2xl': 'var(--shadow-2xl)'
   		},
   		fontFamily: {
+  			/* Latin stays on the system stack — the zero-webfont policy is
+  			   deliberate. Only Arabic gets a downloaded face, because the
+  			   system stack below names no Arabic-capable family at all and
+  			   Arabic fell through to whatever the OS happened to substitute. */
+  			arabic: [
+  				'Noto Sans Arabic',
+  				'Segoe UI',
+  				'Tahoma',
+  				'Arial',
+  				'sans-serif'
+  			],
   			sans: [
   				'ui-sans-serif',
   				'system-ui',

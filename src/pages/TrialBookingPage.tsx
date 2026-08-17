@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -19,10 +19,12 @@ import TrialSlotPicker from "@/components/TrialSlotPicker";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { track } from "@/lib/tracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
-import { LEVEL_SELECT_OPTIONS, getLevelShortLabel } from "@/constants/levels";
 import { CheckCircle2, CalendarPlus, CalendarClock, CalendarX, ArrowRight, GraduationCap, LayoutDashboard, Sparkles, MessageCircle, Tag, Share2, Globe, Link2, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { friendlyError } from "@/lib/friendlyError";
 import { convertDateTimeToTimezone } from "@/lib/admin-utils";
+import { viewerToday, NO_END_DATE_SENTINEL } from "@/lib/trialTime";
+import { readPendingTrialSlot, clearPendingTrialSlot } from "@/lib/pendingTrialSlot";
 
 // ── Country / pricing helpers ─────────────────────────────────────────────────
 
@@ -127,10 +129,24 @@ const TrialBookingPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [profile, setProfile] = useState<{ name: string | null; email: string | null; level: string | null; country: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ name: string | null; email: string | null; level: string | null; country: string | null; phone: string | null } | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
-  const [selectedLevel, setSelectedLevel] = useState("");
   const [loading, setLoading] = useState(false);
+
+  /*
+    WhatsApp is now the single required field on this step.
+
+    Removing the level and country dropdowns left the form with no required
+    field at all, and WhatsApp is the primary support channel — the admin
+    table already searches by phone, but nothing had ever collected it. It
+    prefills from profiles.phone, so a rescheduling student does not retype it.
+  */
+  const [whatsapp, setWhatsapp] = useState("");
+  const [whatsappError, setWhatsappError] = useState<string | null>(null);
+  const whatsappRef = useRef<HTMLInputElement>(null);
+
+  /* Focus target for the success screen — see the effect below. */
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>(guessCountryFromTz);
@@ -148,18 +164,15 @@ const TrialBookingPage = () => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("name, email, level, country")
+      .select("name, email, level, country, phone")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) setProfile(data as any);
-        const profileLevel = (data as any)?.level?.trim();
-        const metaLevel = (user.user_metadata?.level as string | undefined)?.trim();
-        if (profileLevel) {
-          setSelectedLevel(profileLevel);
-        } else if (metaLevel) {
-          setSelectedLevel(metaLevel);
-        }
+        // Prefill WhatsApp so a returning or rescheduling student never
+        // retypes a number we already hold.
+        const profilePhone = (data as any)?.phone?.trim();
+        if (profilePhone) setWhatsapp(profilePhone);
         // Pre-fill country from profile if available — avoids asking the user again
         const profileCountry = (data as any)?.country?.trim();
         if (profileCountry && ALL_COUNTRIES.includes(profileCountry)) {
@@ -178,14 +191,23 @@ const TrialBookingPage = () => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const todayMyt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      /*
+        "Today" in the viewer's own timezone.
+
+        This was `Date.now() + 8h`, an approximation of the teacher's date.
+        From 18:00 Cairo onward that rolled over to tomorrow, so the `gte`
+        filter excluded a student's own class on the day of the class — the
+        pre-check found nothing, the page offered to book again, and the
+        student was walked straight into a duplicate booking. Every evening.
+      */
+      const today = viewerToday();
       const { data } = await supabase
         .from("trial_bookings")
         .select("trial_date, start_time, timezone, status")
         .eq("user_id", user.id)
         .in("status", ["pending", "confirmed"])
-        .gte("trial_date", todayMyt)
-        .neq("trial_date", "2099-12-31")
+        .gte("trial_date", today)
+        .neq("trial_date", NO_END_DATE_SENTINEL)
         .order("trial_date", { ascending: true })
         .limit(1)
         .maybeSingle();
@@ -215,11 +237,16 @@ const TrialBookingPage = () => {
     })();
   }, [user]);
 
-  // True when neither profile nor user_metadata has a level — we need to ask.
-  const needsLevel =
-    profileLoaded &&
-    !(profile?.level?.trim()) &&
-    !((user?.user_metadata?.level as string | undefined)?.trim());
+  /*
+    A slot chosen on /free-trial before signing up. The class-language part is
+    applied immediately so the picker below is already filtered correctly;
+    the student confirms the time itself, because between choosing and
+    finishing signup the seat may have gone.
+  */
+  useEffect(() => {
+    const pending = readPendingTrialSlot();
+    if (pending) setClassLanguage(pending.class_language);
+  }, []);
 
   const handleSlotPicked = async (dayOfWeek: number, startTime: string, trialDate: string) => {
     if (!user) {
@@ -227,15 +254,34 @@ const TrialBookingPage = () => {
       return;
     }
 
-    // If we still don't have a level (profile empty + dropdown untouched), ask for it.
-    if (needsLevel && !selectedLevel) {
-      toast({
-        title: t("trialBooking.pickLevelTitle"),
-        description: t("trialBooking.pickLevelDesc"),
-        variant: "destructive",
-      });
+    /*
+      Re-entrancy guard. The picker disables its own button while `submitting`
+      is true, but the guard belongs here too: a double-tap that slips through
+      React's render gap, or any future second caller, must not produce two
+      bookings.
+    */
+    if (loading) return;
+
+    /*
+      The level question is gone. The placement test computes the real level
+      thirty seconds later, and the guess collected here was being written
+      straight to the profile — so the funnel asked for a number, then
+      overwrote it with a better one, having paid a form field for it.
+    */
+
+    // WhatsApp is the one thing we do need and never collected.
+    const wa = whatsapp.trim();
+    if (!wa) {
+      setWhatsappError(t("trialBooking.whatsappRequired"));
+      whatsappRef.current?.focus();
       return;
     }
+    if (!/^[+()\d\s-]{7,20}$/.test(wa)) {
+      setWhatsappError(t("trialBooking.whatsappInvalid"));
+      whatsappRef.current?.focus();
+      return;
+    }
+    setWhatsappError(null);
 
     setLoading(true);
     let skipFinallyReset = false;
@@ -251,20 +297,19 @@ const TrialBookingPage = () => {
         try { return localStorage.getItem("referrer_id") || undefined; } catch { return undefined; }
       })();
 
+      // Whatever level we already know. Never a guess collected on this page.
       const effectiveLevel =
         profile?.level?.trim() ||
         (user.user_metadata?.level as string | undefined)?.trim() ||
-        selectedLevel ||
         "";
 
-      // If the user picked a level here (and profile was empty), persist it so
-      // we don't ask again on future flows.
-      if (needsLevel && selectedLevel) {
-        await supabase
-          .from("profiles")
-          .update({ level: selectedLevel })
-          .eq("user_id", user.id);
-      }
+      // Persist the WhatsApp number so a returning student never retypes it.
+      // Failure here must not block the booking.
+      const { error: phoneErr } = await supabase
+        .from("profiles")
+        .update({ phone: wa })
+        .eq("user_id", user.id);
+      if (phoneErr) console.warn("Could not save WhatsApp number to profile:", phoneErr);
 
       const { data, error } = await supabase.functions.invoke("book-trial", {
         body: {
@@ -279,6 +324,8 @@ const TrialBookingPage = () => {
           trial_date: trialDate,           // always concrete — slot picker guarantees this
           class_language: classLanguage,
           country: selectedCountry,
+          // book-trial already reads `phone` and writes trial_bookings.phone.
+          phone: wa,
           referrer_id: referrerId,
           authed: true,
         },
@@ -292,6 +339,8 @@ const TrialBookingPage = () => {
         return;
       }
 
+      // The choice made on /free-trial has been consumed.
+      clearPendingTrialSlot();
       setBookingResult(data.booking);
     } catch (err: any) {
       // Detect 429 rate-limit: Supabase wraps it in FunctionsHttpError with status on .context
@@ -300,20 +349,37 @@ const TrialBookingPage = () => {
         (typeof err?.message === "string" && err.message.includes("non-2xx"));
 
       if (is429) {
-        // Before showing an error, check whether the booking actually landed
-        // (the function may have succeeded on a prior tap before rate-limiting kicked in).
+        /*
+          A 429 usually means the write already succeeded on an earlier tap
+          and the retry got rate-limited. Check before crying failure.
+
+          Two changes from the previous version:
+            · look up by `user_id`, not by email. Email is not the identity
+              the booking is keyed on and can differ in case or alias.
+            · require the row to be RECENT. Matching on date+time alone meant
+              a student who had booked this same weekly slot last month was
+              shown a destructive "something went wrong" error after a write
+              that had almost certainly succeeded.
+        */
         const { data: existing } = await supabase
           .from("trial_bookings")
-          .select("id, trial_date, start_time, day_of_week, status")
-          .eq("email", user.email ?? "")
+          .select("id, trial_date, start_time, day_of_week, status, created_at, timezone")
+          .eq("user_id", user.id)
           .neq("status", "cancelled")
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();
 
-        if (existing?.trial_date === trialDate && existing?.start_time === startTime) {
-          // Booking succeeded on a previous tap — treat as success silently.
-          setBookingResult(existing as any);
+        const createdAt = existing?.created_at ? new Date(existing.created_at).getTime() : 0;
+        const isFresh = Date.now() - createdAt < 2 * 60 * 1000;
+
+        if (
+          isFresh &&
+          existing?.trial_date === trialDate &&
+          existing?.start_time === startTime
+        ) {
+          // It landed. Show the success screen rather than a scary error.
+          setBookingResult(existing as unknown as BookingResult);
           return;
         }
 
@@ -331,7 +397,7 @@ const TrialBookingPage = () => {
       logLeadEvent({ source_type: "free_trial", cta_label: "booking_failed", metadata: { reason: err?.message || "unknown" } });
       toast({
         title: t("trialBooking.somethingWrong"),
-        description: err.message || t("trialBooking.tryAgain"),
+        description: friendlyError(t, err).message,
         variant: "destructive",
       });
     } finally {
@@ -344,6 +410,16 @@ const TrialBookingPage = () => {
   const referralShareUrl = user
     ? `https://kloversegy.com/free-trial?ref=${user.id}`
     : "https://kloversegy.com/free-trial";
+
+  /*
+    Move focus to the success heading when the booking lands. Without this,
+    focus stays on the (now unmounted) submit button, which drops it to
+    <body> — a screen-reader user is told nothing, and a keyboard user's next
+    Tab starts again from the top of the document.
+  */
+  useEffect(() => {
+    if (bookingResult) successHeadingRef.current?.focus();
+  }, [bookingResult]);
 
   // Fire once when success state renders: funnel + Meta Pixel + GA4
   useEffect(() => {
@@ -423,7 +499,7 @@ const TrialBookingPage = () => {
     } catch (err: any) {
       toast({
         title: t("trialBooking.somethingWrong"),
-        description: err.message || t("trialBooking.tryAgain"),
+        description: friendlyError(t, err).message,
         variant: "destructive",
       });
     } finally {
@@ -464,11 +540,30 @@ const TrialBookingPage = () => {
           <div className="max-w-2xl mx-auto px-4 py-12">
             {/* Hero */}
             <div className="text-center mb-8">
-              <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-                <CheckCircle2 className="h-10 w-10 text-green-600" />
+              {/*
+                A screen-reader user previously heard nothing at all about the
+                booking they had just made: the whole page swapped underneath
+                them with focus still on a button that no longer existed.
+                Focus now moves to this heading (see the effect above) and the
+                result is announced through the live region below it.
+              */}
+              <div
+                className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-950/50 flex items-center justify-center mx-auto mb-6"
+                aria-hidden="true"
+              >
+                <CheckCircle2 className="h-10 w-10 text-green-700 dark:text-green-400" />
               </div>
-              <h1 className="text-3xl font-black text-foreground mb-3">{t("trialBooking.successTitle")}</h1>
-              <div className="inline-flex items-center gap-3 bg-card border border-border rounded-2xl px-5 py-3 text-left">
+              <h1
+                ref={successHeadingRef}
+                tabIndex={-1}
+                className="text-3xl font-black text-foreground mb-3 outline-none"
+              >
+                {t("trialBooking.successTitle")}
+              </h1>
+              <p className="sr-only" role="status" aria-live="polite">
+                {t("trialBooking.successTitle")} — {localFormattedDate}, {localized.timeFormatted}
+              </p>
+              <div className="inline-flex items-center gap-3 bg-card border border-border rounded-2xl px-5 py-3 text-start">
                 <CalendarPlus className="h-5 w-5 text-primary shrink-0" />
                 <div>
                   <p className="font-bold text-foreground">{localFormattedDate}</p>
@@ -577,7 +672,7 @@ const TrialBookingPage = () => {
                     const url = `${WHATSAPP_BASE}?text=${encodeURIComponent(t("trialBooking.whatsappSuccessMsg"))}`;
                     trackAndOpenWhatsApp(url, { cta_label: "post_booking_whatsapp" });
                   }}
-                  className="w-full flex items-center gap-4 bg-green-50 dark:bg-green-950/30 border-2 border-green-400 rounded-xl p-4 text-left hover:bg-green-100 dark:hover:bg-green-950/50 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-green-50 dark:bg-green-950/30 border-2 border-green-400 rounded-xl p-4 text-start hover:bg-green-100 dark:hover:bg-green-950/50 hover:shadow-md transition-all group"
                 >
                   <div className="h-10 w-10 rounded-full bg-[#25D366] flex items-center justify-center shrink-0">
                     <MessageCircle className="h-5 w-5 text-white" />
@@ -586,7 +681,7 @@ const TrialBookingPage = () => {
                     <p className="font-bold text-sm text-foreground">{t("trialBooking.whatsappPromptTitle")}</p>
                     <p className="text-xs text-muted-foreground">{t("trialBooking.whatsappPromptDesc")}</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-green-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-green-600 group-hover:translate-x-0.5 transition-all shrink-0 rtl-flip" />
                 </button>
 
                 {/* Placement test */}
@@ -596,7 +691,7 @@ const TrialBookingPage = () => {
                     logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_placement_test" });
                     navigate("/placement-test");
                   }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-blue-400 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-start hover:border-blue-400 hover:shadow-md transition-all group"
                 >
                   <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
                     <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -605,7 +700,7 @@ const TrialBookingPage = () => {
                     <p className="font-semibold text-sm text-foreground">{t("trialBooking.findLevelTitle")}</p>
                     <p className="text-xs text-muted-foreground">{t("trialBooking.findLevelDesc")}</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all shrink-0 rtl-flip" />
                 </button>
 
                 {/* Pricing teaser */}
@@ -615,7 +710,7 @@ const TrialBookingPage = () => {
                     logLeadEvent({ source_type: "free_trial", cta_label: "post_booking_pricing" });
                     navigate("/pricing");
                   }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-purple-400 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-start hover:border-purple-400 hover:shadow-md transition-all group"
                 >
                   <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
                     <Tag className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -628,7 +723,7 @@ const TrialBookingPage = () => {
                         : `Group classes from ${getStartingPrice(selectedCountry)} · small groups`}
                     </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all shrink-0 rtl-flip" />
                 </button>
 
                 {/* Referral / share */}
@@ -645,7 +740,7 @@ const TrialBookingPage = () => {
                       window.open(`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`, "_blank", "noopener,noreferrer");
                     }
                   }}
-                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-left hover:border-orange-400 hover:shadow-md transition-all group"
+                  className="w-full flex items-center gap-4 bg-card border border-border rounded-xl p-4 text-start hover:border-orange-400 hover:shadow-md transition-all group"
                 >
                   <div className="h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center shrink-0">
                     <Share2 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
@@ -658,7 +753,7 @@ const TrialBookingPage = () => {
                       {language === "ar" ? "خليهم يجربوا معاك — الحصة المجانية متاحة للكل" : "Invite a friend to join your free class"}
                     </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-orange-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-orange-600 group-hover:translate-x-0.5 transition-all shrink-0 rtl-flip" />
                 </button>
               </div>
             </div>
@@ -757,107 +852,98 @@ const TrialBookingPage = () => {
                 {t("trialBooking.pickTimeDesc")} <span className="opacity-70">({(Intl.DateTimeFormat().resolvedOptions().timeZone || "Africa/Cairo").replace(/_/g, " ")})</span>
               </p>
 
-              {/* Inline level dropdown — only shown when profile/user_metadata has no level */}
-              {needsLevel && (
-                <div className="mb-6 space-y-2">
-                  <Label htmlFor="trial-level" className="text-sm font-medium">
-                    {t("trialBooking.yourLevelLabel")}
-                  </Label>
-                  <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                    <SelectTrigger id="trial-level">
-                      <SelectValue placeholder={t("trialBooking.yourLevelPlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LEVEL_SELECT_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    {t("trialBooking.levelHelperText")}
-                  </p>
-                </div>
-              )}
+              {/*
+                The level dropdown and the 38-option country dropdown are gone.
 
-              {/* Show the existing level (read-only) when we already have it */}
-              {!needsLevel && profileLoaded && selectedLevel && (
-                <p className="text-xs text-muted-foreground mb-4">
-                  {t("trialBooking.yourLevelIs")} <span className="font-medium text-foreground">{getLevelShortLabel(selectedLevel)}</span>
-                </p>
-              )}
+                The level was asked for here and then recomputed by the
+                placement test half a minute later — and the guess was written
+                to the profile in the meantime. The country list existed only
+                to pick a pricing tier, which the success screen can ask for
+                once the booking is safe. That took the step from 13 targets
+                to 7.
+              */}
 
-              {/* Country selector — hidden when profile already has a country */}
-              {!(profile?.country?.trim() && ALL_COUNTRIES.includes(profile.country.trim())) && (
-                <div className="mb-4 space-y-1.5">
-                  <Label htmlFor="trial-country" className="text-sm font-medium flex items-center gap-1.5">
-                    <Globe className="h-3.5 w-3.5 text-muted-foreground" />
-                    {language === "ar" ? "بلدك" : "Your country"}
-                    <span className="text-[10px] text-muted-foreground font-normal">{language === "ar" ? "(للأسعار)" : "(for pricing)"}</span>
-                  </Label>
-                  <Select value={selectedCountry} onValueChange={handleCountryChange}>
-                    <SelectTrigger id="trial-country">
-                      <SelectValue placeholder={language === "ar" ? "اختر بلدك" : "Select your country"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ALL_COUNTRIES.map(c => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* Class language — auto-detected from country, user can override */}
+              {/* The one required field: WhatsApp. */}
               <div className="mb-6 space-y-1.5">
-                <Label className="text-sm font-medium">
-                  {language === "ar" ? "لغة الحصة" : "Class language"}
+                <Label htmlFor="trial-whatsapp" className="text-sm font-medium flex items-center gap-1.5">
+                  <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+                  {t("trialBooking.whatsappLabel")}
+                  <span className="text-destructive" aria-hidden="true">*</span>
+                  <span className="sr-only">{t("trialBooking.requiredField")}</span>
                 </Label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setClassLanguage("arabic")}
-                    className={`flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
-                      classLanguage === "arabic"
-                        ? "border-gray-800 bg-gray-800 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
-                        : "border-border bg-card text-muted-foreground hover:border-primary/40"
-                    }`}
-                  >
-                    🇸🇦 {language === "ar" ? "عربي" : "Arabic"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setClassLanguage("english")}
-                    className={`flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
-                      classLanguage === "english"
-                        ? "border-gray-800 bg-gray-800 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
-                        : "border-border bg-card text-muted-foreground hover:border-primary/40"
-                    }`}
-                  >
-                    🇺🇸 {language === "ar" ? "إنجليزي" : "English"}
-                  </button>
-                </div>
-                <p className="text-[11px] text-muted-foreground">
-                  {language === "ar"
-                    ? "اخترنا هذا تلقائيًا حسب بلدك — يمكنك تغييره"
-                    : "Auto-selected based on your country — you can change it"}
-                </p>
+                <Input
+                  id="trial-whatsapp"
+                  ref={whatsappRef}
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  required
+                  aria-required="true"
+                  value={whatsapp}
+                  onChange={(e) => { setWhatsapp(e.target.value); setWhatsappError(null); }}
+                  aria-invalid={whatsappError ? true : undefined}
+                  aria-describedby={whatsappError ? "trial-whatsapp-error" : "trial-whatsapp-hint"}
+                  placeholder={t("trialBooking.whatsappPlaceholder")}
+                  className="min-h-[44px]"
+                />
+                {whatsappError ? (
+                  <p id="trial-whatsapp-error" role="alert" className="text-xs text-destructive">
+                    {whatsappError}
+                  </p>
+                ) : (
+                  <p id="trial-whatsapp-hint" className="text-[11px] text-muted-foreground">
+                    {t("trialBooking.whatsappHint")}
+                  </p>
+                )}
               </div>
+
+              {/*
+                Class language as a real radiogroup. It was two buttons whose
+                selected state was signalled by background colour alone, with
+                nothing exposed to assistive technology.
+              */}
+              <fieldset className="mb-6 space-y-1.5">
+                <legend className="text-sm font-medium mb-1.5">{t("trialBooking.classLanguageLabel")}</legend>
+                <div role="radiogroup" aria-label={t("trialBooking.classLanguageLabel")} className="flex gap-2">
+                  {(["arabic", "english"] as const).map((lang) => {
+                    const selected = classLanguage === lang;
+                    return (
+                      <button
+                        key={lang}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => setClassLanguage(lang)}
+                        className={`flex-1 min-h-[44px] py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all inline-flex items-center justify-center gap-2 ${
+                          selected
+                            ? "border-foreground bg-accent text-foreground"
+                            : "border-border bg-card text-muted-foreground hover:border-foreground/40"
+                        }`}
+                      >
+                        <span aria-hidden="true">{selected ? "●" : "○"}</span>
+                        {t(lang === "arabic" ? "trialBooking.classInArabic" : "trialBooking.classInEnglish")}
+                      </button>
+                    );
+                  })}
+                </div>
+              </fieldset>
 
               <TrialSlotPicker
                 onSelect={handleSlotPicked}
                 onBack={() => navigate("/free-trial")}
                 classLanguage={classLanguage}
+                submitting={loading}
               />
 
               {loading && (
-                <p className="text-sm text-muted-foreground text-center mt-4">{t("trialBooking.bookingTrial")}</p>
+                <p className="text-sm text-muted-foreground text-center mt-4" role="status">
+                  {t("trialBooking.bookingTrial")}
+                </p>
               )}
 
               <p className="text-xs text-muted-foreground text-center mt-6">
                 {t("trialBooking.manageFromDashboard")}
-                <ArrowRight className="inline h-3 w-3 ml-1" />
+                <ArrowRight className="inline h-3 w-3 ms-1 rtl-flip" />
               </p>
             </div>
           </div>

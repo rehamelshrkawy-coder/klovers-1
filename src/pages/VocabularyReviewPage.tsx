@@ -96,8 +96,8 @@ export function VocabularyReviewPage() {
         <div className="container mx-auto px-4 max-w-3xl">
           {/* Page header */}
           <div className="mb-8">
-            <Button variant="ghost" onClick={() => navigate("/textbook")} className="mb-4 -ml-2">
-              <ArrowLeft className="w-4 h-4 mr-2" />
+            <Button variant="ghost" onClick={() => navigate("/textbook")} className="mb-4 -ms-2">
+              <ArrowLeft className="w-4 h-4 me-2 rtl-flip" />
               {isAr ? "العودة للكتاب" : "Back to Textbook"}
             </Button>
             <div className="flex items-center gap-3 mb-2">
@@ -161,7 +161,7 @@ export function VocabularyReviewPage() {
                   }
                 </p>
                 {lessonOptions.length > 1 && (
-                  <div className="mb-6 text-left">
+                  <div className="mb-6 text-start">
                     <label className="block text-sm font-medium text-foreground mb-2">{isAr ? "تصفية حسب الدرس" : "Filter by lesson"}</label>
                     <select
                       value={selectedLessonId ?? ""}
@@ -180,7 +180,7 @@ export function VocabularyReviewPage() {
                 <Button onClick={() => { setSessionCardCount(filteredCards.length); setSessionStarted(true); }} size="lg" className="gap-2">
                   <BookOpen className="w-4 h-4" /> {isAr ? "ابدأ جلسة المراجعة" : "Start Review Session"}
                 </Button>
-                <div className="mt-8 text-left space-y-3 bg-muted/50 p-6 rounded-xl">
+                <div className="mt-8 text-start space-y-3 bg-muted/50 p-6 rounded-xl">
                   <h3 className="font-semibold text-sm text-foreground">{isAr ? "💡 نصائح" : "💡 Tips"}</h3>
                   <ul className="text-sm text-muted-foreground space-y-1.5">
                     <li>• {isAr ? "قيّم نفسك بصدق — هذا يساعد الخوارزمية على العمل بشكل أفضل" : "Rate yourself honestly — this helps the algorithm work better"}</li>

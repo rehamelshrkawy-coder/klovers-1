@@ -70,8 +70,8 @@ const Header = () => {
 
   return (
     <>
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/98 backdrop-blur-md shadow-sm" : "bg-background/95 backdrop-blur-sm"} border-b border-border`}>
+      {/* No skip-nav here — App.tsx renders the single app-wide one. */}
+    <header className={`fixed top-0 start-0 end-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/98 backdrop-blur-md shadow-sm" : "bg-background/95 backdrop-blur-sm"} border-b border-border`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="K-Lovers homepage">
@@ -118,7 +118,7 @@ const Header = () => {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8" aria-label="Toggle dark mode">
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-11 w-11" aria-label="Toggle dark mode">
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
             <Button variant="ghost" size="sm" onClick={toggleLanguage} className="gap-1.5 text-xs">
@@ -126,25 +126,28 @@ const Header = () => {
               {t("header", "langToggle")}
             </Button>
 
-            {!user && (
-              <Button size="sm" variant="outline" asChild className="gap-1.5 border-primary/40 text-primary hover:bg-primary/10">
-                <Link
-                  to="/free-trial"
-                  onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "header_free_trial" }); } catch { /* Analytics must not block navigation. */ } }}
-                >
-                  🎁 {isAr ? "حصة مجانية" : "Free Trial"}
-                </Link>
-              </Button>
-            )}
+            {/*
+              Shown to signed-in users too. This was gated on `!user`, so the
+              moment someone created an account they lost the only visible path
+              back to booking — exactly the people closest to converting.
+            */}
+            <Button size="sm" variant="outline" asChild className="gap-1.5 border-primary/40 text-primary-text hover:bg-primary/10">
+              <Link
+                to="/free-trial"
+                onClick={() => { try { logLeadEvent({ source_type: "free_trial", cta_label: "header_free_trial" }); } catch { /* Analytics must not block navigation. */ } }}
+              >
+                🎁 {t("common.ctaBookFreeClass")}
+              </Link>
+            </Button>
 
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none">
                     {profile?.avatar_url ? (
-                      <img src={profile.avatar_url} alt={profile.name} className="h-8 w-8 rounded-full object-cover border border-border" />
+                      <img src={profile.avatar_url} alt={profile.name} className="h-11 w-11 rounded-full object-cover border border-border" />
                     ) : (
-                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center border border-border">
+                      <div className="h-11 w-11 rounded-full bg-muted flex items-center justify-center border border-border">
                         <UserCircle className="h-5 w-5 text-muted-foreground" />
                       </div>
                     )}
@@ -158,32 +161,32 @@ const Header = () => {
                   <div className="px-2 py-1.5 text-xs text-muted-foreground truncate">{user.email}</div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                    <LayoutDashboard className="h-4 w-4 mr-2" />
+                    <LayoutDashboard className="h-4 w-4 me-2" />
                     {isAr ? "لوحة التحكم" : "My Dashboard"}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/trial-booking")}>
-                    <Gift className="h-4 w-4 mr-2" />
+                    <Gift className="h-4 w-4 me-2" />
                     {isAr ? "احجز حصة مجانية" : "Book Free Trial"}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/profile")}>
-                    <Settings className="h-4 w-4 mr-2" />
+                    <Settings className="h-4 w-4 me-2" />
                     {isAr ? "ملفي الشخصي" : "My Profile"}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/dashboard/schedule")}>
-                    <CalendarDays className="h-4 w-4 mr-2" />
+                    <CalendarDays className="h-4 w-4 me-2" />
                     {isAr ? "جدولي" : "My Schedule"}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/daily-quiz")}>
-                    <Zap className="h-4 w-4 mr-2" />
+                    <Zap className="h-4 w-4 me-2" />
                     {isAr ? "اختبار يومي" : "Daily Quiz"}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/review")}>
-                    <Brain className="h-4 w-4 mr-2" />
+                    <Brain className="h-4 w-4 me-2" />
                     {isAr ? "مراجعة المفردات" : "Vocab Review"}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-                    <LogOut className="h-4 w-4 mr-2" />
+                    <LogOut className="h-4 w-4 me-2" />
                     {isAr ? "تسجيل الخروج" : "Logout"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -243,21 +246,21 @@ const Header = () => {
               {user ? (
                 <>
                   <Button variant="outline" asChild className="w-full" onClick={() => setIsMenuOpen(false)}>
-                    <Link to="/dashboard"><LayoutDashboard className="h-4 w-4 mr-2" />{isAr ? "لوحة التحكم" : "My Dashboard"}</Link>
+                    <Link to="/dashboard"><LayoutDashboard className="h-4 w-4 me-2" />{isAr ? "لوحة التحكم" : "My Dashboard"}</Link>
                   </Button>
                   <div className="grid grid-cols-3 gap-2">
                     <Button variant="ghost" size="sm" asChild className="w-full" onClick={() => setIsMenuOpen(false)}>
-                      <Link to="/dashboard/schedule"><CalendarDays className="h-4 w-4 mr-1" />{isAr ? "جدول" : "Schedule"}</Link>
+                      <Link to="/dashboard/schedule"><CalendarDays className="h-4 w-4 me-1" />{isAr ? "جدول" : "Schedule"}</Link>
                     </Button>
                     <Button variant="ghost" size="sm" asChild className="w-full" onClick={() => setIsMenuOpen(false)}>
-                      <Link to="/daily-quiz"><Zap className="h-4 w-4 mr-1" />{isAr ? "اختبار" : "Quiz"}</Link>
+                      <Link to="/daily-quiz"><Zap className="h-4 w-4 me-1" />{isAr ? "اختبار" : "Quiz"}</Link>
                     </Button>
                     <Button variant="ghost" size="sm" asChild className="w-full" onClick={() => setIsMenuOpen(false)}>
-                      <Link to="/review"><Brain className="h-4 w-4 mr-1" />{isAr ? "مراجعة" : "Review"}</Link>
+                      <Link to="/review"><Brain className="h-4 w-4 me-1" />{isAr ? "مراجعة" : "Review"}</Link>
                     </Button>
                   </div>
                   <Button variant="ghost" className="w-full justify-start text-destructive" onClick={() => { handleLogout(); setIsMenuOpen(false); }}>
-                    <LogOut className="h-4 w-4 mr-2" />{isAr ? "تسجيل الخروج" : "Logout"}
+                    <LogOut className="h-4 w-4 me-2" />{isAr ? "تسجيل الخروج" : "Logout"}
                   </Button>
                 </>
               ) : (

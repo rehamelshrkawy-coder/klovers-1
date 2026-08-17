@@ -94,17 +94,17 @@ const FAQPage = () => {
 
             {/* Search */}
             <div className="relative max-w-md mx-auto mb-6">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
                 placeholder="Search questions..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="pl-9 pr-9"
+                className="ps-9 pe-9"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -147,7 +147,7 @@ const FAQPage = () => {
                 <Accordion type="single" collapsible className="w-full">
                   {filteredFaqs.map((faq, index) => (
                     <AccordionItem key={index} value={`item-${index}`}>
-                      <AccordionTrigger className="text-left text-foreground hover:text-foreground/80">
+                      <AccordionTrigger className="text-start text-foreground hover:text-foreground/80">
                         {faq.question}
                       </AccordionTrigger>
                       <AccordionContent className="text-muted-foreground">
@@ -171,13 +171,13 @@ const FAQPage = () => {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button variant="outline" asChild>
                   <a href="https://wa.me/201010003084?text=Hi!%20I%20have%20a%20question%20about%20Klovers." onClick={(e) => { e.preventDefault(); trackAndOpenWhatsApp("https://wa.me/201010003084?text=Hi!%20I%20have%20a%20question%20about%20Klovers.", { cta_label: "faq_contact" }); }} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" />
+                    <MessageCircle className="me-2 h-4 w-4" />
                     WhatsApp
                   </a>
                 </Button>
                 <Button variant="outline" asChild>
                   <a href="https://t.me/+Fu5T7d4wLMsxNDY9" target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" />
+                    <MessageCircle className="me-2 h-4 w-4" />
                     Telegram
                   </a>
                 </Button>

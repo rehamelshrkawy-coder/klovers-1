@@ -339,10 +339,12 @@ function TrialLevelsAr() {
 /* Hangul Taste */
 function TrialHangulAr() {
   const chars = [
-    { char:"ㄱ", sound:"ك/غ", word:"가방", read:"غا-بانغ", mean:"حقيبة" },
-    { char:"ㄴ", sound:"ن",   word:"나비", read:"نا-بي",   mean:"فراشة" },
-    { char:"ㅅ", sound:"س",   word:"사랑", read:"سا-رانغ", mean:"حب" },
-    { char:"ㅁ", sound:"م",   word:"물",   read:"مول",     mean:"ماء" },
+    /* Same correction as the English deck — see the comment there. */
+    { char:"ㄱ", sound:"ك/غ", word:"고기", read:"غو-غي", mean:"لحم" },
+    { char:"ㄴ", sound:"ن",   word:"나이", read:"نا-إي", mean:"عُمر" },
+    { char:"ㅅ", sound:"س",   word:"손",   read:"سون",   mean:"يد" },
+    { char:"ㅁ", sound:"م",   word:"몸",   read:"موم",   mean:"جسم" },
+    { char:"ㅇ", sound:"صامت / نغ", word:"오이", read:"أو-إي", mean:"خيار" },
     { char:"ㅎ", sound:"هـ",  word:"한국", read:"هان-غوك", mean:"كوريا" },
   ];
   const vowels = [
@@ -466,11 +468,12 @@ function TrialDramaAr() {
       </div>
 
       <div style={{ background:"#0047AB", borderRadius:"10px", padding:"10px 14px", textAlign:"center" }}>
+        {/* Same correction as the English page: the Level 1 claim was false. */}
         <div style={{ fontSize:"12px", fontWeight:800, color:Y, marginBottom:"3px" }}>
-          💡 حقيقة مذهلة
+          💡 المستوى الأول هيديك إيه
         </div>
         <div style={{ fontSize:"10px", color:"#ddd" }}>
-          بعد المستوى الأول فقط، ستفهم ما يقال في المشاهد الرومانسية والمشاهد المضحكة في أي مسلسل كوري!
+          هتقرا الهانغول بصوت عالي، وهتلتقط التحيات والعبارات الجاهزة اللي بتتكرر في كل دراما، وهتتابع مع الترجمة بدل ما تقراها بس.
         </div>
       </div>
     </Page>
@@ -636,7 +639,7 @@ function TrialAgendaEn() {
   const steps = [
     { time:"0–5 min",  icon:"👋", color:"#0047AB", title:"Ice Breaker & Intro",      body:"Meet the group, share names, warm-up: 'Why did you start learning Korean?'" },
     { time:"5–12 min", icon:"🌏", color:"#C8102E", title:"Why Korean?",              body:"K-Drama, K-Pop, travel, career — 7 minutes that will change how you see this language." },
-    { time:"12–22 min",icon:"✍️", color:"#166534", title:"Learn Hangul Now!",        body:"Learn 5 consonants + 3 vowels, then read 2 real Korean words together." },
+    { time:"12–22 min",icon:"✍️", color:"#166534", title:"Learn Hangul Now!",        body:"Learn 5 consonants + 3 vowels, then read 5 real Korean words built only from those letters." },
     { time:"22–27 min",icon:"🎬", color:"#7B2D8B", title:"K-Drama Phrases",          body:"Read 3 K-Drama phrases in Hangul — with translation and correct pronunciation." },
     { time:"27–30 min",icon:"🚀", color:BK,        title:"Your Next Steps",          body:"Overview of the 6 levels and the path to fluency — how to join us!" },
   ];
@@ -769,10 +772,21 @@ function TrialLevelsEn() {
 
 function TrialHangulEn() {
   const chars = [
-    { char:"ㄱ", sound:"g/k", word:"가방", read:"ga-bang", mean:"bag" },
-    { char:"ㄴ", sound:"n",   word:"나비", read:"na-bi",   mean:"butterfly" },
-    { char:"ㅅ", sound:"s",   word:"사랑", read:"sa-rang", mean:"love" },
-    { char:"ㅁ", sound:"m",   word:"물",   read:"mul",     mean:"water" },
+    /*
+      Every one of these words is decodable from the five consonants and three
+      vowels this page actually teaches.
+
+      The previous set was 가방, 나비, 사랑 and 물 — and not one of them could
+      be read with the letters introduced: 가방 and 나비 need ㅂ, 사랑 needs ㄹ,
+      물 needs both ㄹ and ㅜ. A student was shown a letter, then handed a word
+      containing letters they had never seen, which makes "you'll be reading
+      real Korean in 30 minutes" a promise the lesson breaks on its own page.
+    */
+    { char:"ㄱ", sound:"g/k", word:"고기", read:"go-gi", mean:"meat" },
+    { char:"ㄴ", sound:"n",   word:"나이", read:"na-i",  mean:"age" },
+    { char:"ㅅ", sound:"s",   word:"손",   read:"son",   mean:"hand" },
+    { char:"ㅁ", sound:"m",   word:"몸",   read:"mom",   mean:"body" },
+    { char:"ㅇ", sound:"silent / ng", word:"오이", read:"o-i", mean:"cucumber" },
     { char:"ㅎ", sound:"h",   word:"한국", read:"han-guk", mean:"Korea" },
   ];
   const vowels = [
@@ -888,9 +902,18 @@ function TrialDramaEn() {
         ))}
       </div>
       <div style={{ background:"#0047AB", borderRadius:"10px", padding:"10px 14px", textAlign:"center" }}>
-        <div style={{ fontSize:"12px", fontWeight:800, color:Y, marginBottom:"3px" }}>💡 Fun Fact</div>
+        {/*
+          Was: "After just Level 1, you'll understand what's being said in
+          romantic and funny scenes of any K-Drama!" — presented as fact at
+          the exact moment of decision, and discovered to be false at renewal.
+          Level 1 is A1: greetings, self-introduction, present tense. It does
+          not get anyone through unscripted drama dialogue.
+        */}
+        <div style={{ fontSize:"12px", fontWeight:800, color:Y, marginBottom:"3px" }}>💡 What Level 1 gives you</div>
         <div style={{ fontSize:"10px", color:"#ddd" }}>
-          After just Level 1, you'll understand what's being said in romantic and funny scenes of any K-Drama!
+          You'll read Hangul out loud, catch the greetings and set phrases that
+          recur in every drama, and follow along with subtitles instead of
+          only reading them.
         </div>
       </div>
     </Page>
@@ -1018,7 +1041,7 @@ export default function TrialBookPage() {
 
   if (access === "denied") return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-6 text-center">
-      <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
+      <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center dark:bg-amber-900/40">
         <Lock className="h-8 w-8 text-amber-600" />
       </div>
       <h1 className="text-2xl font-black">Trial Book — Admin Only</h1>
@@ -1062,7 +1085,7 @@ export default function TrialBookPage() {
             ← Back
           </button>
           <span className="text-sm font-bold">Trial Class Book — دليل الحصة التجريبية</span>
-          <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">30 min</span>
+          <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium dark:bg-amber-900/40 dark:text-amber-400">30 min</span>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex border rounded-lg overflow-hidden text-xs">

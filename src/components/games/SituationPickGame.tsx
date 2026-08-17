@@ -188,7 +188,7 @@ const SituationPickGame = ({ onGameComplete }: { onGameComplete?: (score: number
       </Card>
 
       {selected && (
-        <Card className={`p-3 border-l-4 text-sm ${selected === s.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
+        <Card className={`p-3 border-s-4 text-sm ${selected === s.correct ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-500 bg-red-50 dark:bg-red-950/30"}`}>
           <p className="font-semibold mb-1">{selected === s.correct ? "✅ Perfect!" : `❌ Best answer: ${s.correct}`}</p>
           <p className="text-xs text-muted-foreground">{s.explanation}</p>
         </Card>
@@ -203,7 +203,7 @@ const SituationPickGame = ({ onGameComplete }: { onGameComplete?: (score: number
           }
           return (
             <button key={opt} onClick={() => handleSelect(opt)} disabled={!!selected}
-              className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-150 ${selected ? extra || "border-border opacity-50" : "border-border hover:border-primary hover:bg-primary/5"}`}>
+              className={`w-full text-start px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-150 ${selected ? extra || "border-border opacity-50" : "border-border hover:border-primary hover:bg-primary/5"}`}>
               {opt}
             </button>
           );
@@ -212,7 +212,7 @@ const SituationPickGame = ({ onGameComplete }: { onGameComplete?: (score: number
 
       {selected && (
         <Button onClick={next} className="w-full gap-2">
-          {round + 1 >= totalRounds ? <><Trophy className="h-4 w-4" /> See Results</> : <><ArrowRight className="h-4 w-4" /> Next Situation</>}
+          {round + 1 >= totalRounds ? <><Trophy className="h-4 w-4" /> See Results</> : <><ArrowRight className="h-4 w-4 rtl-flip" /> Next Situation</>}
         </Button>
       )}
     </div>

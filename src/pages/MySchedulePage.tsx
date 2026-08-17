@@ -287,7 +287,7 @@ const MySchedulePage = () => {
         <div className="max-w-2xl mx-auto space-y-6">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> {t("mySchedule.dashboardLink")}
+              <ArrowLeft className="h-4 w-4 me-1 rtl-flip" /> {t("mySchedule.dashboardLink")}
             </Button>
             <h1 className="text-2xl font-bold text-foreground">{t("mySchedule.title")}</h1>
           </div>
@@ -327,7 +327,7 @@ const MySchedulePage = () => {
                   {t("mySchedule.chooseScheduleDesc")}
                 </p>
                 <Button size="lg" onClick={() => setShowPicker(true)}>
-                  <CalendarDays className="h-4 w-4 mr-2" /> {t("mySchedule.pickDayTime")}
+                  <CalendarDays className="h-4 w-4 me-2" /> {t("mySchedule.pickDayTime")}
                 </Button>
               </CardContent>
             </Card>
@@ -389,7 +389,7 @@ const MySchedulePage = () => {
                             <p className="text-xs text-muted-foreground">{alt.duration_min}{t("mySchedule.minutes")} · {aTz.replace(/_/g, " ")} · {alt.seats_left} {t("mySchedule.seatsLeft")}</p>
                           </div>
                           <Button size="sm" disabled={assigning} onClick={() => handleAssignToAlternative(alt)}>
-                            {assigning ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ArrowRight className="h-4 w-4 mr-1" /> {t("mySchedule.choose")}</>}
+                            {assigning ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ArrowRight className="h-4 w-4 me-1 rtl-flip" /> {t("mySchedule.choose")}</>}
                           </Button>
                         </div>
                         );
@@ -411,7 +411,7 @@ const MySchedulePage = () => {
           {/* Change Schedule Button */}
           {packageDetails && (
             <Button variant="outline" onClick={() => setShowPicker(true)} className="w-full">
-              <RefreshCw className="h-4 w-4 mr-2" /> {t("mySchedule.changeSchedule")}
+              <RefreshCw className="h-4 w-4 me-2" /> {t("mySchedule.changeSchedule")}
             </Button>
           )}
         </div>
@@ -455,7 +455,7 @@ const MySchedulePage = () => {
               <>
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="sm" onClick={() => { setSelectedCourseType(null); setSelectedPackageId(null); }}>
-                    <ArrowLeft className="h-4 w-4 mr-1" /> {t("mySchedule.backBtn")}
+                    <ArrowLeft className="h-4 w-4 me-1 rtl-flip" /> {t("mySchedule.backBtn")}
                   </Button>
                   <Badge variant="outline">{selectedCourseType === "group" ? t("mySchedule.group") : t("mySchedule.private")}</Badge>
                 </div>
@@ -467,7 +467,7 @@ const MySchedulePage = () => {
                 />
                 {selectedPackageId && (
                   <Button className="w-full" disabled={assigning} onClick={handleConfirmChange}>
-                    {assigning ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    {assigning ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : null}
                     {t("mySchedule.confirmNewSchedule")}
                   </Button>
                 )}

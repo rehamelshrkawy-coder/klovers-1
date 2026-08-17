@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { friendlyError } from "@/lib/friendlyError";
 
 const ForgotPasswordPage = () => {
   useSEO({ title: "Forgot Password | Klovers Korean Academy", description: "Reset your Klovers account password to regain access to your Korean lessons.", noindex: true });
@@ -26,7 +27,7 @@ const ForgotPasswordPage = () => {
     });
 
     if (error) {
-      toast({ title: t("auth.loginFailed"), description: error.message, variant: "destructive" });
+      toast({ title: t("auth.loginFailed"), description: friendlyError(t, error).message, variant: "destructive" });
       setLoading(false);
       return;
     }

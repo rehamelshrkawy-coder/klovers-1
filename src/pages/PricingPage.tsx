@@ -65,7 +65,7 @@ const FAQ = () => {
           {faqs.map((faq, i) => (
             <div key={i} className="bg-card border border-border rounded-xl overflow-hidden">
               <button
-                className="w-full flex items-center justify-between px-5 py-4 text-left gap-4 hover:bg-muted/30 transition-colors"
+                className="w-full flex items-center justify-between px-5 py-4 text-start gap-4 hover:bg-muted/30 transition-colors"
                 onClick={() => setOpen(open === i ? null : i)}
               >
                 <span className="font-medium text-sm text-foreground">{faq.q}</span>
@@ -147,12 +147,12 @@ const ExitNudge = () => {
   // read it. This version is a pinned bottom card with ONE primary CTA,
   // WhatsApp demoted to a footer link, bilingual via existing i18n keys.
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-3 sm:p-4 pointer-events-none animate-in slide-in-from-bottom-2 duration-300">
+    <div className="fixed bottom-0 start-0 end-0 z-50 p-3 sm:p-4 pointer-events-none animate-in slide-in-from-bottom-2 duration-300">
       <div className="relative pointer-events-auto mx-auto max-w-lg bg-card border-2 border-primary/60 shadow-[0_20px_60px_rgba(0,0,0,0.25)] rounded-2xl overflow-hidden">
         <button
           onClick={() => setVisible(false)}
           aria-label={t("pricingPage.exitDismiss")}
-          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-muted transition-colors z-10"
+          className="absolute top-2 end-2 text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-muted transition-colors z-10"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -162,7 +162,7 @@ const ExitNudge = () => {
           className="group flex items-center gap-4 p-4 hover:bg-primary/5 transition-colors"
         >
           <div className="text-3xl flex-shrink-0">🎁</div>
-          <div className="flex-1 min-w-0 pr-6">
+          <div className="flex-1 min-w-0 pe-6">
             <p className="font-bold text-foreground text-sm leading-tight">
               {t("pricingPage.exitTitle")}
             </p>

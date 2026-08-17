@@ -33,10 +33,10 @@ interface LanguageContextType {
   /**
    * Pluralization-aware translation.
    * The translation value must be an object with CLDR plural keys.
-   * Supports {{count}} and any other {{variable}} interpolation.
+   * Supports {count} and any other {variable} interpolation.
    *
    * Example translation:
-   *   { lessons: { one: "{{count}} lesson", other: "{{count}} lessons" } }
+   *   { lessons: { one: "{count} lesson", other: "{count} lessons" } }
    * Usage:
    *   tPlural("lessons", 5) → "5 lessons"
    */
@@ -46,26 +46,71 @@ interface LanguageContextType {
     vars?: Record<string, string | number>
   ) => string;
   /**
-   * Interpolate `{{variable}}` placeholders in a translated string.
+   * Interpolate `{variable}` placeholders in a translated string.
    * Usage: tInterpolate(t("greeting"), { name: "أحمد" })
    */
   tInterpolate: (template: string, vars: Record<string, string | number>) => string;
+  /** Sets the language explicitly (the toggle is the two-value case of this). */
+  setLanguage: (lang: Language) => void;
+}
+
+const LANG_STORAGE_KEY = "k-lovers-lang";
+
+const isLanguage = (v: unknown): v is Language => v === "en" || v === "ar";
+
+/**
+ * URL first, saved preference second, English last.
+ *
+ * The URL has to win: the site's hreflang annotation points Google at
+ * `/?lang=ar` and every WhatsApp campaign link carries the same parameter.
+ * While nothing read it, the Arabic site could not be indexed, linked or
+ * shared — an Arabic reader following an Arabic ad landed on English.
+ *
+ * Kept in sync with the pre-paint script in index.html, which applies the
+ * same resolution to <html dir/lang> so there is no LTR flash.
+ */
+export function resolveInitialLanguage(
+  search: string,
+  stored: string | null,
+): Language {
+  const fromUrl = new URLSearchParams(search).get("lang");
+  if (isLanguage(fromUrl)) return fromUrl;
+  if (isLanguage(stored)) return stored;
+  return "en";
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 import { translations } from "@/i18n/translations";
+import { syncAdminLanguage } from "@/i18n/config";
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<Language>(() => {
-    const saved = localStorage.getItem("k-lovers-lang");
-    return (saved === "ar" ? "ar" : "en") as Language;
+    let stored: string | null = null;
+    try { stored = localStorage.getItem(LANG_STORAGE_KEY); } catch { /* private mode */ }
+    return resolveInitialLanguage(window.location.search, stored);
   });
 
   useEffect(() => {
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
     document.documentElement.lang = language;
-    localStorage.setItem("k-lovers-lang", language);
+    try { localStorage.setItem(LANG_STORAGE_KEY, language); } catch { /* private mode */ }
+
+    // The admin panel runs on i18next rather than this context. Keep the two
+    // in step so its Arabic strings are actually reachable.
+    syncAdminLanguage(language);
+
+    // Write the choice back into the URL so the page is linkable and
+    // shareable in the language the reader is actually looking at.
+    // replaceState, not pushState: switching language should not add a
+    // history entry that Back has to walk through.
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get("lang") !== language) {
+        url.searchParams.set("lang", language);
+        window.history.replaceState(window.history.state, "", url.toString());
+      }
+    } catch { /* Non-fatal: the language still applies. */ }
   }, [language]);
 
   const toggleLanguage = useCallback(() => {
@@ -98,9 +143,15 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     return Array.isArray(result) ? result : [];
   }, [resolve]);
 
+  /**
+   * Every interpolated string in the corpus uses single braces — `{count}`,
+   * `{name}`, `{days}`. The regex required `{{name}}`, so this function
+   * matched nothing it was ever given: a guaranteed no-op waiting for the
+   * next developer to trip over.
+   */
   const tInterpolate = useCallback((template: string, vars: Record<string, string | number>): string => {
-    return template.replace(/\{\{(\w+)\}\}/g, (_, key) =>
-      vars[key] !== undefined ? String(vars[key]) : `{{${key}}}`
+    return template.replace(/\{(\w+)\}/g, (whole, key) =>
+      vars[key] !== undefined ? String(vars[key]) : whole
     );
   }, []);
 
@@ -128,8 +179,8 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   }, [language, resolve, tInterpolate]);
 
   const value = useMemo(
-    () => ({ language, toggleLanguage, t, tArray, tPlural, tInterpolate }),
-    [language, toggleLanguage, t, tArray, tPlural, tInterpolate],
+    () => ({ language, toggleLanguage, setLanguage, t, tArray, tPlural, tInterpolate }),
+    [language, toggleLanguage, setLanguage, t, tArray, tPlural, tInterpolate],
   );
 
   return (

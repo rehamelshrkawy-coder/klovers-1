@@ -192,7 +192,7 @@ const KDramaLearningPage = () => {
                       <p className="text-sm text-pink-600 font-semibold mt-1">{item.time}</p>
                     </div>
                   </div>
-                  <p className="text-foreground/70 ml-14">{item.desc}</p>
+                  <p className="text-foreground/70 ms-14">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -353,7 +353,7 @@ const KDramaLearningPage = () => {
                   <summary className="font-bold text-lg flex items-center justify-between">
                     {item.q}
                     <span className="transition group-open:rotate-180">
-                      <ArrowRight className="h-5 w-5" />
+                      <ArrowRight className="h-5 w-5 rtl-flip" />
                     </span>
                   </summary>
                   <p className="text-foreground/70 mt-4 pt-4 border-t">{item.a}</p>
@@ -373,7 +373,7 @@ const KDramaLearningPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" asChild>
                 <a href="/enroll-now" className="flex items-center gap-2">
-                  {t("kdrama.finalCtaJoin")} <ArrowRight className="h-4 w-4" />
+                  {t("kdrama.finalCtaJoin")} <ArrowRight className="h-4 w-4 rtl-flip" />
                 </a>
               </Button>
               <Button size="lg" variant="outline" className="text-foreground border-white hover:bg-white/10" asChild>
@@ -381,7 +381,7 @@ const KDramaLearningPage = () => {
               </Button>
             </div>
             <p className="text-sm text-pink-100 mt-6">
-              <Tv className="h-4 w-4 inline mr-2" />
+              <Tv className="h-4 w-4 inline me-2" />
               {t("kdrama.finalCtaFooter")}
             </p>
           </div>

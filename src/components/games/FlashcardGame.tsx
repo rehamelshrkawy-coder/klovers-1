@@ -88,7 +88,7 @@ const FlashcardGame = ({ onGameComplete }: { onGameComplete?: (score: number, to
           <Badge variant="outline">Card {index + 1}/{cards.length}</Badge>
           <div className="flex items-center gap-2">
             {usingLesson && <Badge variant="outline" className="text-xs">📚 From your lessons</Badge>}
-            <Badge variant="secondary"><Sparkles className="h-3 w-3 mr-1" />{knew * 5} XP</Badge>
+            <Badge variant="secondary"><Sparkles className="h-3 w-3 me-1" />{knew * 5} XP</Badge>
           </div>
         </div>
 

@@ -1,14 +1,18 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ClipboardCheck, Brain, Target, Sparkles, Clock, CheckCircle2, ChevronRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const PlacementTestCTA = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const sectionRef = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
+  /* Shared reveal: falls back to visible when IntersectionObserver
+     is missing, and reveals after 2s regardless — a section that
+     never appears is worse than one that appears early. */
+  const { ref: sectionRef, visible } = useScrollReveal<HTMLElement>({ threshold: 0.15 });
   const [activeLevel, setActiveLevel] = useState(0);
 
   const LEVELS = [
@@ -28,14 +32,6 @@ const PlacementTestCTA = () => {
   ];
 
   // Scroll-triggered entrance
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.15 }
-    );
-    if (sectionRef.current) obs.observe(sectionRef.current);
-    return () => obs.disconnect();
-  }, []);
 
   // Animate through levels once visible
   useEffect(() => {
@@ -55,8 +51,8 @@ const PlacementTestCTA = () => {
       className="py-20 px-4 relative overflow-hidden bg-gradient-to-b from-background to-muted/40"
     >
       {/* Background blobs */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-amber-200/15 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-80 h-80 bg-amber-200/15 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl pointer-events-none" />
+      <div className="absolute top-0 start-0 w-96 h-96 bg-amber-200/15 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl pointer-events-none dark:bg-amber-900/60" />
+      <div className="absolute bottom-0 end-0 w-80 h-80 bg-amber-200/15 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl pointer-events-none dark:bg-amber-900/60" />
 
       {/* Floating Korean characters */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden>
@@ -80,7 +76,7 @@ const PlacementTestCTA = () => {
               visible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
             }`}
           >
-            <div className="inline-flex items-center gap-2 bg-amber-100 border border-black/10 px-4 py-2 rounded-full text-sm font-semibold text-amber-700">
+            <div className="inline-flex items-center gap-2 bg-amber-100 border border-black/10 px-4 py-2 rounded-full text-sm font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
               <Sparkles className="h-4 w-4" />
               {t("placementCta.badge")}
             </div>
@@ -89,7 +85,7 @@ const PlacementTestCTA = () => {
               {t("placementCta.titleLine1")}<br />
               <span className="relative inline-block">
                 <span className="relative z-10">{t("placementCta.titleMiddle")}</span>
-                <span className="absolute bottom-1 left-0 w-full h-3 bg-amber-200/40 rounded-full -z-0" />
+                <span className="absolute bottom-1 start-0 w-full h-3 bg-amber-200/40 rounded-full -z-0 dark:bg-amber-900/60" />
               </span>{" "}
               {t("placementCta.titleEnd")}
             </h2>
@@ -114,7 +110,7 @@ const PlacementTestCTA = () => {
               className="text-base px-8 gap-2 h-12 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow"
             >
               {t("placementCta.cta")}
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 rtl-flip" />
             </Button>
 
             <p className="text-xs text-muted-foreground">
@@ -151,7 +147,7 @@ const PlacementTestCTA = () => {
                           {lvl.label}
                         </span>
                         {idx === activeLevel && (
-                          <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium animate-pulse border border-black/10">
+                          <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium animate-pulse border border-black/10 dark:bg-amber-900/40 dark:text-amber-400">
                             {t("placementCta.detecting")}
                           </span>
                         )}

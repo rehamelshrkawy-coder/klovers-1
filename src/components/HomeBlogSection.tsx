@@ -121,12 +121,12 @@ const HomeBlogSection = () => {
 
                     {/* Attraction badges */}
                     {idx === 0 && (
-                      <span className="ml-2 inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                      <span className="ms-2 inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/40 dark:text-amber-400 dark:border-amber-800">
                         ⭐ {isAr ? "مميز" : "Featured"}
                       </span>
                     )}
                     {idx > 0 && (post.seo_score ?? 0) >= 80 && (
-                      <span className="ml-2 inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                      <span className="ms-2 inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                         ✨ {isAr ? "موصى به" : "Top Pick"}
                       </span>
                     )}
@@ -166,7 +166,7 @@ const HomeBlogSection = () => {
           <Button variant="outline" asChild size="lg" className="gap-2">
             <Link to="/blog">
               {isAr ? "عرض جميع المقالات" : "View All Articles"}
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 rtl-flip" />
             </Link>
           </Button>
         </div>

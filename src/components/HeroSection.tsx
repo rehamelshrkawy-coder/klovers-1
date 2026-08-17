@@ -6,20 +6,42 @@ const heroPoster = "/hero-korean.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { logLeadEvent, trackAndOpenWhatsApp } from "@/lib/leadTracking";
 import { WHATSAPP_BASE } from "@/lib/siteConfig";
+import { useTrialAvailability, formatSlot } from "@/hooks/useTrialAvailability";
 
+/**
+ * Counts 0 → target once the element is actually on screen.
+ *
+ * Two guards matter here:
+ *  - `Math.max(0, …)`: `performance.now()` is not guaranteed to be monotonic
+ *    relative to a timestamp captured in a different frame, so `now - start`
+ *    can come back negative on the first tick and the hero briefly rendered a
+ *    negative student count.
+ *  - the observer starts the animation, so it can never run during the hero's
+ *    first paint before the strip is visible.
+ */
 const useCountUp = (target: number, duration = 1800) => {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    // Respect the user's motion preference: land on the final value at once.
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) { setCount(target); return; }
+
+    if (typeof IntersectionObserver === "undefined") { setCount(target); return; }
+
     const obs = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return;
       obs.disconnect();
       const start = performance.now();
       const tick = (now: number) => {
-        const t = Math.min((now - start) / duration, 1);
-        setCount(Math.round(t * target));
+        const elapsed = Math.max(0, now - start);
+        const t = Math.min(elapsed / duration, 1);
+        setCount(Math.max(0, Math.round(t * target)));
         if (t < 1) requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
@@ -30,65 +52,79 @@ const useCountUp = (target: number, duration = 1800) => {
   return { count, ref };
 };
 
-/** 4 official trial class timestamps stored as MYT (UTC+8) ISO instants. */
-const TRIAL_INSTANTS_MYT = [
-  "2026-07-03T01:00:00+08:00",
-  "2026-07-04T23:00:00+08:00",
-  "2026-07-05T09:00:00+08:00",
-  "2026-07-07T23:00:00+08:00",
-];
-
-/** Returns the label for the next upcoming trial class in the visitor's timezone. */
-const nextClassLabel = () => {
-  const now = Date.now();
-  const upcoming = TRIAL_INSTANTS_MYT
-    .map((iso) => new Date(iso))
-    .filter((d) => d.getTime() > now);
-  if (upcoming.length === 0) return { en: "soon", ar: "قريباً" };
-  const next = upcoming[0];
-  const userTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return "Asia/Kuala_Lumpur"; } })();
-  const en = next.toLocaleDateString("en-US", { weekday: "long", timeZone: userTz });
-  const ar = next.toLocaleDateString("ar-EG", { weekday: "long", timeZone: userTz });
-  return { en, ar };
-};
-
-/** Formats a trial instant for display in the visitor's local timezone. */
-function formatTrialPill(iso: string, lang: "en" | "ar"): string | null {
-  const d = new Date(iso);
-  if (d.getTime() <= Date.now()) return null;
-  const userTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return "Asia/Kuala_Lumpur"; } })();
-  const day = d.toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", { weekday: "short", month: "short", day: "numeric", timeZone: userTz });
-  const time = d.toLocaleTimeString(lang === "ar" ? "ar-EG" : "en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: userTz });
-  return `${day} · ${time}`;
-}
-
 const HeroSection = () => {
   const { t, language } = useLanguage();
   const isAr = language === "ar";
-  const nextDay = useMemo(() => nextClassLabel(), []);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoReady, setVideoReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const { count: studentCount, ref: studentRef } = useCountUp(500);
   const { count: ratingCount, ref: ratingRef } = useCountUp(49, 1200);
-  const { count: countryCount, ref: countryRef } = useCountUp(15);
+  const { ref: monthsRef } = useCountUp(6);
+
+  /*
+    Live schedule. The hero used to carry its own literal array of four MYT
+    timestamps that had already expired, so the "next class" chip and the date
+    pills advertised classes that no longer existed.
+  */
+  const availability = useTrialAvailability();
+  const nextSlotLabel = useMemo(() => {
+    if (!availability.nextSlot) return null;
+    return formatSlot(availability.nextSlot, isAr ? "ar" : "en");
+  }, [availability.nextSlot, isAr]);
+
+  /* Locale-aware grouping. A hardcoded 'en-US' put Western grouping into an
+     Arabic sentence. */
+  const numberFormat = useMemo(
+    () => new Intl.NumberFormat(isAr ? "ar-EG-u-nu-latn" : "en-US"),
+    [isAr],
+  );
 
   useEffect(() => {
-    const conn = (navigator as Navigator & { connection?: { type?: string; effectiveType?: string } }).connection;
-    const isFast = !conn || conn.type === "wifi" || conn.effectiveType === "4g";
+    const conn = (navigator as Navigator & {
+      connection?: { type?: string; effectiveType?: string; saveData?: boolean };
+    }).connection;
+
+    /*
+      Opt in, never opt out.
+
+      The old test was `!conn || conn.type === "wifi" || conn.effectiveType === "4g"`.
+      `navigator.connection` is undefined on every iPhone, so `!conn` was true
+      and every iOS visitor downloaded a 30–45 MB hero video regardless of
+      their actual network. Now an unknown connection means "don't", and
+      Data Saver — widely enabled in Egypt — is honoured.
+    */
+    if (!conn) return;
+    if (conn.saveData) return;
+    const isFast = conn.type === "wifi" || conn.effectiveType === "4g";
     if (!isFast) return;
 
-    const timer = setTimeout(() => {
-      const video = videoRef.current;
-      if (!video) return;
-      setShowVideo(true);
-      video.src = "/videos/hero-korea-video-new.mp4";
-      video.load();
-      video.play().catch(() => {});
-    }, 2000);
+    // A decorative background loop is exactly what this preference is for.
+    if (
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) return;
 
+    const timer = setTimeout(() => setShowVideo(true), 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  /*
+    The <video> element only exists once showVideo flips, so the source has to
+    be attached in a second pass. Doing it in the timer read videoRef.current
+    while the element was still unmounted, so it was always null and the video
+    never actually loaded.
+  */
+  useEffect(() => {
+    if (!showVideo) return;
+    const video = videoRef.current;
+    if (!video) return;
+    video.src = "/videos/hero-korea-video-new.mp4";
+    video.load();
+    video.play().catch(() => {
+      /* Autoplay refusal is fine — the poster image stays. */
+    });
+  }, [showVideo]);
 
   return (
     <section
@@ -127,7 +163,7 @@ const HeroSection = () => {
       {/* Cinematic gradient — just enough for text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-black/55" />
       {/* Bottom scrim for stats readability */}
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/50 to-transparent" />
+      <div className="absolute bottom-0 start-0 end-0 h-40 bg-gradient-to-t from-black/50 to-transparent" />
 
       {/* Primary colour glow behind headline */}
       <div
@@ -165,20 +201,29 @@ const HeroSection = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
-              <span className="text-white text-xs font-semibold tracking-[0.12em] uppercase">Enrolling Now</span>
+              <span className="text-white text-xs font-semibold tracking-[0.12em] uppercase">
+                {isAr ? "التسجيل مفتوح" : "Enrolling now"}
+              </span>
             </div>
           </div>
 
-          {/* Next-class urgency chip */}
-          <div className="inline-flex items-center gap-2 bg-black/40 border border-white/20 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-semibold text-white/90">
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
-            </span>
-            {isAr
-              ? `الحصة التالية: ${nextDay.ar} — سجّل دلوقتي`
-              : `Next class: ${nextDay.en} — spots filling fast`}
-          </div>
+          {/*
+            Next-class chip. Rendered only when there genuinely is a next class:
+            no slots means no chip, rather than a chip promising one "soon".
+            The old copy also appended "spots filling fast" unconditionally,
+            with no capacity query anywhere behind it.
+          */}
+          {availability.status === "ready" && nextSlotLabel && (
+            <div className="inline-flex items-center gap-2 bg-black/40 border border-white/20 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-semibold text-white/90">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
+              </span>
+              {isAr
+                ? `الحصة التالية: ${nextSlotLabel.weekday}`
+                : `Next class: ${nextSlotLabel.weekday}`}
+            </div>
+          )}
 
           {/* Main headline */}
           <h1
@@ -222,7 +267,7 @@ const HeroSection = () => {
               >
                 <Gift className="h-5 w-5" />
                 {t("hero", "startNow")}
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="h-5 w-5 rtl-flip" />
               </Link>
             </Button>
             <Button
@@ -244,22 +289,41 @@ const HeroSection = () => {
 
           {/* Micro trust line */}
           <p className="text-white/60 text-xs" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.8)" }}>
-            {isAr ? "✓ بدون بطاقة بنكية · ✓ ٩٨٪ راضون · ✓ رد خلال دقائق" : "✓ No credit card · ✓ 98% satisfaction · ✓ Reply in minutes"}
+            {isAr ? "✓ بدون بطاقة بنكية · ✓ 98% راضون · ✓ رد خلال دقائق" : "✓ No credit card · ✓ 98% satisfaction · ✓ Reply in minutes"}
           </p>
 
-          {/* Upcoming class sessions — auto-localised to visitor timezone */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            {TRIAL_INSTANTS_MYT.map((iso) => {
-              const label = formatTrialPill(iso, isAr ? "ar" : "en");
-              if (!label) return null;
-              return (
-                <div key={iso} className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/80">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
-                  {label}
-                </div>
-              );
-            })}
-          </div>
+          {/*
+            Upcoming sessions, straight from get_trial_availability and
+            localised to the visitor's timezone. Three explicit states, so an
+            empty grid can never appear: a skeleton while the query is in
+            flight, the real sessions, or nothing at all. `error` and
+            `unscheduled` deliberately render no pills and no urgency copy —
+            an empty schedule is not a scarcity message.
+          */}
+          {availability.status === "loading" && (
+            <div className="flex flex-wrap gap-2 justify-center" aria-hidden="true">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-6 w-32 rounded-full bg-white/10 animate-pulse" />
+              ))}
+            </div>
+          )}
+          {availability.status === "ready" && (
+            <div className="flex flex-wrap gap-2 justify-center">
+              {availability.slots.slice(0, 4).map((slot) => {
+                const label = formatSlot(slot, isAr ? "ar" : "en");
+                if (!label) return null;
+                return (
+                  <div
+                    key={`${slot.day_of_week}|${slot.start_time}|${slot.next_trial_date}`}
+                    className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/80"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+                    {label.day} · {label.time}
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Hangul sheet — reciprocity trigger */}
           <Link
@@ -268,21 +332,42 @@ const HeroSection = () => {
             onClick={() => { try { logLeadEvent({ source_type: "free_resource", cta_label: "hero_hangul_sheet" }); } catch { /* Analytics must not block navigation. */ } }}
           >
             <BookOpen className="h-3.5 w-3.5 shrink-0" />
-            {isAr ? "احصل على ورقة هانغول المجانية ←" : "Free Hangul starter sheet →"}
+            {isAr ? "احصل على ورقة هانغول المجانية" : "Free Hangul starter sheet"}
+            {/* A literal "→" in the string points the wrong way in RTL; the
+                icon flips with the document direction instead. */}
+            <ArrowRight className="h-3.5 w-3.5 shrink-0 rtl-flip" aria-hidden="true" />
           </Link>
 
         </div>
       </div>
 
       {/* ── Stats strip — absolutely pinned to bottom ─────────── */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 pb-8 sm:pb-10 px-4">
+      <div className="absolute bottom-0 start-0 end-0 z-10 pb-8 sm:pb-10 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="w-full h-px bg-gradient-to-r from-transparent via-white/25 to-transparent mb-6" />
           <div className="grid grid-cols-3 gap-4 md:gap-8">
             {[
-              { icon: Users, ref: studentRef, display: `${studentCount.toLocaleString('en-US')}+`, label: isAr ? "طالب تعلّموا" : "Students Taught" },
-              { icon: Star,  ref: ratingRef,  display: `${(ratingCount / 10).toFixed(1)} ★`, label: isAr ? "متوسط التقييم" : "Average Rating" },
-              { icon: Globe, ref: countryRef, display: isAr ? "٦ أشهر" : "6 Months", label: isAr ? "للمحادثة" : "To Conversational" },
+              {
+                icon: Users, ref: studentRef,
+                display: `${numberFormat.format(studentCount)}+`,
+                label: isAr ? "طالب تعلّموا" : "Students taught",
+              },
+              {
+                icon: Star, ref: ratingRef,
+                display: `${numberFormat.format(Math.round(ratingCount) / 10)} ★`,
+                label: isAr ? "متوسط التقييم" : "Average rating",
+              },
+              {
+                /*
+                  Was "6 Months → To Conversational". Six months of one class a
+                  week is A1 — the first level, not conversational fluency —
+                  so the headline number was promising something the course
+                  structure cannot deliver in that time.
+                */
+                icon: Globe, ref: monthsRef,
+                display: isAr ? "6 أشهر" : "6 months",
+                label: isAr ? "لمستواك الأول" : "To your first level",
+              },
             ].map(({ icon: Icon, ref: itemRef, display, label }) => (
               <div key={label} className="flex flex-col items-center gap-1 text-center group">
                 <div className="flex items-center gap-1.5">

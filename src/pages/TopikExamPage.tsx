@@ -339,7 +339,7 @@ const TopikExamPage = () => {
                   <summary className="font-bold text-lg flex items-center justify-between">
                     {item.q}
                     <span className="transition group-open:rotate-180">
-                      <ArrowRight className="h-5 w-5" />
+                      <ArrowRight className="h-5 w-5 rtl-flip" />
                     </span>
                   </summary>
                   <p className="text-foreground/70 mt-4 pt-4 border-t">{item.a}</p>
@@ -359,7 +359,7 @@ const TopikExamPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" asChild>
                 <a href="/enroll-now" className="flex items-center gap-2">
-                  {t("topikExam.finalCtaStart")} <ArrowRight className="h-4 w-4" />
+                  {t("topikExam.finalCtaStart")} <ArrowRight className="h-4 w-4 rtl-flip" />
                 </a>
               </Button>
               <Button size="lg" variant="outline" className="text-foreground border-white hover:bg-white/10" asChild>
@@ -367,7 +367,7 @@ const TopikExamPage = () => {
               </Button>
             </div>
             <p className="text-sm text-green-100 mt-6">
-              <BookOpen className="h-4 w-4 inline mr-2" />
+              <BookOpen className="h-4 w-4 inline me-2" />
               {t("topikExam.finalCtaFooter")}
             </p>
           </div>

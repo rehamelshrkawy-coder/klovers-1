@@ -113,7 +113,7 @@ const HangulStarterPage = () => {
               <Button asChild className="gap-2">
                 <Link to="/free-trial">
                   {isAr ? "احجز حصة مجانية" : "Book a Free Class"}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 rtl-flip" />
                 </Link>
               </Button>
             </div>
@@ -182,7 +182,7 @@ const HangulStarterPage = () => {
                 <Button asChild className="gap-2 w-full sm:w-auto">
                   <Link to="/free-trial">
                     {isAr ? "ابدأ مع مدرسة حقيقية — مجانًا" : "Start with a real teacher — free"}
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4 rtl-flip" />
                   </Link>
                 </Button>
               </div>

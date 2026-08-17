@@ -316,7 +316,7 @@ const LessonDetailPage = () => {
         {/* Back link with world context */}
         <div className="flex items-center gap-2 mb-6">
      <Link to={`/textbook/${bookSlug}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-            <ChevronLeft className="h-4 w-4" /> {t("textbook.allMissions")}
+            <ChevronLeft className="h-4 w-4 rtl-flip" /> {t("textbook.allMissions")}
           </Link>
           <span className="text-muted-foreground">·</span>
           <span className="text-sm text-muted-foreground">{world.emoji} {isAr ? world.nameAr : world.name}</span>
@@ -361,7 +361,7 @@ const LessonDetailPage = () => {
         )}
 
         {lp?.chapter_completed && (
-          <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 mb-6 text-center ring-1 ring-black/10">
+          <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 mb-6 text-center ring-1 ring-black/10 dark:bg-amber-950/40 dark:border-amber-700">
             <span className="text-2xl">⭐</span>
             <p className="font-bold text-foreground">{t("textbook.missionComplete")}</p>
             <p className="text-sm text-muted-foreground">{getRandomMotivation()}</p>
@@ -486,7 +486,7 @@ const LessonDetailPage = () => {
                               isStudied ? "border-amber-300 bg-amber-50" : "border-border bg-card hover:border-amber-200 hover:shadow-md"
                             )}
                           >
-                            {isStudied && <span className="absolute top-2 right-2 text-amber-600 text-xs z-10">✓</span>}
+                            {isStudied && <span className="absolute top-2 end-2 text-amber-600 text-xs z-10">✓</span>}
                             {/* Image */}
                             {v.image_url && (
                               <img
@@ -521,7 +521,7 @@ const LessonDetailPage = () => {
                               WebkitBackfaceVisibility: 'hidden',
                               transform: 'rotateY(180deg)',
                             }}
-                            className="absolute inset-0 rounded-xl border border-amber-300 bg-amber-50 flex flex-col items-center justify-center gap-2 p-4 ring-1 ring-black/10"
+                            className="absolute inset-0 rounded-xl border border-amber-300 bg-amber-50 flex flex-col items-center justify-center gap-2 p-4 ring-1 ring-black/10 dark:bg-amber-950/40 dark:border-amber-700"
                           >
                             <p className="text-lg font-bold text-foreground text-center">{v.meaning}</p>
                             <p className="text-sm italic text-muted-foreground">{v.romanization}</p>
@@ -563,7 +563,7 @@ const LessonDetailPage = () => {
           <TabsContent value="grammar">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
               <Languages className="h-5 w-5 text-amber-600" /> {t("textbook.grammar")}
-              <span className="text-xs text-muted-foreground ml-auto">+{XP_VALUES.grammar} XP</span>
+              <span className="text-xs text-muted-foreground ms-auto">+{XP_VALUES.grammar} XP</span>
             </h2>
             {grammar.length === 0 ? (
               <p className="text-muted-foreground">{t("textbook.noGrammar")}</p>
@@ -577,13 +577,13 @@ const LessonDetailPage = () => {
                         <h3 className="text-lg font-bold text-foreground">{g.title}</h3>
                       </div>
                       {g.structure && (
-                        <p className="text-sm font-mono text-foreground bg-amber-100 inline-block px-3 py-1.5 rounded-lg mb-3 border border-black/10">{g.structure}</p>
+                        <p className="text-sm font-mono text-foreground bg-amber-100 inline-block px-3 py-1.5 rounded-lg mb-3 border border-black/10 dark:bg-amber-900/40">{g.structure}</p>
                       )}
                       <p className="text-sm text-muted-foreground mb-4">{g.explanation}</p>
                       {g.examples?.length > 0 && (
                         <div className="space-y-2 bg-muted/30 rounded-lg p-3">
                           {g.examples.map((ex, i) => (
-                            <div key={i} className="border-l-2 border-amber-300 pl-3">
+                            <div key={i} className="border-s-2 border-amber-300 ps-3">
                               <p className="text-sm font-medium text-foreground">{ex.korean}</p>
                               <p className="text-xs text-muted-foreground">{ex.english}</p>
                             </div>
@@ -602,7 +602,7 @@ const LessonDetailPage = () => {
           <TabsContent value="dialogue">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-amber-600" /> {t("textbook.dialogue")}
-              <span className="text-xs text-muted-foreground ml-auto">+{XP_VALUES.dialogue} XP</span>
+              <span className="text-xs text-muted-foreground ms-auto">+{XP_VALUES.dialogue} XP</span>
             </h2>
             {dialogue.length === 0 ? (
               <p className="text-muted-foreground">{t("textbook.noDialogue")}</p>
@@ -762,7 +762,7 @@ const LessonDetailPage = () => {
           <TabsContent value="reading">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
               <FileText className="h-5 w-5 text-amber-600" /> {t("textbook.reading")}
-              <span className="text-xs text-muted-foreground ml-auto">+{XP_VALUES.reading} XP</span>
+              <span className="text-xs text-muted-foreground ms-auto">+{XP_VALUES.reading} XP</span>
             </h2>
             {reading.length === 0 ? (
               <p className="text-muted-foreground">{t("textbook.noReading")}</p>
@@ -786,7 +786,7 @@ const LessonDetailPage = () => {
           <TabsContent value="writing">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
               <PenLine className="h-5 w-5 text-amber-600" /> {isAr ? "تمرين الكتابة" : "Writing Practice"}
-              <span className="text-xs text-muted-foreground ml-auto">+{XP_VALUES.writing} XP</span>
+              <span className="text-xs text-muted-foreground ms-auto">+{XP_VALUES.writing} XP</span>
             </h2>
             <p className="text-sm text-muted-foreground mb-6">
               {isAr
@@ -810,7 +810,7 @@ const LessonDetailPage = () => {
         {/* Games XP Banner */}
         <Link
           to="/games"
-          className="group flex items-center gap-4 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 p-4 mt-10 transition-all ring-1 ring-black/10"
+          className="group flex items-center gap-4 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 p-4 mt-10 transition-all ring-1 ring-black/10 dark:bg-amber-950/40 dark:bg-amber-900/40 dark:border-amber-800"
         >
           <span className="text-3xl">🎮</span>
           <div className="flex-1">
@@ -830,12 +830,12 @@ const LessonDetailPage = () => {
         <div className="flex justify-between items-center mt-6 pt-6 border-t border-border">
           {lessonNum > 1 ? (
            <Link to={`/textbook/${bookSlug}/${lessonNum - 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-              <ChevronLeft className="h-4 w-4" /> {t("textbook.previousMission")}
+              <ChevronLeft className="h-4 w-4 rtl-flip" /> {t("textbook.previousMission")}
             </Link>
           ) : <span />}
           {lessonNum < totalLessons ? (
             <Link to={`/textbook/${bookSlug}/${lessonNum + 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-              {t("textbook.nextMission")} <ChevronRight className="h-4 w-4" />
+              {t("textbook.nextMission")} <ChevronRight className="h-4 w-4 rtl-flip" />
             </Link>
           ) : <span />}
         </div>

@@ -140,7 +140,7 @@ const UnderReviewBlock = ({
 
         {/* View receipt */}
         <Button variant="outline" className="w-full" onClick={onViewReceipt} disabled={viewingReceipt}>
-          <Eye className="h-4 w-4 mr-2" />
+          <Eye className="h-4 w-4 me-2" />
           {viewingReceipt ? t("payment.opening") : t("payment.viewReceipt")}
         </Button>
 
@@ -185,7 +185,7 @@ const UnderReviewBlock = ({
                 onClick={handleReplace}
                 className="flex-1"
               >
-                <RefreshCw className="h-4 w-4 mr-1" />
+                <RefreshCw className="h-4 w-4 me-1" />
                 {replacing ? t("payment.replacing") : t("payment.replaceReceipt")}
               </Button>
               <Button type="button" variant="outline" size="sm" onClick={() => { setShowReplace(false); setNewFile(null); }}>
@@ -560,7 +560,7 @@ const EgyptPaymentPage = () => {
                   {t("payment.approvedMsg")}
                 </p>
                 <Button className="w-full sm:w-auto" onClick={() => navigate("/dashboard")}>
-                  {t("payment.goToDashboard")} <ArrowRight className="h-4 w-4 ml-1" />
+                  {t("payment.goToDashboard")} <ArrowRight className="h-4 w-4 ms-1 rtl-flip" />
                 </Button>
               </CardContent>
             </Card>

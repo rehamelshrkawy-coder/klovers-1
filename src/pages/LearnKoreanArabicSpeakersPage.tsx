@@ -273,7 +273,7 @@ const LearnKoreanArabicSpeakersPage = () => {
                   <summary className="font-bold text-lg flex items-center justify-between">
                     {item.q}
                     <span className="transition group-open:rotate-180">
-                      <ArrowRight className="h-5 w-5" />
+                      <ArrowRight className="h-5 w-5 rtl-flip" />
                     </span>
                   </summary>
                   <p className="text-foreground/70 mt-4 pt-4 border-t">{item.a}</p>
@@ -293,7 +293,7 @@ const LearnKoreanArabicSpeakersPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" asChild>
                 <a href="/enroll-now" className="flex items-center gap-2">
-                  {t("learnArabicSpeakers.ctaEnroll")} <ArrowRight className="h-4 w-4" />
+                  {t("learnArabicSpeakers.ctaEnroll")} <ArrowRight className="h-4 w-4 rtl-flip" />
                 </a>
               </Button>
               <Button size="lg" variant="outline" className="text-foreground border-white hover:bg-white/10" asChild>
@@ -301,7 +301,7 @@ const LearnKoreanArabicSpeakersPage = () => {
               </Button>
             </div>
             <p className="text-sm text-white/80 mt-6">
-              <Clock className="h-4 w-4 inline mr-2" />
+              <Clock className="h-4 w-4 inline me-2" />
               {t("learnArabicSpeakers.ctaFooter")}
             </p>
           </div>

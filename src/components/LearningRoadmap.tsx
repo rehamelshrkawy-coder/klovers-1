@@ -25,6 +25,18 @@ const LearningRoadmap = () => {
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
+    const revealAll = () => setVisibleItems(new Set(stages.map((_, i) => i)));
+
+    // No observer, or reduced motion: reveal everything immediately rather
+    // than leaving every item stuck at opacity-0 forever.
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (typeof IntersectionObserver === "undefined" || reduceMotion) {
+      revealAll();
+      return;
+    }
+
     const observers: IntersectionObserver[] = [];
     itemRefs.current.forEach((el, i) => {
       if (!el) return;
@@ -40,7 +52,13 @@ const LearningRoadmap = () => {
       obs.observe(el);
       observers.push(obs);
     });
-    return () => observers.forEach((o) => o.disconnect());
+    // Failsafe: whatever the observers did, the content becomes visible.
+    const timer = window.setTimeout(revealAll, 2000);
+
+    return () => {
+      observers.forEach((o) => o.disconnect());
+      window.clearTimeout(timer);
+    };
   }, [stages.length]);
 
   const toggle = (index: number) =>
@@ -140,7 +158,7 @@ const LearningRoadmap = () => {
                       isActive ? "max-h-40 mt-4 opacity-100" : "max-h-0 opacity-0"
                     }`}
                   >
-                    <p className="text-sm text-muted-foreground leading-relaxed pl-[72px]">
+                    <p className="text-sm text-muted-foreground leading-relaxed ps-[72px]">
                       {stage.description}
                     </p>
                   </div>
@@ -164,7 +182,7 @@ const LearningRoadmap = () => {
           <Button size="lg" asChild className="gap-2 text-base font-bold h-12 px-8">
             <Link to="/placement-test">
               {t("roadmap", "cta")}
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-5 w-5 rtl-flip" />
             </Link>
           </Button>
           <p className="text-sm text-muted-foreground mt-3">{t("roadmap", "ctaSub")}</p>

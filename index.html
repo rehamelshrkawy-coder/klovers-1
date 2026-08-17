@@ -53,7 +53,42 @@
     <!-- LCP hero image — preloaded from stable public path to avoid render-blocking discovery -->
     <link rel="preload" as="image" href="/hero-korean.jpg" fetchpriority="high" />
 
-    <!-- Fonts: system font stack used globally; marketing fonts loaded on-demand by Creator Hub -->
+    <!-- Language: resolved before first paint so an Arabic visitor never sees
+         an LTR flash. URL wins over the saved preference, because hreflang
+         and every WhatsApp campaign link points at /?lang=ar. This mirrors
+         resolveInitialLanguage() in src/contexts/LanguageContext.tsx. -->
+    <script>
+      (function () {
+        try {
+          var p = new URLSearchParams(window.location.search).get('lang');
+          var lang = p === 'ar' || p === 'en' ? p : localStorage.getItem('k-lovers-lang');
+          if (lang !== 'ar' && lang !== 'en') lang = 'en';
+          document.documentElement.lang = lang;
+          document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        } catch (e) {
+          /* Private mode can throw on localStorage; the LTR default is fine. */
+        }
+      })();
+    </script>
+
+    <!-- Fonts: Latin deliberately stays on the system stack (zero webfonts).
+         Arabic is the exception — the system stack names no Arabic-capable
+         family, so Arabic rendered in whatever the OS substituted. Arabic
+         subset only, 3 weights, loaded non-render-blocking. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;800&display=swap&subset=arabic"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;800&display=swap&subset=arabic"
+      />
+    </noscript>
 
     <!-- Google Analytics (GA4) — deferred to avoid blocking render -->
     <script>

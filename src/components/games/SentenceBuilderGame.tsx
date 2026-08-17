@@ -112,7 +112,7 @@ const SentenceBuilderGame = ({ onGameComplete }: { onGameComplete?: (score: numb
       <div className="max-w-lg mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <Badge variant="outline">{t("games.round")} {total + 1}/{rounds}</Badge>
-          <Badge variant="secondary"><Sparkles className="h-3 w-3 mr-1" />{score * 5} XP</Badge>
+          <Badge variant="secondary"><Sparkles className="h-3 w-3 me-1" />{score * 5} XP</Badge>
         </div>
 
         <Card className="p-6 space-y-4">
@@ -139,7 +139,7 @@ const SentenceBuilderGame = ({ onGameComplete }: { onGameComplete?: (score: numb
           )}
         </Card>
 
-        {feedback && <Button onClick={nextRound} className="w-full gap-2">{t("games.next")} <ArrowRight className="h-4 w-4" /></Button>}
+        {feedback && <Button onClick={nextRound} className="w-full gap-2">{t("games.next")} <ArrowRight className="h-4 w-4 rtl-flip" /></Button>}
         <Button variant="ghost" size="sm" onClick={restart} className="w-full gap-1"><RotateCcw className="h-3 w-3" /> {t("games.restart")}</Button>
       </div>
     </section>
