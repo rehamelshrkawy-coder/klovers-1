@@ -63,7 +63,7 @@ const PlacementTestCTA = () => {
         {["한", "국", "어", "급", "수"].map((char, i) => (
           <span
             key={char}
-            className="absolute text-5xl font-bold text-primary/15 dark:text-primary/10"
+            className="absolute text-5xl font-bold text-primary-text/15 dark:text-primary-text/10"
             style={{ top: `${15 + i * 18}%`, left: `${3 + i * 19}%`, transform: `rotate(${-15 + i * 8}deg)` }}
           >
             {char}

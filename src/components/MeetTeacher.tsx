@@ -46,11 +46,11 @@ const MeetTeacher = () => {
                 {/* Name overlay at bottom */}
                 <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-6 py-5">
                   <div className="flex items-center gap-2 mb-1">
-                    <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-                    <span className="text-primary text-xs font-bold tracking-wider uppercase">TOPIK Certified</span>
+                    <ShieldCheck className="h-4 w-4 text-primary-text shrink-0" />
+                    <span className="text-primary-text text-xs font-bold tracking-wider uppercase">TOPIK Certified</span>
                   </div>
                   <p className="text-white font-bold text-lg leading-tight">{t("teacher", "name")}</p>
-                  <p className="text-primary text-sm font-semibold mt-0.5">{isAr ? "المدرّسة الرئيسية" : "Lead Korean Instructor"}</p>
+                  <p className="text-primary-text text-sm font-semibold mt-0.5">{isAr ? "المدرّسة الرئيسية" : "Lead Korean Instructor"}</p>
                 </div>
               </div>
             </div>

@@ -7,6 +7,15 @@ import { WHATSAPP_BASE } from "@/lib/siteConfig";
 
 type PageState = "loading" | "success" | "already" | "error";
 
+/** Row shape returned by the `respond_to_trial_invite` RPC. */
+export interface TrialInviteResponse {
+  outcome: "recorded" | "already" | "invalid";
+  trial_date: string | null;
+  start_time: string | null;
+  timezone: string | null;
+  meeting_url: string | null;
+}
+
 /**
  * Reached from the confirmation email — including the Arabic one. The page was
  * 100% hardcoded English, so an Arabic-speaking student clicking through from an
@@ -27,51 +36,34 @@ const TrialConfirmPage = () => {
     }
 
     const confirm = async () => {
-      // Fetch the booking to check current status and get the slot's meeting_url
-      const { data: booking, error: fetchErr } = await supabase
-        .from("trial_bookings")
-        .select("id, status, trial_date, start_time")
-        .eq("id", id)
-        .eq("confirmation_token", token)
-        .maybeSingle();
+      // Goes through respond_to_trial_invite rather than updating the table
+      // directly. anon has no UPDATE policy on trial_bookings, so the previous
+      // direct update was silently filtered by RLS — PostgREST reports no error
+      // when an update matches zero rows, so this page told every student
+      // "Attendance Confirmed!" while writing nothing at all.
+      const { data, error } = await supabase.rpc(
+        "respond_to_trial_invite" as never,
+        { p_booking_id: id, p_token: token, p_response: "yes" } as never,
+      );
 
-      if (fetchErr || !booking) {
+      const rows = (data ?? []) as unknown as TrialInviteResponse[];
+      const row = Array.isArray(rows) ? rows[0] : (rows as TrialInviteResponse | undefined);
+
+      if (error || !row || row.outcome === "invalid") {
+        if (error) console.error("respond_to_trial_invite failed:", error);
         setState("error");
         return;
       }
 
-      if (booking.status === "confirmed_attendance") {
-        // Already confirmed — idempotent: just show success
-        setState("already");
-      } else {
-        // Attempt the update
-        const { error: updateErr } = await supabase
-          .from("trial_bookings")
-          .update({
-            status: "confirmed_attendance",
-            attendance_confirmed_at: new Date().toISOString(),
-          } as any)
-          .eq("id", id)
-          .eq("confirmation_token", token)
-          .neq("status", "confirmed_attendance");
+      setState(row.outcome === "already" ? "already" : "success");
+      if (row.meeting_url) setClassLink(row.meeting_url);
 
-        if (updateErr) {
-          setState("error");
-          return;
-        }
-        setState("success");
-      }
-
-      // Try to fetch the Google Meet link from the trial slot
-      if (booking.trial_date && booking.start_time) {
-        const { data: slotRow } = await supabase
-          .from("trial_slots")
-          .select("meeting_url")
-          .eq("trial_date", booking.trial_date)
-          .eq("start_time", booking.start_time)
-          .maybeSingle();
-        const url = (slotRow as { meeting_url?: string | null } | null)?.meeting_url ?? null;
-        if (url) setClassLink(url);
+      // Best-effort: this confirmation may have just completed the group's
+      // minimum run size for this occurrence. Never blocks the UI.
+      if (row.outcome === "recorded" && row.trial_date && row.start_time) {
+        supabase.functions.invoke("trial-capacity-alert", {
+          body: { trial_date: row.trial_date, start_time: row.start_time },
+        }).catch(() => { /* best-effort, ignore */ });
       }
     };
 

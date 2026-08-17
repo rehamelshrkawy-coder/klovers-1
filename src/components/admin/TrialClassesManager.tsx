@@ -19,6 +19,8 @@ import { toast } from "@/hooks/use-toast";
 import { CheckCircle, Mail, RefreshCw, Users, XCircle, Pencil, ChevronDown, ChevronUp, CalendarCog, Copy } from "lucide-react";
 import { formatTime, convertDateTimeToTimezone } from "@/lib/admin-utils";
 import { getAdminTimezone } from "@/lib/viewerTimezone";
+import { sendTrialConfirmationEmail } from "@/lib/trialConfirmationEmail";
+import { TRIAL_ANCHOR_TIMEZONE } from "@/lib/siteConfig";
 import { getLevelShortLabel } from "@/constants/levels";
 import { useAllTrialSlots } from "@/hooks/useTrialAdmin";
 import AddTrialClassDialog from "@/components/admin/trial/AddTrialClassDialog";
@@ -91,6 +93,8 @@ interface TrialSlot {
   trial_date?: string | null;
   meeting_url?: string | null;
   class_language?: string | null;
+  /** Zone the stored start_time is a wall-clock time in. */
+  timezone?: string | null;
 }
 
 type TimeFilter = "all" | "upcoming" | "past";
@@ -163,7 +167,7 @@ const TrialClassesManager = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("trial_slots")
-        .select("day_of_week, start_time, is_active, trial_date, meeting_url, class_language")
+        .select("day_of_week, start_time, is_active, trial_date, meeting_url, class_language, timezone")
         .eq("is_active", true);
       if (error) throw error;
       return (data as TrialSlot[] | null) ?? [];
@@ -260,22 +264,35 @@ const TrialClassesManager = () => {
       // Normalise "arabic"→"ar", "english"→"en" for the email template
       const emailLang = rawLang === "arabic" ? "ar" : rawLang === "english" ? "en" : rawLang;
 
-      // Send confirmation email with join link to the student
-      const emailBody: Record<string, unknown> = {
-        template: "trial_confirmed",
-        email: booking.email,
-        name: booking.name || booking.email,
-        language: emailLang,
-        trial_date: date,
-        trial_time: time,
-        trial_timezone: "Africa/Cairo",
-        level: booking.level?.trim() || "",
-      };
-      if (meetingUrl) emailBody.class_link_url = meetingUrl;
-      const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", { body: emailBody });
+      // Routed through the shared helper so TRIAL_CONFIRMATION_EMAIL_ENABLED
+      // actually governs this path. This button used to invoke the edge
+      // function directly, bypassing the flag entirely — emails kept going out
+      // while the team believed they were paused. The timezone comes from the
+      // booking rather than a hardcoded Africa/Cairo, which stated a time up to
+      // seven hours wrong for slots anchored to the teacher's zone.
+      let emailSent = false;
+      let emailError: string | null = null;
+      try {
+        emailSent = await sendTrialConfirmationEmail({
+          email: booking.email,
+          name: booking.name || booking.email,
+          level: booking.level?.trim() || "",
+          trial_date: date,
+          start_time: time,
+          timezone: booking.timezone || TRIAL_ANCHOR_TIMEZONE,
+          language: emailLang,
+          classLinkUrl: meetingUrl,
+        });
+      } catch (e: any) {
+        emailError = e?.message ?? String(e);
+      }
 
-      if (emailErr) {
-        toast({ title: "Confirmed (email failed)", description: `Booking saved. Email error: ${emailErr.message}`, variant: "destructive" });
+      // The toast reports what actually happened, including the case where
+      // sending is deliberately paused.
+      if (emailError) {
+        toast({ title: "Confirmed (email failed)", description: `Booking saved. Email error: ${emailError}`, variant: "destructive" });
+      } else if (!emailSent) {
+        toast({ title: "Confirmed — email skipped (sending is paused)", description: `${booking.name || booking.email} → ${date} at ${time}` });
       } else {
         toast({ title: "Confirmed & email sent", description: `${booking.name || booking.email} → ${date} at ${time}` });
       }
@@ -397,7 +414,7 @@ const TrialClassesManager = () => {
           available_slots: langSlots.map((s) => ({
             day_of_week: s.day_of_week,
             start_time: s.start_time,
-            timezone: "Africa/Cairo",
+            timezone: s.timezone || TRIAL_ANCHOR_TIMEZONE,
             date: s.trial_date,
           })),
         },
@@ -447,7 +464,7 @@ const TrialClassesManager = () => {
           .map((s) => ({
             day_of_week: s.day_of_week,
             start_time: s.start_time,
-            timezone: "Africa/Cairo",
+            timezone: s.timezone || TRIAL_ANCHOR_TIMEZONE,
             date: s.trial_date,
           }));
         const { error: emailErr } = await supabase.functions.invoke("send-confirmation-email", {
@@ -719,8 +736,8 @@ const TrialClassesManager = () => {
                       <TableHead>Day</TableHead>
                       <TableHead>Time</TableHead>
                       <TableHead>Language</TableHead>
-                      <TableHead className="text-right">Capacity</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="text-end">Capacity</TableHead>
+                      <TableHead className="text-end">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -730,8 +747,8 @@ const TrialClassesManager = () => {
                         <TableCell className="text-xs">{DAY_NAMES[s.day_of_week]}</TableCell>
                         <TableCell className="text-xs font-mono">{s.start_time} ({s.timezone})</TableCell>
                         <TableCell className="text-xs capitalize">{s.class_language ?? "—"}</TableCell>
-                        <TableCell className="text-xs text-right">{s.capacity}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-xs text-end">{s.capacity}</TableCell>
+                        <TableCell className="text-end">
                           <Button
                             size="sm"
                             variant="ghost"
@@ -760,7 +777,7 @@ const TrialClassesManager = () => {
         <div className="flex items-center gap-3">
           <h3 className="text-base font-semibold">
             All Trial Bookings
-            <span className="ml-2 text-xs text-muted-foreground font-normal">({bookings.length} total · {pendingCount} pending)</span>
+            <span className="ms-2 text-xs text-muted-foreground font-normal">({bookings.length} total · {pendingCount} pending)</span>
           </h3>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -789,7 +806,7 @@ const TrialClassesManager = () => {
                 variant="default"
                 disabled={bulkBusy || pendingCount === 0}
               >
-                <CheckCircle className="h-4 w-4 mr-1" />
+                <CheckCircle className="h-4 w-4 me-1" />
                 Accept all pending ({pendingCount})
               </Button>
             </AlertDialogTrigger>
@@ -807,7 +824,7 @@ const TrialClassesManager = () => {
             </AlertDialogContent>
           </AlertDialog>
           <Button variant="outline" size="sm" onClick={fetchData}>
-            <RefreshCw className="h-4 w-4 mr-1" /> Refresh
+            <RefreshCw className="h-4 w-4 me-1" /> Refresh
           </Button>
         </div>
       </div>
@@ -862,7 +879,7 @@ const TrialClassesManager = () => {
                             disabled={bulkBusy}
                             title={`${tbaDuplicateGroups.length} email${tbaDuplicateGroups.length === 1 ? "" : "s"} have more than one unscheduled booking`}
                           >
-                            <Copy className="h-3.5 w-3.5 mr-1" />
+                            <Copy className="h-3.5 w-3.5 me-1" />
                             Clear duplicates ({duplicateExtraCount})
                           </Button>
                         </AlertDialogTrigger>
@@ -890,7 +907,7 @@ const TrialClassesManager = () => {
                             disabled={bulkBusy || tbaUnsentCount === 0}
                             title={tbaUnsentCount === 0 ? "No unscheduled students" : `Email ${tbaUnsentCount} unscheduled student${tbaUnsentCount === 1 ? "" : "s"}`}
                           >
-                            <Mail className="h-3.5 w-3.5 mr-1" />
+                            <Mail className="h-3.5 w-3.5 me-1" />
                             Resend with new dates ({tbaUnsentCount})
                           </Button>
                         </AlertDialogTrigger>
@@ -925,7 +942,7 @@ const TrialClassesManager = () => {
                         <TableHead>Changed</TableHead>
                         <TableHead>Cancelled</TableHead>
                         <TableHead>Notes</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead className="text-end">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -971,7 +988,7 @@ const TrialClassesManager = () => {
                           <TableCell className="text-xs text-muted-foreground max-w-[220px] truncate" title={b.goal || ""}>
                             {b.goal || "—"}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-end">
                             <div className="flex gap-1 justify-end items-center flex-wrap">
                               {isTbaSession && (
                                 <>
@@ -989,7 +1006,7 @@ const TrialClassesManager = () => {
                                       onClick={() => sendRebookEmail(b)}
                                       title={b.rebook_email_sent_at ? "Resend with new dates" : "Invite student to choose a new trial date"}
                                     >
-                                      <Mail className="h-3.5 w-3.5 mr-1" />
+                                      <Mail className="h-3.5 w-3.5 me-1" />
                                       Resend with new dates
                                     </Button>
                                     <span className="text-[10px] text-muted-foreground">Invite students to choose a new trial date</span>
@@ -1005,7 +1022,7 @@ const TrialClassesManager = () => {
                                   onClick={() => sendResendConfirmation(b)}
                                   title="Resend attendance confirmation email"
                                 >
-                                  <Mail className="h-3.5 w-3.5 mr-1" />
+                                  <Mail className="h-3.5 w-3.5 me-1" />
                                   Resend confirmation
                                 </Button>
                               )}
@@ -1047,13 +1064,13 @@ const TrialClassesManager = () => {
                                       disabled={actioningId === b.id || !slots.length}
                                       onClick={() => handleConfirm(b, defaultVal)}
                                     >
-                                      <CheckCircle className="h-3.5 w-3.5 mr-1 text-green-600" /> Confirm
+                                      <CheckCircle className="h-3.5 w-3.5 me-1 text-green-600" /> Confirm
                                     </Button>
                                   </div>
                                     );
                                   })()}
                                   <Button size="sm" variant="outline" className="h-7" disabled={actioningId === b.id} onClick={() => handleReject(b)}>
-                                    <XCircle className="h-3.5 w-3.5 mr-1 text-red-600" /> Reject
+                                    <XCircle className="h-3.5 w-3.5 me-1 text-red-600" /> Reject
                                   </Button>
                                 </>
                               )}
@@ -1067,7 +1084,7 @@ const TrialClassesManager = () => {
                                       disabled={actioningId === b.id}
                                       title="Move student back to the TBA (unscheduled) list"
                                     >
-                                      <RefreshCw className="h-3.5 w-3.5 mr-1" /> Unschedule
+                                      <RefreshCw className="h-3.5 w-3.5 me-1" /> Unschedule
                                     </Button>
                                   </AlertDialogTrigger>
                                   <AlertDialogContent>

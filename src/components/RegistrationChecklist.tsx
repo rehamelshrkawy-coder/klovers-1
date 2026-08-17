@@ -123,7 +123,7 @@ const RegistrationChecklist = ({ userId, enrollmentId, items, onItemCompleted, a
     if (key === "Preferred class days") {
       return (
         <Button size="sm" variant="default" onClick={() => navigate("/dashboard/schedule")}>
-          Go to My Schedule <ArrowRight className="h-3.5 w-3.5 ml-1" />
+          Go to My Schedule <ArrowRight className="h-3.5 w-3.5 ms-1" />
         </Button>
       );
     }
@@ -210,7 +210,7 @@ const RegistrationChecklist = ({ userId, enrollmentId, items, onItemCompleted, a
           <div key={item.key} className="flex items-center justify-between gap-3 py-1.5">
             <div className="flex items-center gap-2.5 min-w-0">
               {item.completed ? (
-                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <CheckCircle2 className="h-5 w-5 text-primary-text shrink-0" />
               ) : (
                 <Circle className="h-5 w-5 text-amber-400 shrink-0" />
               )}

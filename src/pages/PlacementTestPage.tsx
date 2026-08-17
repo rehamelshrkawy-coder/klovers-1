@@ -66,7 +66,7 @@ const RECOMMENDED_PLANS: Record<string, RecommendedPlan> = {
     name: "Foundation Group Class",
     nameAr: "صف التأسيس الجماعي",
     format: "Small group · 4–8 students · Twice a week",
-    formatAr: "مجموعة صغيرة · ٤–٨ طلاب · مرتين أسبوعياً",
+    formatAr: "مجموعة صغيرة · 4–8 طلاب · مرتين أسبوعياً",
     bullets: ["Master Hangul in 2 weeks", "Build everyday phrases with peers", "Most affordable plan"],
     bulletsAr: ["أتقن الهانغول في أسبوعين", "ابنِ الجمل اليومية مع زملائك", "الخطة الأكثر اقتصاداً"],
   },
@@ -74,7 +74,7 @@ const RECOMMENDED_PLANS: Record<string, RecommendedPlan> = {
     name: "Level 1 Group Class",
     nameAr: "صف المستوى الأول الجماعي",
     format: "Small group · 4–8 students · Twice a week",
-    formatAr: "مجموعة صغيرة · ٤–٨ طلاب · مرتين أسبوعياً",
+    formatAr: "مجموعة صغيرة · 4–8 طلاب · مرتين أسبوعياً",
     bullets: ["Daily conversations & numbers", "Practice speaking with peers", "Great value for beginners"],
     bulletsAr: ["محادثات يومية وأرقام", "تدرّب على المحادثة مع الزملاء", "قيمة ممتازة للمبتدئين"],
   },
@@ -82,15 +82,15 @@ const RECOMMENDED_PLANS: Record<string, RecommendedPlan> = {
     name: "Level 2 Group Class",
     nameAr: "صف المستوى الثاني الجماعي",
     format: "Small group · 4–8 students · Twice a week",
-    formatAr: "مجموعة صغيرة · ٤–٨ طلاب · مرتين أسبوعياً",
+    formatAr: "مجموعة صغيرة · 4–8 طلاب · مرتين أسبوعياً",
     bullets: ["Grammar patterns for real conversations", "K-drama listening practice", "Prep for TOPIK I"],
     bulletsAr: ["أنماط القواعد للمحادثات الحقيقية", "تمارين استماع من الدراما", "التحضير لـ TOPIK I"],
   },
   l3: {
     name: "Level 3–4 Group Class",
-    nameAr: "صف المستوى ٣–٤ الجماعي",
+    nameAr: "صف المستوى 3–4 الجماعي",
     format: "Small group · 4–6 students · Twice a week",
-    formatAr: "مجموعة صغيرة · ٤–٦ طلاب · مرتين أسبوعياً",
+    formatAr: "مجموعة صغيرة · 4–6 طلاب · مرتين أسبوعياً",
     bullets: ["Nuanced grammar & natural speech", "Discuss K-dramas in Korean", "TOPIK II prep track"],
     bulletsAr: ["قواعد متقدمة وكلام طبيعي", "ناقش الدراما بالكورية", "مسار التحضير لـ TOPIK II"],
   },
@@ -561,7 +561,7 @@ const PlacementTestPage = () => {
         <main id="main-content" className="flex-1 px-4 py-8 max-w-2xl mx-auto w-full">
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-1">
-              <ClipboardList className="h-5 w-5 text-primary" />
+              <ClipboardList className="h-5 w-5 text-primary-text" />
               <h1 className="text-2xl font-bold">{isAr ? "مراجعة إجاباتك" : "Review Your Answers"}</h1>
             </div>
             <p className="text-sm text-muted-foreground">{isAr ? "اضغط على أي سؤال للعودة وتغييره." : "Click any question to go back and change it."}</p>
@@ -619,10 +619,10 @@ const PlacementTestPage = () => {
 
           <div className="flex justify-between gap-3">
             <Button variant="outline" onClick={() => setPhase("test")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> {isAr ? "العودة للاختبار" : "Back to Test"}
+              <ArrowLeft className="me-2 h-4 w-4" /> {isAr ? "العودة للاختبار" : "Back to Test"}
             </Button>
             <Button onClick={handleSubmit} disabled={submitting || totalAnswered === 0}>
-              {submitting ? (isAr ? "جارٍ الإرسال..." : "Submitting…") : (isAr ? "إرسال الاختبار" : "Submit Test")} <ArrowRight className="ml-2 h-4 w-4" />
+              {submitting ? (isAr ? "جارٍ الإرسال..." : "Submitting…") : (isAr ? "إرسال الاختبار" : "Submit Test")} <ArrowRight className="ms-2 h-4 w-4" />
             </Button>
           </div>
         </main>
@@ -705,7 +705,7 @@ const PlacementTestPage = () => {
                   disabled={listeningSelected === null}
                   onClick={() => listeningSelected !== null && advanceListening(listeningSelected)}
                 >
-                  {isLast ? (isAr ? "إنهاء اختبار الاستماع" : "Finish Listening Exam") : (isAr ? "تأكيد الإجابة" : "Confirm Answer")} <ArrowRight className="ml-2 h-4 w-4" />
+                  {isLast ? (isAr ? "إنهاء اختبار الاستماع" : "Finish Listening Exam") : (isAr ? "تأكيد الإجابة" : "Confirm Answer")} <ArrowRight className="ms-2 h-4 w-4" />
                 </Button>
               ) : (
                 <p className="text-center text-xs text-muted-foreground">
@@ -745,7 +745,7 @@ const PlacementTestPage = () => {
           <Card>
             <CardContent className="pt-6 pb-6 space-y-5">
               {/* Passage */}
-              <div className="bg-muted/50 border-l-4 border-primary/40 rounded-r-lg px-4 py-3 text-sm leading-relaxed text-foreground font-medium">
+              <div className="bg-muted/50 border-s-4 border-primary/40 rounded-e-lg px-4 py-3 text-sm leading-relaxed text-foreground font-medium">
                 {q.passage}
               </div>
 
@@ -792,7 +792,7 @@ const PlacementTestPage = () => {
                   disabled={readingSelected === null}
                   onClick={() => readingSelected !== null && advanceReading(readingSelected)}
                 >
-                  {isLast ? (isAr ? "إنهاء اختبار القراءة" : "Finish Reading Exam") : (isAr ? "تأكيد الإجابة" : "Confirm Answer")} <ArrowRight className="ml-2 h-4 w-4" />
+                  {isLast ? (isAr ? "إنهاء اختبار القراءة" : "Finish Reading Exam") : (isAr ? "تأكيد الإجابة" : "Confirm Answer")} <ArrowRight className="ms-2 h-4 w-4" />
                 </Button>
               ) : (
                 <p className="text-center text-xs text-muted-foreground">
@@ -956,14 +956,14 @@ const PlacementTestPage = () => {
             <CardContent className="pt-5 pb-6 space-y-3">
               <p className="text-sm text-muted-foreground leading-relaxed">{meta.description}</p>
               {(isAr ? JOURNEY_MESSAGES_AR : JOURNEY_MESSAGES)[result.levelKey] && (
-                <p className="text-xs text-primary font-medium flex items-center gap-1.5 justify-center">
+                <p className="text-xs text-primary-text font-medium flex items-center gap-1.5 justify-center">
                   <TrendingUp className="h-3 w-3 shrink-0" />
                   {(isAr ? JOURNEY_MESSAGES_AR : JOURNEY_MESSAGES)[result.levelKey]}
                 </p>
               )}
               <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground flex-wrap">
                 <span className="flex items-center gap-1.5">
-                  <CheckCircle className="h-3.5 w-3.5 text-primary" />
+                  <CheckCircle className="h-3.5 w-3.5 text-primary-text" />
                   {isAr ? "النتيجة:" : "Score:"} <strong className="text-foreground">{result.score} / {PLACEMENT_QUESTIONS.length}</strong>
                 </span>
                 {finalTimeRef.current > 0 && (
@@ -986,7 +986,7 @@ const PlacementTestPage = () => {
             return (
               <Card className="border-primary/30 bg-gradient-to-b from-primary/5 to-transparent">
                 <CardContent className="pt-5 pb-5 space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-wider">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-primary-text uppercase tracking-wider">
                     <span>✨</span>
                     {isAr ? "موصى به لك" : "Recommended for you"}
                   </div>
@@ -997,7 +997,7 @@ const PlacementTestPage = () => {
                   <ul className="space-y-1.5">
                     {bullets.map((b, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-foreground/90">
-                        <CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <CheckCircle className="h-4 w-4 text-primary-text shrink-0 mt-0.5" />
                         <span>{b}</span>
                       </li>
                     ))}
@@ -1012,7 +1012,7 @@ const PlacementTestPage = () => {
                         navigate("/free-trial");
                       }}
                     >
-                      {isAr ? "احجز تجربتي المجانية" : "Book My Free Trial"} <ArrowRight className="ml-2 h-4 w-4" />
+                      {isAr ? "احجز تجربتي المجانية" : "Book My Free Trial"} <ArrowRight className="ms-2 h-4 w-4" />
                     </Button>
                     <button
                       onClick={() => {
@@ -1036,7 +1036,7 @@ const PlacementTestPage = () => {
           <Card>
             <CardContent className="pt-5 pb-5 space-y-5">
               <div className="flex items-center gap-2 text-sm font-semibold">
-                <TrendingUp className="h-4 w-4 text-primary" />
+                <TrendingUp className="h-4 w-4 text-primary-text" />
                 {isAr ? "تحليل الأداء" : "Performance breakdown"}
               </div>
 
@@ -1095,7 +1095,7 @@ const PlacementTestPage = () => {
                     <p className="text-xs text-muted-foreground">{tip}</p>
                     <button
                       onClick={() => navigate(link)}
-                      className="text-xs text-primary font-medium hover:underline flex items-center gap-1"
+                      className="text-xs text-primary-text font-medium hover:underline flex items-center gap-1"
                     >
                       {label} <ArrowRight className="h-3 w-3" />
                     </button>
@@ -1117,7 +1117,7 @@ const PlacementTestPage = () => {
                         />
                       ))}
                     </div>
-                    <span className="text-muted-foreground w-8 text-right">{correct}/{total}</span>
+                    <span className="text-muted-foreground w-8 text-end">{correct}/{total}</span>
                   </div>
                 ))}
               </div>
@@ -1133,7 +1133,7 @@ const PlacementTestPage = () => {
                   className="flex w-full items-center justify-between text-sm font-semibold text-foreground"
                 >
                   <span className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-primary" />
+                    <MapPin className="h-4 w-4 text-primary-text" />
                     {isAr ? "خطة دراستك لمدة 4 أسابيع" : "Your 4-week study roadmap"}
                   </span>
                   {showRoadmap ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -1142,11 +1142,11 @@ const PlacementTestPage = () => {
                   <div className="mt-4 space-y-4">
                     {STUDY_ROADMAPS[result.levelKey].map((week) => (
                       <div key={week.week} className="border-t border-border pt-4 first:border-0 first:pt-0">
-                        <p className="text-xs font-bold text-primary mb-1.5">{isAr ? `الأسبوع ${week.week}: ${week.title}` : `Week ${week.week}: ${week.title}`}</p>
+                        <p className="text-xs font-bold text-primary-text mb-1.5">{isAr ? `الأسبوع ${week.week}: ${week.title}` : `Week ${week.week}: ${week.title}`}</p>
                         <ul className="space-y-1">
                           {week.tasks.map((task, ti) => (
                             <li key={ti} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                              <span className="text-primary mt-0.5 shrink-0">•</span>{task}
+                              <span className="text-primary-text mt-0.5 shrink-0">•</span>{task}
                             </li>
                           ))}
                         </ul>
@@ -1173,7 +1173,7 @@ const PlacementTestPage = () => {
               <p className="text-sm font-semibold text-foreground text-center">{isAr ? "مستعد لبدء التعلّم؟" : "Ready to start learning?"}</p>
               <div className="flex gap-2">
                 <Button size="lg" className="flex-1" onClick={() => navigate("/enroll")}>
-                  {isAr ? "📚 احجز حصة" : "📚 Book a Class"} <ArrowRight className="ml-2 h-4 w-4" />
+                  {isAr ? "📚 احجز حصة" : "📚 Book a Class"} <ArrowRight className="ms-2 h-4 w-4" />
                 </Button>
                 <Button size="lg" variant="outline" className="flex-1 gap-2" onClick={() => handleWhatsAppEnroll(result)}>
                   <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current shrink-0" xmlns="http://www.w3.org/2000/svg">
@@ -1289,7 +1289,7 @@ const PlacementTestPage = () => {
               {speakingRatings.length === 5 && (
                 <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 space-y-1">
                   <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                    <Mic className="h-3.5 w-3.5 text-primary" />
+                    <Mic className="h-3.5 w-3.5 text-primary-text" />
                     {isAr ? "نتيجة المحادثة:" : "Speaking score:"} {speakingRatings.reduce((a, b) => a + b, 0)}/10
                   </p>
                   <p className="text-xs text-muted-foreground">{speakingSummary(speakingRatings, result.levelKey, isAr)}</p>
@@ -1309,7 +1309,7 @@ const PlacementTestPage = () => {
                 className="flex w-full items-center justify-between text-sm font-semibold text-foreground"
               >
                 <span className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4 text-primary" />
+                  <BookOpen className="h-4 w-4 text-primary-text" />
                   {isAr ? "مراجعة الإجابات والشروحات" : "Review answers & explanations"}
                 </span>
                 {showExplanations ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -1332,10 +1332,10 @@ const PlacementTestPage = () => {
 
                       {/* Listening passage revealed in review */}
                       {q.section === "Listening" && q.passage && (
-                        <div className="ml-7 mb-2 rounded-lg bg-primary/5 border border-primary/15 px-3 py-2 text-xs space-y-1.5">
+                        <div className="ms-7 mb-2 rounded-lg bg-primary/5 border border-primary/15 px-3 py-2 text-xs space-y-1.5">
                           <p className="font-medium text-foreground leading-relaxed">{q.passage}</p>
                           <button
-                            className="flex items-center gap-1 text-primary hover:underline text-[11px]"
+                            className="flex items-center gap-1 text-primary-text hover:underline text-[11px]"
                             onClick={() => speakKorean(q.passage!)}
                           >
                             <Volume2 className="h-3 w-3" /> {isAr ? "استمع مجدداً" : "Listen again"}
@@ -1344,7 +1344,7 @@ const PlacementTestPage = () => {
                       )}
 
                       {!wasSkipped && (
-                        <div className="ml-7 text-xs space-y-1 mb-2">
+                        <div className="ms-7 text-xs space-y-1 mb-2">
                           {!isCorrect && (
                             <p className="text-red-700 dark:text-red-300">
                               {isAr ? "إجابتك:" : "Your answer:"} {q.options[userAnswer] ?? "—"}
@@ -1356,9 +1356,9 @@ const PlacementTestPage = () => {
                         </div>
                       )}
 
-                      <p className="ml-7 text-xs text-muted-foreground leading-relaxed">{q.explanation}</p>
+                      <p className="ms-7 text-xs text-muted-foreground leading-relaxed">{q.explanation}</p>
                       {q.arabicTip && (
-                        <p className="mt-1.5 ml-7 text-xs text-muted-foreground border-r-2 border-primary/40 pr-2 text-right leading-relaxed" dir="rtl">
+                        <p className="mt-1.5 ms-7 text-xs text-muted-foreground border-e-2 border-primary/40 pe-2 text-end leading-relaxed" dir="rtl">
                           💡 {q.arabicTip}
                         </p>
                       )}
@@ -1446,7 +1446,7 @@ const PlacementTestPage = () => {
                 navigate("/free-trial?level=hangul");
               }}
             >
-              {isAr ? "احجز التجربة" : "Book trial"} <ArrowRight className="h-3 w-3 ml-1" />
+              {isAr ? "احجز التجربة" : "Book trial"} <ArrowRight className="h-3 w-3 ms-1" />
             </Button>
           </div>
         )}
@@ -1466,7 +1466,7 @@ const PlacementTestPage = () => {
               <span className="text-green-800 dark:text-green-300 font-medium">{isAr ? `${totalAnswered} تمت الإجابة` : `${totalAnswered} answered`}</span>
               {totalSkipped > 0 && <span className="text-amber-800 dark:text-amber-300 font-medium">{isAr ? `${totalSkipped} تم التخطي` : `${totalSkipped} skipped`}</span>}
               {totalRemaining > 0 && <span>{isAr ? `${totalRemaining} متبقي` : `${totalRemaining} left`}</span>}
-              <span className="flex items-center gap-1 ml-1 text-muted-foreground" title="Auto-advance to next question after answering">
+              <span className="flex items-center gap-1 ms-1 text-muted-foreground" title="Auto-advance to next question after answering">
                 <Switch id="auto-advance" checked={autoAdvance} onCheckedChange={toggleAutoAdvance} className="scale-75 origin-right" />
                 <label htmlFor="auto-advance" className="cursor-pointer select-none hidden sm:inline">{isAr ? "تلقائي" : "Auto"}</label>
               </span>
@@ -1500,7 +1500,7 @@ const PlacementTestPage = () => {
         {/* Section banner */}
         {banner && (
           <div className="mb-5 flex items-center gap-3 bg-primary/5 border border-primary/15 rounded-xl px-4 py-3">
-            <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0 text-sm font-bold text-primary">
+            <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0 text-sm font-bold text-primary-text">
               {page + 1}
             </div>
             <div>
@@ -1536,7 +1536,7 @@ const PlacementTestPage = () => {
                       </span>
                     </div>
                     <p className="font-medium text-sm leading-snug">
-                      <span className="text-muted-foreground mr-1.5">Q{q.id}.</span>
+                      <span className="text-muted-foreground me-1.5">Q{q.id}.</span>
                       {q.question}
                     </p>
                   </div>
@@ -1556,17 +1556,17 @@ const PlacementTestPage = () => {
                       </Button>
                     </div>
                   ) : q.passage ? (
-                    <div className="bg-muted/50 border-l-4 border-primary/40 rounded-r-lg px-4 py-3 mb-4 text-sm leading-relaxed text-foreground font-medium">
+                    <div className="bg-muted/50 border-s-4 border-primary/40 rounded-e-lg px-4 py-3 mb-4 text-sm leading-relaxed text-foreground font-medium">
                       {q.passage}
                     </div>
                   ) : null}
 
                   {isSkipped ? (
-                    <div className="flex items-center justify-between ml-1">
+                    <div className="flex items-center justify-between ms-1">
                       <span className="text-sm text-muted-foreground italic">{isAr ? "تم التخطي — يحتسب كـ 0" : "Skipped — counts as 0"}</span>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleUnskip(q.id); }}
-                        className="flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
+                        className="flex items-center gap-1.5 text-xs text-primary-text hover:underline font-medium"
                       >
                         <Undo2 className="h-3.5 w-3.5" /> {isAr ? "أجب هذا السؤال" : "Answer this question"}
                       </button>
@@ -1593,18 +1593,18 @@ const PlacementTestPage = () => {
                             }, 350);
                           }
                         }}
-                        className="space-y-2 ml-1"
+                        className="space-y-2 ms-1"
                       >
                         {q.options.map((opt, oi) => (
-                          <div key={oi} className="flex items-center space-x-3">
+                          <div key={oi} className="flex items-center space-x-3 rtl:space-x-reverse">
                             <RadioGroupItem value={oi.toString()} id={`q${q.id}-o${oi}`} />
                             <Label htmlFor={`q${q.id}-o${oi}`} className="cursor-pointer text-sm">
-                              <span className="text-muted-foreground mr-1 text-xs">{oi + 1}.</span> {opt}
+                              <span className="text-muted-foreground me-1 text-xs">{oi + 1}.</span> {opt}
                             </Label>
                           </div>
                         ))}
                       </RadioGroup>
-                      <div className="mt-3 ml-1">
+                      <div className="mt-3 ms-1">
                         <button
                           onClick={(e) => { e.stopPropagation(); handleSkip(q.id); }}
                           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -1623,16 +1623,16 @@ const PlacementTestPage = () => {
         {/* Navigation */}
         <div className="flex justify-between mt-8 pb-8 gap-3">
           <Button variant="outline" onClick={() => setPage((p) => p - 1)} disabled={page === 0}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> {isAr ? "السابق" : "Previous"}
+            <ArrowLeft className="me-2 h-4 w-4" /> {isAr ? "السابق" : "Previous"}
           </Button>
 
           {page < TOTAL_PAGES - 1 ? (
             <Button onClick={() => setPage((p) => p + 1)}>
-              {isAr ? "التالي" : "Next"} <ArrowRight className="ml-2 h-4 w-4" />
+              {isAr ? "التالي" : "Next"} <ArrowRight className="ms-2 h-4 w-4" />
             </Button>
           ) : (
             <Button onClick={() => setPhase("review")} disabled={totalAnswered === 0}>
-              <ClipboardList className="mr-2 h-4 w-4" /> {isAr ? "مراجعة وإرسال" : "Review & Submit"}
+              <ClipboardList className="me-2 h-4 w-4" /> {isAr ? "مراجعة وإرسال" : "Review & Submit"}
             </Button>
           )}
         </div>

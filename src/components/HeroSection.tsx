@@ -308,7 +308,7 @@ const HeroSection = () => {
                 <div className="flex items-center gap-1.5">
                   {/* Hero is always dark (#1a1a1a), so the bright brand yellow is
                       the correct value here rather than the light-surface one. */}
-                  <Icon className="h-4 w-4 text-primary hidden sm:block" />
+                  <Icon className="h-4 w-4 text-primary-text hidden sm:block" />
                   <span
                     ref={itemRef}
                     className="text-2xl sm:text-3xl md:text-4xl font-black text-white"

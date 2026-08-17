@@ -44,13 +44,13 @@ export default function InterviewTrainingPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="password"
                   placeholder={t("interviewTraining.gatePlaceholder")}
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); setError(false); }}
-                  className="pl-10"
+                  className="ps-10"
                   autoFocus
                 />
               </div>

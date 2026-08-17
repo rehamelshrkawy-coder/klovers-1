@@ -588,7 +588,7 @@ const StudentManager = () => {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
             <Card className={overviewFilter === "attending" ? "ring-2 ring-primary" : ""} onClick={() => setOverviewFilter("attending")} role="button">
               <CardContent className="pt-4 text-center cursor-pointer">
-                <UserCheck className="h-5 w-5 mx-auto mb-1 text-primary" />
+                <UserCheck className="h-5 w-5 mx-auto mb-1 text-primary-text" />
                 <p className="text-2xl font-bold text-foreground">{overviewStats.attending}</p>
                 <p className="text-xs text-muted-foreground">Attending</p>
               </CardContent>
@@ -625,8 +625,8 @@ const StudentManager = () => {
 
           <div className="flex flex-col sm:flex-row gap-2 mb-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search by name or email..." value={overviewSearch} onChange={(e) => setOverviewSearch(e.target.value)} className="pl-9" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search by name or email..." value={overviewSearch} onChange={(e) => setOverviewSearch(e.target.value)} className="ps-9" />
             </div>
             <Select value={overviewFilter} onValueChange={setOverviewFilter}>
               <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
@@ -639,7 +639,7 @@ const StudentManager = () => {
                 <SelectItem value="rejected">Rejected ({overviewStats.rejected})</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" onClick={exportOverviewCSV}><Download className="h-4 w-4 mr-1" /> CSV</Button>
+            <Button variant="outline" size="sm" onClick={exportOverviewCSV}><Download className="h-4 w-4 me-1" /> CSV</Button>
           </div>
 
           {overviewLoading ? (
@@ -680,7 +680,7 @@ const StudentManager = () => {
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-6 w-6 shrink-0 text-muted-foreground hover:text-primary"
+                              className="h-6 w-6 shrink-0 text-muted-foreground hover:text-primary-text"
                               title="Manually enroll"
                               onClick={() => openManualEnroll(u)}
                             >
@@ -707,8 +707,8 @@ const StudentManager = () => {
         <TabsContent value="legacy">
           <div className="flex flex-col sm:flex-row gap-2 mb-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search by name or email..." value={legacySearch} onChange={(e) => setLegacySearch(e.target.value)} className="pl-9" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search by name or email..." value={legacySearch} onChange={(e) => setLegacySearch(e.target.value)} className="ps-9" />
             </div>
             <Select value={legacyStatusFilter} onValueChange={setLegacyStatusFilter}>
               <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
@@ -728,9 +728,9 @@ const StudentManager = () => {
               </SelectContent>
             </Select>
             <Button variant="outline" size="sm" onClick={() => setManageGroupsOpen(true)} title="Manage Groups">
-              <Settings className="h-4 w-4 mr-1" /> Groups
+              <Settings className="h-4 w-4 me-1" /> Groups
             </Button>
-            <Button onClick={openAddStudent} size="sm"><Plus className="h-4 w-4 mr-1" /> Add</Button>
+            <Button onClick={openAddStudent} size="sm"><Plus className="h-4 w-4 me-1" /> Add</Button>
           </div>
 
           {legacyLoading || overviewLoading ? (
@@ -748,10 +748,10 @@ const StudentManager = () => {
                     <TableHead className="text-center">Classes</TableHead>
                     <TableHead className="text-center">Remaining</TableHead>
                     <TableHead className="text-center">Negative</TableHead>
-                    <TableHead className="text-right">Amount Due</TableHead>
-                    <TableHead className="text-right">Paid</TableHead>
+                    <TableHead className="text-end">Amount Due</TableHead>
+                    <TableHead className="text-end">Paid</TableHead>
                     <TableHead>Payment</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-end">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -792,11 +792,11 @@ const StudentManager = () => {
                               : `${s.used_classes}/${s.total_classes}`}
                           </span>
                           {overview ? (
-                            <span className={`text-xs ml-1 ${overview.sessions_remaining < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                            <span className={`text-xs ms-1 ${overview.sessions_remaining < 0 ? "text-destructive" : "text-muted-foreground"}`}>
                               ({overview.sessions_remaining} left)
                             </span>
                           ) : (
-                            <span className="text-xs text-muted-foreground ml-1">({s.total_classes - s.used_classes} left)</span>
+                            <span className="text-xs text-muted-foreground ms-1">({s.total_classes - s.used_classes} left)</span>
                           )}
                         </TableCell>
                         <TableCell className={`text-center font-mono ${remaining < 0 ? "text-destructive font-semibold" : ""}`}>
@@ -805,10 +805,10 @@ const StudentManager = () => {
                         <TableCell className={`text-center font-mono ${negativeSessions > 0 ? "text-destructive font-semibold" : ""}`}>
                           {negativeSessions > 0 ? negativeSessions : "—"}
                         </TableCell>
-                        <TableCell className={`text-right font-mono ${amountDue > 0 ? "text-destructive font-semibold" : ""}`}>
+                        <TableCell className={`text-end font-mono ${amountDue > 0 ? "text-destructive font-semibold" : ""}`}>
                           {amountDue > 0 ? `${currency}${Math.round(amountDue).toLocaleString()}` : "—"}
                         </TableCell>
-                        <TableCell className="text-right text-sm">
+                        <TableCell className="text-end text-sm">
                           {overview ? `${currency}${Math.round(Number(overview.amount || 0)).toLocaleString()}` : `$${Math.round(s.total_paid)}`}
                         </TableCell>
                         <TableCell>{paymentBadge(s.payment_status)}</TableCell>
@@ -879,7 +879,7 @@ const StudentManager = () => {
                 <Input value={studentForm.full_name} onChange={(e) => setStudentForm(f => ({ ...f, full_name: e.target.value }))} />
               </div>
               <div>
-                <label className="text-sm font-medium text-foreground">Email * {lookingUpEmail && <Loader2 className="inline h-3 w-3 animate-spin ml-1" />}</label>
+                <label className="text-sm font-medium text-foreground">Email * {lookingUpEmail && <Loader2 className="inline h-3 w-3 animate-spin ms-1" />}</label>
                 <Input type="email" value={studentForm.email} onChange={(e) => setStudentForm(f => ({ ...f, email: e.target.value }))} onBlur={handleEmailBlur} />
                 {!editingStudentId && <p className="text-xs text-muted-foreground mt-0.5">Tab out to auto-lookup existing data</p>}
               </div>
@@ -1062,7 +1062,7 @@ const StudentManager = () => {
                           {paymentBadge(pkg.payment_status)}
                         </div>
                         <Button variant="outline" size="sm" onClick={() => openAttendanceForPackage(pkg, packagesStudentName)}>
-                          <CalendarDays className="h-3.5 w-3.5 mr-1" /> Dates
+                          <CalendarDays className="h-3.5 w-3.5 me-1" /> Dates
                         </Button>
                       </div>
                       <div className="grid grid-cols-4 gap-2 text-sm">
@@ -1199,7 +1199,7 @@ const StudentManager = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => setManualEnrollOpen(false)}>Cancel</Button>
             <Button onClick={handleManualEnroll} disabled={enrollSaving || !enrollForm.group_id}>
-              {enrollSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <UserPlus className="h-4 w-4 mr-2" />}
+              {enrollSaving ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : <UserPlus className="h-4 w-4 me-2" />}
               Enroll
             </Button>
           </DialogFooter>

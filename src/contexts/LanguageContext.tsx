@@ -12,7 +12,7 @@ type PluralCategory = "zero" | "one" | "two" | "few" | "many" | "other";
  * Arabic:  zero → 0, one → 1, two → 2, few → 3-10, many → 11-99, other → 100+
  * (Arabic has 6 plural forms — the richest plural system of any major language.)
  */
-function getPluralCategory(count: number, lang: Language): PluralCategory {
+export function getPluralCategory(count: number, lang: Language): PluralCategory {
   if (lang === "ar") {
     if (count === 0) return "zero";
     if (count === 1) return "one";
@@ -52,20 +52,75 @@ interface LanguageContextType {
   tInterpolate: (template: string, vars: Record<string, string | number>) => string;
 }
 
+/**
+ * Interpolate `{name}` / `{{name}}` placeholders in a translated string.
+ *
+ * Exported as a plain function so tests exercise the code that actually ships.
+ * The regex used to match `{{name}}` only, while all interpolated strings in
+ * both locales are written with single braces — zero overlap, so this was a
+ * no-op on 100% of the corpus, and the one caller that did interpolate had to
+ * hand-roll `.replace()`.
+ */
+export function interpolate(template: string, vars: Record<string, string | number>): string {
+  return template.replace(/\{\{?(\w+)\}?\}/g, (match, key: string) =>
+    vars[key] !== undefined ? String(vars[key]) : match
+  );
+}
+
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 import { translations } from "@/i18n/translations";
 
+const STORAGE_KEY = "k-lovers-lang";
+
+/**
+ * Resolve the initial language: explicit `?lang=`, then the saved choice, then
+ * the browser's preference. The URL comes first because it is the only
+ * representation of language that can be linked, shared, crawled or campaigned
+ * against — and the site publishes hreflang="ar" -> /?lang=ar, a URL that
+ * served English until this read existed.
+ *
+ * Must stay in sync with the pre-hydration script in index.html.
+ */
+function initialLanguage(): Language {
+  if (typeof window === "undefined") return "en";
+  const fromUrl = new URLSearchParams(window.location.search).get("lang");
+  if (fromUrl === "ar" || fromUrl === "en") return fromUrl;
+  let saved: string | null = null;
+  try { saved = localStorage.getItem(STORAGE_KEY); } catch { /* Storage is optional. */ }
+  if (saved === "ar" || saved === "en") return saved;
+  return typeof navigator !== "undefined" && navigator.language?.startsWith("ar") ? "ar" : "en";
+}
+
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>(() => {
-    const saved = localStorage.getItem("k-lovers-lang");
-    return (saved === "ar" ? "ar" : "en") as Language;
-  });
+  const [language, setLanguage] = useState<Language>(initialLanguage);
 
   useEffect(() => {
-    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+    const isAr = language === "ar";
+    document.documentElement.dir = isAr ? "rtl" : "ltr";
     document.documentElement.lang = language;
-    localStorage.setItem("k-lovers-lang", language);
+    try { localStorage.setItem(STORAGE_KEY, language); } catch { /* Storage is optional. */ }
+
+    // Keep the URL honest about the current language so the page can be linked,
+    // shared and indexed, and so og:locale / hreflang describe something real.
+    // Replaces rather than pushes: switching language is not a navigation the
+    // back button should have to undo.
+    const url = new URL(window.location.href);
+    const current = url.searchParams.get("lang");
+    if (isAr && current !== "ar") {
+      url.searchParams.set("lang", "ar");
+      window.history.replaceState(null, "", url.toString());
+    } else if (!isAr && current !== null) {
+      url.searchParams.delete("lang");
+      window.history.replaceState(null, "", url.toString());
+    }
+
+    // Social previews are scraped from the served HTML, so these have to follow
+    // the crawler that arrives on an ?lang=ar link.
+    document.querySelector('meta[property="og:locale"]')
+      ?.setAttribute("content", isAr ? "ar_EG" : "en_US");
+    document.querySelector('meta[property="og:locale:alternate"]')
+      ?.setAttribute("content", isAr ? "en_US" : "ar_EG");
   }, [language]);
 
   const toggleLanguage = () => setLanguage((prev) => (prev === "en" ? "ar" : "en"));
@@ -96,11 +151,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     return Array.isArray(result) ? result : [];
   };
 
-  const tInterpolate = (template: string, vars: Record<string, string | number>): string => {
-    return template.replace(/\{\{(\w+)\}\}/g, (_, key) =>
-      vars[key] !== undefined ? String(vars[key]) : `{{${key}}}`
-    );
-  };
+  const tInterpolate = interpolate;
 
   const tPlural = (
     sectionOrPath: string,
